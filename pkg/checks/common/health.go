@@ -114,7 +114,11 @@ func (c *HealthCheck) searchFileForPatterns(root, filePath string, patterns []st
 	if err != nil {
 		return "", false
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			// File close errors are typically not critical in read-only scenarios
+		}
+	}()
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {

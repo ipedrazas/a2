@@ -96,7 +96,11 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 		if err != nil {
 			return nil
 		}
-		defer file.Close()
+		defer func() {
+			if err := file.Close(); err != nil {
+				// File close errors are typically not critical in read-only scenarios
+			}
+		}()
 
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
