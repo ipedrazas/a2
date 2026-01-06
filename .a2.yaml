@@ -36,5 +36,5 @@ external:
   - id: security
     name: Trufflehog
     command: trufflehog
-    args: ["filesystem", "--no-update", "--fail", "."]
+    args: ["filesystem", "--no-update", "--fail", "--log-level=-1", "."]
     severity: warn
