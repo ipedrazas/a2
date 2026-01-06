@@ -45,7 +45,7 @@ jobs:
           BUILDDATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           go build -ldflags="-s -w -X github.com/ipedrazas/a2/pkg/version.Version=${VERSION} -X github.com/ipedrazas/a2/pkg/version.GitSHA=${GITSHA} -X github.com/ipedrazas/a2/pkg/version.BuildDate=${BUILDDATE}" -o dist/a2 .
 
-      - name: Install A2 dependencies
+      - name: Install A2 go dependencies
         run: |
           go install github.com/securego/gosec/v2/cmd/gosec@latest
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
@@ -53,6 +53,10 @@ jobs:
           go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
           go install github.com/kisielk/errcheck@latest
           go install github.com/zricethezav/gitleaks/v8@latest
+          
+      - name: Install A2 Python dependencies
+        run: |
+          pip3 install --no-cache-dir --break-system-packages bandit semgrep
 
       - name: Run A2 self-check
         run: |
