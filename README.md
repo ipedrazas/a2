@@ -5,7 +5,7 @@ A2 is a multi-language code quality checker. It auto-detects project language(s)
 ## Features
 
 - **Multi-Language Support**: Go, Python, and Node.js (auto-detected or explicit)
-- **22+ Built-in Checks**: Build, tests, coverage, formatting, linting, vulnerabilities
+- **25+ Built-in Checks**: Build, tests, coverage, formatting, linting, type checking, vulnerabilities
 - **Veto System**: Critical checks (build, tests) stop execution on failure
 - **Pretty Output**: Colored terminal output with recommendations
 - **JSON Output**: Machine-readable format for CI/CD integration
@@ -79,6 +79,7 @@ Recommendations:
 | Go Module | `go:module` | Fail | go.mod exists and has valid Go version |
 | Go Build | `go:build` | Fail | `go build ./...` succeeds |
 | Go Tests | `go:tests` | Fail | `go test ./...` passes |
+| Go Race Detection | `go:race` | Warn | No data races (`go test -race`) |
 | Go Format | `go:format` | Warn | Code is properly formatted |
 | Go Vet | `go:vet` | Warn | No `go vet` issues |
 | Go Coverage | `go:coverage` | Warn | Coverage >= threshold (default 80%) |
@@ -93,6 +94,7 @@ Recommendations:
 | Python Tests | `python:tests` | Fail | pytest or unittest passes |
 | Python Format | `python:format` | Warn | Code formatted (ruff/black) |
 | Python Lint | `python:lint` | Warn | No lint issues (ruff/flake8/pylint) |
+| Python Type Check | `python:type` | Warn | No type errors (mypy) |
 | Python Coverage | `python:coverage` | Warn | Coverage >= threshold (default 80%) |
 | Python Vulnerabilities | `python:deps` | Warn | No known vulns (pip-audit/safety) |
 
@@ -105,6 +107,7 @@ Recommendations:
 | Node Tests | `node:tests` | Fail | Tests pass (jest/vitest/mocha/npm test) |
 | Node Format | `node:format` | Warn | Code formatted (prettier/biome) |
 | Node Lint | `node:lint` | Warn | No lint issues (eslint/biome/oxlint) |
+| TypeScript Type Check | `node:type` | Warn | No type errors (tsc --noEmit) |
 | Node Coverage | `node:coverage` | Warn | Coverage >= threshold (default 80%) |
 | Node Vulnerabilities | `node:deps` | Warn | No known vulns (npm/yarn/pnpm audit) |
 
@@ -113,6 +116,8 @@ Recommendations:
 | Check | ID | Severity | Description |
 |-------|-----|----------|-------------|
 | Required Files | `file_exists` | Warn | README.md, LICENSE exist |
+
+> **See [docs/CHECKS.md](docs/CHECKS.md) for detailed documentation** on all checks, including configuration options, auto-detection logic, and pass/warn/fail conditions.
 
 **Severity Levels:**
 - **Fail**: Critical check - stops execution immediately (veto power)
@@ -192,12 +197,6 @@ checks:
 
 # Custom external checks
 external:
-  - id: typecheck
-    name: Type Check
-    command: mypy
-    args: ["src/"]
-    severity: warn
-
   - id: security
     name: Security Scan
     command: bandit
@@ -228,14 +227,6 @@ files:
 checks:
   disabled:
     - node:deps  # Skip vulnerability scan
-
-# Custom external checks
-external:
-  - id: typecheck
-    name: Type Check
-    command: npx
-    args: ["tsc", "--noEmit"]
-    severity: warn
 ```
 
 ### Multi-Language Project (Monorepo)

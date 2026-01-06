@@ -45,6 +45,16 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
+			Checker: &RaceCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "go:race",
+				Name:      "Go Race Detection",
+				Languages: []checker.Language{checker.LangGo},
+				Critical:  false,
+				Order:     125,
+			},
+		},
+		{
 			Checker: &FormatCheck{},
 			Meta: checker.CheckMeta{
 				ID:        "go:format",

@@ -13,13 +13,13 @@ type RegisterTestSuite struct {
 	suite.Suite
 }
 
-// TestRegister_ReturnsAllChecks tests that Register returns all 7 checks.
+// TestRegister_ReturnsAllChecks tests that Register returns all 8 checks.
 func (suite *RegisterTestSuite) TestRegister_ReturnsAllChecks() {
 	cfg := config.DefaultConfig()
 
 	checks := Register(cfg)
 
-	suite.Len(checks, 7)
+	suite.Len(checks, 8)
 }
 
 // TestRegister_CheckIDs tests that all check IDs are correct.
@@ -34,6 +34,7 @@ func (suite *RegisterTestSuite) TestRegister_CheckIDs() {
 		"node:tests",
 		"node:format",
 		"node:lint",
+		"node:type",
 		"node:coverage",
 		"node:deps",
 	}
@@ -54,11 +55,12 @@ func (suite *RegisterTestSuite) TestRegister_CriticalChecks() {
 	suite.True(checks[1].Meta.Critical, "node:build should be critical")
 	suite.True(checks[2].Meta.Critical, "node:tests should be critical")
 
-	// Format, Lint, Coverage, and Deps should not be critical
+	// Format, Lint, Type, Coverage, and Deps should not be critical
 	suite.False(checks[3].Meta.Critical, "node:format should not be critical")
 	suite.False(checks[4].Meta.Critical, "node:lint should not be critical")
-	suite.False(checks[5].Meta.Critical, "node:coverage should not be critical")
-	suite.False(checks[6].Meta.Critical, "node:deps should not be critical")
+	suite.False(checks[5].Meta.Critical, "node:type should not be critical")
+	suite.False(checks[6].Meta.Critical, "node:coverage should not be critical")
+	suite.False(checks[7].Meta.Critical, "node:deps should not be critical")
 }
 
 // TestRegister_CheckOrder tests that checks are ordered correctly.
@@ -73,10 +75,11 @@ func (suite *RegisterTestSuite) TestRegister_CheckOrder() {
 	suite.Equal(120, checks[2].Meta.Order)
 
 	// Non-critical checks should have order 200-230
-	suite.Equal(200, checks[3].Meta.Order)
-	suite.Equal(210, checks[4].Meta.Order)
-	suite.Equal(220, checks[5].Meta.Order)
-	suite.Equal(230, checks[6].Meta.Order)
+	suite.Equal(200, checks[3].Meta.Order) // format
+	suite.Equal(210, checks[4].Meta.Order) // lint
+	suite.Equal(215, checks[5].Meta.Order) // type
+	suite.Equal(220, checks[6].Meta.Order) // coverage
+	suite.Equal(230, checks[7].Meta.Order) // deps
 }
 
 // TestRegister_LanguageIsNode tests that all checks are for Node language.

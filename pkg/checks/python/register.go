@@ -61,6 +61,16 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
+			Checker: &TypeCheck{Config: pythonCfg},
+			Meta: checker.CheckMeta{
+				ID:        "python:type",
+				Name:      "Python Type Check",
+				Languages: []checker.Language{checker.LangPython},
+				Critical:  false,
+				Order:     215,
+			},
+		},
+		{
 			Checker: &CoverageCheck{Config: pythonCfg},
 			Meta: checker.CheckMeta{
 				ID:        "python:coverage",

@@ -27,5 +27,11 @@ COPY --from=builder /a2 /usr/local/bin/a2
 # Set working directory
 WORKDIR /workspace
 
+# Create a non-root user
+RUN adduser -D -u 1000 -g 1000 a2
+USER a2
+
 ENTRYPOINT ["a2"]
 CMD ["check"]
+
+USER a2

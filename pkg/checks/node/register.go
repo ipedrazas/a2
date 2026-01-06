@@ -68,6 +68,16 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
+			Checker: &TypeCheck{Config: nodeCfg},
+			Meta: checker.CheckMeta{
+				ID:        "node:type",
+				Name:      "TypeScript Type Check",
+				Languages: []checker.Language{checker.LangNode},
+				Critical:  false,
+				Order:     215,
+			},
+		},
+		{
 			Checker: &CoverageCheck{Config: nodeCfg, Threshold: coverageThreshold},
 			Meta: checker.CheckMeta{
 				ID:        "node:coverage",

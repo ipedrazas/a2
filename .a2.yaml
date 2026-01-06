@@ -38,3 +38,33 @@ external:
     command: trufflehog
     args: ["filesystem", "--no-update", "--fail", "--log-level=-1", "."]
     severity: warn
+    
+  - id: secrets
+    name: Secret Detection
+    command: gitleaks
+    args: ["detect", "--no-git", "--redact", "-v", "."]
+    severity: fail
+
+  - id: go:errcheck
+    name: Error Check
+    command: errcheck
+    args: ["-ignoretests", "./..."]
+    severity: warn
+
+  - id: go:staticcheck
+    name: Static Analysis
+    command: staticcheck
+    args: ["./..."]
+    severity: warn
+
+  - id: python:bandit
+    name: Bandit Security
+    command: bandit
+    args: ["-r", ".", "-f", "json", "-q"]
+    severity: warn
+
+  - id: sast
+    name: Semgrep SAST
+    command: semgrep
+    args: ["scan", "--config", "auto", "--error", "."]
+    severity: warn  
