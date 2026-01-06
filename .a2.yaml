@@ -31,3 +31,9 @@ external:
     command: gosec
     args: ["./..."]
     severity: fail
+  
+  - id: security
+    name: Trufflehog
+    command: trufflehog
+    args: ["filesystem", "--no-update", "."]
+    severity: warn
