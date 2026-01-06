@@ -13,7 +13,6 @@ files:
 # Disable specific checks
 checks:
   disabled:
-    - deps  # Skip vulnerability check
     - go:logging  # Skip logging check
     - common:health  # Skip health check
 
