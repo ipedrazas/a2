@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
 // HealthCheck verifies that health endpoint patterns exist in the codebase.
@@ -79,7 +80,7 @@ func (c *HealthCheck) Run(path string) (checker.Result, error) {
 		}
 
 		// Search file for patterns
-		pattern, hasPattern := c.searchFileForPatterns(filePath, patterns)
+		pattern, hasPattern := c.searchFileForPatterns(path, filePath, patterns)
 		if hasPattern {
 			found = true
 			foundPattern = pattern
@@ -108,8 +109,8 @@ func (c *HealthCheck) Run(path string) (checker.Result, error) {
 }
 
 // searchFileForPatterns searches a file for any of the given patterns.
-func (c *HealthCheck) searchFileForPatterns(filePath string, patterns []string) (string, bool) {
-	file, err := os.Open(filePath)
+func (c *HealthCheck) searchFileForPatterns(root, filePath string, patterns []string) (string, bool) {
+	file, err := safepath.OpenPath(root, filePath)
 	if err != nil {
 		return "", false
 	}

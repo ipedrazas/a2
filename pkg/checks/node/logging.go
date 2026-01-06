@@ -92,7 +92,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 			strings.HasSuffix(baseName, ".config.js") ||
 			strings.HasSuffix(baseName, ".config.ts")
 
-		file, err := os.Open(filePath)
+		file, err := safepath.OpenPath(path, filePath)
 		if err != nil {
 			return nil
 		}

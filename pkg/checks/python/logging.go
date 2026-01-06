@@ -66,7 +66,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 			strings.HasSuffix(baseName, "_test.py") ||
 			baseName == "conftest.py"
 
-		file, err := os.Open(filePath)
+		file, err := safepath.OpenPath(path, filePath)
 		if err != nil {
 			return nil
 		}

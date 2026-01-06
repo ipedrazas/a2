@@ -234,6 +234,88 @@ func (suite *SafePathTestSuite) TestSafeJoin_SymlinkInPath() {
 	suite.Contains(result, "link")
 }
 
+// TestOpen_ValidFile tests Open with a valid file.
+func (suite *SafePathTestSuite) TestOpen_ValidFile() {
+	file, err := Open(suite.tempDir, "test.txt")
+	suite.NoError(err)
+	suite.NotNil(file)
+	defer file.Close()
+
+	// Verify we can read from it
+	buf := make([]byte, 100)
+	n, err := file.Read(buf)
+	suite.NoError(err)
+	suite.Equal("test content", string(buf[:n]))
+}
+
+// TestOpen_NestedFile tests Open with a nested file.
+func (suite *SafePathTestSuite) TestOpen_NestedFile() {
+	file, err := Open(suite.tempDir, "subdir/nested.txt")
+	suite.NoError(err)
+	suite.NotNil(file)
+	defer file.Close()
+}
+
+// TestOpen_NonExistent tests Open with a non-existent file.
+func (suite *SafePathTestSuite) TestOpen_NonExistent() {
+	_, err := Open(suite.tempDir, "nonexistent.txt")
+	suite.Error(err)
+}
+
+// TestOpen_TraversalAttack tests Open rejects directory traversal.
+func (suite *SafePathTestSuite) TestOpen_TraversalAttack() {
+	_, err := Open(suite.tempDir, "../../../etc/passwd")
+	suite.Error(err)
+	suite.Contains(err.Error(), "path escapes root directory")
+}
+
+// TestOpenPath_ValidFile tests OpenPath with a valid file path.
+func (suite *SafePathTestSuite) TestOpenPath_ValidFile() {
+	filePath := filepath.Join(suite.tempDir, "test.txt")
+	file, err := OpenPath(suite.tempDir, filePath)
+	suite.NoError(err)
+	suite.NotNil(file)
+	defer file.Close()
+
+	// Verify we can read from it
+	buf := make([]byte, 100)
+	n, err := file.Read(buf)
+	suite.NoError(err)
+	suite.Equal("test content", string(buf[:n]))
+}
+
+// TestOpenPath_NestedFile tests OpenPath with a nested file path.
+func (suite *SafePathTestSuite) TestOpenPath_NestedFile() {
+	filePath := filepath.Join(suite.tempDir, "subdir", "nested.txt")
+	file, err := OpenPath(suite.tempDir, filePath)
+	suite.NoError(err)
+	suite.NotNil(file)
+	defer file.Close()
+}
+
+// TestOpenPath_NonExistent tests OpenPath with a non-existent file.
+func (suite *SafePathTestSuite) TestOpenPath_NonExistent() {
+	filePath := filepath.Join(suite.tempDir, "nonexistent.txt")
+	_, err := OpenPath(suite.tempDir, filePath)
+	suite.Error(err)
+}
+
+// TestOpenPath_TraversalAttack tests OpenPath rejects paths outside root.
+func (suite *SafePathTestSuite) TestOpenPath_TraversalAttack() {
+	_, err := OpenPath(suite.tempDir, "/etc/passwd")
+	suite.Error(err)
+	suite.Contains(err.Error(), "path escapes root directory")
+}
+
+// TestOpenPath_RelativeTraversal tests OpenPath rejects relative traversal.
+func (suite *SafePathTestSuite) TestOpenPath_RelativeTraversal() {
+	// Create a path that tries to escape using ..
+	escapePath := filepath.Join(suite.tempDir, "..", "etc", "passwd")
+	_, err := OpenPath(suite.tempDir, escapePath)
+	suite.Error(err)
+	suite.Contains(err.Error(), "path escapes root directory")
+}
+
 // TestSafePathTestSuite runs all the tests in the suite.
 func TestSafePathTestSuite(t *testing.T) {
 	suite.Run(t, new(SafePathTestSuite))
