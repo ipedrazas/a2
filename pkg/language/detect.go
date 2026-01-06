@@ -28,6 +28,13 @@ var LanguageIndicators = map[checker.Language][]string{
 		"poetry.lock",
 		"setup.cfg",
 	},
+	checker.LangNode: {
+		"package.json",
+		"package-lock.json",
+		"yarn.lock",
+		"pnpm-lock.yaml",
+		"bun.lockb",
+	},
 }
 
 // Detect analyzes a directory and returns detected languages.
@@ -38,7 +45,7 @@ func Detect(path string) DetectionResult {
 	}
 
 	// Check languages in a defined order for consistent primary selection
-	orderedLanguages := []checker.Language{checker.LangGo, checker.LangPython}
+	orderedLanguages := []checker.Language{checker.LangGo, checker.LangPython, checker.LangNode}
 
 	for _, lang := range orderedLanguages {
 		indicators := LanguageIndicators[lang]

@@ -21,6 +21,7 @@ type LanguageConfig struct {
 	AutoDetect bool                 `yaml:"auto_detect"`        // Default: true
 	Go         GoLanguageConfig     `yaml:"go,omitempty"`
 	Python     PythonLanguageConfig `yaml:"python,omitempty"`
+	Node       NodeLanguageConfig   `yaml:"node,omitempty"`
 }
 
 // GoLanguageConfig contains Go-specific settings.
@@ -34,6 +35,15 @@ type PythonLanguageConfig struct {
 	TestRunner        string  `yaml:"test_runner,omitempty"`     // auto, pytest, unittest
 	Formatter         string  `yaml:"formatter,omitempty"`       // auto, black, ruff
 	Linter            string  `yaml:"linter,omitempty"`          // auto, pylint, ruff, flake8
+	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"`
+}
+
+// NodeLanguageConfig contains Node.js-specific settings.
+type NodeLanguageConfig struct {
+	PackageManager    string  `yaml:"package_manager,omitempty"` // auto, npm, yarn, pnpm, bun
+	TestRunner        string  `yaml:"test_runner,omitempty"`     // auto, jest, vitest, mocha, npm-test
+	Formatter         string  `yaml:"formatter,omitempty"`       // auto, prettier, biome
+	Linter            string  `yaml:"linter,omitempty"`          // auto, eslint, biome, oxlint
 	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"`
 }
 
@@ -87,6 +97,13 @@ func DefaultConfig() *Config {
 				CoverageThreshold: 80.0,
 			},
 			Python: PythonLanguageConfig{
+				PackageManager:    "auto",
+				TestRunner:        "auto",
+				Formatter:         "auto",
+				Linter:            "auto",
+				CoverageThreshold: 80.0,
+			},
+			Node: NodeLanguageConfig{
 				PackageManager:    "auto",
 				TestRunner:        "auto",
 				Formatter:         "auto",

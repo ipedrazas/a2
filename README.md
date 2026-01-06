@@ -4,8 +4,8 @@ A2 is a multi-language code quality checker. It auto-detects project language(s)
 
 ## Features
 
-- **Multi-Language Support**: Go and Python (auto-detected or explicit)
-- **15+ Built-in Checks**: Build, tests, coverage, formatting, linting, vulnerabilities
+- **Multi-Language Support**: Go, Python, and Node.js (auto-detected or explicit)
+- **22+ Built-in Checks**: Build, tests, coverage, formatting, linting, vulnerabilities
 - **Veto System**: Critical checks (build, tests) stop execution on failure
 - **Pretty Output**: Colored terminal output with recommendations
 - **JSON Output**: Machine-readable format for CI/CD integration
@@ -95,6 +95,18 @@ Recommendations:
 | Python Lint | `python:lint` | Warn | No lint issues (ruff/flake8/pylint) |
 | Python Coverage | `python:coverage` | Warn | Coverage >= threshold (default 80%) |
 | Python Vulnerabilities | `python:deps` | Warn | No known vulns (pip-audit/safety) |
+
+### Node.js Checks
+
+| Check | ID | Severity | Description |
+|-------|-----|----------|-------------|
+| Node Project | `node:project` | Fail | package.json exists with name/version |
+| Node Build | `node:build` | Fail | Dependencies install successfully |
+| Node Tests | `node:tests` | Fail | Tests pass (jest/vitest/mocha/npm test) |
+| Node Format | `node:format` | Warn | Code formatted (prettier/biome) |
+| Node Lint | `node:lint` | Warn | No lint issues (eslint/biome/oxlint) |
+| Node Coverage | `node:coverage` | Warn | Coverage >= threshold (default 80%) |
+| Node Vulnerabilities | `node:deps` | Warn | No known vulns (npm/yarn/pnpm audit) |
 
 ### Common Checks
 
@@ -193,6 +205,39 @@ external:
     severity: warn
 ```
 
+### Example: Node.js Project
+
+```yaml
+# Language settings
+language:
+  node:
+    package_manager: auto  # auto, npm, yarn, pnpm, bun
+    test_runner: auto      # auto, jest, vitest, mocha, npm-test
+    formatter: auto        # auto, prettier, biome
+    linter: auto           # auto, eslint, biome, oxlint
+    coverage_threshold: 80
+
+# Required files
+files:
+  required:
+    - README.md
+    - LICENSE
+    - package.json
+
+# Disable specific checks
+checks:
+  disabled:
+    - node:deps  # Skip vulnerability scan
+
+# Custom external checks
+external:
+  - id: typecheck
+    name: Type Check
+    command: npx
+    args: ["tsc", "--noEmit"]
+    severity: warn
+```
+
 ### Multi-Language Project (Monorepo)
 
 ```yaml
@@ -201,12 +246,17 @@ language:
   explicit:
     - go
     - python
+    - node
   go:
     coverage_threshold: 80
   python:
     coverage_threshold: 70
     linter: ruff
     formatter: ruff
+  node:
+    coverage_threshold: 75
+    linter: eslint
+    formatter: prettier
 
 files:
   required:
@@ -221,6 +271,7 @@ A2 auto-detects languages based on indicator files:
 |----------|----------------|
 | Go | `go.mod`, `go.sum` |
 | Python | `pyproject.toml`, `setup.py`, `requirements.txt`, `Pipfile`, `poetry.lock` |
+| Node.js | `package.json`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `bun.lockb` |
 
 Use `--lang` flag or `language.explicit` config to override auto-detection.
 

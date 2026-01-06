@@ -6,6 +6,7 @@ import (
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checks/common"
 	gocheck "github.com/ipedrazas/a2/pkg/checks/go"
+	nodecheck "github.com/ipedrazas/a2/pkg/checks/node"
 	pythoncheck "github.com/ipedrazas/a2/pkg/checks/python"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/language"
@@ -48,6 +49,8 @@ func getChecksForLanguage(lang checker.Language, cfg *config.Config) []checker.C
 		return gocheck.Register(cfg)
 	case checker.LangPython:
 		return pythoncheck.Register(cfg)
+	case checker.LangNode:
+		return nodecheck.Register(cfg)
 	default:
 		return nil
 	}
