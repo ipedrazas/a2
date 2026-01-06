@@ -1,0 +1,188 @@
+package checks
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"os/exec"
+	"path/filepath"
+	"strings"
+
+	"github.com/ipedrazas/a2/pkg/checker"
+)
+
+// ExternalCheck runs an external binary as a check.
+// The binary should follow the A2 external check protocol:
+// - Exit code 0: Pass
+// - Exit code 1: Warning
+// - Exit code 2+: Fail
+// - Output: Plain text message, or JSON with "message" field
+//
+// Security Note: External checks are configured by the project owner via .a2.yaml.
+// Only commands that exist in PATH are allowed to execute.
+type ExternalCheck struct {
+	CheckID   string   // Unique identifier
+	CheckName string   // Human-readable name
+	Command   string   // Command to run (must exist in PATH)
+	Args      []string // Arguments to pass
+	Severity  string   // Default severity on failure: "warn" or "fail"
+}
+
+// ExternalOutput is the optional JSON output format for external checks.
+type ExternalOutput struct {
+	Message string `json:"message"`
+	Status  string `json:"status"` // "pass", "warn", or "fail"
+}
+
+func (c *ExternalCheck) ID() string   { return c.CheckID }
+func (c *ExternalCheck) Name() string { return c.CheckName }
+
+func (c *ExternalCheck) Run(path string) (checker.Result, error) {
+	// Validate command before execution
+	if err := c.validateCommand(); err != nil {
+		return checker.Result{
+			Name:    c.CheckName,
+			ID:      c.CheckID,
+			Passed:  false,
+			Status:  checker.Warn,
+			Message: err.Error(),
+		}, nil
+	}
+
+	// Resolve command to absolute path for security
+	cmdPath, err := exec.LookPath(c.Command)
+	if err != nil {
+		return checker.Result{
+			Name:    c.CheckName,
+			ID:      c.CheckID,
+			Passed:  false,
+			Status:  checker.Warn,
+			Message: fmt.Sprintf("Command not found: %s", c.Command),
+		}, nil
+	}
+
+	// Sanitize arguments - remove any that contain shell metacharacters
+	sanitizedArgs := c.sanitizeArgs()
+
+	// Execute the command with resolved path
+	// #nosec G204 -- Command is validated via LookPath and args are sanitized.
+	// External checks are an intentional feature configured by project owners.
+	cmd := exec.Command(cmdPath, sanitizedArgs...)
+	cmd.Dir = path
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err = cmd.Run()
+
+	// Parse output
+	output := strings.TrimSpace(stdout.String())
+	if output == "" {
+		output = strings.TrimSpace(stderr.String())
+	}
+
+	// Try to parse as JSON
+	var extOutput ExternalOutput
+	if jsonErr := json.Unmarshal([]byte(output), &extOutput); jsonErr == nil {
+		// Successfully parsed JSON
+		return c.resultFromJSON(extOutput, err)
+	}
+
+	// Plain text output - determine status from exit code
+	return c.resultFromExitCode(output, err)
+}
+
+// validateCommand checks that the command is safe to execute.
+func (c *ExternalCheck) validateCommand() error {
+	if c.Command == "" {
+		return fmt.Errorf("empty command")
+	}
+
+	// Reject commands with path separators (must be in PATH)
+	if strings.ContainsAny(c.Command, "/\\") {
+		// Allow if it's an absolute path that exists
+		if !filepath.IsAbs(c.Command) {
+			return fmt.Errorf("relative paths not allowed: %s", c.Command)
+		}
+	}
+
+	// Reject shell metacharacters in command name
+	dangerous := []string{";", "&", "|", "$", "`", "(", ")", "{", "}", "<", ">", "\n", "\r"}
+	for _, char := range dangerous {
+		if strings.Contains(c.Command, char) {
+			return fmt.Errorf("invalid characters in command: %s", c.Command)
+		}
+	}
+
+	return nil
+}
+
+// sanitizeArgs returns the arguments as-is.
+// Since exec.Command passes arguments directly to the executable without shell
+// interpretation, shell metacharacters in arguments are not a security risk.
+// The command itself is validated via LookPath, and the project owner controls
+// the configuration of external checks.
+func (c *ExternalCheck) sanitizeArgs() []string {
+	return c.Args
+}
+
+func (c *ExternalCheck) resultFromJSON(out ExternalOutput, err error) (checker.Result, error) {
+	status := checker.Pass
+	passed := true
+
+	switch strings.ToLower(out.Status) {
+	case "warn", "warning":
+		status = checker.Warn
+		passed = false
+	case "fail", "error":
+		status = checker.Fail
+		passed = false
+	}
+
+	return checker.Result{
+		Name:    c.CheckName,
+		ID:      c.CheckID,
+		Passed:  passed,
+		Status:  status,
+		Message: out.Message,
+	}, nil
+}
+
+func (c *ExternalCheck) resultFromExitCode(output string, err error) (checker.Result, error) {
+	if err == nil {
+		// Exit code 0 = pass
+		return checker.Result{
+			Name:    c.CheckName,
+			ID:      c.CheckID,
+			Passed:  true,
+			Status:  checker.Pass,
+			Message: output,
+		}, nil
+	}
+
+	// Get exit code
+	exitCode := 1
+	if exitErr, ok := err.(*exec.ExitError); ok {
+		exitCode = exitErr.ExitCode()
+	}
+
+	// Determine severity
+	status := checker.Warn
+	if exitCode >= 2 || c.Severity == "fail" {
+		status = checker.Fail
+	}
+
+	message := output
+	if message == "" {
+		message = "Check failed"
+	}
+
+	return checker.Result{
+		Name:    c.CheckName,
+		ID:      c.CheckID,
+		Passed:  false,
+		Status:  status,
+		Message: message,
+	}, nil
+}

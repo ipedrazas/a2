@@ -1,0 +1,93 @@
+package output
+
+import (
+	"encoding/json"
+	"os"
+
+	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/runner"
+)
+
+// JSONResult is the JSON-friendly version of a check result.
+type JSONResult struct {
+	Name    string `json:"name"`
+	ID      string `json:"id"`
+	Passed  bool   `json:"passed"`
+	Status  string `json:"status"`
+	Message string `json:"message,omitempty"`
+}
+
+// JSONOutput is the complete JSON output structure.
+type JSONOutput struct {
+	Results []JSONResult `json:"results"`
+	Summary JSONSummary  `json:"summary"`
+	Aborted bool         `json:"aborted"`
+	Success bool         `json:"success"`
+}
+
+// JSONSummary provides aggregate statistics.
+type JSONSummary struct {
+	Total    int     `json:"total"`
+	Passed   int     `json:"passed"`
+	Warnings int     `json:"warnings"`
+	Failed   int     `json:"failed"`
+	Score    float64 `json:"score"`
+}
+
+// JSON outputs the results as formatted JSON.
+func JSON(result runner.SuiteResult) error {
+	output := JSONOutput{
+		Results: make([]JSONResult, 0, len(result.Results)),
+		Summary: JSONSummary{
+			Total:    result.TotalChecks(),
+			Passed:   result.Passed,
+			Warnings: result.Warnings,
+			Failed:   result.Failed,
+			Score:    calculateScore(result),
+		},
+		Aborted: result.Aborted,
+		Success: result.Success(),
+	}
+
+	for _, r := range result.Results {
+		output.Results = append(output.Results, JSONResult{
+			Name:    r.Name,
+			ID:      r.ID,
+			Passed:  r.Passed,
+			Status:  statusToString(r.Status),
+			Message: r.Message,
+		})
+	}
+
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	if err := enc.Encode(output); err != nil {
+		return err
+	}
+
+	if !result.Success() {
+		os.Exit(1)
+	}
+	return nil
+}
+
+func statusToString(s checker.Status) string {
+	switch s {
+	case checker.Pass:
+		return "pass"
+	case checker.Warn:
+		return "warn"
+	case checker.Fail:
+		return "fail"
+	default:
+		return "unknown"
+	}
+}
+
+func calculateScore(result runner.SuiteResult) float64 {
+	total := result.TotalChecks()
+	if total == 0 {
+		return 100.0
+	}
+	return float64(result.Passed) / float64(total) * 100
+}

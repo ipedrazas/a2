@@ -1,0 +1,18 @@
+- id: a2
+  name: A2 - Application Analysis
+  description: Run A2 code quality checks
+  entry: a2 check
+  language: golang
+  types: [go]
+  pass_filenames: false
+  always_run: true
+
+- id: a2-strict
+  name: A2 - Strict Mode
+  description: Run A2 checks (fail on warnings)
+  entry: a2 check
+  language: golang
+  types: [go]
+  pass_filenames: false
+  always_run: true
+  args: ['--strict']

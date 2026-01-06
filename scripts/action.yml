@@ -1,0 +1,78 @@
+name: 'A2 - Application Analysis'
+description: 'Run code quality checks on your Go project'
+author: 'Ivan Pedrazas'
+
+branding:
+  icon: 'check-circle'
+  color: 'green'
+
+inputs:
+  path:
+    description: 'Path to the directory to analyze'
+    required: false
+    default: '.'
+  format:
+    description: 'Output format (pretty or json)'
+    required: false
+    default: 'pretty'
+  config:
+    description: 'Path to config file (default: .a2.yaml in target directory)'
+    required: false
+  fail-on-warning:
+    description: 'Fail the action if there are warnings'
+    required: false
+    default: 'false'
+
+outputs:
+  score:
+    description: 'The percentage of checks that passed'
+  passed:
+    description: 'Number of checks that passed'
+  total:
+    description: 'Total number of checks run'
+  success:
+    description: 'Whether all critical checks passed'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.25'
+
+    - name: Install A2
+      shell: bash
+      run: go install github.com/ipedrazas/a2@latest
+
+    - name: Run A2 checks
+      id: a2
+      shell: bash
+      run: |
+        set +e
+        OUTPUT=$(a2 check ${{ inputs.path }} --format json)
+        EXIT_CODE=$?
+        echo "$OUTPUT"
+
+        # Parse JSON output for GitHub outputs
+        SCORE=$(echo "$OUTPUT" | jq -r '.summary.score')
+        PASSED=$(echo "$OUTPUT" | jq -r '.summary.passed')
+        TOTAL=$(echo "$OUTPUT" | jq -r '.summary.total')
+        SUCCESS=$(echo "$OUTPUT" | jq -r '.success')
+        WARNINGS=$(echo "$OUTPUT" | jq -r '.summary.warnings')
+
+        echo "score=$SCORE" >> $GITHUB_OUTPUT
+        echo "passed=$PASSED" >> $GITHUB_OUTPUT
+        echo "total=$TOTAL" >> $GITHUB_OUTPUT
+        echo "success=$SUCCESS" >> $GITHUB_OUTPUT
+
+        # Pretty output for logs
+        a2 check ${{ inputs.path }} --format ${{ inputs.format }} || true
+
+        # Determine exit code
+        if [ "${{ inputs.fail-on-warning }}" = "true" ] && [ "$WARNINGS" -gt 0 ]; then
+          echo "::error::A2 found $WARNINGS warning(s)"
+          exit 1
+        fi
+
+        exit $EXIT_CODE

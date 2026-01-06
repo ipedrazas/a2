@@ -1,0 +1,33 @@
+# Coverage threshold (default: 80)
+coverage:
+  threshold: 60
+
+# Required files to check
+files:
+  required:
+    - README.md
+    - LICENSE
+    - CONTRIBUTING.md
+
+# Disable specific checks
+checks:
+  disabled:
+    - deps  # Skip vulnerability check
+
+# Execution options
+execution:
+  parallel: true  # Run checks in parallel (default: true). Set to false for CI with limited CPU.
+
+# Custom external checks
+external:
+  - id: lint
+    name: Golangci-lint
+    command: golangci-lint
+    args: ["run", "./..."]
+    severity: warn
+
+  - id: security
+    name: Security Scan
+    command: gosec
+    args: ["./..."]
+    severity: fail

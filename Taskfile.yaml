@@ -1,0 +1,138 @@
+version: '3'
+
+vars:
+  BINARY: a2
+  VERSION:
+    sh: git describe --tags --always --dirty 2>/dev/null || echo "dev"
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+  
+  dependencies:
+    desc: Install dependencies
+    cmds:
+      - go mod tidy
+      - go mod download
+      - go install github.com/securego/gosec/v2/cmd/gosec@latest
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - go install golang.org/x/vuln/cmd/govulncheck@latest
+
+  build:
+    desc: Build the binary
+    cmds:
+      - go build -ldflags="-s -w -X main.Version={{.VERSION}}" -o dist/{{.BINARY}} .
+    sources:
+      - '**/*.go'
+      - go.mod
+      - go.sum
+    generates:
+      - '{{.BINARY}}'
+
+  run:
+    desc: Run a2 check on current directory
+    deps: [build]
+    cmds:
+      - ./{{.BINARY}} check {{.CLI_ARGS}}
+
+  test:
+    desc: Run tests
+    cmds:
+      - go test -v ./...
+
+  test:unit:
+    desc: Run unit tests only (excludes integration)
+    cmds:
+      - go test -v -short ./...
+
+  test:coverage:
+    desc: Run tests with coverage
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+      - echo "Coverage report available at coverage.html"
+
+  test:coverage:bypackage:
+    desc: Show coverage by package
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -func=coverage.out
+      - go tool cover -html=coverage.out -o coverage.html
+      - echo "Coverage report available at coverage.html"
+
+  test:validate:
+    desc: Validate all tests pass and show summary
+    cmds:
+      - go test -v ./... 2>&1 | tee test-output.log
+      - echo "Test summary:"
+      - grep -E "^(PASS|FAIL|ok|FAIL)" test-output.log | tail -20 || true
+      - rm -f test-output.log
+
+  fmt:
+    desc: Format code
+    cmds:
+      - gofmt -w .
+
+  lint:
+    desc: Run linters
+    cmds:
+      - go vet ./...
+      - gofmt -l . | grep -q . && echo "Files need formatting" && exit 1 || true
+
+  tidy:
+    desc: Tidy go modules
+    cmds:
+      - go mod tidy
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -f dist/{{.BINARY}}
+      - rm -f coverage.out coverage.html
+
+  install:
+    desc: Install a2 to GOPATH/bin
+    cmds:
+      - go install -ldflags="-s -w -X main.Version={{.VERSION}}" .
+
+  docker:build:
+    desc: Build Docker image
+    cmds:
+      - docker build -t {{.BINARY}}:{{.VERSION}} -t {{.BINARY}}:latest .
+
+  docker:run:
+    desc: Run a2 in Docker
+    cmds:
+      - docker run -v $(pwd):/workspace {{.BINARY}}:latest check {{.CLI_ARGS}}
+
+  release:
+    desc: Build release binaries for all platforms
+    cmds:
+      - mkdir -p dist
+      - GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.Version={{.VERSION}}" -o dist/{{.BINARY}}-linux-amd64 .
+      - GOOS=linux GOARCH=arm64 go build -ldflags="-s -w -X main.Version={{.VERSION}}" -o dist/{{.BINARY}}-linux-arm64 .
+      - GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X main.Version={{.VERSION}}" -o dist/{{.BINARY}}-darwin-amd64 .
+      - GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X main.Version={{.VERSION}}" -o dist/{{.BINARY}}-darwin-arm64 .
+      - GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X main.Version={{.VERSION}}" -o dist/{{.BINARY}}-windows-amd64.exe .
+    generates:
+      - dist/*
+
+  ci:
+    desc: Run all CI checks
+    cmds:
+      - task: fmt
+      - task: lint
+      - task: test
+      - task: build
+      - ./dist/{{.BINARY}} check
+
+  all:
+    desc: Build, test, and run checks
+    cmds:
+      - task: tidy
+      - task: fmt
+      - task: build
+      - task: test
+      - task: run
