@@ -89,8 +89,8 @@ func (c *HealthCheck) Run(path string) (checker.Result, error) {
 		return nil
 	})
 
-	if err != nil && err != filepath.SkipAll {
-		// Continue even if there were some errors walking
+	if err != nil {
+		return result, err
 	}
 
 	if !found {

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
 // LoggingCheck verifies proper logging practices in Python code.

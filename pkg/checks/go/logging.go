@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
 // LoggingCheck verifies proper logging practices in Go code.
@@ -61,7 +62,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 		// Skip test files for print detection
 		isTestFile := strings.HasSuffix(filePath, "_test.go")
 
-		file, err := os.Open(filePath)
+		file, err := safepath.OpenPath(path, filePath)
 		if err != nil {
 			return nil
 		}

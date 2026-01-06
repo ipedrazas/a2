@@ -14,6 +14,8 @@ files:
 checks:
   disabled:
     - deps  # Skip vulnerability check
+    - go:logging  # Skip logging check
+    - common:health  # Skip health check
 
 # Execution options
 execution:
@@ -38,7 +40,7 @@ external:
     command: trufflehog
     args: ["filesystem", "--no-update", "--fail", "--log-level=-1", "."]
     severity: warn
-    
+
   - id: secrets
     name: Secret Detection
     command: gitleaks

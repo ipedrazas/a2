@@ -75,6 +75,43 @@ func Exists(root, filename string) bool {
 	return err == nil
 }
 
+// Open safely opens a file within the given root directory.
+// It prevents directory traversal by ensuring the resolved path is within root.
+func Open(root, filename string) (*os.File, error) {
+	safePath, err := SafeJoin(root, filename)
+	if err != nil {
+		return nil, err
+	}
+
+	// #nosec G304 -- Path is validated by SafeJoin to prevent traversal
+	return os.Open(safePath)
+}
+
+// OpenPath safely opens a file path that should be within the given root directory.
+// Unlike Open, this validates an already-joined path against the root.
+// This is useful when the path comes from filepath.Walk.
+func OpenPath(root, filePath string) (*os.File, error) {
+	// Resolve both paths to absolute
+	absRoot, err := filepath.Abs(root)
+	if err != nil {
+		return nil, fmt.Errorf("invalid root path: %w", err)
+	}
+
+	absPath, err := filepath.Abs(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("invalid file path: %w", err)
+	}
+
+	// Ensure the path is within root
+	rootWithSep := absRoot + string(filepath.Separator)
+	if absPath != absRoot && !hasPrefix(absPath, rootWithSep) {
+		return nil, fmt.Errorf("path escapes root directory: %s", filePath)
+	}
+
+	// #nosec G304 -- Path is validated above to prevent traversal
+	return os.Open(absPath)
+}
+
 // hasPrefix checks if path starts with prefix, handling OS-specific path separators.
 func hasPrefix(path, prefix string) bool {
 	// Use filepath.Clean to normalize both paths
