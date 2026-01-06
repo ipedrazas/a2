@@ -13,6 +13,12 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 		coverageThreshold = cfg.Language.Go.CoverageThreshold
 	}
 
+	// Use language-specific cyclomatic threshold or default
+	cyclomaticThreshold := cfg.Language.Go.CyclomaticThreshold
+	if cyclomaticThreshold <= 0 {
+		cyclomaticThreshold = 15 // Default threshold
+	}
+
 	return []checker.CheckRegistration{
 		{
 			Checker: &ModuleCheck{},
@@ -92,6 +98,26 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Languages: []checker.Language{checker.LangGo},
 				Critical:  false,
 				Order:     230,
+			},
+		},
+		{
+			Checker: &CyclomaticCheck{Threshold: cyclomaticThreshold},
+			Meta: checker.CheckMeta{
+				ID:        "go:cyclomatic",
+				Name:      "Go Complexity",
+				Languages: []checker.Language{checker.LangGo},
+				Critical:  false,
+				Order:     240,
+			},
+		},
+		{
+			Checker: &LoggingCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "go:logging",
+				Name:      "Go Logging",
+				Languages: []checker.Language{checker.LangGo},
+				Critical:  false,
+				Order:     250,
 			},
 		},
 	}

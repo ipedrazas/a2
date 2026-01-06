@@ -1,4 +1,4 @@
-name: PR Merge
+name: 'PR Merge'
 
 on:
   pull_request:

@@ -90,5 +90,25 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Order:     230,
 			},
 		},
+		{
+			Checker: &ComplexityCheck{Config: pythonCfg},
+			Meta: checker.CheckMeta{
+				ID:        "python:complexity",
+				Name:      "Python Complexity",
+				Languages: []checker.Language{checker.LangPython},
+				Critical:  false,
+				Order:     240,
+			},
+		},
+		{
+			Checker: &LoggingCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "python:logging",
+				Name:      "Python Logging",
+				Languages: []checker.Language{checker.LangPython},
+				Critical:  false,
+				Order:     250,
+			},
+		},
 	}
 }

@@ -25,6 +25,8 @@ This document describes all checks available in A2, organized by language.
 | `go:vet` | Go Vet | No | 210 | Finds suspicious code with `go vet` |
 | `go:coverage` | Go Coverage | No | 220 | Measures test coverage against threshold |
 | `go:deps` | Go Vulnerabilities | No | 230 | Scans for vulnerabilities with `govulncheck` |
+| `go:cyclomatic` | Go Complexity | No | 240 | Analyzes cyclomatic complexity of functions |
+| `go:logging` | Go Logging | No | 250 | Detects structured logging vs fmt.Print |
 
 ### go:module
 
@@ -102,6 +104,46 @@ Scans for known vulnerabilities in Go dependencies using `govulncheck`.
 - **Pass**: No vulnerabilities found or govulncheck not installed
 - **Warn**: Vulnerabilities detected
 
+### go:cyclomatic
+
+Analyzes cyclomatic complexity of Go functions using the go/ast package.
+
+**Configuration:**
+```yaml
+language:
+  go:
+    cyclomatic_threshold: 15  # Default: 15
+```
+
+**Complexity Calculation:**
+- Base complexity: 1
+- +1 for each: `if`, `for`, `range`, `case` (non-default), `&&`, `||`
+
+**Status:**
+- **Pass**: No functions exceed threshold
+- **Warn**: Functions exceed complexity threshold
+
+**Fix:** Break complex functions into smaller, focused functions.
+
+### go:logging
+
+Checks for proper structured logging practices instead of fmt.Print statements.
+
+**Structured loggers detected:**
+- `log/slog` (Go 1.21+)
+- `go.uber.org/zap`
+- `github.com/rs/zerolog`
+- `github.com/sirupsen/logrus`
+
+**Anti-patterns detected (in non-test files):**
+- `fmt.Print`, `fmt.Println`, `fmt.Printf`
+
+**Status:**
+- **Pass**: Uses structured logging, no fmt.Print statements
+- **Warn**: Uses fmt.Print for logging or no structured logger detected
+
+**Fix:** Use `log/slog` or other structured logging libraries.
+
 ---
 
 ## Python Checks
@@ -116,6 +158,8 @@ Scans for known vulnerabilities in Go dependencies using `govulncheck`.
 | `python:type` | Python Type Check | No | 215 | Type checks with mypy |
 | `python:coverage` | Python Coverage | No | 220 | Measures test coverage |
 | `python:deps` | Python Vulnerabilities | No | 230 | Scans for vulnerabilities |
+| `python:complexity` | Python Complexity | No | 240 | Analyzes cyclomatic complexity with radon |
+| `python:logging` | Python Logging | No | 250 | Detects structured logging vs print() |
 
 ### python:project
 
@@ -256,6 +300,49 @@ Scans for security vulnerabilities in Python dependencies.
 - **Pass**: No vulnerabilities found or scanner not installed
 - **Warn**: Vulnerabilities detected
 
+### python:complexity
+
+Analyzes cyclomatic complexity of Python functions using radon.
+
+**Requirements:** Install with `pip install radon`
+
+**Configuration:**
+```yaml
+language:
+  python:
+    cyclomatic_threshold: 15  # Default: 15
+```
+
+**Complexity Grades:**
+- A (1-5): Low complexity
+- B (6-10): Moderate complexity
+- C (11-20): High complexity
+- D/E/F (21+): Very high complexity
+
+**Status:**
+- **Pass**: No functions exceed threshold or radon not installed
+- **Warn**: Functions exceed complexity threshold
+
+**Fix:** Break complex functions into smaller, focused functions.
+
+### python:logging
+
+Checks for proper logging practices instead of print() statements.
+
+**Logging modules detected:**
+- `logging` (standard library)
+- `structlog`
+- `loguru`
+
+**Anti-patterns detected (in non-test files):**
+- `print()` statements
+
+**Status:**
+- **Pass**: Uses logging module, no print() statements
+- **Warn**: Uses print() for logging or no logging module detected
+
+**Fix:** Use the `logging` module or `structlog`/`loguru`.
+
 ---
 
 ## Node.js Checks
@@ -270,6 +357,7 @@ Scans for security vulnerabilities in Python dependencies.
 | `node:type` | TypeScript Type Check | No | 215 | Type checks TypeScript |
 | `node:coverage` | Node Coverage | No | 220 | Measures test coverage |
 | `node:deps` | Node Vulnerabilities | No | 230 | Scans for vulnerabilities |
+| `node:logging` | Node Logging | No | 250 | Detects structured logging vs console.log |
 
 ### node:project
 
@@ -415,6 +503,27 @@ Scans for security vulnerabilities in Node.js dependencies.
 - **Pass**: No vulnerabilities found
 - **Warn**: Vulnerabilities detected
 
+### node:logging
+
+Checks for proper structured logging practices instead of console.log.
+
+**Logging libraries detected (in package.json):**
+- `winston`
+- `pino`
+- `bunyan`
+- `log4js`
+- `loglevel`
+- `signale`
+
+**Anti-patterns detected (in non-test files):**
+- `console.log`, `console.error`, `console.warn`, `console.info`, `console.debug`
+
+**Status:**
+- **Pass**: Uses structured logging, no console.* statements
+- **Warn**: Uses console.log for logging or no structured logger detected
+
+**Fix:** Use `winston`, `pino`, or another structured logging library.
+
 ---
 
 ## Common Checks
@@ -422,6 +531,9 @@ Scans for security vulnerabilities in Node.js dependencies.
 | Check ID | Name | Critical | Order | Description |
 |----------|------|----------|-------|-------------|
 | `file_exists` | Required Files | No | 900 | Checks for required files |
+| `common:dockerfile` | Container Ready | No | 910 | Checks for Dockerfile/Containerfile |
+| `common:ci` | CI Pipeline | No | 920 | Detects CI/CD configuration |
+| `common:health` | Health Endpoint | No | 930 | Detects health check endpoints |
 
 ### file_exists
 
@@ -439,6 +551,59 @@ files:
 **Status:**
 - **Pass**: All required files exist
 - **Warn**: One or more files missing
+
+### common:dockerfile
+
+Checks if the project is container-ready by looking for container configuration.
+
+**Detection files:**
+- `Dockerfile`
+- `Containerfile`
+- `dockerfile` (case-insensitive)
+- `Dockerfile.*` (e.g., `Dockerfile.prod`)
+
+**Bonus detection:**
+- `.dockerignore` (reported in pass message)
+
+**Status:**
+- **Pass**: Dockerfile found
+- **Warn**: No Dockerfile found
+
+### common:ci
+
+Detects CI/CD pipeline configuration in the project.
+
+**Supported CI systems:**
+- GitHub Actions: `.github/workflows/*.yml`, `.github/workflows/*.yaml`
+- GitLab CI: `.gitlab-ci.yml`
+- Jenkins: `Jenkinsfile`
+- CircleCI: `.circleci/config.yml`
+- Travis CI: `.travis.yml`
+- Azure Pipelines: `azure-pipelines.yml`
+- Bitbucket Pipelines: `bitbucket-pipelines.yml`
+
+**Status:**
+- **Pass**: CI configuration found (reports which CI system)
+- **Warn**: No CI configuration found
+
+### common:health
+
+Detects health check endpoints in the codebase for production readiness.
+
+**Endpoint patterns detected:**
+- `/health`, `/healthz`, `/ready`, `/readiness`, `/live`, `/liveness`
+
+**Function patterns detected:**
+- `HealthCheck`, `healthCheck`, `health_check`
+
+**Files scanned:**
+- Go: `*.go`
+- Python: `*.py`
+- JavaScript/TypeScript: `*.js`, `*.ts`, `*.jsx`, `*.tsx`, `*.mjs`, `*.cjs`
+
+**Status:**
+- **Pass**: Health endpoint pattern found
+- **Warn**: No health endpoint detected
 
 ---
 
@@ -505,6 +670,7 @@ language:
 
   go:
     coverage_threshold: 80
+    cyclomatic_threshold: 15
 
   python:
     package_manager: auto    # auto, pip, poetry, pipenv
@@ -512,6 +678,7 @@ language:
     formatter: auto          # auto, black, ruff
     linter: auto             # auto, ruff, flake8, pylint
     coverage_threshold: 80
+    cyclomatic_threshold: 15
 
   node:
     package_manager: auto    # auto, npm, yarn, pnpm, bun
@@ -563,11 +730,11 @@ external:
 
 | Language | Total Checks | Critical | Non-Critical |
 |----------|-------------|----------|--------------|
-| Go | 8 | 3 | 5 |
-| Python | 8 | 3 | 5 |
-| Node.js | 8 | 3 | 5 |
-| Common | 1+ | 0 | 1+ |
-| **Total** | **25+** | **9** | **16+** |
+| Go | 10 | 3 | 7 |
+| Python | 10 | 3 | 7 |
+| Node.js | 9 | 3 | 6 |
+| Common | 4+ | 0 | 4+ |
+| **Total** | **33+** | **9** | **24+** |
 
 **Critical checks** stop execution in sequential mode when they fail.
 **Non-critical checks** report warnings but allow other checks to continue.

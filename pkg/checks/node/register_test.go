@@ -19,7 +19,7 @@ func (suite *RegisterTestSuite) TestRegister_ReturnsAllChecks() {
 
 	checks := Register(cfg)
 
-	suite.Len(checks, 8)
+	suite.Len(checks, 9)
 }
 
 // TestRegister_CheckIDs tests that all check IDs are correct.
@@ -37,6 +37,7 @@ func (suite *RegisterTestSuite) TestRegister_CheckIDs() {
 		"node:type",
 		"node:coverage",
 		"node:deps",
+		"node:logging",
 	}
 
 	for i, check := range checks {
@@ -55,12 +56,13 @@ func (suite *RegisterTestSuite) TestRegister_CriticalChecks() {
 	suite.True(checks[1].Meta.Critical, "node:build should be critical")
 	suite.True(checks[2].Meta.Critical, "node:tests should be critical")
 
-	// Format, Lint, Type, Coverage, and Deps should not be critical
+	// Format, Lint, Type, Coverage, Deps, and Logging should not be critical
 	suite.False(checks[3].Meta.Critical, "node:format should not be critical")
 	suite.False(checks[4].Meta.Critical, "node:lint should not be critical")
 	suite.False(checks[5].Meta.Critical, "node:type should not be critical")
 	suite.False(checks[6].Meta.Critical, "node:coverage should not be critical")
 	suite.False(checks[7].Meta.Critical, "node:deps should not be critical")
+	suite.False(checks[8].Meta.Critical, "node:logging should not be critical")
 }
 
 // TestRegister_CheckOrder tests that checks are ordered correctly.
@@ -74,12 +76,13 @@ func (suite *RegisterTestSuite) TestRegister_CheckOrder() {
 	suite.Equal(110, checks[1].Meta.Order)
 	suite.Equal(120, checks[2].Meta.Order)
 
-	// Non-critical checks should have order 200-230
+	// Non-critical checks should have order 200-250
 	suite.Equal(200, checks[3].Meta.Order) // format
 	suite.Equal(210, checks[4].Meta.Order) // lint
 	suite.Equal(215, checks[5].Meta.Order) // type
 	suite.Equal(220, checks[6].Meta.Order) // coverage
 	suite.Equal(230, checks[7].Meta.Order) // deps
+	suite.Equal(250, checks[8].Meta.Order) // logging
 }
 
 // TestRegister_LanguageIsNode tests that all checks are for Node language.

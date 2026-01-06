@@ -26,16 +26,18 @@ type LanguageConfig struct {
 
 // GoLanguageConfig contains Go-specific settings.
 type GoLanguageConfig struct {
-	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"`
+	CoverageThreshold   float64 `yaml:"coverage_threshold,omitempty"`
+	CyclomaticThreshold int     `yaml:"cyclomatic_threshold,omitempty"`
 }
 
 // PythonLanguageConfig contains Python-specific settings.
 type PythonLanguageConfig struct {
-	PackageManager    string  `yaml:"package_manager,omitempty"` // auto, pip, poetry, pipenv
-	TestRunner        string  `yaml:"test_runner,omitempty"`     // auto, pytest, unittest
-	Formatter         string  `yaml:"formatter,omitempty"`       // auto, black, ruff
-	Linter            string  `yaml:"linter,omitempty"`          // auto, pylint, ruff, flake8
-	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"`
+	PackageManager      string  `yaml:"package_manager,omitempty"` // auto, pip, poetry, pipenv
+	TestRunner          string  `yaml:"test_runner,omitempty"`     // auto, pytest, unittest
+	Formatter           string  `yaml:"formatter,omitempty"`       // auto, black, ruff
+	Linter              string  `yaml:"linter,omitempty"`          // auto, pylint, ruff, flake8
+	CoverageThreshold   float64 `yaml:"coverage_threshold,omitempty"`
+	CyclomaticThreshold int     `yaml:"cyclomatic_threshold,omitempty"`
 }
 
 // NodeLanguageConfig contains Node.js-specific settings.
@@ -94,14 +96,16 @@ func DefaultConfig() *Config {
 		Language: LanguageConfig{
 			AutoDetect: true,
 			Go: GoLanguageConfig{
-				CoverageThreshold: 80.0,
+				CoverageThreshold:   80.0,
+				CyclomaticThreshold: 15,
 			},
 			Python: PythonLanguageConfig{
-				PackageManager:    "auto",
-				TestRunner:        "auto",
-				Formatter:         "auto",
-				Linter:            "auto",
-				CoverageThreshold: 80.0,
+				PackageManager:      "auto",
+				TestRunner:          "auto",
+				Formatter:           "auto",
+				Linter:              "auto",
+				CoverageThreshold:   80.0,
+				CyclomaticThreshold: 15,
 			},
 			Node: NodeLanguageConfig{
 				PackageManager:    "auto",

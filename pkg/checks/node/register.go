@@ -97,5 +97,15 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Order:     230,
 			},
 		},
+		{
+			Checker: &LoggingCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "node:logging",
+				Name:      "Node Logging",
+				Languages: []checker.Language{checker.LangNode},
+				Critical:  false,
+				Order:     250,
+			},
+		},
 	}
 }

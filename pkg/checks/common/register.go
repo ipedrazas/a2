@@ -18,6 +18,36 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Order:     900,
 			},
 		},
+		{
+			Checker: &DockerfileCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:dockerfile",
+				Name:      "Container Ready",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     910,
+			},
+		},
+		{
+			Checker: &CICheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:ci",
+				Name:      "CI Pipeline",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     920,
+			},
+		},
+		{
+			Checker: &HealthCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:health",
+				Name:      "Health Endpoint",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     930,
+			},
+		},
 	}
 
 	// Add external checks from config
