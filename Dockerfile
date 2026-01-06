@@ -28,27 +28,51 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
 # Final stage - minimal image
 FROM golang:1.25-alpine
 
-# Install git (needed for some checks) and ca-certificates
-RUN apk add --no-cache git ca-certificates
+# Install git (needed for some checks), ca-certificates, wget, and Python for some tools
+RUN apk add --no-cache git ca-certificates wget python3 py3-pip
 
 # Copy the binary
 COPY --from=builder /a2 /usr/local/bin/a2
 
-# Install tools
+# Install Go tools
 RUN <<EOF
 go install github.com/securego/gosec/v2/cmd/gosec@latest
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 go install golang.org/x/vuln/cmd/govulncheck@latest
 go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
 go install github.com/kisielk/errcheck@latest
-# Add other tools here
+go install github.com/zricethezav/gitleaks/v8@latest
 EOF
+
+# Install trufflehog from release (can't use go install due to replace directives)
+ARG TARGETARCH
+RUN <<EOF
+TRUFFLEHOG_VERSION="3.88.29"
+ARCH="${TARGETARCH}"
+if [ "$ARCH" = "amd64" ]; then ARCH="amd64"; fi
+if [ "$ARCH" = "arm64" ]; then ARCH="arm64"; fi
+wget -q "https://github.com/trufflesecurity/trufflehog/releases/download/v${TRUFFLEHOG_VERSION}/trufflehog_${TRUFFLEHOG_VERSION}_linux_${ARCH}.tar.gz" -O /tmp/trufflehog.tar.gz
+tar -xzf /tmp/trufflehog.tar.gz -C /usr/local/bin trufflehog
+chmod +x /usr/local/bin/trufflehog
+rm /tmp/trufflehog.tar.gz
+EOF
+
+# Install Python tools
+RUN pip3 install --no-cache-dir --break-system-packages bandit semgrep
+
+# Create a non-root user and set up Go directories
+RUN adduser -D -u 1000 -g 1000 a2 && \
+    mkdir -p /home/a2/go /home/a2/.cache && \
+    chown -R a2:a2 /home/a2
 
 # Set working directory
 WORKDIR /workspace
 
-# Create a non-root user
-RUN adduser -D -u 1000 -g 1000 a2
+# Environment for non-root Go usage
+ENV GOPATH=/home/a2/go
+ENV GOCACHE=/home/a2/.cache/go-build
+ENV GOMODCACHE=/home/a2/go/pkg/mod
+ENV PATH="/home/a2/go/bin:/go/bin:${PATH}"
 
 ENTRYPOINT ["a2"]
 CMD ["check"]
