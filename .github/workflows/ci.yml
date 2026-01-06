@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache-dependency-path: go.sum
+
+      - name: Get dependencies
+        run: |
+          go mod tidy
+          go mod download
+
+      - name: Format check
+        run: |
+          gofmt -l . | grep -q . && echo "Files need formatting" && exit 1 || true
+
+      - name: Lint
+        run: go vet ./...
+
+      - name: Run tests
+        run: go test -v ./...
+
+      - name: Build
+        run: |
+          VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "dev")
+          GITSHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+          BUILDDATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          go build -ldflags="-s -w -X github.com/ipedrazas/a2/pkg/version.Version=${VERSION} -X github.com/ipedrazas/a2/pkg/version.GitSHA=${GITSHA} -X github.com/ipedrazas/a2/pkg/version.BuildDate=${BUILDDATE}" -o dist/a2 .
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: a2-binary
+          path: dist/a2
+          retention-days: 1
+

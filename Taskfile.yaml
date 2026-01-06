@@ -8,6 +8,8 @@ vars:
     sh: git rev-parse --short HEAD 2>/dev/null || echo "unknown"
   BUILDDATE:
     sh: date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date +"%Y-%m-%dT%H:%M:%SZ"
+  REGISTRY: docker.io
+  DOCKER_USER: ipedrazas
 
 tasks:
   default:
@@ -107,12 +109,12 @@ tasks:
   docker:build:
     desc: Build Docker image
     cmds:
-      - docker build -t {{.BINARY}}:{{.VERSION}} -t {{.BINARY}}:latest .
+      - docker build --build-arg VERSION={{.VERSION}} --build-arg GITSHA={{.GITSHA}} --build-arg BUILDDATE={{.BUILDDATE}} -t {{.BINARY}}:{{.VERSION}} -t {{.REGISTRY}}/{{.DOCKER_USER}}/{{.BINARY}}:latest .
 
   docker:run:
     desc: Run a2 in Docker
     cmds:
-      - docker run -v $(pwd):/workspace {{.BINARY}}:latest check {{.CLI_ARGS}}
+      - docker run -v $(pwd):/workspace {{.REGISTRY}}/{{.DOCKER_USER}}/{{.BINARY}}:latest check {{.CLI_ARGS}}
 
   release:
     desc: Build release binaries for all platforms

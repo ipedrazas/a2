@@ -1,0 +1,85 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache-dependency-path: go.sum
+
+      - name: Get dependencies
+        run: |
+          go mod tidy
+          go mod download
+
+      - name: Run tests
+        run: go test -v ./...
+
+      - name: Build binaries
+        run: |
+          VERSION="${{ inputs.version }}"
+          GITSHA=$(git rev-parse --short HEAD)
+          BUILDDATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          LDFLAGS="-s -w -X github.com/ipedrazas/a2/pkg/version.Version=${VERSION} -X github.com/ipedrazas/a2/pkg/version.GitSHA=${GITSHA} -X github.com/ipedrazas/a2/pkg/version.BuildDate=${BUILDDATE}"
+          
+          mkdir -p dist
+          
+          GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o dist/a2-linux-amd64 .
+          GOOS=linux GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o dist/a2-linux-arm64 .
+          GOOS=darwin GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o dist/a2-darwin-amd64 .
+          GOOS=darwin GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o dist/a2-darwin-arm64 .
+          GOOS=windows GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o dist/a2-windows-amd64.exe .
+
+      - name: Create checksums
+        run: |
+          cd dist
+          sha256sum a2-* > checksums.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          name: Release ${{ inputs.version }}
+          body: |
+            ## Release ${{ inputs.version }}
+            
+            ### Binaries
+            - `a2-linux-amd64` - Linux (amd64)
+            - `a2-linux-arm64` - Linux (arm64)
+            - `a2-darwin-amd64` - macOS (amd64)
+            - `a2-darwin-arm64` - macOS (arm64)
+            - `a2-windows-amd64.exe` - Windows (amd64)
+            
+            ### Checksums
+            See `checksums.txt` for SHA256 checksums.
+          files: |
+            dist/a2-*
+            dist/checksums.txt
+          prerelease: ${{ inputs.prerelease }}
+          generate_release_notes: true
+
