@@ -73,6 +73,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 		defer func() {
 			if err := file.Close(); err != nil {
 				// File close errors are typically not critical in read-only scenarios
+				fmt.Println("Error closing file:", err)
 			}
 		}()
 

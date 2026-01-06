@@ -2,6 +2,7 @@ package common
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -117,6 +118,7 @@ func (c *HealthCheck) searchFileForPatterns(root, filePath string, patterns []st
 	defer func() {
 		if err := file.Close(); err != nil {
 			// File close errors are typically not critical in read-only scenarios
+			fmt.Println("Error closing file:", err)
 		}
 	}()
 
