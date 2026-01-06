@@ -8,4 +8,3 @@ var (
 	// BuildDate is set at build time via ldflags
 	BuildDate = "unknown"
 )
-
