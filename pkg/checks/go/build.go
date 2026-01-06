@@ -1,4 +1,4 @@
-package checks
+package gocheck
 
 import (
 	"bytes"
@@ -11,8 +11,8 @@ import (
 // BuildCheck verifies that the project compiles successfully.
 type BuildCheck struct{}
 
-func (c *BuildCheck) ID() string   { return "build" }
-func (c *BuildCheck) Name() string { return "Build" }
+func (c *BuildCheck) ID() string   { return "go:build" }
+func (c *BuildCheck) Name() string { return "Go Build" }
 
 func (c *BuildCheck) Run(path string) (checker.Result, error) {
 	cmd := exec.Command("go", "build", "./...")
@@ -30,19 +30,21 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 		}
 
 		return checker.Result{
-			Name:    c.Name(),
-			ID:      c.ID(),
-			Passed:  false,
-			Status:  checker.Fail, // Critical - stops execution
-			Message: "Build failed: " + output,
+			Name:     c.Name(),
+			ID:       c.ID(),
+			Passed:   false,
+			Status:   checker.Fail, // Critical - stops execution
+			Message:  "Build failed: " + output,
+			Language: checker.LangGo,
 		}, nil
 	}
 
 	return checker.Result{
-		Name:    c.Name(),
-		ID:      c.ID(),
-		Passed:  true,
-		Status:  checker.Pass,
-		Message: "Build successful",
+		Name:     c.Name(),
+		ID:       c.ID(),
+		Passed:   true,
+		Status:   checker.Pass,
+		Message:  "Build successful",
+		Language: checker.LangGo,
 	}, nil
 }

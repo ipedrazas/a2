@@ -1,4 +1,4 @@
-package checks
+package gocheck
 
 import (
 	"bytes"
@@ -16,8 +16,8 @@ type CoverageCheck struct {
 	Threshold float64 // Minimum coverage percentage (default 80.0)
 }
 
-func (c *CoverageCheck) ID() string   { return "coverage" }
-func (c *CoverageCheck) Name() string { return "Test Coverage" }
+func (c *CoverageCheck) ID() string   { return "go:coverage" }
+func (c *CoverageCheck) Name() string { return "Go Coverage" }
 
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 	threshold := c.Threshold
@@ -38,22 +38,24 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 	// Check for no test files
 	if strings.Contains(output, "no test files") && !strings.Contains(output, "coverage:") {
 		return checker.Result{
-			Name:    c.Name(),
-			ID:      c.ID(),
-			Passed:  false,
-			Status:  checker.Warn,
-			Message: "No test files found - coverage is 0%",
+			Name:     c.Name(),
+			ID:       c.ID(),
+			Passed:   false,
+			Status:   checker.Warn,
+			Message:  "No test files found - coverage is 0%",
+			Language: checker.LangGo,
 		}, nil
 	}
 
 	// If tests failed, report that
 	if err != nil {
 		return checker.Result{
-			Name:    c.Name(),
-			ID:      c.ID(),
-			Passed:  false,
-			Status:  checker.Warn,
-			Message: "Could not measure coverage: tests failed",
+			Name:     c.Name(),
+			ID:       c.ID(),
+			Passed:   false,
+			Status:   checker.Warn,
+			Message:  "Could not measure coverage: tests failed",
+			Language: checker.LangGo,
 		}, nil
 	}
 
@@ -62,20 +64,22 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 
 	if coverage < threshold {
 		return checker.Result{
-			Name:    c.Name(),
-			ID:      c.ID(),
-			Passed:  false,
-			Status:  checker.Warn,
-			Message: fmt.Sprintf("Coverage %.1f%% is below threshold %.1f%%", coverage, threshold),
+			Name:     c.Name(),
+			ID:       c.ID(),
+			Passed:   false,
+			Status:   checker.Warn,
+			Message:  fmt.Sprintf("Coverage %.1f%% is below threshold %.1f%%", coverage, threshold),
+			Language: checker.LangGo,
 		}, nil
 	}
 
 	return checker.Result{
-		Name:    c.Name(),
-		ID:      c.ID(),
-		Passed:  true,
-		Status:  checker.Pass,
-		Message: fmt.Sprintf("Coverage: %.1f%%", coverage),
+		Name:     c.Name(),
+		ID:       c.ID(),
+		Passed:   true,
+		Status:   checker.Pass,
+		Message:  fmt.Sprintf("Coverage: %.1f%%", coverage),
+		Language: checker.LangGo,
 	}, nil
 }
 

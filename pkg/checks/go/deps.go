@@ -1,4 +1,4 @@
-package checks
+package gocheck
 
 import (
 	"bytes"
@@ -9,21 +9,22 @@ import (
 	"github.com/ipedrazas/a2/pkg/checker"
 )
 
-// DependencyCheck scans for known vulnerabilities using govulncheck.
-type DependencyCheck struct{}
+// DepsCheck scans for known vulnerabilities using govulncheck.
+type DepsCheck struct{}
 
-func (c *DependencyCheck) ID() string   { return "deps" }
-func (c *DependencyCheck) Name() string { return "Vulnerabilities" }
+func (c *DepsCheck) ID() string   { return "go:deps" }
+func (c *DepsCheck) Name() string { return "Go Vulnerabilities" }
 
-func (c *DependencyCheck) Run(path string) (checker.Result, error) {
+func (c *DepsCheck) Run(path string) (checker.Result, error) {
 	// Check if govulncheck is available
 	if _, err := exec.LookPath("govulncheck"); err != nil {
 		return checker.Result{
-			Name:    c.Name(),
-			ID:      c.ID(),
-			Passed:  true,
-			Status:  checker.Pass,
-			Message: "govulncheck not installed (run: go install golang.org/x/vuln/cmd/govulncheck@latest)",
+			Name:     c.Name(),
+			ID:       c.ID(),
+			Passed:   true,
+			Status:   checker.Pass,
+			Message:  "govulncheck not installed (run: go install golang.org/x/vuln/cmd/govulncheck@latest)",
+			Language: checker.LangGo,
 		}, nil
 	}
 
@@ -44,11 +45,12 @@ func (c *DependencyCheck) Run(path string) (checker.Result, error) {
 
 		if vulnCount > 0 {
 			return checker.Result{
-				Name:    c.Name(),
-				ID:      c.ID(),
-				Passed:  false,
-				Status:  checker.Warn,
-				Message: formatVulnMessage(vulnCount, output),
+				Name:     c.Name(),
+				ID:       c.ID(),
+				Passed:   false,
+				Status:   checker.Warn,
+				Message:  formatVulnMessage(vulnCount),
+				Language: checker.LangGo,
 			}, nil
 		}
 
@@ -56,21 +58,23 @@ func (c *DependencyCheck) Run(path string) (checker.Result, error) {
 		errOutput := strings.TrimSpace(stderr.String())
 		if errOutput != "" {
 			return checker.Result{
-				Name:    c.Name(),
-				ID:      c.ID(),
-				Passed:  false,
-				Status:  checker.Warn,
-				Message: "govulncheck error: " + errOutput,
+				Name:     c.Name(),
+				ID:       c.ID(),
+				Passed:   false,
+				Status:   checker.Warn,
+				Message:  "govulncheck error: " + errOutput,
+				Language: checker.LangGo,
 			}, nil
 		}
 	}
 
 	return checker.Result{
-		Name:    c.Name(),
-		ID:      c.ID(),
-		Passed:  true,
-		Status:  checker.Pass,
-		Message: "No known vulnerabilities found",
+		Name:     c.Name(),
+		ID:       c.ID(),
+		Passed:   true,
+		Status:   checker.Pass,
+		Message:  "No known vulnerabilities found",
+		Language: checker.LangGo,
 	}, nil
 }
 
@@ -85,8 +89,8 @@ func countVulnerabilities(output string) int {
 	return count
 }
 
-// formatVulnMessage creates a summary message from govulncheck output.
-func formatVulnMessage(count int, output string) string {
+// formatVulnMessage creates a summary message.
+func formatVulnMessage(count int) string {
 	if count == 1 {
 		return "1 vulnerability found. Run 'govulncheck ./...' for details."
 	}

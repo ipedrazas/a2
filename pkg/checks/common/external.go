@@ -1,4 +1,4 @@
-package checks
+package common
 
 import (
 	"bytes"
@@ -41,11 +41,12 @@ func (c *ExternalCheck) Run(path string) (checker.Result, error) {
 	// Validate command before execution
 	if err := c.validateCommand(); err != nil {
 		return checker.Result{
-			Name:    c.CheckName,
-			ID:      c.CheckID,
-			Passed:  false,
-			Status:  checker.Warn,
-			Message: err.Error(),
+			Name:     c.CheckName,
+			ID:       c.CheckID,
+			Passed:   false,
+			Status:   checker.Warn,
+			Message:  err.Error(),
+			Language: checker.LangCommon,
 		}, nil
 	}
 
@@ -53,11 +54,12 @@ func (c *ExternalCheck) Run(path string) (checker.Result, error) {
 	cmdPath, err := exec.LookPath(c.Command)
 	if err != nil {
 		return checker.Result{
-			Name:    c.CheckName,
-			ID:      c.CheckID,
-			Passed:  false,
-			Status:  checker.Warn,
-			Message: fmt.Sprintf("Command not found: %s", c.Command),
+			Name:     c.CheckName,
+			ID:       c.CheckID,
+			Passed:   false,
+			Status:   checker.Warn,
+			Message:  fmt.Sprintf("Command not found: %s", c.Command),
+			Language: checker.LangCommon,
 		}, nil
 	}
 
@@ -86,7 +88,7 @@ func (c *ExternalCheck) Run(path string) (checker.Result, error) {
 	var extOutput ExternalOutput
 	if jsonErr := json.Unmarshal([]byte(output), &extOutput); jsonErr == nil {
 		// Successfully parsed JSON
-		return c.resultFromJSON(extOutput, err)
+		return c.resultFromJSON(extOutput)
 	}
 
 	// Plain text output - determine status from exit code
@@ -127,7 +129,7 @@ func (c *ExternalCheck) sanitizeArgs() []string {
 	return c.Args
 }
 
-func (c *ExternalCheck) resultFromJSON(out ExternalOutput, err error) (checker.Result, error) {
+func (c *ExternalCheck) resultFromJSON(out ExternalOutput) (checker.Result, error) {
 	status := checker.Pass
 	passed := true
 
@@ -141,11 +143,12 @@ func (c *ExternalCheck) resultFromJSON(out ExternalOutput, err error) (checker.R
 	}
 
 	return checker.Result{
-		Name:    c.CheckName,
-		ID:      c.CheckID,
-		Passed:  passed,
-		Status:  status,
-		Message: out.Message,
+		Name:     c.CheckName,
+		ID:       c.CheckID,
+		Passed:   passed,
+		Status:   status,
+		Message:  out.Message,
+		Language: checker.LangCommon,
 	}, nil
 }
 
@@ -153,11 +156,12 @@ func (c *ExternalCheck) resultFromExitCode(output string, err error) (checker.Re
 	if err == nil {
 		// Exit code 0 = pass
 		return checker.Result{
-			Name:    c.CheckName,
-			ID:      c.CheckID,
-			Passed:  true,
-			Status:  checker.Pass,
-			Message: output,
+			Name:     c.CheckName,
+			ID:       c.CheckID,
+			Passed:   true,
+			Status:   checker.Pass,
+			Message:  output,
+			Language: checker.LangCommon,
 		}, nil
 	}
 
@@ -179,10 +183,11 @@ func (c *ExternalCheck) resultFromExitCode(output string, err error) (checker.Re
 	}
 
 	return checker.Result{
-		Name:    c.CheckName,
-		ID:      c.CheckID,
-		Passed:  false,
-		Status:  status,
-		Message: message,
+		Name:     c.CheckName,
+		ID:       c.CheckID,
+		Passed:   false,
+		Status:   status,
+		Message:  message,
+		Language: checker.LangCommon,
 	}, nil
 }

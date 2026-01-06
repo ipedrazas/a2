@@ -1,4 +1,4 @@
-package checks
+package common
 
 import (
 	"strings"
@@ -27,20 +27,22 @@ func (c *FileExistsCheck) Run(path string) (checker.Result, error) {
 
 	if len(missing) > 0 {
 		return checker.Result{
-			Name:    c.Name(),
-			ID:      c.ID(),
-			Passed:  false,
-			Status:  checker.Warn,
-			Message: "Missing files: " + strings.Join(missing, ", "),
+			Name:     c.Name(),
+			ID:       c.ID(),
+			Passed:   false,
+			Status:   checker.Warn,
+			Message:  "Missing files: " + strings.Join(missing, ", "),
+			Language: checker.LangCommon,
 		}, nil
 	}
 
 	return checker.Result{
-		Name:    c.Name(),
-		ID:      c.ID(),
-		Passed:  true,
-		Status:  checker.Pass,
-		Message: "All required files present",
+		Name:     c.Name(),
+		ID:       c.ID(),
+		Passed:   true,
+		Status:   checker.Pass,
+		Message:  "All required files present",
+		Language: checker.LangCommon,
 	}, nil
 }
 

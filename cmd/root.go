@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checks"
 	"github.com/ipedrazas/a2/pkg/config"
+	"github.com/ipedrazas/a2/pkg/language"
 	"github.com/ipedrazas/a2/pkg/output"
 	"github.com/ipedrazas/a2/pkg/runner"
 	"github.com/spf13/cobra"
 )
 
 var (
-	format string
+	format    string
+	languages []string // Explicit language selection
 )
 
 var rootCmd = &cobra.Command{
@@ -34,6 +37,7 @@ var checkCmd = &cobra.Command{
 
 func init() {
 	checkCmd.Flags().StringVarP(&format, "format", "f", "pretty", "Output format: pretty or json")
+	checkCmd.Flags().StringSliceVarP(&languages, "lang", "l", nil, "Languages to check (go, python). Auto-detects if not specified.")
 	rootCmd.AddCommand(checkCmd)
 }
 
@@ -56,8 +60,35 @@ func runCheck(cmd *cobra.Command, args []string) error {
 		os.Exit(1)
 	}
 
+	// Detect or use explicit languages
+	var detected language.DetectionResult
+	if len(languages) > 0 {
+		// Convert string flags to Language types
+		langs := make([]checker.Language, len(languages))
+		for i, l := range languages {
+			langs[i] = checker.Language(l)
+		}
+		detected = language.DetectWithOverride(path, langs)
+	} else if len(cfg.Language.Explicit) > 0 {
+		// Use explicit languages from config
+		langs := make([]checker.Language, len(cfg.Language.Explicit))
+		for i, l := range cfg.Language.Explicit {
+			langs[i] = checker.Language(l)
+		}
+		detected = language.DetectWithOverride(path, langs)
+	} else {
+		// Auto-detect languages
+		detected = language.Detect(path)
+	}
+
+	// Fallback to Go if nothing detected (backward compatibility)
+	if len(detected.Languages) == 0 {
+		detected.Languages = []checker.Language{checker.LangGo}
+		detected.Primary = checker.LangGo
+	}
+
 	// Get the list of checks to run
-	checkList := checks.GetChecks(cfg)
+	checkList := checks.GetChecks(cfg, detected)
 
 	// Run the suite with configured execution options
 	opts := runner.RunSuiteOptions{Parallel: cfg.Execution.Parallel}
@@ -66,8 +97,8 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	// Output results
 	switch format {
 	case "json":
-		return output.JSON(result)
+		return output.JSON(result, detected)
 	default:
-		return output.Pretty(result, path)
+		return output.Pretty(result, path, detected)
 	}
 }

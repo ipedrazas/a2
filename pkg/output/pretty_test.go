@@ -230,7 +230,7 @@ func (suite *PrettyTestSuite) TestPrintScore_Empty() {
 func (suite *PrettyTestSuite) TestPrintRecommendations_Coverage() {
 	result := runner.SuiteResult{
 		Results: []checker.Result{
-			{ID: "coverage", Passed: false},
+			{ID: "go:coverage", Passed: false},
 		},
 	}
 
@@ -245,7 +245,7 @@ func (suite *PrettyTestSuite) TestPrintRecommendations_Coverage() {
 func (suite *PrettyTestSuite) TestPrintRecommendations_Gofmt() {
 	result := runner.SuiteResult{
 		Results: []checker.Result{
-			{ID: "gofmt", Passed: false},
+			{ID: "go:format", Passed: false},
 		},
 	}
 
@@ -260,7 +260,7 @@ func (suite *PrettyTestSuite) TestPrintRecommendations_Gofmt() {
 func (suite *PrettyTestSuite) TestPrintRecommendations_GoVet() {
 	result := runner.SuiteResult{
 		Results: []checker.Result{
-			{ID: "govet", Passed: false},
+			{ID: "go:vet", Passed: false},
 		},
 	}
 
@@ -290,7 +290,7 @@ func (suite *PrettyTestSuite) TestPrintRecommendations_FileExists() {
 func (suite *PrettyTestSuite) TestPrintRecommendations_Tests() {
 	result := runner.SuiteResult{
 		Results: []checker.Result{
-			{ID: "tests", Passed: false},
+			{ID: "go:tests", Passed: false},
 		},
 	}
 
@@ -305,7 +305,7 @@ func (suite *PrettyTestSuite) TestPrintRecommendations_Tests() {
 func (suite *PrettyTestSuite) TestPrintRecommendations_Build() {
 	result := runner.SuiteResult{
 		Results: []checker.Result{
-			{ID: "build", Passed: false},
+			{ID: "go:build", Passed: false},
 		},
 	}
 
@@ -320,7 +320,7 @@ func (suite *PrettyTestSuite) TestPrintRecommendations_Build() {
 func (suite *PrettyTestSuite) TestPrintRecommendations_Deps() {
 	result := runner.SuiteResult{
 		Results: []checker.Result{
-			{ID: "deps", Passed: false},
+			{ID: "go:deps", Passed: false},
 		},
 	}
 
@@ -335,8 +335,8 @@ func (suite *PrettyTestSuite) TestPrintRecommendations_Deps() {
 func (suite *PrettyTestSuite) TestPrintRecommendations_NoFailures() {
 	result := runner.SuiteResult{
 		Results: []checker.Result{
-			{ID: "coverage", Passed: true},
-			{ID: "gofmt", Passed: true},
+			{ID: "go:coverage", Passed: true},
+			{ID: "go:format", Passed: true},
 		},
 	}
 
@@ -352,9 +352,9 @@ func (suite *PrettyTestSuite) TestPrintRecommendations_NoFailures() {
 func (suite *PrettyTestSuite) TestPrintRecommendations_Multiple() {
 	result := runner.SuiteResult{
 		Results: []checker.Result{
-			{ID: "coverage", Passed: false},
-			{ID: "gofmt", Passed: false},
-			{ID: "tests", Passed: false},
+			{ID: "go:coverage", Passed: false},
+			{ID: "go:format", Passed: false},
+			{ID: "go:tests", Passed: false},
 		},
 	}
 

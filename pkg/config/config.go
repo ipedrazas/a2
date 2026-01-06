@@ -12,6 +12,29 @@ type Config struct {
 	Checks    ChecksConfig    `yaml:"checks"`
 	External  []ExternalCheck `yaml:"external"`
 	Execution ExecutionConfig `yaml:"execution"`
+	Language  LanguageConfig  `yaml:"language"`
+}
+
+// LanguageConfig handles language detection and settings.
+type LanguageConfig struct {
+	Explicit   []string             `yaml:"explicit,omitempty"` // Override auto-detect
+	AutoDetect bool                 `yaml:"auto_detect"`        // Default: true
+	Go         GoLanguageConfig     `yaml:"go,omitempty"`
+	Python     PythonLanguageConfig `yaml:"python,omitempty"`
+}
+
+// GoLanguageConfig contains Go-specific settings.
+type GoLanguageConfig struct {
+	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"`
+}
+
+// PythonLanguageConfig contains Python-specific settings.
+type PythonLanguageConfig struct {
+	PackageManager    string  `yaml:"package_manager,omitempty"` // auto, pip, poetry, pipenv
+	TestRunner        string  `yaml:"test_runner,omitempty"`     // auto, pytest, unittest
+	Formatter         string  `yaml:"formatter,omitempty"`       // auto, black, ruff
+	Linter            string  `yaml:"linter,omitempty"`          // auto, pylint, ruff, flake8
+	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"`
 }
 
 // ExecutionConfig configures how checks are executed.
@@ -58,6 +81,19 @@ func DefaultConfig() *Config {
 		Execution: ExecutionConfig{
 			Parallel: true, // Run checks in parallel by default
 		},
+		Language: LanguageConfig{
+			AutoDetect: true,
+			Go: GoLanguageConfig{
+				CoverageThreshold: 80.0,
+			},
+			Python: PythonLanguageConfig{
+				PackageManager:    "auto",
+				TestRunner:        "auto",
+				Formatter:         "auto",
+				Linter:            "auto",
+				CoverageThreshold: 80.0,
+			},
+		},
 	}
 }
 
@@ -84,10 +120,30 @@ func Load(path string) (*Config, error) {
 	return cfg, nil
 }
 
+// checkAliases maps old check IDs to new language-prefixed IDs for backward compatibility.
+var checkAliases = map[string]string{
+	"go_mod":   "go:module",
+	"build":    "go:build",
+	"tests":    "go:tests",
+	"gofmt":    "go:format",
+	"govet":    "go:vet",
+	"coverage": "go:coverage",
+	"deps":     "go:deps",
+}
+
 // IsCheckDisabled returns true if the given check ID is disabled.
 func (c *Config) IsCheckDisabled(checkID string) bool {
 	for _, disabled := range c.Checks.Disabled {
+		// Direct match
 		if disabled == checkID {
+			return true
+		}
+		// Check if disabled ID is an alias for the check ID
+		if alias, ok := checkAliases[disabled]; ok && alias == checkID {
+			return true
+		}
+		// Check if check ID is an alias for the disabled ID
+		if alias, ok := checkAliases[checkID]; ok && alias == disabled {
 			return true
 		}
 	}

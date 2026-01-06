@@ -5,24 +5,27 @@ import (
 	"os"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/language"
 	"github.com/ipedrazas/a2/pkg/runner"
 )
 
 // JSONResult is the JSON-friendly version of a check result.
 type JSONResult struct {
-	Name    string `json:"name"`
-	ID      string `json:"id"`
-	Passed  bool   `json:"passed"`
-	Status  string `json:"status"`
-	Message string `json:"message,omitempty"`
+	Name     string `json:"name"`
+	ID       string `json:"id"`
+	Passed   bool   `json:"passed"`
+	Status   string `json:"status"`
+	Message  string `json:"message,omitempty"`
+	Language string `json:"language,omitempty"`
 }
 
 // JSONOutput is the complete JSON output structure.
 type JSONOutput struct {
-	Results []JSONResult `json:"results"`
-	Summary JSONSummary  `json:"summary"`
-	Aborted bool         `json:"aborted"`
-	Success bool         `json:"success"`
+	Languages []string     `json:"languages"`
+	Results   []JSONResult `json:"results"`
+	Summary   JSONSummary  `json:"summary"`
+	Aborted   bool         `json:"aborted"`
+	Success   bool         `json:"success"`
 }
 
 // JSONSummary provides aggregate statistics.
@@ -35,9 +38,16 @@ type JSONSummary struct {
 }
 
 // JSON outputs the results as formatted JSON.
-func JSON(result runner.SuiteResult) error {
+func JSON(result runner.SuiteResult, detected language.DetectionResult) error {
+	// Convert languages to strings
+	langs := make([]string, len(detected.Languages))
+	for i, l := range detected.Languages {
+		langs[i] = string(l)
+	}
+
 	output := JSONOutput{
-		Results: make([]JSONResult, 0, len(result.Results)),
+		Languages: langs,
+		Results:   make([]JSONResult, 0, len(result.Results)),
 		Summary: JSONSummary{
 			Total:    result.TotalChecks(),
 			Passed:   result.Passed,
@@ -51,11 +61,12 @@ func JSON(result runner.SuiteResult) error {
 
 	for _, r := range result.Results {
 		output.Results = append(output.Results, JSONResult{
-			Name:    r.Name,
-			ID:      r.ID,
-			Passed:  r.Passed,
-			Status:  statusToString(r.Status),
-			Message: r.Message,
+			Name:     r.Name,
+			ID:       r.ID,
+			Passed:   r.Passed,
+			Status:   statusToString(r.Status),
+			Message:  r.Message,
+			Language: string(r.Language),
 		})
 	}
 

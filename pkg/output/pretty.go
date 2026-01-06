@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/language"
 	"github.com/ipedrazas/a2/pkg/runner"
 )
 
@@ -65,7 +67,7 @@ var (
 )
 
 // Pretty outputs the results in a formatted, colorful way.
-func Pretty(result runner.SuiteResult, path string) error {
+func Pretty(result runner.SuiteResult, path string, detected language.DetectionResult) error {
 	// Get project name from path
 	projectName := filepath.Base(path)
 	if path == "." {
@@ -77,6 +79,15 @@ func Pretty(result runner.SuiteResult, path string) error {
 	// Title
 	fmt.Println(titleStyle.Render(fmt.Sprintf("A2 Analysis: %s", projectName)))
 	fmt.Println(separatorStyle.Render("─────────────────────────────────────"))
+
+	// Show detected languages
+	if len(detected.Languages) > 0 {
+		langs := make([]string, len(detected.Languages))
+		for i, l := range detected.Languages {
+			langs[i] = string(l)
+		}
+		fmt.Println(scoreStyle.Render(fmt.Sprintf("Languages: %s", strings.Join(langs, ", "))))
+	}
 	fmt.Println()
 
 	// Results
@@ -170,20 +181,33 @@ func printRecommendations(result runner.SuiteResult) {
 	for _, r := range result.Results {
 		if !r.Passed {
 			switch r.ID {
-			case "coverage":
+			// Go checks (new IDs)
+			case "go:coverage":
 				recommendations = append(recommendations, "→ Add more tests to improve coverage")
-			case "gofmt":
+			case "go:format":
 				recommendations = append(recommendations, "→ Run 'gofmt -w .' to format code")
-			case "govet":
+			case "go:vet":
 				recommendations = append(recommendations, "→ Fix issues reported by 'go vet ./...'")
+			case "go:tests":
+				recommendations = append(recommendations, "→ Fix failing tests before continuing")
+			case "go:build":
+				recommendations = append(recommendations, "→ Fix build errors before continuing")
+			case "go:deps":
+				recommendations = append(recommendations, "→ Update dependencies to fix vulnerabilities")
+			// Python checks
+			case "python:tests":
+				recommendations = append(recommendations, "→ Fix failing tests before continuing")
+			case "python:format":
+				recommendations = append(recommendations, "→ Run formatter (black/ruff) to format code")
+			case "python:lint":
+				recommendations = append(recommendations, "→ Fix linting issues")
+			case "python:coverage":
+				recommendations = append(recommendations, "→ Add more tests to improve coverage")
+			case "python:deps":
+				recommendations = append(recommendations, "→ Update dependencies to fix vulnerabilities")
+			// Common checks
 			case "file_exists":
 				recommendations = append(recommendations, "→ Add missing documentation files")
-			case "tests":
-				recommendations = append(recommendations, "→ Fix failing tests before continuing")
-			case "build":
-				recommendations = append(recommendations, "→ Fix build errors before continuing")
-			case "deps":
-				recommendations = append(recommendations, "→ Update dependencies to fix vulnerabilities")
 			}
 		}
 	}
