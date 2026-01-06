@@ -10,6 +10,7 @@ import (
 	"github.com/ipedrazas/a2/pkg/language"
 	"github.com/ipedrazas/a2/pkg/output"
 	"github.com/ipedrazas/a2/pkg/runner"
+	"github.com/ipedrazas/a2/pkg/version"
 	"github.com/spf13/cobra"
 )
 
@@ -35,10 +36,18 @@ var checkCmd = &cobra.Command{
 	RunE:  runCheck,
 }
 
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Print version information",
+	Long:  `Print version, git SHA, and build date information.`,
+	Run:   runVersion,
+}
+
 func init() {
 	checkCmd.Flags().StringVarP(&format, "format", "f", "pretty", "Output format: pretty or json")
 	checkCmd.Flags().StringSliceVarP(&languages, "lang", "l", nil, "Languages to check (go, python). Auto-detects if not specified.")
 	rootCmd.AddCommand(checkCmd)
+	rootCmd.AddCommand(versionCmd)
 }
 
 func Execute() {
@@ -101,4 +110,10 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	default:
 		return output.Pretty(result, path, detected)
 	}
+}
+
+func runVersion(cmd *cobra.Command, args []string) {
+	fmt.Printf("Version:   %s\n", version.Version)
+	fmt.Printf("Git SHA:   %s\n", version.GitSHA)
+	fmt.Printf("Build Date: %s\n", version.BuildDate)
 }

@@ -1,6 +1,6 @@
-# AGENTS.md - Guide for AI Agents
+# CLAUDE.md
 
-This document provides guidance for AI agents working with the A2 codebase. A2 is a code quality checker for Go projects that runs a suite of checks and provides a health score.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Build Commands
 
@@ -91,4 +91,3 @@ Check ID aliases exist for backward compatibility (e.g., "gofmt" maps to "go:for
 ## Testing
 
 Tests use `testify/suite`. Target coverage: >80%.
-
