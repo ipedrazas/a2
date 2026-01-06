@@ -41,14 +41,15 @@ jobs:
         run: go test -v ./...
 
       - name: Build binaries
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          VERSION="${{ inputs.version }}"
           GITSHA=$(git rev-parse --short HEAD)
           BUILDDATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           LDFLAGS="-s -w -X github.com/ipedrazas/a2/pkg/version.Version=${VERSION} -X github.com/ipedrazas/a2/pkg/version.GitSHA=${GITSHA} -X github.com/ipedrazas/a2/pkg/version.BuildDate=${BUILDDATE}"
-          
+
           mkdir -p dist
-          
+
           GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o dist/a2-linux-amd64 .
           GOOS=linux GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o dist/a2-linux-arm64 .
           GOOS=darwin GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o dist/a2-darwin-amd64 .

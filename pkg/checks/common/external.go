@@ -68,7 +68,11 @@ func (c *ExternalCheck) Run(path string) (checker.Result, error) {
 
 	// Execute the command with resolved path
 	// #nosec G204 -- Command is validated via LookPath and args are sanitized.
-	// External checks are an intentional feature configured by project owners.
+	// External checks are an intentional feature configured by project owners in .a2.yaml.
+	// Security: cmdPath is resolved via exec.LookPath (must exist in PATH),
+	// command name is validated to reject shell metacharacters, and args are passed
+	// directly to exec without shell interpretation.
+	// nosemgrep: go.lang.security.audit.dangerous-exec-command.dangerous-exec-command
 	cmd := exec.Command(cmdPath, sanitizedArgs...)
 	cmd.Dir = path
 
