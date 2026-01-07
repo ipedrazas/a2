@@ -33,12 +33,6 @@ external:
     command: gosec
     args: ["./..."]
     severity: fail
-  
-  - id: security
-    name: Trufflehog
-    command: trufflehog
-    args: ["filesystem", "--no-update", "--fail", "--log-level=-1", "."]
-    severity: warn
 
   - id: secrets
     name: Secret Detection

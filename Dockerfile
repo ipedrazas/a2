@@ -44,19 +44,6 @@ go install github.com/kisielk/errcheck@latest
 go install github.com/zricethezav/gitleaks/v8@latest
 EOF
 
-# Install trufflehog from release (can't use go install due to replace directives)
-ARG TARGETARCH
-RUN <<EOF
-TRUFFLEHOG_VERSION="3.88.29"
-ARCH="${TARGETARCH}"
-if [ "$ARCH" = "amd64" ]; then ARCH="amd64"; fi
-if [ "$ARCH" = "arm64" ]; then ARCH="arm64"; fi
-wget -q "https://github.com/trufflesecurity/trufflehog/releases/download/v${TRUFFLEHOG_VERSION}/trufflehog_${TRUFFLEHOG_VERSION}_linux_${ARCH}.tar.gz" -O /tmp/trufflehog.tar.gz
-tar -xzf /tmp/trufflehog.tar.gz -C /usr/local/bin trufflehog
-chmod +x /usr/local/bin/trufflehog
-rm /tmp/trufflehog.tar.gz
-EOF
-
 # Install Python tools
 RUN pip3 install --no-cache-dir --break-system-packages bandit semgrep
 
