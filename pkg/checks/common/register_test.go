@@ -17,8 +17,8 @@ func (s *RegisterTestSuite) TestRegister_ReturnsAllChecks() {
 
 	checks := Register(cfg)
 
-	// Should have 4 built-in checks (file_exists, dockerfile, ci, health)
-	s.Len(checks, 4)
+	// Should have 5 built-in checks (file_exists, dockerfile, ci, health, secrets)
+	s.Len(checks, 5)
 }
 
 func (s *RegisterTestSuite) TestRegister_CheckIDs() {
@@ -31,6 +31,7 @@ func (s *RegisterTestSuite) TestRegister_CheckIDs() {
 		"common:dockerfile",
 		"common:ci",
 		"common:health",
+		"common:secrets",
 	}
 
 	for i, check := range checks {
@@ -43,7 +44,7 @@ func (s *RegisterTestSuite) TestRegister_CheckOrder() {
 
 	checks := Register(cfg)
 
-	expectedOrders := []int{900, 910, 920, 930}
+	expectedOrders := []int{900, 910, 920, 930, 940}
 
 	for i, check := range checks {
 		s.Equal(expectedOrders[i], check.Meta.Order)
@@ -91,17 +92,17 @@ func (s *RegisterTestSuite) TestRegister_WithExternalChecks() {
 
 	checks := Register(cfg)
 
-	// 4 built-in + 2 external
-	s.Len(checks, 6)
+	// 5 built-in + 2 external
+	s.Len(checks, 7)
 
-	// Check external checks
-	s.Equal("custom:lint", checks[4].Meta.ID)
-	s.Equal("Custom Linter", checks[4].Meta.Name)
-	s.False(checks[4].Meta.Critical) // severity: warn
+	// Check external checks (indices 5 and 6 after 5 built-in checks)
+	s.Equal("custom:lint", checks[5].Meta.ID)
+	s.Equal("Custom Linter", checks[5].Meta.Name)
+	s.False(checks[5].Meta.Critical) // severity: warn
 
-	s.Equal("custom:security", checks[5].Meta.ID)
-	s.Equal("Security Scan", checks[5].Meta.Name)
-	s.True(checks[5].Meta.Critical) // severity: fail
+	s.Equal("custom:security", checks[6].Meta.ID)
+	s.Equal("Security Scan", checks[6].Meta.Name)
+	s.True(checks[6].Meta.Critical) // severity: fail
 }
 
 func (s *RegisterTestSuite) TestRegister_ExternalCheckOrder() {
@@ -117,8 +118,8 @@ func (s *RegisterTestSuite) TestRegister_ExternalCheckOrder() {
 
 	checks := Register(cfg)
 
-	// External checks should have order 1000
-	s.Equal(1000, checks[4].Meta.Order)
+	// External checks should have order 1000 (index 5 after 5 built-in checks)
+	s.Equal(1000, checks[5].Meta.Order)
 }
 
 func (s *RegisterTestSuite) TestRegister_FileExistsUsesConfig() {

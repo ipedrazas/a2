@@ -48,6 +48,16 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Order:     930,
 			},
 		},
+		{
+			Checker: &SecretsCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:secrets",
+				Name:      "Secrets Detection",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     940,
+			},
+		},
 	}
 
 	// Add external checks from config

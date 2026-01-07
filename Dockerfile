@@ -29,7 +29,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
 FROM golang:1.25-alpine
 
 # Install git (needed for some checks), ca-certificates, wget, and Python for some tools
-RUN apk add --no-cache git ca-certificates wget python3 py3-pip
+RUN apk add --no-cache git ca-certificates 
 
 # Copy the binary
 COPY --from=builder /a2 /usr/local/bin/a2
@@ -45,7 +45,7 @@ go install github.com/zricethezav/gitleaks/v8@latest
 EOF
 
 # Install Python tools
-RUN pip3 install --no-cache-dir --break-system-packages bandit semgrep
+# RUN pip3 install --no-cache-dir --break-system-packages bandit semgrep
 
 # Create a non-root user and set up Go directories
 RUN adduser -D -u 1000 -g 1000 a2 && \

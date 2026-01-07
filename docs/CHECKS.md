@@ -534,6 +534,7 @@ Checks for proper structured logging practices instead of console.log.
 | `common:dockerfile` | Container Ready | No | 910 | Checks for Dockerfile/Containerfile |
 | `common:ci` | CI Pipeline | No | 920 | Detects CI/CD configuration |
 | `common:health` | Health Endpoint | No | 930 | Detects health check endpoints |
+| `common:secrets` | Secrets Detection | No | 940 | Detects secret scanning config or hardcoded secrets |
 
 ### file_exists
 
@@ -604,6 +605,45 @@ Detects health check endpoints in the codebase for production readiness.
 **Status:**
 - **Pass**: Health endpoint pattern found
 - **Warn**: No health endpoint detected
+
+### common:secrets
+
+Detects secret scanning configuration or scans for hardcoded secrets in the codebase.
+
+**Secret scanning tools detected:**
+- Gitleaks: `.gitleaks.toml`, `.gitleaks.yaml`, `gitleaks.toml`
+- TruffleHog: `.trufflehog.yml`, `trufflehog.yml`
+- Secretlint: `.secretlintrc`, `.secretlintrc.json`
+- detect-secrets: `.secrets.baseline`
+- git-secrets: `.git-secrets`
+- Pre-commit hooks with secret scanning
+
+**Secret patterns detected (if no scanner configured):**
+- AWS Access Keys (`AKIA...`)
+- AWS Secret Keys
+- Private Keys (RSA, DSA, EC, OPENSSH, PGP)
+- GitHub Tokens (`ghp_`, `gho_`, `ghu_`, `ghs_`, `ghr_`)
+- JWT Tokens
+- Slack Tokens
+- Stripe Keys (`sk_live_`)
+- SendGrid Keys
+- Database URLs with credentials
+- Generic API keys and passwords
+
+**Files scanned:**
+- Code files: `*.go`, `*.py`, `*.js`, `*.ts`, `*.java`, `*.rb`, `*.php`, `*.cs`
+- Config files: `*.yaml`, `*.yml`, `*.json`, `*.xml`, `*.config`
+- Shell scripts: `*.sh`, `*.bash`
+- Environment files: `.env` (but not `.env.example`)
+
+**Directories skipped:**
+- `node_modules/`, `vendor/`, `.git/`, `__pycache__/`, `.venv/`, `venv/`, `dist/`, `build/`
+
+**Status:**
+- **Pass**: Secret scanning tool configured
+- **Warn**: Potential secrets found, or no secret scanning configured
+
+**Recommendation:** Configure Gitleaks or similar tool for automated secret scanning.
 
 ---
 
@@ -733,8 +773,8 @@ external:
 | Go | 10 | 3 | 7 |
 | Python | 10 | 3 | 7 |
 | Node.js | 9 | 3 | 6 |
-| Common | 4+ | 0 | 4+ |
-| **Total** | **33+** | **9** | **24+** |
+| Common | 5+ | 0 | 5+ |
+| **Total** | **34+** | **9** | **25+** |
 
 **Critical checks** stop execution in sequential mode when they fail.
 **Non-critical checks** report warnings but allow other checks to continue.
