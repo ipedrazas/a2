@@ -58,6 +58,16 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Order:     940,
 			},
 		},
+		{
+			Checker: &ChangelogCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:changelog",
+				Name:      "Changelog",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     965,
+			},
+		},
 	}
 
 	// Add external checks from config

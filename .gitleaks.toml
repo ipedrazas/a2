@@ -1,0 +1,12 @@
+# Gitleaks configuration
+# https://github.com/gitleaks/gitleaks
+
+title = "a2 gitleaks config"
+
+[allowlist]
+  description = "Allowlist for a2 project"
+
+  # Allow test files with fake secrets for testing the secrets detection check
+  paths = [
+    '''pkg/checks/common/secrets_test\.go''',
+  ]

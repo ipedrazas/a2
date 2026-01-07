@@ -535,6 +535,7 @@ Checks for proper structured logging practices instead of console.log.
 | `common:ci` | CI Pipeline | No | 920 | Detects CI/CD configuration |
 | `common:health` | Health Endpoint | No | 930 | Detects health check endpoints |
 | `common:secrets` | Secrets Detection | No | 940 | Detects secret scanning config or hardcoded secrets |
+| `common:changelog` | Changelog | No | 965 | Verifies changelog or release notes exist |
 
 ### file_exists
 
@@ -644,6 +645,35 @@ Detects secret scanning configuration or scans for hardcoded secrets in the code
 - **Warn**: Potential secrets found, or no secret scanning configured
 
 **Recommendation:** Configure Gitleaks or similar tool for automated secret scanning.
+
+### common:changelog
+
+Verifies that a changelog or release notes file exists, and detects release tooling configuration.
+
+**Changelog files detected:**
+- `CHANGELOG.md`, `CHANGELOG.txt`, `CHANGELOG`
+- `CHANGES.md`, `CHANGES.txt`, `CHANGES`
+- `HISTORY.md`, `HISTORY.txt`, `HISTORY`
+- `NEWS.md`, `NEWS.txt`, `NEWS`
+- `RELEASES.md`, `RELEASE_NOTES.md`
+
+**Release tooling detected:**
+- GoReleaser: `.goreleaser.yml`, `.goreleaser.yaml`
+- semantic-release: `.releaserc`, `.releaserc.json`, `release.config.js`
+- release-please: `release-please-config.json`, `.release-please-manifest.json`
+- standard-version: `.versionrc`, `.versionrc.json`
+- changesets: `.changeset/config.json`
+
+**Changelog format detection:**
+- Keep a Changelog: Detects `## [Unreleased]`, `### Added`, `### Changed`, `### Fixed`, etc.
+- Conventional Changelog: Detects `### Features`, `### Bug Fixes`, `feat:`, `fix:`
+- Plain markdown or text
+
+**Status:**
+- **Pass**: Changelog file found or release tooling configured
+- **Warn**: No changelog or release tooling found
+
+**Recommendation:** Create a `CHANGELOG.md` following [Keep a Changelog](https://keepachangelog.com) format.
 
 ---
 
@@ -773,8 +803,8 @@ external:
 | Go | 10 | 3 | 7 |
 | Python | 10 | 3 | 7 |
 | Node.js | 9 | 3 | 6 |
-| Common | 5+ | 0 | 5+ |
-| **Total** | **34+** | **9** | **25+** |
+| Common | 6+ | 0 | 6+ |
+| **Total** | **35+** | **9** | **26+** |
 
 **Critical checks** stop execution in sequential mode when they fail.
 **Non-critical checks** report warnings but allow other checks to continue.
