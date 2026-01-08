@@ -15,14 +15,14 @@ a2 should answer: "Is this application mature and production-ready?" by checking
 
 ---
 
-## Current Checks (38 total)
+## Current Checks (39 total)
 
 | Language | Checks |
 |----------|--------|
 | Go | module, build, tests, race, format, vet, coverage, deps, cyclomatic, logging |
 | Python | project, build, tests, format, lint, type, coverage, deps, complexity, logging |
 | Node.js | project, build, tests, format, lint, type, coverage, deps, logging |
-| Common | file_exists, dockerfile, ci, health, **secrets**, **changelog**, **precommit**, external |
+| Common | file_exists, dockerfile, ci, health, **secrets**, **changelog**, **precommit**, **k8s**, external |
 
 ---
 
@@ -366,7 +366,7 @@ Mature applications ship logs to centralized systems.
 
 ## 5. Production Readiness Checks
 
-### `common:k8s` [P0]
+### `common:k8s` [P0] ✅ IMPLEMENTED
 **Verify Kubernetes manifests exist**
 
 Mature cloud-native applications have declarative deployment configurations.
@@ -381,6 +381,8 @@ Mature cloud-native applications have declarative deployment configurations.
 - Check for files: `deployment.yaml`, `service.yaml`, files with `kind: Deployment`
 - Check for Helm: `Chart.yaml`, `values.yaml`
 - Check for Kustomize: `kustomization.yaml`
+
+**Implementation:** `pkg/checks/common/k8s.go`
 
 ---
 
@@ -549,11 +551,11 @@ Mature teams ensure consistent code style across all editors.
 
 | Priority | Count | Implemented | Categories |
 |----------|-------|-------------|------------|
-| P0 (High) | 10 | 3 | ✅ secrets, api_docs, ✅ changelog, integration, metrics, errors, k8s, shutdown, ✅ precommit |
+| P0 (High) | 10 | 4 | ✅ secrets, api_docs, ✅ changelog, integration, metrics, errors, ✅ k8s, shutdown, ✅ precommit |
 | P1 (Medium) | 13 | 0 | license, env, sast, security, contributing, e2e, tracing, migrations, config_validation, retry, errcheck, editorconfig |
 | P2 (Low) | 5 | 0 | conduct, godoc, fixtures, mocking, logging_config, di, architecture |
 
-**Total: 28 new checks (3 implemented, 25 remaining)**
+**Total: 28 new checks (4 implemented, 24 remaining)**
 
 ---
 

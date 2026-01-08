@@ -15,6 +15,7 @@ checks:
   disabled:
     - go:logging  # Skip logging check
     - common:health  # Skip health check
+    - common:k8s  # Skip k8s check
 
 # Execution options
 execution:

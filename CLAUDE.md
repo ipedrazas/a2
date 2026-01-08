@@ -91,3 +91,10 @@ Check ID aliases exist for backward compatibility (e.g., "gofmt" maps to "go:for
 ## Testing
 
 Tests use `testify/suite`. Target coverage: >80%.
+
+## Implementation Notes
+
+1. All new checks should follow the existing pattern in `pkg/checks/`
+2. Use `safepath` package for all file operations
+3. Common checks go in `pkg/checks/common/`, language-specific in `pkg/checks/<lang>/`
+4. Each check needs: implementation file, registration in `register.go`, tests

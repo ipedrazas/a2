@@ -78,6 +78,16 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Order:     1065,
 			},
 		},
+		{
+			Checker: &K8sCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:k8s",
+				Name:      "Kubernetes Ready",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     1030,
+			},
+		},
 	}
 
 	// Add external checks from config

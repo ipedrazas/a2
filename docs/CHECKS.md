@@ -536,6 +536,7 @@ Checks for proper structured logging practices instead of console.log.
 | `common:health` | Health Endpoint | No | 930 | Detects health check endpoints |
 | `common:secrets` | Secrets Detection | No | 940 | Detects secret scanning config or hardcoded secrets |
 | `common:changelog` | Changelog | No | 965 | Verifies changelog or release notes exist |
+| `common:k8s` | Kubernetes Ready | No | 1030 | Detects Kubernetes manifests and deployment configurations |
 | `common:precommit` | Pre-commit Hooks | No | 1065 | Verifies pre-commit hooks are configured |
 
 ### file_exists
@@ -675,6 +676,46 @@ Verifies that a changelog or release notes file exists, and detects release tool
 - **Warn**: No changelog or release tooling found
 
 **Recommendation:** Create a `CHANGELOG.md` following [Keep a Changelog](https://keepachangelog.com) format.
+
+### common:k8s
+
+Detects Kubernetes manifests, Helm charts, and other deployment configurations for cloud-native applications.
+
+**Helm charts detected:**
+- `Chart.yaml` in root directory
+- `charts/*/Chart.yaml` (chart repositories)
+- `helm/Chart.yaml` or `helm/*/Chart.yaml`
+
+**Kustomize configurations detected:**
+- `kustomization.yaml`, `kustomization.yml`, `Kustomization`
+- Searched in root and common directories: `k8s/`, `kubernetes/`, `deploy/`, `base/`, `overlays/`
+
+**Kubernetes manifest directories detected:**
+- `k8s/`, `kubernetes/`, `deploy/`, `deployment/`, `deployments/`, `manifests/`, `.k8s/`
+- Scans for YAML files containing `apiVersion:` and `kind: Deployment`, `kind: Service`, etc.
+
+**Standalone manifest files detected (in root):**
+- `deployment.yaml`, `service.yaml`, `ingress.yaml`, `configmap.yaml`
+- `secret.yaml`, `pod.yaml`, `statefulset.yaml`, `daemonset.yaml`
+- `cronjob.yaml`, `job.yaml` (and `.yml` variants)
+
+**Alternative deployment tools detected:**
+- Docker Compose: `docker-compose.yaml`, `compose.yaml`, `docker-compose.prod.yaml`
+- Skaffold: `skaffold.yaml`, `skaffold.yml`
+- Tilt: `Tiltfile`
+
+**Kubernetes resource types detected:**
+- Deployment, Service, ConfigMap, Secret, Ingress, Pod
+- StatefulSet, DaemonSet, Job, CronJob
+- PersistentVolume, PersistentVolumeClaim, Namespace
+- ServiceAccount, Role, RoleBinding, ClusterRole, ClusterRoleBinding
+- HorizontalPodAutoscaler, NetworkPolicy
+
+**Status:**
+- **Pass**: Kubernetes manifests, Helm chart, Kustomize, or alternative deployment config found
+- **Warn**: No deployment configuration found
+
+**Recommendation:** Configure Kubernetes manifests, Helm charts, or Docker Compose for reproducible deployments.
 
 ### common:precommit
 
@@ -828,8 +869,8 @@ external:
 | Go | 10 | 3 | 7 |
 | Python | 10 | 3 | 7 |
 | Node.js | 9 | 3 | 6 |
-| Common | 7+ | 0 | 7+ |
-| **Total** | **36+** | **9** | **27+** |
+| Common | 8+ | 0 | 8+ |
+| **Total** | **37+** | **9** | **28+** |
 
 **Critical checks** stop execution in sequential mode when they fail.
 **Non-critical checks** report warnings but allow other checks to continue.
