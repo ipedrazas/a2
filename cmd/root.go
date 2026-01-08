@@ -12,6 +12,7 @@ import (
 	"github.com/ipedrazas/a2/pkg/output"
 	"github.com/ipedrazas/a2/pkg/profiles"
 	"github.com/ipedrazas/a2/pkg/runner"
+	"github.com/ipedrazas/a2/pkg/targets"
 	"github.com/ipedrazas/a2/pkg/version"
 	"github.com/spf13/cobra"
 )
@@ -20,7 +21,8 @@ var (
 	format        string
 	languages     []string // Explicit language selection
 	skippedChecks []string // Checks to skip via CLI
-	profile       string   // Built-in profile to use
+	profile       string   // Application type profile (cli, api, library, desktop)
+	target        string   // Maturity target (poc, production)
 )
 
 var rootCmd = &cobra.Command{
@@ -49,19 +51,28 @@ var versionCmd = &cobra.Command{
 
 var profilesCmd = &cobra.Command{
 	Use:   "profiles",
-	Short: "List available check profiles",
+	Short: "List available application profiles",
 	Long:  `List all built-in profiles that can be used with the --profile flag.`,
 	Run:   runProfiles,
+}
+
+var targetsCmd = &cobra.Command{
+	Use:   "targets",
+	Short: "List available maturity targets",
+	Long:  `List all built-in targets that can be used with the --target flag.`,
+	Run:   runTargets,
 }
 
 func init() {
 	checkCmd.Flags().StringVarP(&format, "format", "f", "pretty", "Output format: pretty or json")
 	checkCmd.Flags().StringSliceVarP(&languages, "lang", "l", nil, "Languages to check (go, python). Auto-detects if not specified.")
 	checkCmd.Flags().StringSliceVar(&skippedChecks, "skip", nil, "Checks to skip (e.g., --skip=license,k8s)")
-	checkCmd.Flags().StringVar(&profile, "profile", "", "Use a built-in profile (poc, library, production)")
+	checkCmd.Flags().StringVar(&profile, "profile", "", "Application profile (cli, api, library, desktop)")
+	checkCmd.Flags().StringVar(&target, "target", "", "Maturity target (poc, production)")
 	rootCmd.AddCommand(checkCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(profilesCmd)
+	rootCmd.AddCommand(targetsCmd)
 }
 
 func Execute() {
@@ -83,7 +94,16 @@ func runCheck(cmd *cobra.Command, args []string) error {
 		os.Exit(1)
 	}
 
-	// Apply profile if specified
+	// Apply target if specified (maturity level)
+	if target != "" {
+		t, ok := targets.Get(target)
+		if !ok {
+			return fmt.Errorf("unknown target: %s (available: %s)", target, strings.Join(targets.Names(), ", "))
+		}
+		cfg.Checks.Disabled = append(cfg.Checks.Disabled, t.Disabled...)
+	}
+
+	// Apply profile if specified (application type)
 	if profile != "" {
 		p, ok := profiles.Get(profile)
 		if !ok {
@@ -147,15 +167,33 @@ func runVersion(cmd *cobra.Command, args []string) {
 }
 
 func runProfiles(cmd *cobra.Command, args []string) {
-	fmt.Println("Available profiles:")
+	fmt.Println("Application Profiles:")
+	fmt.Println()
+	fmt.Println("Profiles define which checks are relevant for your application type.")
 	fmt.Println()
 	for _, p := range profiles.List() {
 		fmt.Printf("  %s\n", p.Name)
 		fmt.Printf("    %s\n", p.Description)
 		if len(p.Disabled) > 0 {
-			fmt.Printf("    Disables %d checks\n", len(p.Disabled))
+			fmt.Printf("    Skips %d checks\n", len(p.Disabled))
 		}
 		fmt.Println()
 	}
 	fmt.Println("Usage: a2 check --profile=<name>")
+}
+
+func runTargets(cmd *cobra.Command, args []string) {
+	fmt.Println("Maturity Targets:")
+	fmt.Println()
+	fmt.Println("Targets control the strictness level of checks for your project stage.")
+	fmt.Println()
+	for _, t := range targets.List() {
+		fmt.Printf("  %s\n", t.Name)
+		fmt.Printf("    %s\n", t.Description)
+		if len(t.Disabled) > 0 {
+			fmt.Printf("    Skips %d checks\n", len(t.Disabled))
+		}
+		fmt.Println()
+	}
+	fmt.Println("Usage: a2 check --target=<name>")
 }

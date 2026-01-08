@@ -19,5 +19,5 @@ This document tracks proposed new languages for a2.
 
 ## Tasks
 
-- We got profiles wrong. We want to have profiles like `desktop, API, library, cli` not prod, dev or poc. Those are targets more than profiles.
-- 
+- We got profiles wrong. We want to have profiles like `desktop, API, library, cli` not prod, dev or poc. Those are targets more than profiles. So, we need to rename Profiles to Targets, and define profiles properly. The idea is that we can do `a2 check --profile desktop` and run the checks associated with desktop, which means that we will have to have a way of defining what a `desktop` profile should be.
+- Make profiles configurable. Users should be able to define what an `API` profile looks like. Let's define the default profiles as external configuration files that the users can modify if they want to to match their expectations.

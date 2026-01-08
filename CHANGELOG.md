@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Application profiles** (`--profile` flag) for different application types:
+  - `cli` - Command-line tools (skips health, k8s, metrics, api_docs, etc.)
+  - `api` - Web services/APIs (all operational checks enabled)
+  - `library` - Reusable packages (skips deployment and runtime checks)
+  - `desktop` - Desktop applications (skips server-related checks)
+- **Maturity targets** (`--target` flag) for project stage:
+  - `poc` - Proof of Concept (minimal checks for early development)
+  - `production` - All checks enabled (default)
+- **New commands**:
+  - `a2 profiles` - List available application profiles
+  - `a2 targets` - List available maturity targets
 - **P1 common checks** for application maturity:
   - `common:contributing` - Detects CONTRIBUTING.md, PR templates, issue templates, CODEOWNERS
   - `common:e2e` - Detects E2E testing (Cypress, Playwright, WebdriverIO, Puppeteer, etc.)
@@ -35,6 +46,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `rust:coverage` - Detects coverage tools (tarpaulin, llvm-cov) and reports
   - `rust:deps` - Checks for vulnerabilities using `cargo audit` or cargo-deny
   - `rust:logging` - Detects logging crates (tracing, log, slog), warns on println!
+
+### Changed
+- **BREAKING**: Refactored profiles system into profiles and targets:
+  - Old `--profile=poc` is now `--target=poc`
+  - Old `--profile=production` is now `--target=production`
+  - New `--profile` flag now selects application type (cli, api, library, desktop)
+  - Both flags can be combined: `a2 check --profile=cli --target=poc`
 
 ## [0.2.0] - 2026-01-08
 

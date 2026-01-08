@@ -10,43 +10,72 @@ type ProfilesTestSuite struct {
 	suite.Suite
 }
 
-func (s *ProfilesTestSuite) TestGet_PoCProfile() {
-	profile, ok := Get("poc")
+func (s *ProfilesTestSuite) TestGet_CLIProfile() {
+	profile, ok := Get("cli")
 	s.True(ok)
-	s.Equal("poc", profile.Name)
-	s.Contains(profile.Description, "Proof of Concept")
+	s.Equal("cli", profile.Name)
+	s.Contains(profile.Description, "Command-line")
 	s.NotEmpty(profile.Disabled)
 
-	// Verify key checks are disabled
-	s.Contains(profile.Disabled, "common:license")
-	s.Contains(profile.Disabled, "common:k8s")
+	// Verify server-related checks are disabled
 	s.Contains(profile.Disabled, "common:health")
-	s.Contains(profile.Disabled, "go:coverage")
+	s.Contains(profile.Disabled, "common:k8s")
+	s.Contains(profile.Disabled, "common:metrics")
+	s.Contains(profile.Disabled, "common:api_docs")
+	s.Contains(profile.Disabled, "common:tracing")
+}
+
+func (s *ProfilesTestSuite) TestGet_APIProfile() {
+	profile, ok := Get("api")
+	s.True(ok)
+	s.Equal("api", profile.Name)
+	s.Contains(profile.Description, "API")
+
+	// API should have minimal disabled checks
+	s.Len(profile.Disabled, 1)
+	s.Contains(profile.Disabled, "common:e2e")
+
+	// Operational checks should NOT be disabled
+	s.NotContains(profile.Disabled, "common:health")
+	s.NotContains(profile.Disabled, "common:metrics")
+	s.NotContains(profile.Disabled, "common:api_docs")
+	s.NotContains(profile.Disabled, "common:tracing")
 }
 
 func (s *ProfilesTestSuite) TestGet_LibraryProfile() {
 	profile, ok := Get("library")
 	s.True(ok)
 	s.Equal("library", profile.Name)
-	s.Contains(profile.Description, "Library")
+	s.Contains(profile.Description, "library")
 	s.NotEmpty(profile.Disabled)
 
 	// Verify deployment checks are disabled
 	s.Contains(profile.Disabled, "common:dockerfile")
 	s.Contains(profile.Disabled, "common:k8s")
 	s.Contains(profile.Disabled, "common:health")
+	s.Contains(profile.Disabled, "common:metrics")
 
-	// Verify security checks are NOT disabled
+	// Code quality checks should NOT be disabled
 	s.NotContains(profile.Disabled, "common:sast")
 	s.NotContains(profile.Disabled, "common:secrets")
+	s.NotContains(profile.Disabled, "common:license")
 }
 
-func (s *ProfilesTestSuite) TestGet_ProductionProfile() {
-	profile, ok := Get("production")
+func (s *ProfilesTestSuite) TestGet_DesktopProfile() {
+	profile, ok := Get("desktop")
 	s.True(ok)
-	s.Equal("production", profile.Name)
-	s.Contains(profile.Description, "Production")
-	s.Empty(profile.Disabled) // All checks enabled
+	s.Equal("desktop", profile.Name)
+	s.Contains(profile.Description, "Desktop")
+	s.NotEmpty(profile.Disabled)
+
+	// Verify server-related checks are disabled
+	s.Contains(profile.Disabled, "common:health")
+	s.Contains(profile.Disabled, "common:k8s")
+	s.Contains(profile.Disabled, "common:api_docs")
+	s.Contains(profile.Disabled, "common:tracing")
+
+	// E2E tests should NOT be disabled (desktop apps need E2E)
+	s.NotContains(profile.Disabled, "common:e2e")
 }
 
 func (s *ProfilesTestSuite) TestGet_UnknownProfile() {
@@ -56,57 +85,41 @@ func (s *ProfilesTestSuite) TestGet_UnknownProfile() {
 
 func (s *ProfilesTestSuite) TestList_ReturnsAllProfiles() {
 	profiles := List()
-	s.Len(profiles, 3)
+	s.Len(profiles, 4)
 
 	// Verify order
-	s.Equal("poc", profiles[0].Name)
-	s.Equal("library", profiles[1].Name)
-	s.Equal("production", profiles[2].Name)
+	s.Equal("cli", profiles[0].Name)
+	s.Equal("api", profiles[1].Name)
+	s.Equal("library", profiles[2].Name)
+	s.Equal("desktop", profiles[3].Name)
 }
 
 func (s *ProfilesTestSuite) TestNames_ReturnsAllNames() {
 	names := Names()
-	s.Len(names, 3)
-	s.Contains(names, "poc")
+	s.Len(names, 4)
+	s.Contains(names, "cli")
+	s.Contains(names, "api")
 	s.Contains(names, "library")
-	s.Contains(names, "production")
+	s.Contains(names, "desktop")
 }
 
-func (s *ProfilesTestSuite) TestPoCProfile_DisablesNonCriticalChecks() {
-	profile, _ := Get("poc")
-
-	// Common non-critical checks
-	expectedDisabled := []string{
-		"common:license", "common:sast", "common:k8s", "common:shutdown",
-		"common:health", "common:api_docs", "common:changelog",
-		"common:integration", "common:metrics", "common:errors",
-		"common:precommit", "common:env",
-	}
-
-	for _, check := range expectedDisabled {
-		s.Contains(profile.Disabled, check, "PoC profile should disable %s", check)
-	}
-
-	// Critical checks should NOT be disabled
-	s.NotContains(profile.Disabled, "go:module")
-	s.NotContains(profile.Disabled, "go:build")
-	s.NotContains(profile.Disabled, "go:tests")
-	s.NotContains(profile.Disabled, "python:project")
-	s.NotContains(profile.Disabled, "python:build")
-	s.NotContains(profile.Disabled, "python:tests")
-}
-
-func (s *ProfilesTestSuite) TestLibraryProfile_KeepsCodeQualityChecks() {
-	profile, _ := Get("library")
+func (s *ProfilesTestSuite) TestCLIProfile_KeepsCodeQualityChecks() {
+	profile, _ := Get("cli")
 
 	// Code quality checks should NOT be disabled
-	s.NotContains(profile.Disabled, "go:format")
-	s.NotContains(profile.Disabled, "go:vet")
-	s.NotContains(profile.Disabled, "go:coverage")
-	s.NotContains(profile.Disabled, "python:format")
-	s.NotContains(profile.Disabled, "python:lint")
 	s.NotContains(profile.Disabled, "common:sast")
+	s.NotContains(profile.Disabled, "common:secrets")
 	s.NotContains(profile.Disabled, "common:license")
+	s.NotContains(profile.Disabled, "common:ci")
+	s.NotContains(profile.Disabled, "common:precommit")
+}
+
+func (s *ProfilesTestSuite) TestLibraryProfile_KeepsDocumentation() {
+	profile, _ := Get("library")
+
+	// Documentation checks should NOT be disabled
+	s.NotContains(profile.Disabled, "common:changelog")
+	s.NotContains(profile.Disabled, "common:contributing")
 }
 
 func TestProfilesTestSuite(t *testing.T) {

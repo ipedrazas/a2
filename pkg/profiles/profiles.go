@@ -1,50 +1,64 @@
-// Package profiles provides built-in check profiles for different project types.
+// Package profiles provides application type profiles for different project types.
 package profiles
 
-// Profile defines a set of checks to disable for a specific use case.
+// Profile defines a set of checks to disable for a specific application type.
 type Profile struct {
 	Name        string
 	Description string
 	Disabled    []string // Check IDs to disable
 }
 
-// BuiltInProfiles contains the predefined profiles.
+// BuiltInProfiles contains the predefined application profiles.
 var BuiltInProfiles = map[string]Profile{
-	"poc": {
-		Name:        "poc",
-		Description: "Proof of Concept - minimal checks for early development",
+	"cli": {
+		Name:        "cli",
+		Description: "Command-line tool - skip server-related checks",
 		Disabled: []string{
-			// Common checks to disable for PoC
-			"common:license", "common:sast", "common:k8s", "common:shutdown",
-			"common:health", "common:api_docs", "common:changelog",
-			"common:integration", "common:metrics", "common:errors",
-			"common:precommit", "common:env",
-			// Go optional checks
-			"go:coverage", "go:deps", "go:cyclomatic", "go:logging", "go:race",
-			// Python optional checks
-			"python:coverage", "python:deps", "python:complexity", "python:logging",
-			// Node.js optional checks
-			"node:coverage", "node:deps", "node:logging",
-			// Java optional checks
-			"java:coverage", "java:deps", "java:logging",
-			// Rust optional checks
-			"rust:coverage", "rust:deps", "rust:logging",
-			// TypeScript optional checks
-			"typescript:coverage", "typescript:deps", "typescript:logging",
+			"common:health",      // No health endpoints
+			"common:k8s",         // Not containerized typically
+			"common:metrics",     // No Prometheus metrics
+			"common:api_docs",    // No API documentation
+			"common:integration", // CLI doesn't need integration tests
+			"common:shutdown",    // No graceful shutdown
+			"common:errors",      // No error tracking service
+			"common:e2e",         // No browser E2E tests
+			"common:tracing",     // No distributed tracing
+		},
+	},
+	"api": {
+		Name:        "api",
+		Description: "Web service/API - all operational checks enabled",
+		Disabled: []string{
+			"common:e2e", // API tests via integration tests instead
 		},
 	},
 	"library": {
 		Name:        "library",
-		Description: "Library/package - focus on code quality, skip deployment checks",
+		Description: "Reusable package/library - focus on code quality",
 		Disabled: []string{
-			"common:dockerfile", "common:health", "common:k8s", "common:shutdown",
-			"common:metrics", "common:errors", "common:integration",
+			"common:dockerfile",  // Libraries aren't containerized
+			"common:health",      // No health endpoints
+			"common:k8s",         // Not deployed
+			"common:shutdown",    // No server to shutdown
+			"common:metrics",     // No runtime metrics
+			"common:errors",      // No error tracking
+			"common:integration", // Unit tests suffice
+			"common:tracing",     // No distributed tracing
+			"common:e2e",         // No E2E tests
+			"common:api_docs",    // API docs via code docs
 		},
 	},
-	"production": {
-		Name:        "production",
-		Description: "Production application - all checks enabled",
-		Disabled:    []string{}, // Enable everything
+	"desktop": {
+		Name:        "desktop",
+		Description: "Desktop application - focus on user-facing quality",
+		Disabled: []string{
+			"common:health",   // No health endpoints
+			"common:k8s",      // Not containerized
+			"common:api_docs", // No REST API
+			"common:tracing",  // No distributed tracing
+			"common:metrics",  // Different metrics approach
+			"common:shutdown", // OS handles shutdown
+		},
 	},
 }
 
@@ -57,13 +71,14 @@ func Get(name string) (Profile, bool) {
 // List returns all available profiles in a consistent order.
 func List() []Profile {
 	return []Profile{
-		BuiltInProfiles["poc"],
+		BuiltInProfiles["cli"],
+		BuiltInProfiles["api"],
 		BuiltInProfiles["library"],
-		BuiltInProfiles["production"],
+		BuiltInProfiles["desktop"],
 	}
 }
 
 // Names returns the names of all available profiles.
 func Names() []string {
-	return []string{"poc", "library", "production"}
+	return []string{"cli", "api", "library", "desktop"}
 }
