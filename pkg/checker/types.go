@@ -4,17 +4,18 @@ package checker
 type Language string
 
 const (
-	LangGo     Language = "go"
-	LangPython Language = "python"
-	LangNode   Language = "node"
-	LangJava   Language = "java"
-	LangRust   Language = "rust"
-	LangCommon Language = "common" // Language-agnostic checks
+	LangGo         Language = "go"
+	LangPython     Language = "python"
+	LangNode       Language = "node"
+	LangJava       Language = "java"
+	LangRust       Language = "rust"
+	LangTypeScript Language = "typescript"
+	LangCommon     Language = "common" // Language-agnostic checks
 )
 
 // AllLanguages returns all supported language identifiers (excluding common).
 func AllLanguages() []Language {
-	return []Language{LangGo, LangPython, LangNode, LangJava, LangRust}
+	return []Language{LangGo, LangPython, LangNode, LangJava, LangRust, LangTypeScript}
 }
 
 // Status represents the severity level of a check result.

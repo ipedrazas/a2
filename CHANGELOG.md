@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **TypeScript language support** with 9 checks:
+  - `typescript:project` - Detects tsconfig.json, extracts compiler options and TypeScript version
+  - `typescript:build` - Runs build script or `tsc --noEmit` to verify compilation
+  - `typescript:tests` - Runs tests with Jest, Vitest, or Mocha (auto-detects)
+  - `typescript:format` - Checks code formatting with Prettier, Biome, or dprint
+  - `typescript:lint` - Runs ESLint, Biome, or oxlint for linting
+  - `typescript:type` - Type checking with `tsc --noEmit` (critical check)
+  - `typescript:coverage` - Detects coverage tools (Jest, Vitest, c8, nyc)
+  - `typescript:deps` - Checks for vulnerabilities using npm/yarn/pnpm audit
+  - `typescript:logging` - Detects logging libraries (winston, pino, tslog), warns on console.log
 - **Rust language support** with 8 checks:
   - `rust:project` - Detects Cargo.toml, extracts package info, detects workspaces
   - `rust:build` - Runs `cargo check` to verify compilation

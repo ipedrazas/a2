@@ -50,6 +50,11 @@ var LanguageIndicators = map[checker.Language][]string{
 		"rust-toolchain.toml",
 		"rust-toolchain",
 	},
+	checker.LangTypeScript: {
+		"tsconfig.json",
+		"tsconfig.base.json",
+		"tsconfig.build.json",
+	},
 }
 
 // Detect analyzes a directory and returns detected languages.
@@ -60,7 +65,7 @@ func Detect(path string) DetectionResult {
 	}
 
 	// Check languages in a defined order for consistent primary selection
-	orderedLanguages := []checker.Language{checker.LangGo, checker.LangPython, checker.LangNode, checker.LangJava, checker.LangRust}
+	orderedLanguages := []checker.Language{checker.LangGo, checker.LangPython, checker.LangNode, checker.LangJava, checker.LangRust, checker.LangTypeScript}
 
 	for _, lang := range orderedLanguages {
 		indicators := LanguageIndicators[lang]

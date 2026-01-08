@@ -17,13 +17,14 @@ type Config struct {
 
 // LanguageConfig handles language detection and settings.
 type LanguageConfig struct {
-	Explicit   []string             `yaml:"explicit,omitempty"` // Override auto-detect
-	AutoDetect bool                 `yaml:"auto_detect"`        // Default: true
-	Go         GoLanguageConfig     `yaml:"go,omitempty"`
-	Python     PythonLanguageConfig `yaml:"python,omitempty"`
-	Node       NodeLanguageConfig   `yaml:"node,omitempty"`
-	Java       JavaLanguageConfig   `yaml:"java,omitempty"`
-	Rust       RustLanguageConfig   `yaml:"rust,omitempty"`
+	Explicit   []string                 `yaml:"explicit,omitempty"` // Override auto-detect
+	AutoDetect bool                     `yaml:"auto_detect"`        // Default: true
+	Go         GoLanguageConfig         `yaml:"go,omitempty"`
+	Python     PythonLanguageConfig     `yaml:"python,omitempty"`
+	Node       NodeLanguageConfig       `yaml:"node,omitempty"`
+	Java       JavaLanguageConfig       `yaml:"java,omitempty"`
+	Rust       RustLanguageConfig       `yaml:"rust,omitempty"`
+	TypeScript TypeScriptLanguageConfig `yaml:"typescript,omitempty"`
 }
 
 // GoLanguageConfig contains Go-specific settings.
@@ -61,6 +62,15 @@ type JavaLanguageConfig struct {
 // RustLanguageConfig contains Rust-specific settings.
 type RustLanguageConfig struct {
 	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"` // default 80
+}
+
+// TypeScriptLanguageConfig contains TypeScript-specific settings.
+type TypeScriptLanguageConfig struct {
+	PackageManager    string  `yaml:"package_manager,omitempty"` // auto, npm, yarn, pnpm, bun
+	TestRunner        string  `yaml:"test_runner,omitempty"`     // auto, jest, vitest, mocha
+	Formatter         string  `yaml:"formatter,omitempty"`       // auto, prettier, biome, dprint
+	Linter            string  `yaml:"linter,omitempty"`          // auto, eslint, biome, oxlint
+	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"`
 }
 
 // ExecutionConfig configures how checks are executed.
@@ -134,6 +144,13 @@ func DefaultConfig() *Config {
 				CoverageThreshold: 80.0,
 			},
 			Rust: RustLanguageConfig{
+				CoverageThreshold: 80.0,
+			},
+			TypeScript: TypeScriptLanguageConfig{
+				PackageManager:    "auto",
+				TestRunner:        "auto",
+				Formatter:         "auto",
+				Linter:            "auto",
 				CoverageThreshold: 80.0,
 			},
 		},

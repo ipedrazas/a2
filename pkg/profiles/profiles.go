@@ -29,6 +29,8 @@ var BuiltInProfiles = map[string]Profile{
 			"java:coverage", "java:deps", "java:logging",
 			// Rust optional checks
 			"rust:coverage", "rust:deps", "rust:logging",
+			// TypeScript optional checks
+			"typescript:coverage", "typescript:deps", "typescript:logging",
 		},
 	},
 	"library": {

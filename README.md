@@ -1,6 +1,6 @@
 # A2 - Application Analysis
 
-A2 is a multi-language code quality checker. It auto-detects project language(s), runs a suite of checks, and provides a health score with actionable recommendations.
+A2 is a multi-language code quality checker. It auto-detects project language(s), runs a suite of checks, and provides a health score with recommendations that you can give to your Coding Agent to improve your application.
 
 Because of the amount of new code and projects created with the rise of `vibecoding`, I needed a way to assess the level of maturity of any project.
 
@@ -19,7 +19,7 @@ Checks are configurable and they cover big themes like:
 It'a up to you to decide which checks make sense for you and your project. `a2` allows you to configure what and what not to run. For example, if you run `a2 check` in this repo, you will get a response like this one:
 
 ```
-a2 check
+%> a2 check
 A2 Analysis: a2
                
 ─────────────────────────────────────
@@ -38,7 +38,7 @@ Languages: go
 ✓ PASS Go Vet
     No issues found
 ✓ PASS Go Coverage
-    Coverage: 60.0%
+    Coverage: 54.7%
 ✓ PASS Go Vulnerabilities
     No known vulnerabilities found
 ✓ PASS Go Complexity
@@ -54,7 +54,7 @@ Languages: go
 ✓ PASS Environment Config
     Environment config: .env in .gitignore
 ✓ PASS SAST Security Scanning
-    SAST configured: gosec, gosec (CI), Bandit (CI), Semgrep (CI)
+    SAST configured: gosec, gosec (CI), Semgrep (CI), Bandit (CI)
 ✓ PASS Changelog
     CHANGELOG.md found (Keep a Changelog format)
 ✓ PASS Security Scan
@@ -63,9 +63,9 @@ Languages: go
                     
     Summary:        
       Gosec  : dev  
-      Files  : 72   
-      Lines  : 11034
-      Nosec  : 7    
+      Files  : 91   
+      Lines  : 13905
+      Nosec  : 8    
       Issues : 0    
 ✓ PASS Golangci-lint
 ✓ PASS Secret Detection
@@ -75,8 +75,8 @@ Languages: go
         ○ ░                                             
         ░    gitleaks                                   
                                                         
-    2:35AM INF scanned ~1549632 bytes (1.55 MB) in 874ms
-    2:35AM INF no leaks found                           
+    8:12AM INF scanned ~1682916 bytes (1.68 MB) in 762ms
+    8:12AM INF no leaks found                           
 ✓ PASS Error Check
 ✓ PASS Static Analysis
 
@@ -131,39 +131,6 @@ a2 check --format json
 a2 check --skip=license,k8s
 ```
 
-### Sample Output
-
-```
-A2 Analysis: myproject
-Detected: go
-─────────────────────────────────────
-
-✓ PASS Go Module
-    Module: github.com/user/myproject (Go 1.23)
-✓ PASS Go Build
-    Build successful
-✓ PASS Go Tests
-    All tests passed
-✓ PASS Required Files
-    All required files present
-✓ PASS Go Format
-    All Go files are properly formatted
-✓ PASS Go Vet
-    No issues found
-! WARN Go Coverage
-    Coverage 65.0% is below threshold 80.0%
-✓ PASS Go Vulnerabilities
-    No known vulnerabilities found
-
-─────────────────────────────────────
-
-STATUS: ⚠ NEEDS ATTENTION
-
-Score: 7/8 checks passed (88%)
-
-Recommendations:
-→ Add more tests to improve coverage
-```
 
 ## Built-in Checks
 

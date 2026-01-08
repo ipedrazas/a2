@@ -10,6 +10,7 @@ import (
 	nodecheck "github.com/ipedrazas/a2/pkg/checks/node"
 	pythoncheck "github.com/ipedrazas/a2/pkg/checks/python"
 	rustcheck "github.com/ipedrazas/a2/pkg/checks/rust"
+	typescriptcheck "github.com/ipedrazas/a2/pkg/checks/typescript"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/language"
 )
@@ -57,6 +58,8 @@ func getChecksForLanguage(lang checker.Language, cfg *config.Config) []checker.C
 		return javacheck.Register(cfg)
 	case checker.LangRust:
 		return rustcheck.Register(cfg)
+	case checker.LangTypeScript:
+		return typescriptcheck.Register(cfg)
 	default:
 		return nil
 	}
