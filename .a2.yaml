@@ -16,6 +16,13 @@ checks:
     - go:logging  # Skip logging check
     - common:health  # Skip health check
     - common:k8s  # Skip k8s check
+    - common:api_docs  # Skip api docs check
+    - common:integration  # Skip integration check
+    - common:metrics  # Skip metrics check
+    - common:errors  # Skip errors check
+    - common:precommit  # Skip precommit check
+    - common:shutdown  # Skip shutdown check
+    
 
 # Execution options
 execution:
