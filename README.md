@@ -96,8 +96,8 @@ You can still achieve this by writing a prompt, but I like tinkering with clis ð
 
 ## Features
 
-- **Multi-Language Support**: Go, Python, and Node.js (auto-detected or explicit)
-- **25+ Built-in Checks**: Build, tests, coverage, formatting, linting, type checking, vulnerabilities
+- **Multi-Language Support**: Go, Python, Java, and Node.js (auto-detected or explicit)
+- **50+ Built-in Checks**: Build, tests, coverage, formatting, linting, type checking, vulnerabilities
 - **Veto System**: Critical checks (build, tests) stop execution on failure
 - **Pretty Output**: Colored terminal output with recommendations
 - **JSON Output**: Machine-readable format for CI/CD integration
@@ -126,6 +126,9 @@ a2 check --lang go,python
 
 # JSON output for CI/CD
 a2 check --format json
+
+# Skip specific checks
+a2 check --skip=license,k8s
 ```
 
 ### Sample Output

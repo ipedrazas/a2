@@ -192,6 +192,41 @@ func (suite *ConfigTestSuite) TestIsCheckDisabled_CaseSensitive() {
 	suite.False(cfg.IsCheckDisabled("GOFMT"))
 }
 
+// TestIsCheckDisabled_CommonAliases tests that short names work for common checks.
+func (suite *ConfigTestSuite) TestIsCheckDisabled_CommonAliases() {
+	cfg := &Config{
+		Checks: ChecksConfig{
+			Disabled: []string{"license", "k8s", "health"},
+		},
+	}
+
+	// Short names should disable the full check IDs
+	suite.True(cfg.IsCheckDisabled("common:license"))
+	suite.True(cfg.IsCheckDisabled("common:k8s"))
+	suite.True(cfg.IsCheckDisabled("common:health"))
+
+	// Other checks should still be enabled
+	suite.False(cfg.IsCheckDisabled("common:secrets"))
+	suite.False(cfg.IsCheckDisabled("common:sast"))
+}
+
+// TestIsCheckDisabled_GoAliases tests that legacy Go aliases work.
+func (suite *ConfigTestSuite) TestIsCheckDisabled_GoAliases() {
+	cfg := &Config{
+		Checks: ChecksConfig{
+			Disabled: []string{"gofmt", "govet"},
+		},
+	}
+
+	// Legacy names should disable the new check IDs
+	suite.True(cfg.IsCheckDisabled("go:format"))
+	suite.True(cfg.IsCheckDisabled("go:vet"))
+
+	// Other checks should still be enabled
+	suite.False(cfg.IsCheckDisabled("go:build"))
+	suite.False(cfg.IsCheckDisabled("go:tests"))
+}
+
 // TestConfigTestSuite runs all the tests in the suite.
 func TestConfigTestSuite(t *testing.T) {
 	suite.Run(t, new(ConfigTestSuite))

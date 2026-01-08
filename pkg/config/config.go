@@ -155,7 +155,9 @@ func Load(path string) (*Config, error) {
 }
 
 // checkAliases maps old check IDs to new language-prefixed IDs for backward compatibility.
+// Also maps short names to full IDs for convenience with --skip flag.
 var checkAliases = map[string]string{
+	// Go check aliases (legacy)
 	"go_mod":   "go:module",
 	"build":    "go:build",
 	"tests":    "go:tests",
@@ -163,6 +165,22 @@ var checkAliases = map[string]string{
 	"govet":    "go:vet",
 	"coverage": "go:coverage",
 	"deps":     "go:deps",
+	// Common check short names
+	"dockerfile":  "common:dockerfile",
+	"ci":          "common:ci",
+	"health":      "common:health",
+	"secrets":     "common:secrets",
+	"env":         "common:env",
+	"license":     "common:license",
+	"sast":        "common:sast",
+	"api_docs":    "common:api_docs",
+	"changelog":   "common:changelog",
+	"integration": "common:integration",
+	"metrics":     "common:metrics",
+	"errors":      "common:errors",
+	"precommit":   "common:precommit",
+	"k8s":         "common:k8s",
+	"shutdown":    "common:shutdown",
 }
 
 // IsCheckDisabled returns true if the given check ID is disabled.
