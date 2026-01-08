@@ -1,11 +1,13 @@
 package common
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -167,11 +169,15 @@ MIIEpAIBAAKCAQEA...
 
 func (s *SecretsCheckTestSuite) TestDetectsAPIKey() {
 	// Using a test pattern that matches our API key regex
+	// load the .env file
+	err := godotenv.Load(filepath.Join("../../..", ".env"))
+	s.Require().NoError(err)
 	apiKey := os.Getenv("COMMON_TEST_API_KEY")
 	code := fmt.Sprintf(`
 api_key = "%s"
 `, apiKey)
-	err := os.WriteFile(filepath.Join(s.tempDir, "settings.py"), []byte(code), 0644)
+
+	err = os.WriteFile(filepath.Join(s.tempDir, "settings.py"), []byte(code), 0644)
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
