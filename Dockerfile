@@ -26,7 +26,8 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     -o /a2 .
 
 # Final stage - minimal image
-FROM golang:1.25-alpine
+# FROM golang:1.25-alpine
+FROM alpine:3.23
 
 # Install git (needed for some checks), ca-certificates, wget, and Python for some tools
 RUN apk add --no-cache git ca-certificates 
@@ -35,14 +36,14 @@ RUN apk add --no-cache git ca-certificates
 COPY --from=builder /a2 /usr/local/bin/a2
 
 # Install Go tools
-RUN <<EOF
-go install github.com/securego/gosec/v2/cmd/gosec@latest
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-go install golang.org/x/vuln/cmd/govulncheck@latest
-go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
-go install github.com/kisielk/errcheck@latest
-go install github.com/zricethezav/gitleaks/v8@latest
-EOF
+# RUN <<EOF
+# go install github.com/securego/gosec/v2/cmd/gosec@latest
+# go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+# go install golang.org/x/vuln/cmd/govulncheck@latest
+# go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
+# go install github.com/kisielk/errcheck@latest
+# go install github.com/zricethezav/gitleaks/v8@latest
+# EOF
 
 # Install Python tools
 # RUN pip3 install --no-cache-dir --break-system-packages bandit semgrep
@@ -56,10 +57,10 @@ RUN adduser -D -u 1000 -g 1000 a2 && \
 WORKDIR /workspace
 
 # Environment for non-root Go usage
-ENV GOPATH=/home/a2/go
-ENV GOCACHE=/home/a2/.cache/go-build
-ENV GOMODCACHE=/home/a2/go/pkg/mod
-ENV PATH="/home/a2/go/bin:/go/bin:${PATH}"
+# ENV GOPATH=/home/a2/go
+# ENV GOCACHE=/home/a2/.cache/go-build
+# ENV GOMODCACHE=/home/a2/go/pkg/mod
+# ENV PATH="/home/a2/go/bin:/go/bin:${PATH}"
 
 ENTRYPOINT ["a2"]
 CMD ["check"]

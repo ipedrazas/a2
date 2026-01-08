@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/language"
+	"github.com/ipedrazas/a2/pkg/maturity"
 	"github.com/ipedrazas/a2/pkg/runner"
 )
 
@@ -64,6 +65,13 @@ var (
 	recommendStyle = lipgloss.NewStyle().
 			Foreground(gray).
 			Italic(true)
+
+	maturityStyle = lipgloss.NewStyle().
+			Foreground(cyan).
+			Bold(true)
+
+	maturityDescStyle = lipgloss.NewStyle().
+				Foreground(gray)
 )
 
 // Pretty outputs the results in a formatted, colorful way.
@@ -103,6 +111,9 @@ func Pretty(result runner.SuiteResult, path string, detected language.DetectionR
 
 	// Score
 	printScore(result)
+
+	// Maturity estimation
+	printMaturity(result)
 
 	// Recommendations
 	printRecommendations(result)
@@ -173,6 +184,21 @@ func printScore(result runner.SuiteResult) {
 
 	fmt.Println()
 	fmt.Println(scoreStyle.Render(fmt.Sprintf("Score: %d/%d checks passed (%.0f%%)", passed, total, pct)))
+}
+
+func printMaturity(result runner.SuiteResult) {
+	est := maturity.Estimate(result)
+
+	fmt.Println()
+	fmt.Println(maturityStyle.Render(fmt.Sprintf("Maturity: %s", est.Level.String())))
+	fmt.Println(maturityDescStyle.Render(fmt.Sprintf("   %s", est.Level.Description())))
+
+	if len(est.Suggestions) > 0 {
+		fmt.Println()
+		for _, s := range est.Suggestions {
+			fmt.Println(maturityDescStyle.Render(fmt.Sprintf("   → %s", s)))
+		}
+	}
 }
 
 func printRecommendations(result runner.SuiteResult) {

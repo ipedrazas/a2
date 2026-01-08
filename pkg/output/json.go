@@ -6,6 +6,7 @@ import (
 
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/language"
+	"github.com/ipedrazas/a2/pkg/maturity"
 	"github.com/ipedrazas/a2/pkg/runner"
 )
 
@@ -24,6 +25,7 @@ type JSONOutput struct {
 	Languages []string     `json:"languages"`
 	Results   []JSONResult `json:"results"`
 	Summary   JSONSummary  `json:"summary"`
+	Maturity  JSONMaturity `json:"maturity"`
 	Aborted   bool         `json:"aborted"`
 	Success   bool         `json:"success"`
 }
@@ -37,6 +39,13 @@ type JSONSummary struct {
 	Score    float64 `json:"score"`
 }
 
+// JSONMaturity provides maturity assessment.
+type JSONMaturity struct {
+	Level       string   `json:"level"`
+	Description string   `json:"description"`
+	Suggestions []string `json:"suggestions,omitempty"`
+}
+
 // JSON outputs the results as formatted JSON.
 func JSON(result runner.SuiteResult, detected language.DetectionResult) error {
 	// Convert languages to strings
@@ -44,6 +53,9 @@ func JSON(result runner.SuiteResult, detected language.DetectionResult) error {
 	for i, l := range detected.Languages {
 		langs[i] = string(l)
 	}
+
+	// Calculate maturity estimation
+	est := maturity.Estimate(result)
 
 	output := JSONOutput{
 		Languages: langs,
@@ -54,6 +66,11 @@ func JSON(result runner.SuiteResult, detected language.DetectionResult) error {
 			Warnings: result.Warnings,
 			Failed:   result.Failed,
 			Score:    calculateScore(result),
+		},
+		Maturity: JSONMaturity{
+			Level:       est.Level.String(),
+			Description: est.Level.Description(),
+			Suggestions: est.Suggestions,
 		},
 		Aborted: result.Aborted,
 		Success: result.Success(),

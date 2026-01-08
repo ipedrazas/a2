@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Skip flags**: `--skip` flag to exclude checks by ID (e.g., `--skip=license,k8s`)
+- **Built-in profiles**: `--profile` flag for predefined check sets:
+  - `poc` - Minimal checks for proof of concept / early development
+  - `library` - Focus on code quality, skip deployment checks
+  - `production` - All checks enabled (default behavior)
+- **Profiles command**: `a2 profiles` lists available profiles
+- **Maturity estimation**: Automatic assessment of project maturity level based on check results:
+  - Production-Ready: All checks pass (100% score, 0 warnings, 0 failures)
+  - Mature: Most checks pass (≥80% score, 0 failures)
+  - Development: Core functionality works (≥60% score, ≤2 failures)
+  - Proof of Concept: Early stage (<60% score or >2 failures)
 - **Java language support** with 8 checks:
   - `java:project` - Detects Maven (pom.xml) or Gradle (build.gradle) projects
   - `java:build` - Compiles with Maven or Gradle (auto-detects wrapper scripts)
