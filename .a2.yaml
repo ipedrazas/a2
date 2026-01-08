@@ -60,15 +60,3 @@ external:
     command: staticcheck
     args: ["./..."]
     severity: warn
-
-  # - id: python:bandit
-  #   name: Bandit Security
-  #   command: bandit
-  #   args: ["-r", ".", "-f", "json", "-q"]
-  #   severity: warn
-
-  # - id: sast
-  #   name: Semgrep SAST
-  #   command: semgrep
-  #   args: ["scan", "--config", "auto", "--error", "."]
-  #   severity: warn  

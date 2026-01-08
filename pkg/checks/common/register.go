@@ -79,6 +79,16 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
+			Checker: &SASTCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:sast",
+				Name:      "SAST Security Scanning",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     955,
+			},
+		},
+		{
 			Checker: &APIDocsCheck{},
 			Meta: checker.CheckMeta{
 				ID:        "common:api_docs",

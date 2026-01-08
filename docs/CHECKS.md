@@ -716,6 +716,7 @@ Comments are excluded from detection.
 | `common:secrets` | Secrets Detection | No | 940 | Detects secret scanning config or hardcoded secrets |
 | `common:env` | Environment Config | No | 945 | Validates environment variable handling practices |
 | `common:license` | License Compliance | No | 950 | Verifies dependency license compliance tooling |
+| `common:sast` | SAST Security Scanning | No | 955 | Verifies SAST tooling is configured |
 | `common:api_docs` | API Documentation | No | 960 | Detects OpenAPI/Swagger specs and documentation generators |
 | `common:changelog` | Changelog | No | 965 | Verifies changelog or release notes exist |
 | `common:integration` | Integration Tests | No | 980 | Detects integration test directories, files, and E2E frameworks |
@@ -909,6 +910,50 @@ Verifies that dependency license compliance tooling is configured to track licen
 - **Warn**: No license compliance tooling found
 
 **Recommendation:** Configure FOSSA, go-licenses, license-checker, or generate SBOM with CycloneDX for license compliance.
+
+### common:sast
+
+Verifies that SAST (Static Application Security Testing) tooling is configured for automated security scanning.
+
+**Semgrep detection:**
+- `.semgrep.yml`, `.semgrep.yaml`, `semgrep.yml`, `semgrep.yaml`
+- `.semgrep/` or `semgrep/` directories
+
+**SonarQube/SonarCloud detection:**
+- `sonar-project.properties`, `.sonarcloud.properties`, `sonar.properties`
+- SonarQube plugin in `build.gradle` or `pom.xml`
+
+**Snyk detection:**
+- `.snyk`, `snyk.json`, `.snyk.json`
+
+**CodeQL detection:**
+- `.github/codeql/` directory
+- `codeql-config.yml`
+- GitHub Actions workflows containing `github/codeql-action`
+
+**Other SAST tools detected:**
+- Checkmarx: `checkmarx.config`, `.checkmarx`
+- Veracode: `veracode.json`, `.veracode`
+- Fortify: `fortify-sca.properties`, `.fortify`
+- Coverity: `coverity.conf`, `cov-int/`
+- Bearer: `bearer.yml`, `.bearer.yml`
+- Horusec: `horusec-config.json`, `.horusec-config.json`
+
+**Language-specific security tools detected:**
+- Go: gosec (in Makefile or Taskfile)
+- Python: Bandit (`.bandit`, `bandit.yaml`, or in pyproject.toml), Safety
+- Node.js: eslint-plugin-security, audit-ci, better-npm-audit
+- Java: FindSecBugs, OWASP Dependency-Check
+
+**CI security scanning detected:**
+- GitHub Actions: Semgrep, SonarQube, SonarCloud, Snyk, Trivy, gosec, Safety, Bandit, Bearer, Horusec
+- GitLab CI: SAST template or security scanning jobs
+
+**Status:**
+- **Pass**: SAST tooling found
+- **Warn**: No SAST tooling found
+
+**Recommendation:** Configure Semgrep, CodeQL, SonarQube, or Snyk for automated security scanning.
 
 ### common:api_docs
 
@@ -1280,8 +1325,8 @@ external:
 | Python | 10 | 3 | 7 |
 | Node.js | 9 | 3 | 6 |
 | Java | 8 | 3 | 5 |
-| Common | 15+ | 0 | 15+ |
-| **Total** | **52+** | **12** | **40+** |
+| Common | 16+ | 0 | 16+ |
+| **Total** | **53+** | **12** | **41+** |
 
 **Critical checks** stop execution in sequential mode when they fail.
 **Non-critical checks** report warnings but allow other checks to continue.
