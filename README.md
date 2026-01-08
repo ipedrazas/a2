@@ -38,7 +38,7 @@ Languages: go
 ✓ PASS Go Vet
     No issues found
 ✓ PASS Go Coverage
-    Coverage: 51.1%
+    Coverage: 60.0%
 ✓ PASS Go Vulnerabilities
     No known vulnerabilities found
 ✓ PASS Go Complexity
@@ -51,40 +51,48 @@ Languages: go
     GitHub Actions, Taskfile configured
 ✓ PASS Secrets Detection
     Secret scanning configured: Gitleaks, pre-commit hook
+✓ PASS Environment Config
+    Environment config: .env in .gitignore
+✓ PASS SAST Security Scanning
+    SAST configured: gosec, gosec (CI), Bandit (CI), Semgrep (CI)
 ✓ PASS Changelog
     CHANGELOG.md found (Keep a Changelog format)
-✓ PASS Golangci-lint
 ✓ PASS Security Scan
-    Results:       
-                   
-                   
-    Summary:       
-      Gosec  : dev 
-      Files  : 62  
-      Lines  : 8544
-      Nosec  : 6   
-      Issues : 0   
+    Results:        
+                    
+                    
+    Summary:        
+      Gosec  : dev  
+      Files  : 72   
+      Lines  : 11034
+      Nosec  : 7    
+      Issues : 0    
+✓ PASS Golangci-lint
 ✓ PASS Secret Detection
-    ○                                                    
-        │╲                                               
-        │ ○                                              
-        ○ ░                                              
-        ░    gitleaks                                    
-                                                         
-    12:58AM INF scanned ~1109963 bytes (1.11 MB) in 479ms
-    12:58AM INF no leaks found                           
+    ○                                                   
+        │╲                                              
+        │ ○                                             
+        ○ ░                                             
+        ░    gitleaks                                   
+                                                        
+    2:35AM INF scanned ~1549632 bytes (1.55 MB) in 874ms
+    2:35AM INF no leaks found                           
 ✓ PASS Error Check
 ✓ PASS Static Analysis
-✓ PASS Pre-commit Hooks
-    Pre-commit hooks configured: pre-commit, git hooks
 
 ─────────────────────────────────────
 
 STATUS: ✓ ALL CHECKS PASSED
 
-Score: 20/20 checks passed (100%)
+Score: 21/21 checks passed (100%)
+
+Maturity: Production-Ready
+   All checks pass, ready for production deployment
 ```
 
+As you can see `a2` will tell you the maturity level of the project based on the results of the checks. While it's true that you could use `Claude Code` or any other coding agent to do the same, I'd rather use a deterministic approach because saying that something is "Production-ready" depends on what you consider what production level is, so asking an Agent becomes tricky because you have to consistently inform the agent what do you consider "Production" or "Alpha" o...
+
+You can still achieve this by writing a prompt, but I like tinkering with clis 🤷‍♂️
 
 ## Features
 

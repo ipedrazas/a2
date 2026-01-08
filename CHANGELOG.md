@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-01-08
+
 ### Added
 - **Skip flags**: `--skip` flag to exclude checks by ID (e.g., `--skip=license,k8s`)
 - **Built-in profiles**: `--profile` flag for predefined check sets:
@@ -49,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added comprehensive test suites for all Java checks (build, tests, format, lint, coverage, deps, logging)
 - Added test suites for new common checks (api_docs, integration, metrics, errors, shutdown)
 
-## [0.1.0] - 2024-01-01
+## [0.1.0] - 2026-01-01
 
 ### Added
 - Initial release
