@@ -173,7 +173,7 @@ Mature applications document changes for users and maintainers.
 
 ---
 
-### `common:contributing` [P1]
+### `common:contributing` [P1] ✅ IMPLEMENTED
 **Verify contribution guidelines exist**
 
 Mature projects have clear contribution guidelines.
@@ -186,6 +186,8 @@ Mature projects have clear contribution guidelines.
 **Detection approach:**
 - Check for: `CONTRIBUTING.md`, `.github/CONTRIBUTING.md`
 - Check for templates: `.github/PULL_REQUEST_TEMPLATE.md`, `.github/ISSUE_TEMPLATE/`
+
+**Implementation:** `pkg/checks/common/contributing.go`
 
 ---
 
@@ -241,7 +243,7 @@ Mature applications test components working together, not just in isolation.
 
 ---
 
-### `common:e2e` [P1]
+### `common:e2e` [P1] ✅ IMPLEMENTED
 **Verify end-to-end tests exist**
 
 Mature applications validate the entire user flow.
@@ -256,6 +258,8 @@ Mature applications validate the entire user flow.
   - `cypress.config.js`, `playwright.config.ts`, `wdio.conf.js`
 - Check for directories: `e2e/`, `cypress/`, `playwright/`
 - Check for dependencies: `selenium`, `playwright`, `puppeteer`
+
+**Implementation:** `pkg/checks/common/e2e.go`
 
 ---
 
@@ -317,7 +321,7 @@ Mature applications expose metrics for monitoring and alerting.
 
 ---
 
-### `common:tracing` [P1]
+### `common:tracing` [P1] ✅ IMPLEMENTED
 **Verify distributed tracing is implemented**
 
 Mature microservices need request tracing for debugging.
@@ -333,6 +337,8 @@ Mature microservices need request tracing for debugging.
   - Python: `opentelemetry`, `ddtrace`
   - Node: `@opentelemetry/sdk-trace-node`, `dd-trace`
 - Check for OTEL config: `otel-collector-config.yaml`
+
+**Implementation:** `pkg/checks/common/tracing.go`
 
 ---
 
@@ -410,7 +416,7 @@ Mature applications handle SIGTERM/SIGINT to complete in-flight requests.
 
 ---
 
-### `common:migrations` [P1]
+### `common:migrations` [P1] ✅ IMPLEMENTED
 **Verify database migrations are managed**
 
 Mature applications version their database schema changes.
@@ -427,9 +433,11 @@ Mature applications version their database schema changes.
   - Python: `alembic/`, `django/migrations/`
   - Node: `prisma/migrations/`, `knex/migrations/`
 
+**Implementation:** `pkg/checks/common/migrations.go`
+
 ---
 
-### `common:config_validation` [P1]
+### `common:config_validation` [P1] ✅ IMPLEMENTED
 **Verify configuration is validated at startup**
 
 Mature applications fail fast with clear errors when misconfigured.
@@ -444,9 +452,11 @@ Mature applications fail fast with clear errors when misconfigured.
 - Python: Check for `pydantic` Settings, `dynaconf`
 - Node: Check for `joi`, `zod`, `convict`
 
+**Implementation:** `pkg/checks/common/config_validation.go`
+
 ---
 
-### `common:retry` [P1]
+### `common:retry` [P1] ✅ IMPLEMENTED
 **Verify retry logic exists for external calls**
 
 Mature applications handle transient failures with retries and backoff.
@@ -460,6 +470,8 @@ Mature applications handle transient failures with retries and backoff.
 - Go: Check for `cenkalti/backoff`, `avast/retry-go`, `go-retryablehttp`
 - Python: Check for `tenacity`, `backoff`, `urllib3.util.retry`
 - Node: Check for `async-retry`, `axios-retry`, `p-retry`
+
+**Implementation:** `pkg/checks/common/retry.go`
 
 ---
 
@@ -538,7 +550,7 @@ Mature teams automate quality checks before code is committed.
 
 ---
 
-### `common:editorconfig` [P1]
+### `common:editorconfig` [P1] ✅ IMPLEMENTED
 **Verify editor configuration exists**
 
 Mature teams ensure consistent code style across all editors.
@@ -552,6 +564,8 @@ Mature teams ensure consistent code style across all editors.
 - Check for: `.editorconfig`
 - Check for IDE configs: `.vscode/settings.json`, `.idea/codeStyles/`
 
+**Implementation:** `pkg/checks/common/editorconfig.go`
+
 ---
 
 ## Summary
@@ -559,10 +573,10 @@ Mature teams ensure consistent code style across all editors.
 | Priority | Count | Implemented | Categories |
 |----------|-------|-------------|------------|
 | P0 (High) | 10 | 9 | ✅ secrets, ✅ api_docs, ✅ changelog, ✅ integration, ✅ metrics, ✅ errors, ✅ k8s, ✅ shutdown, ✅ precommit |
-| P1 (Medium) | 13 | 3 | ✅ env, ✅ license, ✅ sast, security, contributing, e2e, tracing, migrations, config_validation, retry, errcheck, editorconfig |
+| P1 (Medium) | 12 | 10 | ✅ env, ✅ license, ✅ sast, ✅ contributing, ✅ e2e, ✅ tracing, ✅ migrations, ✅ config_validation, ✅ retry, ✅ editorconfig, security, errcheck |
 | P2 (Low) | 5 | 0 | conduct, godoc, fixtures, mocking, logging_config, di, architecture |
 
-**Total: 28 new checks (12 implemented, 16 remaining)**
+**Total: 27 new checks (19 implemented, 8 remaining)**
 
 ---
 

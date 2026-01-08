@@ -168,6 +168,76 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Order:     1035,
 			},
 		},
+		{
+			Checker: &MigrationsCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:migrations",
+				Name:      "Database Migrations",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     1040,
+			},
+		},
+		{
+			Checker: &ConfigValidationCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:config_validation",
+				Name:      "Config Validation",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     1045,
+			},
+		},
+		{
+			Checker: &RetryCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:retry",
+				Name:      "Retry Logic",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     1050,
+			},
+		},
+		{
+			Checker: &ContributingCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:contributing",
+				Name:      "Contributing Guidelines",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     970,
+			},
+		},
+		{
+			Checker: &EditorconfigCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:editorconfig",
+				Name:      "Editor Config",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     1070,
+			},
+		},
+		{
+			Checker: &E2ECheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:e2e",
+				Name:      "E2E Tests",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     985,
+			},
+		},
+		{
+			Checker: &TracingCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:tracing",
+				Name:      "Distributed Tracing",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     1015,
+			},
+		},
 	}
 
 	// Add external checks from config

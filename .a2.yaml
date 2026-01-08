@@ -23,8 +23,12 @@ checks:
     - common:precommit  # Skip precommit check
     - common:shutdown  # Skip shutdown check
     - common:license  # Skip license check
+    - common:tracing  # Skip tracing check
+    - common:migrations  # Skip migrations check
+    - common:e2e  # Skip e2e tests check
+    - common:config_validation  # Skip config validation check
+    - common:retry  # Skip retry check
     
-
 # Execution options
 execution:
   parallel: true  # Run checks in parallel (default: true). Set to false for CI with limited CPU.

@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **P1 common checks** for application maturity:
+  - `common:contributing` - Detects CONTRIBUTING.md, PR templates, issue templates, CODEOWNERS
+  - `common:e2e` - Detects E2E testing (Cypress, Playwright, WebdriverIO, Puppeteer, etc.)
+  - `common:tracing` - Detects distributed tracing (OpenTelemetry, Jaeger, Datadog, etc.)
+  - `common:migrations` - Detects database migrations (Prisma, Alembic, Flyway, golang-migrate, etc.)
+  - `common:config_validation` - Detects config validation (Pydantic, Zod, Viper, validator, etc.)
+  - `common:retry` - Detects retry/resilience libraries (tenacity, backoff, Resilience4j, etc.)
+  - `common:editorconfig` - Detects editor configuration (.editorconfig, VS Code, JetBrains)
 - **TypeScript language support** with 9 checks:
   - `typescript:project` - Detects tsconfig.json, extracts compiler options and TypeScript version
   - `typescript:build` - Runs build script or `tsc --noEmit` to verify compilation
