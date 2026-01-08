@@ -22,6 +22,7 @@ type LanguageConfig struct {
 	Go         GoLanguageConfig     `yaml:"go,omitempty"`
 	Python     PythonLanguageConfig `yaml:"python,omitempty"`
 	Node       NodeLanguageConfig   `yaml:"node,omitempty"`
+	Java       JavaLanguageConfig   `yaml:"java,omitempty"`
 }
 
 // GoLanguageConfig contains Go-specific settings.
@@ -47,6 +48,13 @@ type NodeLanguageConfig struct {
 	Formatter         string  `yaml:"formatter,omitempty"`       // auto, prettier, biome
 	Linter            string  `yaml:"linter,omitempty"`          // auto, eslint, biome, oxlint
 	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"`
+}
+
+// JavaLanguageConfig contains Java-specific settings.
+type JavaLanguageConfig struct {
+	BuildTool         string  `yaml:"build_tool,omitempty"`         // auto, maven, gradle
+	TestRunner        string  `yaml:"test_runner,omitempty"`        // auto, junit, testng
+	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"` // default 80
 }
 
 // ExecutionConfig configures how checks are executed.
@@ -112,6 +120,11 @@ func DefaultConfig() *Config {
 				TestRunner:        "auto",
 				Formatter:         "auto",
 				Linter:            "auto",
+				CoverageThreshold: 80.0,
+			},
+			Java: JavaLanguageConfig{
+				BuildTool:         "auto",
+				TestRunner:        "auto",
 				CoverageThreshold: 80.0,
 			},
 		},

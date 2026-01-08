@@ -98,3 +98,4 @@ Tests use `testify/suite`. Target coverage: >80%.
 2. Use `safepath` package for all file operations
 3. Common checks go in `pkg/checks/common/`, language-specific in `pkg/checks/<lang>/`
 4. Each check needs: implementation file, registration in `register.go`, tests
+5. Update `CHANGELOG.md` if necessary

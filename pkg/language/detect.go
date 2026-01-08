@@ -35,6 +35,15 @@ var LanguageIndicators = map[checker.Language][]string{
 		"pnpm-lock.yaml",
 		"bun.lockb",
 	},
+	checker.LangJava: {
+		"pom.xml",
+		"build.gradle",
+		"build.gradle.kts",
+		"settings.gradle",
+		"settings.gradle.kts",
+		"mvnw",
+		"gradlew",
+	},
 }
 
 // Detect analyzes a directory and returns detected languages.
@@ -45,7 +54,7 @@ func Detect(path string) DetectionResult {
 	}
 
 	// Check languages in a defined order for consistent primary selection
-	orderedLanguages := []checker.Language{checker.LangGo, checker.LangPython, checker.LangNode}
+	orderedLanguages := []checker.Language{checker.LangGo, checker.LangPython, checker.LangNode, checker.LangJava}
 
 	for _, lang := range orderedLanguages {
 		indicators := LanguageIndicators[lang]

@@ -2,6 +2,90 @@
 
 A2 is a multi-language code quality checker. It auto-detects project language(s), runs a suite of checks, and provides a health score with actionable recommendations.
 
+Because of the amount of new code and projects created with the rise of `vibecoding`, I needed a way to assess the level of maturity of any project.
+
+`a2` should help you to understand if a project is production-ready or not, or in which level of the application life cycle it is: PoC, alpha, beta, prod ready?
+
+Checks are configurable and they cover big themes like:
+
+- Security best practices
+- Proper documentation
+- Comprehensive testing
+- Observability instrumentation
+- Production-ready configuration
+- Clean architecture patterns
+- Solid development workflow
+
+It'a up to you to decide which checks make sense for you and your project. `a2` allows you to configure what and what not to run. For example, if you run `a2 check` in this repo, you will get a response like this one:
+
+```
+a2 check
+A2 Analysis: a2
+               
+─────────────────────────────────────
+Languages: go
+
+✓ PASS Go Module
+    Module: github.com/ipedrazas/a2 (Go 1.25.5)
+✓ PASS Go Build
+    Build successful
+✓ PASS Go Tests
+    No test files found
+✓ PASS Go Race Detection
+    No test files to check for races
+✓ PASS Go Format
+    All Go files are properly formatted
+✓ PASS Go Vet
+    No issues found
+✓ PASS Go Coverage
+    Coverage: 51.1%
+✓ PASS Go Vulnerabilities
+    No known vulnerabilities found
+✓ PASS Go Complexity
+    No functions exceed complexity threshold (15)
+✓ PASS Required Files
+    All required files present
+✓ PASS Container Ready
+    Dockerfile found (consider adding .dockerignore)
+✓ PASS CI Pipeline
+    GitHub Actions, Taskfile configured
+✓ PASS Secrets Detection
+    Secret scanning configured: Gitleaks, pre-commit hook
+✓ PASS Changelog
+    CHANGELOG.md found (Keep a Changelog format)
+✓ PASS Golangci-lint
+✓ PASS Security Scan
+    Results:       
+                   
+                   
+    Summary:       
+      Gosec  : dev 
+      Files  : 62  
+      Lines  : 8544
+      Nosec  : 6   
+      Issues : 0   
+✓ PASS Secret Detection
+    ○                                                    
+        │╲                                               
+        │ ○                                              
+        ○ ░                                              
+        ░    gitleaks                                    
+                                                         
+    12:58AM INF scanned ~1109963 bytes (1.11 MB) in 479ms
+    12:58AM INF no leaks found                           
+✓ PASS Error Check
+✓ PASS Static Analysis
+✓ PASS Pre-commit Hooks
+    Pre-commit hooks configured: pre-commit, git hooks
+
+─────────────────────────────────────
+
+STATUS: ✓ ALL CHECKS PASSED
+
+Score: 20/20 checks passed (100%)
+```
+
+
 ## Features
 
 - **Multi-Language Support**: Go, Python, and Node.js (auto-detected or explicit)
