@@ -20,6 +20,4 @@ This document tracks proposed new languages for a2.
 ## Tasks
 
 - Make profiles configurable. Users should be able to define what an `API` profile looks like. Let's define the default profiles as external configuration files that the users can modify if they want to to match their expectations.
-- Update the readme adding all the langauges we support, explaining profiles and targets, update features and the different checks per language.
-- Breakdown checks.md
 - Add a new Status: Info, in case we want to run the check but we don't want to impact the maturity score
