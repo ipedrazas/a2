@@ -15,7 +15,7 @@ a2 should answer: "Is this application mature and production-ready?" by checking
 
 ---
 
-## Current Checks (53 total)
+## Current Checks (54 total)
 
 | Language | Checks |
 |----------|--------|
@@ -23,7 +23,7 @@ a2 should answer: "Is this application mature and production-ready?" by checking
 | Python | project, build, tests, format, lint, type, coverage, deps, complexity, logging |
 | Node.js | project, build, tests, format, lint, type, coverage, deps, logging |
 | Java | project, build, tests, format, lint, coverage, deps, logging |
-| Common | file_exists, dockerfile, ci, health, **secrets**, **env**, **api_docs**, **changelog**, **integration**, **metrics**, **errors**, **precommit**, **k8s**, **shutdown**, external |
+| Common | file_exists, dockerfile, ci, health, **secrets**, **env**, **license**, **api_docs**, **changelog**, **integration**, **metrics**, **errors**, **precommit**, **k8s**, **shutdown**, external |
 
 ---
 
@@ -57,7 +57,7 @@ Mature applications never store secrets in code. They use environment variables,
 
 ---
 
-### `common:license` [P1]
+### `common:license` [P1] ✅ IMPLEMENTED
 **Verify dependency license compliance**
 
 Mature applications track license obligations for legal compliance.
@@ -73,6 +73,8 @@ Mature applications track license obligations for legal compliance.
   - Go: `go-licenses`
   - Python: `pip-licenses`, `liccheck`
   - Node: `license-checker`, `license-compliance`
+
+**Implementation:** `pkg/checks/common/license.go`
 
 ---
 
@@ -555,10 +557,10 @@ Mature teams ensure consistent code style across all editors.
 | Priority | Count | Implemented | Categories |
 |----------|-------|-------------|------------|
 | P0 (High) | 10 | 9 | ✅ secrets, ✅ api_docs, ✅ changelog, ✅ integration, ✅ metrics, ✅ errors, ✅ k8s, ✅ shutdown, ✅ precommit |
-| P1 (Medium) | 13 | 1 | ✅ env, license, sast, security, contributing, e2e, tracing, migrations, config_validation, retry, errcheck, editorconfig |
+| P1 (Medium) | 13 | 2 | ✅ env, ✅ license, sast, security, contributing, e2e, tracing, migrations, config_validation, retry, errcheck, editorconfig |
 | P2 (Low) | 5 | 0 | conduct, godoc, fixtures, mocking, logging_config, di, architecture |
 
-**Total: 28 new checks (10 implemented, 18 remaining)**
+**Total: 28 new checks (11 implemented, 17 remaining)**
 
 ---
 

@@ -715,6 +715,7 @@ Comments are excluded from detection.
 | `common:health` | Health Endpoint | No | 930 | Detects health check endpoints |
 | `common:secrets` | Secrets Detection | No | 940 | Detects secret scanning config or hardcoded secrets |
 | `common:env` | Environment Config | No | 945 | Validates environment variable handling practices |
+| `common:license` | License Compliance | No | 950 | Verifies dependency license compliance tooling |
 | `common:api_docs` | API Documentation | No | 960 | Detects OpenAPI/Swagger specs and documentation generators |
 | `common:changelog` | Changelog | No | 965 | Verifies changelog or release notes exist |
 | `common:integration` | Integration Tests | No | 980 | Detects integration test directories, files, and E2E frameworks |
@@ -858,6 +859,56 @@ Validates environment variable handling practices to ensure configuration is pro
 - **Warn**: `.env` exists but not gitignored, or no environment configuration found
 
 **Recommendation:** Create `.env.example` to document required environment variables, and ensure `.env` is in `.gitignore`.
+
+### common:license
+
+Verifies that dependency license compliance tooling is configured to track license obligations.
+
+**License audit config files detected:**
+- `.licensrc`, `.licensrc.json`, `.licensrc.yaml`, `.licensrc.yml`
+- `license-checker.json`, `.license-checker.json`
+- `license.json`, `.licenserc`, `.licenserc.json`, `.licenserc.yaml`
+
+**FOSSA configuration detected:**
+- `.fossa.yml`, `.fossa.yaml`, `fossa.yml`, `fossa.yaml`
+
+**SPDX files detected:**
+- `spdx.json`, `spdx.yaml`, `spdx.yml`
+- `sbom.spdx`, `sbom.spdx.json`, `bom.spdx.json`
+
+**Go license tools detected (in go.mod):**
+- `github.com/google/go-licenses`
+- `github.com/mitchellh/golicense`
+- `github.com/uw-labs/lichen`
+- `github.com/anchore/syft`
+- `github.com/CycloneDX/cyclonedx-gomod`
+
+**Python license tools detected:**
+- `pip-licenses`, `liccheck`, `license-check`
+- `scancode-toolkit`, `cyclonedx-bom`, `cyclonedx-py`
+- Config files: `.liccheck.ini`, `liccheck.ini`
+
+**Node.js license tools detected (in package.json):**
+- `license-checker`, `license-compliance`, `license-webpack-plugin`
+- `legally`, `nlf`
+- `@cyclonedx/bom`, `@cyclonedx/cyclonedx-npm`
+- `snyk`
+
+**Java license tools detected (in pom.xml or build.gradle):**
+- `license-maven-plugin`, `com.mycila:license-maven-plugin`
+- `license-gradle-plugin`, `com.github.hierynomus.license`
+- `org.cyclonedx`, `cyclonedx-maven-plugin`, `cyclonedx-gradle-plugin`
+- `dependency-license-report`
+
+**CI license scanning detected:**
+- GitHub Actions: workflows containing `fossa-action`, `license-checker`, `go-licenses`, `pip-licenses`, `cyclonedx`, `sbom`
+- GitLab CI: jobs with license scanning keywords
+
+**Status:**
+- **Pass**: License compliance tooling or SBOM generation found
+- **Warn**: No license compliance tooling found
+
+**Recommendation:** Configure FOSSA, go-licenses, license-checker, or generate SBOM with CycloneDX for license compliance.
 
 ### common:api_docs
 
@@ -1229,8 +1280,8 @@ external:
 | Python | 10 | 3 | 7 |
 | Node.js | 9 | 3 | 6 |
 | Java | 8 | 3 | 5 |
-| Common | 14+ | 0 | 14+ |
-| **Total** | **51+** | **12** | **39+** |
+| Common | 15+ | 0 | 15+ |
+| **Total** | **52+** | **12** | **40+** |
 
 **Critical checks** stop execution in sequential mode when they fail.
 **Non-critical checks** report warnings but allow other checks to continue.

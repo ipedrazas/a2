@@ -69,6 +69,16 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
+			Checker: &LicenseCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:license",
+				Name:      "License Compliance",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     950,
+			},
+		},
+		{
 			Checker: &APIDocsCheck{},
 			Meta: checker.CheckMeta{
 				ID:        "common:api_docs",

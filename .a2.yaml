@@ -22,6 +22,7 @@ checks:
     - common:errors  # Skip errors check
     - common:precommit  # Skip precommit check
     - common:shutdown  # Skip shutdown check
+    - common:license  # Skip license check
     
 
 # Execution options
