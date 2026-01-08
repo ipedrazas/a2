@@ -4,10 +4,42 @@ This document describes all checks available in A2, organized by category.
 
 ## Table of Contents
 
+- [Check Statuses](#check-statuses)
 - [Language Checks](#language-checks)
 - [Common Checks](#common-checks)
 - [External Checks](#external-checks)
 - [Configuration Reference](#configuration-reference)
+
+---
+
+## Check Statuses
+
+Each check returns one of four statuses:
+
+| Status | Symbol | Color | Affects Score | Description |
+|--------|--------|-------|---------------|-------------|
+| **Pass** | `✓` | Green | Yes | Check passed successfully |
+| **Warn** | `!` | Yellow | Yes | Warning - something needs attention but isn't critical |
+| **Fail** | `✗` | Red | Yes | Check failed - critical issue detected |
+| **Info** | `i` | Cyan | No | Informational only - does not affect maturity score |
+
+### Score Calculation
+
+The maturity score is calculated as:
+
+```
+Score = (Passed / ScoredChecks) × 100%
+
+Where ScoredChecks = Passed + Warnings + Failed
+```
+
+**Info checks are excluded from the score calculation.** This allows you to run checks that provide useful information without penalizing the project's maturity rating.
+
+### Use Cases for Info Status
+
+- Optional recommendations (e.g., "consider adding a CONTRIBUTING.md")
+- Informational metrics (e.g., code statistics)
+- Checks you want visibility into without enforcement
 
 ---
 

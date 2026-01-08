@@ -34,6 +34,12 @@ func (suite *CheckerTypesTestSuite) TestStatus_String_Fail() {
 	suite.Equal("FAIL", status.String())
 }
 
+// TestStatus_String_Info tests that Info status returns "INFO".
+func (suite *CheckerTypesTestSuite) TestStatus_String_Info() {
+	status := Info
+	suite.Equal("INFO", status.String())
+}
+
 // TestStatus_String_Unknown tests that unknown status returns "UNKNOWN".
 func (suite *CheckerTypesTestSuite) TestStatus_String_Unknown() {
 	// Test with a status value that doesn't exist
@@ -46,6 +52,7 @@ func (suite *CheckerTypesTestSuite) TestStatus_String_AllValues() {
 	suite.Equal("PASS", Pass.String())
 	suite.Equal("WARN", Warn.String())
 	suite.Equal("FAIL", Fail.String())
+	suite.Equal("INFO", Info.String())
 }
 
 // TestCheckerTypesTestSuite runs all the tests in the suite.

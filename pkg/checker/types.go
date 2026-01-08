@@ -25,6 +25,7 @@ const (
 	Pass Status = iota // Pass: Check passed, no issues
 	Warn               // Warn: Something is wrong, but not critical
 	Fail               // Fail: Critical failure, stops execution (the Veto)
+	Info               // Info: Informational only, does not affect maturity score
 )
 
 func (s Status) String() string {
@@ -35,6 +36,8 @@ func (s Status) String() string {
 		return "WARN"
 	case Fail:
 		return "FAIL"
+	case Info:
+		return "INFO"
 	default:
 		return "UNKNOWN"
 	}

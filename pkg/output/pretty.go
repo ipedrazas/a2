@@ -43,6 +43,10 @@ var (
 			Foreground(red).
 			Bold(true)
 
+	infoStyle = lipgloss.NewStyle().
+			Foreground(cyan).
+			Bold(true)
+
 	messageStyle = lipgloss.NewStyle().
 			Foreground(gray).
 			PaddingLeft(4)
@@ -141,6 +145,10 @@ func printResult(r checker.Result) {
 		symbol = "✗"
 		status = "FAIL"
 		style = failStyle
+	case checker.Info:
+		symbol = "ℹ"
+		status = "INFO"
+		style = infoStyle
 	}
 
 	// Print the check result
@@ -173,17 +181,22 @@ func printStatus(result runner.SuiteResult) {
 }
 
 func printScore(result runner.SuiteResult) {
-	total := result.TotalChecks()
+	// Use ScoredChecks to exclude Info from score calculation
+	scoredTotal := result.ScoredChecks()
 	passed := result.Passed
 
 	// Calculate percentage
 	var pct float64
-	if total > 0 {
-		pct = float64(passed) / float64(total) * 100
+	if scoredTotal > 0 {
+		pct = float64(passed) / float64(scoredTotal) * 100
 	}
 
 	fmt.Println()
-	fmt.Println(scoreStyle.Render(fmt.Sprintf("Score: %d/%d checks passed (%.0f%%)", passed, total, pct)))
+	scoreMsg := fmt.Sprintf("Score: %d/%d checks passed (%.0f%%)", passed, scoredTotal, pct)
+	if result.Info > 0 {
+		scoreMsg += fmt.Sprintf(" + %d info", result.Info)
+	}
+	fmt.Println(scoreStyle.Render(scoreMsg))
 }
 
 func printMaturity(result runner.SuiteResult) {

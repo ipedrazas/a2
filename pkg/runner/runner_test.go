@@ -625,6 +625,126 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelWithError() {
 	suite.Contains(result.Results[1].Message, "Internal error")
 }
 
+// TestRunSuite_WithInfo tests that Info status checks are counted separately and don't affect score.
+func (suite *RunnerTestSuite) TestRunSuite_WithInfo() {
+	checks := []checker.Checker{
+		&mockChecker{
+			id:   "check1",
+			name: "Check 1",
+			result: checker.Result{
+				Name:    "Check 1",
+				ID:      "check1",
+				Passed:  true,
+				Status:  checker.Pass,
+				Message: "Passed",
+			},
+		},
+		&mockChecker{
+			id:   "check2",
+			name: "Check 2",
+			result: checker.Result{
+				Name:    "Check 2",
+				ID:      "check2",
+				Passed:  true,
+				Status:  checker.Info,
+				Message: "Informational only",
+			},
+		},
+		&mockChecker{
+			id:   "check3",
+			name: "Check 3",
+			result: checker.Result{
+				Name:    "Check 3",
+				ID:      "check3",
+				Passed:  true,
+				Status:  checker.Pass,
+				Message: "Passed",
+			},
+		},
+	}
+
+	result := RunSuite("/test/path", checks)
+
+	suite.Equal(3, result.TotalChecks())  // All checks ran
+	suite.Equal(2, result.ScoredChecks()) // Only 2 count toward score (excluding Info)
+	suite.Equal(2, result.Passed)
+	suite.Equal(0, result.Warnings)
+	suite.Equal(0, result.Failed)
+	suite.Equal(1, result.Info)
+	suite.False(result.Aborted)
+	suite.True(result.Success())
+}
+
+// TestRunSuite_InfoDoesNotAbort tests that Info status doesn't cause abortion.
+func (suite *RunnerTestSuite) TestRunSuite_InfoDoesNotAbort() {
+	checks := []checker.Checker{
+		&mockChecker{
+			id:   "check1",
+			name: "Check 1",
+			result: checker.Result{
+				Name:    "Check 1",
+				ID:      "check1",
+				Passed:  true,
+				Status:  checker.Info,
+				Message: "Info 1",
+			},
+		},
+		&mockChecker{
+			id:   "check2",
+			name: "Check 2",
+			result: checker.Result{
+				Name:    "Check 2",
+				ID:      "check2",
+				Passed:  true,
+				Status:  checker.Info,
+				Message: "Info 2",
+			},
+		},
+		&mockChecker{
+			id:   "check3",
+			name: "Check 3",
+			result: checker.Result{
+				Name:    "Check 3",
+				ID:      "check3",
+				Passed:  true,
+				Status:  checker.Pass,
+				Message: "Should run",
+			},
+		},
+	}
+
+	result := RunSuiteSequential("/test/path", checks)
+
+	suite.Equal(3, result.TotalChecks())  // All checks should run
+	suite.Equal(1, result.ScoredChecks()) // Only 1 counts toward score
+	suite.Equal(1, result.Passed)
+	suite.Equal(0, result.Warnings)
+	suite.Equal(0, result.Failed)
+	suite.Equal(2, result.Info)
+	suite.False(result.Aborted)
+	suite.True(result.Success())
+}
+
+// TestSuiteResult_ScoredChecks tests the ScoredChecks method.
+func (suite *RunnerTestSuite) TestSuiteResult_ScoredChecks() {
+	result := SuiteResult{
+		Results: []checker.Result{
+			{ID: "check1", Status: checker.Pass},
+			{ID: "check2", Status: checker.Warn},
+			{ID: "check3", Status: checker.Fail},
+			{ID: "check4", Status: checker.Info},
+			{ID: "check5", Status: checker.Info},
+		},
+		Passed:   1,
+		Warnings: 1,
+		Failed:   1,
+		Info:     2,
+	}
+
+	suite.Equal(5, result.TotalChecks())
+	suite.Equal(3, result.ScoredChecks()) // Excludes Info
+}
+
 // TestRunnerTestSuite runs all the tests in the suite.
 func TestRunnerTestSuite(t *testing.T) {
 	suite.Run(t, new(RunnerTestSuite))

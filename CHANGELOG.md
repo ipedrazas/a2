@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Info status**: New check status for informational checks that don't affect maturity score
+  - Checks with Info status are executed and displayed but excluded from score calculation
+  - Useful for optional recommendations (e.g., "license not found" without penalty)
+  - Output shows Info results with cyan color and `i` symbol in terminal
+  - JSON output includes `info` count in summary
 - **Application profiles** (`--profile` flag) for different application types:
   - `cli` - Command-line tools (skips health, k8s, metrics, api_docs, etc.)
   - `api` - Web services/APIs (all operational checks enabled)

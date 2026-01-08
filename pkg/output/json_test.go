@@ -42,6 +42,12 @@ func (suite *JSONTestSuite) TestStatusToString_Fail() {
 	suite.Equal("fail", result)
 }
 
+// TestStatusToString_Info tests that statusToString converts Info to "info".
+func (suite *JSONTestSuite) TestStatusToString_Info() {
+	result := statusToString(checker.Info)
+	suite.Equal("info", result)
+}
+
 // TestStatusToString_Unknown tests that statusToString handles unknown status.
 func (suite *JSONTestSuite) TestStatusToString_Unknown() {
 	result := statusToString(checker.Status(99))
@@ -83,7 +89,9 @@ func (suite *JSONTestSuite) TestCalculateScore_PartialPass() {
 			{Status: checker.Warn},
 			{Status: checker.Fail},
 		},
-		Passed: 2,
+		Passed:   2,
+		Warnings: 1,
+		Failed:   1,
 	}
 
 	score := calculateScore(result)
@@ -97,7 +105,9 @@ func (suite *JSONTestSuite) TestCalculateScore_NoPass() {
 			{Status: checker.Warn},
 			{Status: checker.Fail},
 		},
-		Passed: 0,
+		Passed:   0,
+		Warnings: 1,
+		Failed:   1,
 	}
 
 	score := calculateScore(result)
@@ -114,7 +124,8 @@ func (suite *JSONTestSuite) TestCalculateScore_MixedResults() {
 			{Status: checker.Warn},
 			{Status: checker.Warn},
 		},
-		Passed: 3,
+		Passed:   3,
+		Warnings: 2,
 	}
 
 	score := calculateScore(result)

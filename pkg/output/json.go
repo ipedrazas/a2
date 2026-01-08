@@ -36,6 +36,7 @@ type JSONSummary struct {
 	Passed   int     `json:"passed"`
 	Warnings int     `json:"warnings"`
 	Failed   int     `json:"failed"`
+	Info     int     `json:"info"`
 	Score    float64 `json:"score"`
 }
 
@@ -61,10 +62,11 @@ func JSON(result runner.SuiteResult, detected language.DetectionResult) error {
 		Languages: langs,
 		Results:   make([]JSONResult, 0, len(result.Results)),
 		Summary: JSONSummary{
-			Total:    result.TotalChecks(),
+			Total:    result.ScoredChecks(), // Excludes Info from total
 			Passed:   result.Passed,
 			Warnings: result.Warnings,
 			Failed:   result.Failed,
+			Info:     result.Info,
 			Score:    calculateScore(result),
 		},
 		Maturity: JSONMaturity{
@@ -107,15 +109,18 @@ func statusToString(s checker.Status) string {
 		return "warn"
 	case checker.Fail:
 		return "fail"
+	case checker.Info:
+		return "info"
 	default:
 		return "unknown"
 	}
 }
 
 func calculateScore(result runner.SuiteResult) float64 {
-	total := result.TotalChecks()
-	if total == 0 {
+	// Use ScoredChecks to exclude Info from score calculation
+	scoredTotal := result.ScoredChecks()
+	if scoredTotal == 0 {
 		return 100.0
 	}
-	return float64(result.Passed) / float64(total) * 100
+	return float64(result.Passed) / float64(scoredTotal) * 100
 }

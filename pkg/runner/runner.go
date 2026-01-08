@@ -13,6 +13,7 @@ type SuiteResult struct {
 	Passed   int              // Number of passed checks
 	Warnings int              // Number of warning checks
 	Failed   int              // Number of failed checks
+	Info     int              // Number of informational checks (excluded from score)
 }
 
 // RunSuiteOptions configures how the suite is executed.
@@ -87,6 +88,8 @@ func runParallel(path string, checks []checker.Checker) SuiteResult {
 			if !res.Passed {
 				result.Aborted = true
 			}
+		case checker.Info:
+			result.Info++
 		}
 	}
 
@@ -120,6 +123,8 @@ func runSequential(path string, checks []checker.Checker) SuiteResult {
 			result.Warnings++
 		case checker.Fail:
 			result.Failed++
+		case checker.Info:
+			result.Info++
 		}
 
 		// Veto Power Logic: stop if a critical check fails
@@ -135,6 +140,12 @@ func runSequential(path string, checks []checker.Checker) SuiteResult {
 // TotalChecks returns the total number of checks that were run.
 func (s *SuiteResult) TotalChecks() int {
 	return len(s.Results)
+}
+
+// ScoredChecks returns the number of checks that affect the maturity score.
+// This excludes Info status checks which are informational only.
+func (s *SuiteResult) ScoredChecks() int {
+	return s.Passed + s.Warnings + s.Failed
 }
 
 // Success returns true if no checks failed (warnings are allowed).

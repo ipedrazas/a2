@@ -13,7 +13,11 @@ type MaturityTestSuite struct {
 }
 
 func (s *MaturityTestSuite) makeResult(passed, warnings, failed int) runner.SuiteResult {
-	results := make([]checker.Result, passed+warnings+failed)
+	return s.makeResultWithInfo(passed, warnings, failed, 0)
+}
+
+func (s *MaturityTestSuite) makeResultWithInfo(passed, warnings, failed, info int) runner.SuiteResult {
+	results := make([]checker.Result, passed+warnings+failed+info)
 	idx := 0
 
 	for i := 0; i < passed; i++ {
@@ -28,12 +32,17 @@ func (s *MaturityTestSuite) makeResult(passed, warnings, failed int) runner.Suit
 		results[idx] = checker.Result{Status: checker.Fail, Passed: false}
 		idx++
 	}
+	for i := 0; i < info; i++ {
+		results[idx] = checker.Result{Status: checker.Info, Passed: true}
+		idx++
+	}
 
 	return runner.SuiteResult{
 		Results:  results,
 		Passed:   passed,
 		Warnings: warnings,
 		Failed:   failed,
+		Info:     info,
 	}
 }
 
@@ -164,6 +173,56 @@ func (s *MaturityTestSuite) TestEstimate_FieldsPopulated() {
 	s.Equal(3, est.Warnings)
 	s.Equal(2, est.Failed)
 	s.Equal(10, est.Total)
+}
+
+func (s *MaturityTestSuite) TestEstimate_InfoExcludedFromScore() {
+	// 10 passed + 5 info = 100% score (info excluded)
+	result := s.makeResultWithInfo(10, 0, 0, 5)
+	est := Estimate(result)
+
+	s.Equal(ProductionReady, est.Level)
+	s.Equal(float64(100), est.Score)
+	s.Equal(10, est.Passed)
+	s.Equal(0, est.Warnings)
+	s.Equal(0, est.Failed)
+	s.Equal(5, est.Info)
+	s.Equal(10, est.Total) // Only scored checks
+}
+
+func (s *MaturityTestSuite) TestEstimate_InfoDoesNotAffectScore() {
+	// 8 passed, 2 warnings = 80% (info excluded from calculation)
+	result := s.makeResultWithInfo(8, 2, 0, 10)
+	est := Estimate(result)
+
+	s.Equal(Mature, est.Level)
+	s.Equal(float64(80), est.Score) // 8/(8+2+0) = 80%
+	s.Equal(8, est.Passed)
+	s.Equal(2, est.Warnings)
+	s.Equal(0, est.Failed)
+	s.Equal(10, est.Info)
+	s.Equal(10, est.Total) // Only scored checks (not 20)
+}
+
+func (s *MaturityTestSuite) TestEstimate_OnlyInfoChecks() {
+	// Only info checks = PoC with score 0 (no scored checks)
+	result := s.makeResultWithInfo(0, 0, 0, 5)
+	est := Estimate(result)
+
+	s.Equal(PoC, est.Level)
+	s.Equal(float64(0), est.Score)
+	s.Equal(0, est.Total)
+	s.Equal(5, est.Info)
+}
+
+func (s *MaturityTestSuite) TestEstimate_InfoWithFailures() {
+	// Info shouldn't mask failures
+	result := s.makeResultWithInfo(5, 0, 5, 10)
+	est := Estimate(result)
+
+	s.Equal(float64(50), est.Score) // 5/(5+0+5) = 50%
+	s.Equal(5, est.Failed)
+	s.Equal(10, est.Info)
+	s.Equal(10, est.Total) // Only scored checks
 }
 
 func TestMaturityTestSuite(t *testing.T) {

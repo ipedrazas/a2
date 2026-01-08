@@ -54,25 +54,28 @@ type Estimation struct {
 	Passed      int      // Number of passed checks
 	Warnings    int      // Number of warnings
 	Failed      int      // Number of failed checks
-	Total       int      // Total number of checks run
+	Info        int      // Number of informational checks (excluded from score)
+	Total       int      // Total number of scored checks (excludes Info)
 	Suggestions []string // Recommendations for improvement
 }
 
 // Estimate analyzes check results and returns a maturity estimation.
 func Estimate(result runner.SuiteResult) Estimation {
-	total := result.TotalChecks()
-	if total == 0 {
-		return Estimation{Level: PoC, Score: 0}
+	// Use ScoredChecks to exclude Info status from score calculation
+	scoredTotal := result.ScoredChecks()
+	if scoredTotal == 0 {
+		return Estimation{Level: PoC, Score: 0, Info: result.Info}
 	}
 
-	score := float64(result.Passed) / float64(total) * 100
+	score := float64(result.Passed) / float64(scoredTotal) * 100
 
 	est := Estimation{
 		Score:    score,
 		Passed:   result.Passed,
 		Warnings: result.Warnings,
 		Failed:   result.Failed,
-		Total:    total,
+		Info:     result.Info,
+		Total:    scoredTotal,
 	}
 
 	// Determine level based on score and failure count

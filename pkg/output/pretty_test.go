@@ -201,7 +201,9 @@ func (suite *PrettyTestSuite) TestPrintScore_Partial() {
 			{Status: checker.Pass},
 			{Status: checker.Fail},
 		},
-		Passed: 2,
+		Passed:   2,
+		Warnings: 1,
+		Failed:   1,
 	}
 
 	output := captureStdout(func() {
