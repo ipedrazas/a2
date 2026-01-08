@@ -714,6 +714,7 @@ Comments are excluded from detection.
 | `common:ci` | CI Pipeline | No | 920 | Detects CI/CD configuration |
 | `common:health` | Health Endpoint | No | 930 | Detects health check endpoints |
 | `common:secrets` | Secrets Detection | No | 940 | Detects secret scanning config or hardcoded secrets |
+| `common:env` | Environment Config | No | 945 | Validates environment variable handling practices |
 | `common:api_docs` | API Documentation | No | 960 | Detects OpenAPI/Swagger specs and documentation generators |
 | `common:changelog` | Changelog | No | 965 | Verifies changelog or release notes exist |
 | `common:integration` | Integration Tests | No | 980 | Detects integration test directories, files, and E2E frameworks |
@@ -831,6 +832,32 @@ Detects secret scanning configuration or scans for hardcoded secrets in the code
 - **Warn**: Potential secrets found, or no secret scanning configured
 
 **Recommendation:** Configure Gitleaks or similar tool for automated secret scanning.
+
+### common:env
+
+Validates environment variable handling practices to ensure configuration is properly separated from code.
+
+**Environment template files detected:**
+- `.env.example`, `.env.sample`, `.env.template`, `example.env`, `.env.local.example`
+
+**Dotenv libraries detected:**
+- Go: `github.com/joho/godotenv`, `github.com/caarlos0/env`, `github.com/kelseyhightower/envconfig`, `github.com/spf13/viper`
+- Python: `python-dotenv`, `environs`, `pydantic-settings`, `django-environ`, `dynaconf`
+- Node.js: `dotenv`, `dotenv-safe`, `dotenv-expand`, `env-cmd`, `cross-env`
+- Java: Spring Boot (`application.properties`, `application.yml`), `dotenv-java`
+
+**Gitignore detection:**
+- Checks if `.env` is listed in `.gitignore`
+- Recognizes patterns: `.env`, `.env*`, `.env.*`, `*.env`, `.env.local`
+
+**Issues detected:**
+- `.env` file exists but not in `.gitignore` (potential secret exposure)
+
+**Status:**
+- **Pass**: Environment template found, dotenv library detected, or `.env` properly gitignored
+- **Warn**: `.env` exists but not gitignored, or no environment configuration found
+
+**Recommendation:** Create `.env.example` to document required environment variables, and ensure `.env` is in `.gitignore`.
 
 ### common:api_docs
 
@@ -1202,8 +1229,8 @@ external:
 | Python | 10 | 3 | 7 |
 | Node.js | 9 | 3 | 6 |
 | Java | 8 | 3 | 5 |
-| Common | 13+ | 0 | 13+ |
-| **Total** | **50+** | **12** | **38+** |
+| Common | 14+ | 0 | 14+ |
+| **Total** | **51+** | **12** | **39+** |
 
 **Critical checks** stop execution in sequential mode when they fail.
 **Non-critical checks** report warnings but allow other checks to continue.

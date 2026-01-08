@@ -59,6 +59,16 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
+			Checker: &EnvCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:env",
+				Name:      "Environment Config",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     945,
+			},
+		},
+		{
 			Checker: &APIDocsCheck{},
 			Meta: checker.CheckMeta{
 				ID:        "common:api_docs",

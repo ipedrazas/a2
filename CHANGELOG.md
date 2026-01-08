@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `common:metrics` check - Detects metrics instrumentation (Prometheus, OpenTelemetry, Datadog, etc.)
 - `common:errors` check - Detects error tracking configuration (Sentry, Rollbar, Bugsnag, etc.)
 - `common:shutdown` check - Detects graceful shutdown handling (signal handlers, K8s lifecycle hooks)
+- `common:env` check - Validates environment variable handling (.env.example, dotenv libraries, .gitignore)
 - `backlog.md` documenting proposed maturity checks for future implementation
 
 ### Changed
