@@ -714,8 +714,13 @@ Comments are excluded from detection.
 | `common:ci` | CI Pipeline | No | 920 | Detects CI/CD configuration |
 | `common:health` | Health Endpoint | No | 930 | Detects health check endpoints |
 | `common:secrets` | Secrets Detection | No | 940 | Detects secret scanning config or hardcoded secrets |
+| `common:api_docs` | API Documentation | No | 960 | Detects OpenAPI/Swagger specs and documentation generators |
 | `common:changelog` | Changelog | No | 965 | Verifies changelog or release notes exist |
+| `common:integration` | Integration Tests | No | 980 | Detects integration test directories, files, and E2E frameworks |
+| `common:metrics` | Metrics Instrumentation | No | 1010 | Detects Prometheus, OpenTelemetry, and other metrics libraries |
+| `common:errors` | Error Tracking | No | 1020 | Detects Sentry, Rollbar, Bugsnag, and other error tracking SDKs |
 | `common:k8s` | Kubernetes Ready | No | 1030 | Detects Kubernetes manifests and deployment configurations |
+| `common:shutdown` | Graceful Shutdown | No | 1035 | Detects signal handling and graceful shutdown configuration |
 | `common:precommit` | Pre-commit Hooks | No | 1065 | Verifies pre-commit hooks are configured |
 
 ### file_exists
@@ -827,6 +832,34 @@ Detects secret scanning configuration or scans for hardcoded secrets in the code
 
 **Recommendation:** Configure Gitleaks or similar tool for automated secret scanning.
 
+### common:api_docs
+
+Detects API documentation configuration and files.
+
+**OpenAPI/Swagger files detected:**
+- `openapi.yaml`, `openapi.yml`, `openapi.json`
+- `swagger.yaml`, `swagger.yml`, `swagger.json`
+- `api.yaml`, `api.yml`, `api.json`
+- Searched in root and `docs/`, `api/` directories
+
+**Documentation directories detected:**
+- `docs/api/`, `api-docs/`, `api/docs/`, `swagger/`, `swagger-ui/`
+
+**Documentation generators detected:**
+- Go: `swaggo/swag`, `go-swagger`, `grpc-gateway`
+- Python: `drf-spectacular`, `drf-yasg`, `flasgger`, `flask-restx`, `FastAPI`
+- Node.js: `swagger-jsdoc`, `swagger-ui-express`, `@nestjs/swagger`, `tsoa`
+
+**Also detected:**
+- GraphQL schemas: `schema.graphql`, `schema.gql`
+- Protocol Buffers: `*.proto` files
+
+**Status:**
+- **Pass**: API documentation or generator found
+- **Warn**: No API documentation found
+
+**Recommendation:** Add OpenAPI/Swagger specification or use a documentation generator.
+
 ### common:changelog
 
 Verifies that a changelog or release notes file exists, and detects release tooling configuration.
@@ -855,6 +888,87 @@ Verifies that a changelog or release notes file exists, and detects release tool
 - **Warn**: No changelog or release tooling found
 
 **Recommendation:** Create a `CHANGELOG.md` following [Keep a Changelog](https://keepachangelog.com) format.
+
+### common:integration
+
+Detects integration test directories, files, and E2E testing frameworks.
+
+**Integration test directories detected:**
+- `tests/integration/`, `test/integration/`
+- `integration_tests/`, `integration-tests/`
+- `tests/e2e/`, `test/e2e/`, `e2e/`, `e2e-tests/`
+
+**Integration test file patterns:**
+- Go: `*_integration_test.go`, `*_integ_test.go`
+- Python: `test_integration_*.py`, `test_*_integration.py`
+- Node.js/TypeScript: `*.integration.test.ts`, `*.integration.spec.ts`, `*.e2e.test.ts`
+
+**Test infrastructure detected:**
+- Docker Compose for tests: `docker-compose.test.yml`, `docker-compose.e2e.yml`
+- testcontainers library usage
+
+**E2E testing frameworks detected:**
+- Cypress: `cypress.config.js`, `cypress.config.ts`
+- Playwright: `playwright.config.js`, `playwright.config.ts`
+- WebdriverIO: `wdio.conf.js`, `wdio.conf.ts`
+- Selenium: `selenium-webdriver` in dependencies
+
+**Status:**
+- **Pass**: Integration tests or E2E framework found
+- **Warn**: No integration tests found
+
+**Recommendation:** Add integration tests in `tests/integration/` directory.
+
+### common:metrics
+
+Detects metrics instrumentation libraries and configuration.
+
+**Metrics libraries detected:**
+- Go: `prometheus/client_golang`, `go-metrics`, `opentelemetry-go`, `datadog/dd-trace-go`
+- Python: `prometheus_client`, `statsd`, `opentelemetry`, `ddtrace`
+- Node.js: `prom-client`, `hot-shots`, `@opentelemetry/sdk-metrics`, `dd-trace`
+- Java: `micrometer`, `prometheus`, `dropwizard-metrics`, `opentelemetry`
+
+**Configuration files detected:**
+- `prometheus.yml`, `prometheus.yaml`
+- `otel-collector-config.yaml`
+- `metrics.yml`, `metrics.yaml`
+
+**Also detected:**
+- Grafana dashboards in `grafana/` or `dashboards/` directories
+- `/metrics` endpoint patterns in source code
+
+**Status:**
+- **Pass**: Metrics library or configuration found
+- **Warn**: No metrics instrumentation found
+
+**Recommendation:** Add Prometheus client or OpenTelemetry for metrics instrumentation.
+
+### common:errors
+
+Detects error tracking SDK configuration.
+
+**Error tracking SDKs detected:**
+- Go: `getsentry/sentry-go`, `rollbar/rollbar-go`, `bugsnag/bugsnag-go`
+- Python: `sentry-sdk`, `rollbar`, `bugsnag`, `honeybadger`
+- Node.js: `@sentry/node`, `rollbar`, `@bugsnag/js`, `@honeybadger-io/js`
+- Java: `sentry`, `rollbar`, `bugsnag`
+
+**Configuration files detected:**
+- `.sentryclirc`, `sentry.properties`
+- `.rollbar`, `bugsnag.json`
+
+**Environment variables detected (in .env.example):**
+- `SENTRY_DSN`, `ROLLBAR_TOKEN`, `BUGSNAG_API_KEY`
+
+**CI integration detected:**
+- Sentry release uploads in GitHub Actions
+
+**Status:**
+- **Pass**: Error tracking SDK or configuration found
+- **Warn**: No error tracking found
+
+**Recommendation:** Add Sentry, Rollbar, or Bugsnag for error tracking.
 
 ### common:k8s
 
@@ -895,6 +1009,40 @@ Detects Kubernetes manifests, Helm charts, and other deployment configurations f
 - **Warn**: No deployment configuration found
 
 **Recommendation:** Configure Kubernetes manifests, Helm charts, or Docker Compose for reproducible deployments.
+
+### common:shutdown
+
+Detects graceful shutdown handling for proper process termination.
+
+**Go signal handling detected:**
+- `signal.Notify`, `os.Signal`, `syscall.SIGTERM`, `syscall.SIGINT`
+- `server.Shutdown`, `context.WithCancel`
+- Graceful shutdown packages: `oklog/run`, `errgroup`
+
+**Python signal handling detected:**
+- `signal.signal`, `signal.SIGTERM`, `signal.SIGINT`
+- `atexit.register`
+- `asyncio` signal handlers
+
+**Node.js signal handling detected:**
+- `process.on('SIGTERM')`, `process.on('SIGINT')`
+- `process.on('beforeExit')`, `process.on('exit')`
+- Graceful shutdown packages: `http-terminator`, `stoppable`, `@godaddy/terminus`, `lightship`
+
+**Java shutdown hooks detected:**
+- `Runtime.getRuntime().addShutdownHook`
+- `@PreDestroy` annotation
+- `DisposableBean`, `SmartLifecycle` Spring interfaces
+
+**Kubernetes lifecycle hooks detected:**
+- `terminationGracePeriodSeconds` in manifests
+- `preStop` lifecycle hooks
+
+**Status:**
+- **Pass**: Signal handling or shutdown hooks found
+- **Warn**: No graceful shutdown handling found
+
+**Recommendation:** Handle SIGTERM/SIGINT signals to complete in-flight requests before shutdown.
 
 ### common:precommit
 
@@ -1054,8 +1202,8 @@ external:
 | Python | 10 | 3 | 7 |
 | Node.js | 9 | 3 | 6 |
 | Java | 8 | 3 | 5 |
-| Common | 8+ | 0 | 8+ |
-| **Total** | **45+** | **12** | **33+** |
+| Common | 13+ | 0 | 13+ |
+| **Total** | **50+** | **12** | **38+** |
 
 **Critical checks** stop execution in sequential mode when they fail.
 **Non-critical checks** report warnings but allow other checks to continue.

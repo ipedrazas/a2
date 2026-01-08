@@ -59,6 +59,16 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
+			Checker: &APIDocsCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:api_docs",
+				Name:      "API Documentation",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     960,
+			},
+		},
+		{
 			Checker: &ChangelogCheck{},
 			Meta: checker.CheckMeta{
 				ID:        "common:changelog",
@@ -66,6 +76,36 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Languages: []checker.Language{checker.LangCommon},
 				Critical:  false,
 				Order:     965,
+			},
+		},
+		{
+			Checker: &IntegrationCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:integration",
+				Name:      "Integration Tests",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     980,
+			},
+		},
+		{
+			Checker: &MetricsCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:metrics",
+				Name:      "Metrics Instrumentation",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     1010,
+			},
+		},
+		{
+			Checker: &ErrorsCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:errors",
+				Name:      "Error Tracking",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     1020,
 			},
 		},
 		{
@@ -86,6 +126,16 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Languages: []checker.Language{checker.LangCommon},
 				Critical:  false,
 				Order:     1030,
+			},
+		},
+		{
+			Checker: &ShutdownCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:shutdown",
+				Name:      "Graceful Shutdown",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     1035,
 			},
 		},
 	}

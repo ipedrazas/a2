@@ -15,14 +15,15 @@ a2 should answer: "Is this application mature and production-ready?" by checking
 
 ---
 
-## Current Checks (39 total)
+## Current Checks (52 total)
 
 | Language | Checks |
 |----------|--------|
 | Go | module, build, tests, race, format, vet, coverage, deps, cyclomatic, logging |
 | Python | project, build, tests, format, lint, type, coverage, deps, complexity, logging |
 | Node.js | project, build, tests, format, lint, type, coverage, deps, logging |
-| Common | file_exists, dockerfile, ci, health, **secrets**, **changelog**, **precommit**, **k8s**, external |
+| Java | project, build, tests, format, lint, coverage, deps, logging |
+| Common | file_exists, dockerfile, ci, health, **secrets**, **api_docs**, **changelog**, **integration**, **metrics**, **errors**, **precommit**, **k8s**, **shutdown**, external |
 
 ---
 
@@ -127,7 +128,7 @@ Mature applications have automated security scanning in their pipeline.
 
 ## 2. Documentation Checks
 
-### `common:api_docs` [P0]
+### `common:api_docs` [P0] ✅ IMPLEMENTED
 **Verify API documentation exists**
 
 Mature APIs are well-documented; OpenAPI specs enable client generation and testing.
@@ -217,7 +218,7 @@ Mature code is self-documenting; exported APIs should have clear docs.
 
 ## 3. Testing Depth Checks
 
-### `common:integration` [P0]
+### `common:integration` [P0] ✅ IMPLEMENTED
 **Verify integration tests exist**
 
 Mature applications test components working together, not just in isolation.
@@ -290,7 +291,7 @@ Mature applications mock external dependencies for reliable, fast tests.
 
 ## 4. Observability Checks
 
-### `common:metrics` [P0]
+### `common:metrics` [P0] ✅ IMPLEMENTED
 **Verify metrics instrumentation exists**
 
 Mature applications expose metrics for monitoring and alerting.
@@ -329,7 +330,7 @@ Mature microservices need request tracing for debugging.
 
 ---
 
-### `common:errors` [P0]
+### `common:errors` [P0] ✅ IMPLEMENTED
 **Verify error tracking is configured**
 
 Mature applications capture and report errors to monitoring services.
@@ -386,7 +387,7 @@ Mature cloud-native applications have declarative deployment configurations.
 
 ---
 
-### `common:shutdown` [P0]
+### `common:shutdown` [P0] ✅ IMPLEMENTED
 **Verify graceful shutdown handling**
 
 Mature applications handle SIGTERM/SIGINT to complete in-flight requests.
@@ -551,11 +552,11 @@ Mature teams ensure consistent code style across all editors.
 
 | Priority | Count | Implemented | Categories |
 |----------|-------|-------------|------------|
-| P0 (High) | 10 | 4 | ✅ secrets, api_docs, ✅ changelog, integration, metrics, errors, ✅ k8s, shutdown, ✅ precommit |
+| P0 (High) | 10 | 9 | ✅ secrets, ✅ api_docs, ✅ changelog, ✅ integration, ✅ metrics, ✅ errors, ✅ k8s, ✅ shutdown, ✅ precommit |
 | P1 (Medium) | 13 | 0 | license, env, sast, security, contributing, e2e, tracing, migrations, config_validation, retry, errcheck, editorconfig |
 | P2 (Low) | 5 | 0 | conduct, godoc, fixtures, mocking, logging_config, di, architecture |
 
-**Total: 28 new checks (4 implemented, 24 remaining)**
+**Total: 28 new checks (9 implemented, 19 remaining)**
 
 ---
 

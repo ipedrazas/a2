@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `common:precommit` check - Detects pre-commit hooks (pre-commit, Husky, Lefthook, Overcommit, commitlint, lint-staged)
 - `common:changelog` check - Detects changelog files and release tooling (GoReleaser, semantic-release, release-please)
 - `common:secrets` check - Detects secret scanning tools and scans for hardcoded secrets
+- `common:api_docs` check - Detects API documentation (OpenAPI/Swagger specs, documentation generators)
+- `common:integration` check - Detects integration tests (directories, test files, E2E frameworks, testcontainers)
+- `common:metrics` check - Detects metrics instrumentation (Prometheus, OpenTelemetry, Datadog, etc.)
+- `common:errors` check - Detects error tracking configuration (Sentry, Rollbar, Bugsnag, etc.)
+- `common:shutdown` check - Detects graceful shutdown handling (signal handlers, K8s lifecycle hooks)
 - `backlog.md` documenting proposed maturity checks for future implementation
 
 ### Changed

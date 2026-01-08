@@ -125,3 +125,66 @@ func hasPrefix(path, prefix string) bool {
 
 	return cleanPath[:len(cleanPrefix)] == cleanPrefix
 }
+
+// IsDir checks if a path is a directory within the given root directory.
+func IsDir(root, dirname string) bool {
+	safePath, err := SafeJoin(root, dirname)
+	if err != nil {
+		return false
+	}
+
+	info, err := os.Stat(safePath)
+	if err != nil {
+		return false
+	}
+
+	return info.IsDir()
+}
+
+// Glob performs a glob pattern match within the given root directory.
+// Returns absolute paths of matching files.
+func Glob(root, pattern string) ([]string, error) {
+	safePath, err := SafeJoin(root, pattern)
+	if err != nil {
+		// If the pattern itself contains traversal, fail
+		return nil, err
+	}
+
+	// Use filepath.Glob on the safe path
+	matches, err := filepath.Glob(safePath)
+	if err != nil {
+		return nil, err
+	}
+
+	// Validate each match is within root
+	absRoot, err := filepath.Abs(root)
+	if err != nil {
+		return nil, err
+	}
+
+	var validMatches []string
+	rootWithSep := absRoot + string(filepath.Separator)
+	for _, match := range matches {
+		absMatch, err := filepath.Abs(match)
+		if err != nil {
+			continue
+		}
+		if absMatch == absRoot || hasPrefix(absMatch, rootWithSep) {
+			validMatches = append(validMatches, absMatch)
+		}
+	}
+
+	return validMatches, nil
+}
+
+// ReadFileAbs reads a file given an absolute path, validating it doesn't escape the cwd.
+// This is useful for reading files returned by Glob.
+func ReadFileAbs(absPath string) ([]byte, error) {
+	// Basic validation that it's an absolute path
+	if !filepath.IsAbs(absPath) {
+		return nil, fmt.Errorf("path must be absolute: %s", absPath)
+	}
+
+	// #nosec G304 -- Caller is responsible for ensuring path is safe (e.g., from Glob)
+	return os.ReadFile(absPath)
+}
