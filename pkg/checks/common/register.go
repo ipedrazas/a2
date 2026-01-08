@@ -68,6 +68,16 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Order:     965,
 			},
 		},
+		{
+			Checker: &PrecommitCheck{},
+			Meta: checker.CheckMeta{
+				ID:        "common:precommit",
+				Name:      "Pre-commit Hooks",
+				Languages: []checker.Language{checker.LangCommon},
+				Critical:  false,
+				Order:     1065,
+			},
+		},
 	}
 
 	// Add external checks from config

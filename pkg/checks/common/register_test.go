@@ -17,8 +17,8 @@ func (s *RegisterTestSuite) TestRegister_ReturnsAllChecks() {
 
 	checks := Register(cfg)
 
-	// Should have 6 built-in checks (file_exists, dockerfile, ci, health, secrets, changelog)
-	s.Len(checks, 6)
+	// Should have 7 built-in checks (file_exists, dockerfile, ci, health, secrets, changelog, precommit)
+	s.Len(checks, 7)
 }
 
 func (s *RegisterTestSuite) TestRegister_CheckIDs() {
@@ -33,6 +33,7 @@ func (s *RegisterTestSuite) TestRegister_CheckIDs() {
 		"common:health",
 		"common:secrets",
 		"common:changelog",
+		"common:precommit",
 	}
 
 	for i, check := range checks {
@@ -45,7 +46,7 @@ func (s *RegisterTestSuite) TestRegister_CheckOrder() {
 
 	checks := Register(cfg)
 
-	expectedOrders := []int{900, 910, 920, 930, 940, 965}
+	expectedOrders := []int{900, 910, 920, 930, 940, 965, 1065}
 
 	for i, check := range checks {
 		s.Equal(expectedOrders[i], check.Meta.Order)
@@ -93,17 +94,17 @@ func (s *RegisterTestSuite) TestRegister_WithExternalChecks() {
 
 	checks := Register(cfg)
 
-	// 6 built-in + 2 external
-	s.Len(checks, 8)
+	// 7 built-in + 2 external
+	s.Len(checks, 9)
 
-	// Check external checks (indices 6 and 7 after 6 built-in checks)
-	s.Equal("custom:lint", checks[6].Meta.ID)
-	s.Equal("Custom Linter", checks[6].Meta.Name)
-	s.False(checks[6].Meta.Critical) // severity: warn
+	// Check external checks (indices 7 and 8 after 7 built-in checks)
+	s.Equal("custom:lint", checks[7].Meta.ID)
+	s.Equal("Custom Linter", checks[7].Meta.Name)
+	s.False(checks[7].Meta.Critical) // severity: warn
 
-	s.Equal("custom:security", checks[7].Meta.ID)
-	s.Equal("Security Scan", checks[7].Meta.Name)
-	s.True(checks[7].Meta.Critical) // severity: fail
+	s.Equal("custom:security", checks[8].Meta.ID)
+	s.Equal("Security Scan", checks[8].Meta.Name)
+	s.True(checks[8].Meta.Critical) // severity: fail
 }
 
 func (s *RegisterTestSuite) TestRegister_ExternalCheckOrder() {
@@ -119,8 +120,8 @@ func (s *RegisterTestSuite) TestRegister_ExternalCheckOrder() {
 
 	checks := Register(cfg)
 
-	// External checks should have order 1000 (index 6 after 6 built-in checks)
-	s.Equal(1000, checks[6].Meta.Order)
+	// External checks should have order 1000 (index 7 after 7 built-in checks)
+	s.Equal(1000, checks[7].Meta.Order)
 }
 
 func (s *RegisterTestSuite) TestRegister_FileExistsUsesConfig() {

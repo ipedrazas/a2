@@ -15,14 +15,14 @@ a2 should answer: "Is this application mature and production-ready?" by checking
 
 ---
 
-## Current Checks (37 total)
+## Current Checks (38 total)
 
 | Language | Checks |
 |----------|--------|
 | Go | module, build, tests, race, format, vet, coverage, deps, cyclomatic, logging |
 | Python | project, build, tests, format, lint, type, coverage, deps, complexity, logging |
 | Node.js | project, build, tests, format, lint, type, coverage, deps, logging |
-| Common | file_exists, dockerfile, ci, health, **secrets**, **changelog**, external |
+| Common | file_exists, dockerfile, ci, health, **secrets**, **changelog**, **precommit**, external |
 
 ---
 
@@ -510,7 +510,7 @@ Mature applications separate concerns into clear layers.
 
 ## 7. Development Workflow Checks
 
-### `common:precommit` [P0]
+### `common:precommit` [P0] ✅ IMPLEMENTED
 **Verify pre-commit hooks are configured**
 
 Mature teams automate quality checks before code is committed.
@@ -524,6 +524,8 @@ Mature teams automate quality checks before code is committed.
 - Check for: `.pre-commit-config.yaml`, `.husky/`, `lefthook.yml`
 - Check for husky config in `package.json`
 - Check for commitlint: `commitlint.config.js`, `.commitlintrc`
+
+**Implementation:** `pkg/checks/common/precommit.go`
 
 ---
 
@@ -547,11 +549,11 @@ Mature teams ensure consistent code style across all editors.
 
 | Priority | Count | Implemented | Categories |
 |----------|-------|-------------|------------|
-| P0 (High) | 10 | 2 | ✅ secrets, api_docs, ✅ changelog, integration, metrics, errors, k8s, shutdown, precommit |
+| P0 (High) | 10 | 3 | ✅ secrets, api_docs, ✅ changelog, integration, metrics, errors, k8s, shutdown, ✅ precommit |
 | P1 (Medium) | 13 | 0 | license, env, sast, security, contributing, e2e, tracing, migrations, config_validation, retry, errcheck, editorconfig |
 | P2 (Low) | 5 | 0 | conduct, godoc, fixtures, mocking, logging_config, di, architecture |
 
-**Total: 28 new checks (2 implemented, 26 remaining)**
+**Total: 28 new checks (3 implemented, 25 remaining)**
 
 ---
 

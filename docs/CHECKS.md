@@ -536,6 +536,7 @@ Checks for proper structured logging practices instead of console.log.
 | `common:health` | Health Endpoint | No | 930 | Detects health check endpoints |
 | `common:secrets` | Secrets Detection | No | 940 | Detects secret scanning config or hardcoded secrets |
 | `common:changelog` | Changelog | No | 965 | Verifies changelog or release notes exist |
+| `common:precommit` | Pre-commit Hooks | No | 1065 | Verifies pre-commit hooks are configured |
 
 ### file_exists
 
@@ -675,6 +676,30 @@ Verifies that a changelog or release notes file exists, and detects release tool
 
 **Recommendation:** Create a `CHANGELOG.md` following [Keep a Changelog](https://keepachangelog.com) format.
 
+### common:precommit
+
+Verifies that pre-commit hooks are configured to automate quality checks before code is committed.
+
+**Pre-commit tools detected:**
+- pre-commit (Python): `.pre-commit-config.yaml`, `.pre-commit-config.yml`
+- Husky (Node.js): `.husky/` directory with hook files, or `husky` in package.json
+- Lefthook: `lefthook.yml`, `lefthook.yaml`, `.lefthook.yml`
+- Overcommit (Ruby): `.overcommit.yml`
+- Native git hooks: `.git/hooks/` with executable hook files
+
+**Related tooling detected:**
+- commitlint: `commitlint.config.js`, `.commitlintrc`, `.commitlintrc.json`, or `commitlint` in package.json
+- lint-staged: `lint-staged.config.js`, `.lintstagedrc`, or `lint-staged` in package.json
+
+**Hook files checked:**
+- `pre-commit`, `pre-push`, `commit-msg`, `prepare-commit-msg`
+
+**Status:**
+- **Pass**: Pre-commit hooks or related tooling configured
+- **Warn**: No pre-commit hooks found
+
+**Recommendation:** Configure pre-commit, Husky, or Lefthook for automated quality checks.
+
 ---
 
 ## External Checks
@@ -803,8 +828,8 @@ external:
 | Go | 10 | 3 | 7 |
 | Python | 10 | 3 | 7 |
 | Node.js | 9 | 3 | 6 |
-| Common | 6+ | 0 | 6+ |
-| **Total** | **35+** | **9** | **26+** |
+| Common | 7+ | 0 | 7+ |
+| **Total** | **36+** | **9** | **27+** |
 
 **Critical checks** stop execution in sequential mode when they fail.
 **Non-critical checks** report warnings but allow other checks to continue.
