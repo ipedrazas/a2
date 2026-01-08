@@ -27,6 +27,8 @@ var BuiltInProfiles = map[string]Profile{
 			"node:coverage", "node:deps", "node:logging",
 			// Java optional checks
 			"java:coverage", "java:deps", "java:logging",
+			// Rust optional checks
+			"rust:coverage", "rust:deps", "rust:logging",
 		},
 	},
 	"library": {

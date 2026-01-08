@@ -8,12 +8,13 @@ const (
 	LangPython Language = "python"
 	LangNode   Language = "node"
 	LangJava   Language = "java"
+	LangRust   Language = "rust"
 	LangCommon Language = "common" // Language-agnostic checks
 )
 
 // AllLanguages returns all supported language identifiers (excluding common).
 func AllLanguages() []Language {
-	return []Language{LangGo, LangPython, LangNode, LangJava}
+	return []Language{LangGo, LangPython, LangNode, LangJava, LangRust}
 }
 
 // Status represents the severity level of a check result.

@@ -23,6 +23,7 @@ type LanguageConfig struct {
 	Python     PythonLanguageConfig `yaml:"python,omitempty"`
 	Node       NodeLanguageConfig   `yaml:"node,omitempty"`
 	Java       JavaLanguageConfig   `yaml:"java,omitempty"`
+	Rust       RustLanguageConfig   `yaml:"rust,omitempty"`
 }
 
 // GoLanguageConfig contains Go-specific settings.
@@ -54,6 +55,11 @@ type NodeLanguageConfig struct {
 type JavaLanguageConfig struct {
 	BuildTool         string  `yaml:"build_tool,omitempty"`         // auto, maven, gradle
 	TestRunner        string  `yaml:"test_runner,omitempty"`        // auto, junit, testng
+	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"` // default 80
+}
+
+// RustLanguageConfig contains Rust-specific settings.
+type RustLanguageConfig struct {
 	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"` // default 80
 }
 
@@ -125,6 +131,9 @@ func DefaultConfig() *Config {
 			Java: JavaLanguageConfig{
 				BuildTool:         "auto",
 				TestRunner:        "auto",
+				CoverageThreshold: 80.0,
+			},
+			Rust: RustLanguageConfig{
 				CoverageThreshold: 80.0,
 			},
 		},

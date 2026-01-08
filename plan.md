@@ -11,7 +11,7 @@ This document tracks proposed new languages for a2.
 ## Languages to support in a2
 
 1. Java [P0] ✅ 
-2. Rust [P1]
+2. Rust [P1] ✅
 3. Typescript [P0]
 4. Ruby [P1]
 5. Swift [P2]

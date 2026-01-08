@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Rust language support** with 8 checks:
+  - `rust:project` - Detects Cargo.toml, extracts package info, detects workspaces
+  - `rust:build` - Runs `cargo check` to verify compilation
+  - `rust:tests` - Runs `cargo test` to execute tests
+  - `rust:format` - Checks code formatting with `cargo fmt --check`
+  - `rust:lint` - Runs Clippy for linting and code quality (`cargo clippy`)
+  - `rust:coverage` - Detects coverage tools (tarpaulin, llvm-cov) and reports
+  - `rust:deps` - Checks for vulnerabilities using `cargo audit` or cargo-deny
+  - `rust:logging` - Detects logging crates (tracing, log, slog), warns on println!
+
 ## [0.2.0] - 2026-01-08
 
 ### Added

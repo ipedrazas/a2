@@ -44,6 +44,12 @@ var LanguageIndicators = map[checker.Language][]string{
 		"mvnw",
 		"gradlew",
 	},
+	checker.LangRust: {
+		"Cargo.toml",
+		"Cargo.lock",
+		"rust-toolchain.toml",
+		"rust-toolchain",
+	},
 }
 
 // Detect analyzes a directory and returns detected languages.
@@ -54,7 +60,7 @@ func Detect(path string) DetectionResult {
 	}
 
 	// Check languages in a defined order for consistent primary selection
-	orderedLanguages := []checker.Language{checker.LangGo, checker.LangPython, checker.LangNode, checker.LangJava}
+	orderedLanguages := []checker.Language{checker.LangGo, checker.LangPython, checker.LangNode, checker.LangJava, checker.LangRust}
 
 	for _, lang := range orderedLanguages {
 		indicators := LanguageIndicators[lang]
