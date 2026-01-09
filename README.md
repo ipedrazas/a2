@@ -521,20 +521,6 @@ docker run -v $(pwd):/workspace a2 check --profile=api
 - `0`: All checks passed (warnings allowed)
 - `1`: One or more critical checks failed
 
-## Backward Compatibility
-
-Old check IDs are aliased to new language-prefixed IDs:
-
-| Old ID | New ID |
-|--------|--------|
-| `go_mod` | `go:module` |
-| `build` | `go:build` |
-| `tests` | `go:tests` |
-| `gofmt` | `go:format` |
-| `govet` | `go:vet` |
-| `coverage` | `go:coverage` |
-| `deps` | `go:deps` |
-
 ## License
 
 MIT License - see [LICENSE](LICENSE)

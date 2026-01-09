@@ -13,6 +13,7 @@ import (
 	"github.com/ipedrazas/a2/pkg/profiles"
 	"github.com/ipedrazas/a2/pkg/runner"
 	"github.com/ipedrazas/a2/pkg/targets"
+	"github.com/ipedrazas/a2/pkg/userconfig"
 	"github.com/ipedrazas/a2/pkg/version"
 	"github.com/spf13/cobra"
 )
@@ -52,15 +53,29 @@ var versionCmd = &cobra.Command{
 var profilesCmd = &cobra.Command{
 	Use:   "profiles",
 	Short: "List available application profiles",
-	Long:  `List all built-in profiles that can be used with the --profile flag.`,
+	Long:  `List all built-in and user-defined profiles that can be used with the --profile flag.`,
 	Run:   runProfiles,
+}
+
+var profilesInitCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Initialize user profiles directory with built-in profiles",
+	Long:  `Creates the user profiles directory (~/.config/a2/profiles) and writes built-in profiles as editable YAML files.`,
+	RunE:  runProfilesInit,
 }
 
 var targetsCmd = &cobra.Command{
 	Use:   "targets",
 	Short: "List available maturity targets",
-	Long:  `List all built-in targets that can be used with the --target flag.`,
+	Long:  `List all built-in and user-defined targets that can be used with the --target flag.`,
 	Run:   runTargets,
+}
+
+var targetsInitCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Initialize user targets directory with built-in targets",
+	Long:  `Creates the user targets directory (~/.config/a2/targets) and writes built-in targets as editable YAML files.`,
+	RunE:  runTargetsInit,
 }
 
 func init() {
@@ -73,9 +88,18 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(profilesCmd)
 	rootCmd.AddCommand(targetsCmd)
+
+	// Add init subcommands
+	profilesCmd.AddCommand(profilesInitCmd)
+	targetsCmd.AddCommand(targetsInitCmd)
 }
 
 func Execute() {
+	// Initialize user profiles and targets
+	// Errors are non-fatal; we'll just use built-in definitions
+	_ = profiles.Init()
+	_ = targets.Init()
+
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
@@ -170,9 +194,14 @@ func runProfiles(cmd *cobra.Command, args []string) {
 	fmt.Println("Application Profiles:")
 	fmt.Println()
 	fmt.Println("Profiles define which checks are relevant for your application type.")
+	if dir, err := userconfig.GetSubDir("profiles"); err == nil {
+		fmt.Printf("User profiles are stored in %s and override built-in profiles.\n", dir)
+	} else {
+		fmt.Println("User profiles override built-in profiles.")
+	}
 	fmt.Println()
 	for _, p := range profiles.List() {
-		fmt.Printf("  %s\n", p.Name)
+		fmt.Printf("  %s (%s)\n", p.Name, p.Source)
 		fmt.Printf("    %s\n", p.Description)
 		if len(p.Disabled) > 0 {
 			fmt.Printf("    Skips %d checks\n", len(p.Disabled))
@@ -180,15 +209,26 @@ func runProfiles(cmd *cobra.Command, args []string) {
 		fmt.Println()
 	}
 	fmt.Println("Usage: a2 check --profile=<name>")
+	fmt.Println("       a2 profiles init  # Initialize user profiles directory")
+}
+
+func runProfilesInit(cmd *cobra.Command, args []string) error {
+	fmt.Println("Initializing user profiles directory...")
+	return profiles.WriteBuiltInProfiles()
 }
 
 func runTargets(cmd *cobra.Command, args []string) {
 	fmt.Println("Maturity Targets:")
 	fmt.Println()
 	fmt.Println("Targets control the strictness level of checks for your project stage.")
+	if dir, err := userconfig.GetSubDir("targets"); err == nil {
+		fmt.Printf("User targets are stored in %s and override built-in targets.\n", dir)
+	} else {
+		fmt.Println("User targets override built-in targets.")
+	}
 	fmt.Println()
 	for _, t := range targets.List() {
-		fmt.Printf("  %s\n", t.Name)
+		fmt.Printf("  %s (%s)\n", t.Name, t.Source)
 		fmt.Printf("    %s\n", t.Description)
 		if len(t.Disabled) > 0 {
 			fmt.Printf("    Skips %d checks\n", len(t.Disabled))
@@ -196,4 +236,10 @@ func runTargets(cmd *cobra.Command, args []string) {
 		fmt.Println()
 	}
 	fmt.Println("Usage: a2 check --target=<name>")
+	fmt.Println("       a2 targets init  # Initialize user targets directory")
+}
+
+func runTargetsInit(cmd *cobra.Command, args []string) error {
+	fmt.Println("Initializing user targets directory...")
+	return targets.WriteBuiltInTargets()
 }

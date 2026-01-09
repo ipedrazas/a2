@@ -1,11 +1,25 @@
 // Package profiles provides application type profiles for different project types.
 package profiles
 
+import (
+	"sort"
+	"sync"
+)
+
+// Source indicates where a profile is defined.
+type Source string
+
+const (
+	SourceBuiltIn Source = "built-in"
+	SourceUser    Source = "user"
+)
+
 // Profile defines a set of checks to disable for a specific application type.
 type Profile struct {
-	Name        string
-	Description string
-	Disabled    []string // Check IDs to disable
+	Name        string   `yaml:"name"`
+	Description string   `yaml:"description"`
+	Disabled    []string `yaml:"disabled"`
+	Source      Source   `yaml:"-"` // Not serialized to YAML
 }
 
 // BuiltInProfiles contains the predefined application profiles.
@@ -62,23 +76,74 @@ var BuiltInProfiles = map[string]Profile{
 	},
 }
 
+var (
+	userProfiles map[string]Profile
+	initOnce     sync.Once
+	initErr      error
+)
+
+// Init loads user profiles from the config directory.
+// This should be called once at application startup.
+// It's safe to call multiple times; subsequent calls are no-ops.
+func Init() error {
+	initOnce.Do(func() {
+		userProfiles, initErr = LoadUserProfiles()
+	})
+	return initErr
+}
+
 // Get returns a profile by name and whether it was found.
+// User profiles take precedence over built-in profiles.
 func Get(name string) (Profile, bool) {
-	p, ok := BuiltInProfiles[name]
-	return p, ok
+	// User profiles take precedence
+	if p, ok := userProfiles[name]; ok {
+		return p, true
+	}
+	// Fall back to built-in
+	if p, ok := BuiltInProfiles[name]; ok {
+		p.Source = SourceBuiltIn
+		return p, true
+	}
+	return Profile{}, false
 }
 
 // List returns all available profiles in a consistent order.
+// User profiles are listed after built-in profiles, both sorted by name.
 func List() []Profile {
-	return []Profile{
-		BuiltInProfiles["cli"],
-		BuiltInProfiles["api"],
-		BuiltInProfiles["library"],
-		BuiltInProfiles["desktop"],
+	var profiles []Profile
+
+	// Add built-in profiles
+	for _, p := range BuiltInProfiles {
+		// Skip if overridden by user
+		if _, ok := userProfiles[p.Name]; ok {
+			continue
+		}
+		p.Source = SourceBuiltIn
+		profiles = append(profiles, p)
 	}
+
+	// Add user profiles
+	for _, p := range userProfiles {
+		profiles = append(profiles, p)
+	}
+
+	// Sort by source (built-in first), then by name
+	sort.Slice(profiles, func(i, j int) bool {
+		if profiles[i].Source != profiles[j].Source {
+			return profiles[i].Source == SourceBuiltIn
+		}
+		return profiles[i].Name < profiles[j].Name
+	})
+
+	return profiles
 }
 
 // Names returns the names of all available profiles.
 func Names() []string {
-	return []string{"cli", "api", "library", "desktop"}
+	profiles := List()
+	names := make([]string, len(profiles))
+	for i, p := range profiles {
+		names[i] = p.Name
+	}
+	return names
 }

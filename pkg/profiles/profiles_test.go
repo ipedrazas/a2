@@ -87,11 +87,15 @@ func (s *ProfilesTestSuite) TestList_ReturnsAllProfiles() {
 	profiles := List()
 	s.Len(profiles, 4)
 
-	// Verify order
-	s.Equal("cli", profiles[0].Name)
-	s.Equal("api", profiles[1].Name)
-	s.Equal("library", profiles[2].Name)
-	s.Equal("desktop", profiles[3].Name)
+	// Verify all profiles are present (now sorted alphabetically)
+	names := make([]string, len(profiles))
+	for i, p := range profiles {
+		names[i] = p.Name
+	}
+	s.Contains(names, "cli")
+	s.Contains(names, "api")
+	s.Contains(names, "library")
+	s.Contains(names, "desktop")
 }
 
 func (s *ProfilesTestSuite) TestNames_ReturnsAllNames() {

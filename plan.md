@@ -19,5 +19,8 @@ This document tracks proposed new languages for a2.
 
 ## Tasks
 
-- Make profiles configurable. Users should be able to define what an `API` profile looks like. Let's define the default profiles as external configuration files that the users can modify if they want to to match their expectations.
-- Add a new Status: Info, in case we want to run the check but we don't want to impact the maturity score
+1. Project-level profiles: Support .a2/profiles/ in project directory (not in this iteration)
+2. Profile/target inheritance: Allow extends: cli to inherit from another profile/target
+3. Validation command: a2 profiles validate / a2 targets validate to check user definitions
+4. Environment-based loading: Support A2_CONFIG_DIR environment variable to override config location
+5. Add a command `a2 init .` to create a `.a2.yaml`, we could have a flag to indicate if we want to initialise profiles and targets too.
