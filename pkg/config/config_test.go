@@ -227,6 +227,74 @@ func (suite *ConfigTestSuite) TestIsCheckDisabled_GoAliases() {
 	suite.False(cfg.IsCheckDisabled("go:tests"))
 }
 
+// TestGetSourceDir tests that GetSourceDir returns the correct source directory per language.
+func (suite *ConfigTestSuite) TestGetSourceDir() {
+	cfg := &Config{
+		Language: LanguageConfig{
+			Go:         GoLanguageConfig{SourceDir: "backend/go"},
+			Rust:       RustLanguageConfig{SourceDir: "src-tauri"},
+			TypeScript: TypeScriptLanguageConfig{SourceDir: "frontend"},
+		},
+	}
+
+	suite.Equal("backend/go", cfg.GetSourceDir("go"))
+	suite.Equal("src-tauri", cfg.GetSourceDir("rust"))
+	suite.Equal("frontend", cfg.GetSourceDir("typescript"))
+	suite.Equal("", cfg.GetSourceDir("python"))  // Not configured
+	suite.Equal("", cfg.GetSourceDir("node"))    // Not configured
+	suite.Equal("", cfg.GetSourceDir("java"))    // Not configured
+	suite.Equal("", cfg.GetSourceDir("unknown")) // Unknown language
+}
+
+// TestGetSourceDirs tests that GetSourceDirs returns a map of all configured source directories.
+func (suite *ConfigTestSuite) TestGetSourceDirs() {
+	cfg := &Config{
+		Language: LanguageConfig{
+			Go:   GoLanguageConfig{SourceDir: "backend"},
+			Rust: RustLanguageConfig{SourceDir: "src-tauri"},
+		},
+	}
+
+	dirs := cfg.GetSourceDirs()
+
+	suite.Len(dirs, 2)
+	suite.Equal("backend", dirs["go"])
+	suite.Equal("src-tauri", dirs["rust"])
+
+	// Languages without source_dir should not be in the map
+	_, hasNode := dirs["node"]
+	suite.False(hasNode)
+}
+
+// TestGetSourceDirs_Empty tests that GetSourceDirs returns empty map when no source directories are configured.
+func (suite *ConfigTestSuite) TestGetSourceDirs_Empty() {
+	cfg := DefaultConfig()
+
+	dirs := cfg.GetSourceDirs()
+
+	suite.Empty(dirs)
+}
+
+// TestLoad_WithSourceDir tests that Load parses source_dir configuration.
+func (suite *ConfigTestSuite) TestLoad_WithSourceDir() {
+	configContent := `
+language:
+  rust:
+    source_dir: src-tauri
+  node:
+    source_dir: frontend
+`
+	suite.createTempFile(".a2.yaml", configContent)
+
+	cfg, err := Load(suite.tempDir)
+
+	suite.NoError(err)
+	suite.NotNil(cfg)
+	suite.Equal("src-tauri", cfg.Language.Rust.SourceDir)
+	suite.Equal("frontend", cfg.Language.Node.SourceDir)
+	suite.Equal("", cfg.Language.Go.SourceDir) // Not configured
+}
+
 // TestConfigTestSuite runs all the tests in the suite.
 func TestConfigTestSuite(t *testing.T) {
 	suite.Run(t, new(ConfigTestSuite))

@@ -1,6 +1,7 @@
 package checks
 
 import (
+	"path/filepath"
 	"sort"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,17 +16,53 @@ import (
 	"github.com/ipedrazas/a2/pkg/language"
 )
 
+// pathResolvingChecker wraps a checker to resolve source directories per language.
+type pathResolvingChecker struct {
+	checker   checker.Checker
+	sourceDir string // Subdirectory to use (empty means use root)
+}
+
+func (p *pathResolvingChecker) ID() string {
+	return p.checker.ID()
+}
+
+func (p *pathResolvingChecker) Name() string {
+	return p.checker.Name()
+}
+
+func (p *pathResolvingChecker) Run(path string) (checker.Result, error) {
+	// Resolve the actual path to use
+	actualPath := path
+	if p.sourceDir != "" {
+		actualPath = filepath.Join(path, p.sourceDir)
+	}
+	return p.checker.Run(actualPath)
+}
+
 // GetChecks returns checks for detected languages based on configuration.
 // Checks are ordered with critical checks first.
+// Language-specific checks are wrapped to use the configured source_dir.
 func GetChecks(cfg *config.Config, detected language.DetectionResult) []checker.Checker {
 	var registrations []checker.CheckRegistration
 
 	// Get checks for each detected language
 	for _, lang := range detected.Languages {
-		registrations = append(registrations, getChecksForLanguage(lang, cfg)...)
+		regs := getChecksForLanguage(lang, cfg)
+		// Get source directory for this language
+		sourceDir := cfg.GetSourceDir(string(lang))
+		// If source_dir is configured, wrap checks to use it
+		if sourceDir != "" {
+			for i := range regs {
+				regs[i].Checker = &pathResolvingChecker{
+					checker:   regs[i].Checker,
+					sourceDir: sourceDir,
+				}
+			}
+		}
+		registrations = append(registrations, regs...)
 	}
 
-	// Add common checks (language-agnostic)
+	// Add common checks (language-agnostic, always use root path)
 	registrations = append(registrations, common.Register(cfg)...)
 
 	// Sort by order (critical checks first)
@@ -90,7 +127,8 @@ func GetChecksForPath(path string, cfg *config.Config) ([]checker.Checker, langu
 		}
 		detected = language.DetectWithOverride(path, langs)
 	} else {
-		detected = language.Detect(path)
+		// Auto-detect languages, checking configured source directories
+		detected = language.DetectWithSourceDirs(path, cfg.GetSourceDirs())
 	}
 
 	// Fallback to Go if nothing detected (backward compatibility)

@@ -2,6 +2,8 @@
 package language
 
 import (
+	"path/filepath"
+
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -111,4 +113,46 @@ func (r DetectionResult) HasLanguage(lang checker.Language) bool {
 		}
 	}
 	return false
+}
+
+// DetectWithSourceDirs detects languages, checking configured source directories.
+// sourceDirs maps language names (e.g., "rust") to subdirectories (e.g., "src-tauri").
+// Languages without a configured source_dir are detected in the root path.
+func DetectWithSourceDirs(path string, sourceDirs map[string]string) DetectionResult {
+	result := DetectionResult{
+		Languages:  make([]checker.Language, 0),
+		Indicators: make(map[checker.Language][]string),
+	}
+
+	// Check languages in a defined order for consistent primary selection
+	orderedLanguages := []checker.Language{checker.LangGo, checker.LangPython, checker.LangNode, checker.LangJava, checker.LangRust, checker.LangTypeScript}
+
+	for _, lang := range orderedLanguages {
+		indicators := LanguageIndicators[lang]
+		found := []string{}
+
+		// Determine the path to check for this language
+		checkPath := path
+		if sourceDir, ok := sourceDirs[string(lang)]; ok && sourceDir != "" {
+			checkPath = filepath.Join(path, sourceDir)
+		}
+
+		for _, indicator := range indicators {
+			if safepath.Exists(checkPath, indicator) {
+				found = append(found, indicator)
+			}
+		}
+		if len(found) > 0 {
+			result.Languages = append(result.Languages, lang)
+			result.Indicators[lang] = found
+		}
+	}
+
+	// Set primary language and multi-lang flag
+	result.MultiLang = len(result.Languages) > 1
+	if len(result.Languages) > 0 {
+		result.Primary = result.Languages[0]
+	}
+
+	return result
 }

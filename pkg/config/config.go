@@ -29,12 +29,14 @@ type LanguageConfig struct {
 
 // GoLanguageConfig contains Go-specific settings.
 type GoLanguageConfig struct {
+	SourceDir           string  `yaml:"source_dir,omitempty"` // Subdirectory containing Go code
 	CoverageThreshold   float64 `yaml:"coverage_threshold,omitempty"`
 	CyclomaticThreshold int     `yaml:"cyclomatic_threshold,omitempty"`
 }
 
 // PythonLanguageConfig contains Python-specific settings.
 type PythonLanguageConfig struct {
+	SourceDir           string  `yaml:"source_dir,omitempty"`      // Subdirectory containing Python code
 	PackageManager      string  `yaml:"package_manager,omitempty"` // auto, pip, poetry, pipenv
 	TestRunner          string  `yaml:"test_runner,omitempty"`     // auto, pytest, unittest
 	Formatter           string  `yaml:"formatter,omitempty"`       // auto, black, ruff
@@ -45,6 +47,7 @@ type PythonLanguageConfig struct {
 
 // NodeLanguageConfig contains Node.js-specific settings.
 type NodeLanguageConfig struct {
+	SourceDir         string  `yaml:"source_dir,omitempty"`      // Subdirectory containing Node.js code
 	PackageManager    string  `yaml:"package_manager,omitempty"` // auto, npm, yarn, pnpm, bun
 	TestRunner        string  `yaml:"test_runner,omitempty"`     // auto, jest, vitest, mocha, npm-test
 	Formatter         string  `yaml:"formatter,omitempty"`       // auto, prettier, biome
@@ -54,6 +57,7 @@ type NodeLanguageConfig struct {
 
 // JavaLanguageConfig contains Java-specific settings.
 type JavaLanguageConfig struct {
+	SourceDir         string  `yaml:"source_dir,omitempty"`         // Subdirectory containing Java code
 	BuildTool         string  `yaml:"build_tool,omitempty"`         // auto, maven, gradle
 	TestRunner        string  `yaml:"test_runner,omitempty"`        // auto, junit, testng
 	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"` // default 80
@@ -61,11 +65,13 @@ type JavaLanguageConfig struct {
 
 // RustLanguageConfig contains Rust-specific settings.
 type RustLanguageConfig struct {
+	SourceDir         string  `yaml:"source_dir,omitempty"`         // Subdirectory containing Rust code
 	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"` // default 80
 }
 
 // TypeScriptLanguageConfig contains TypeScript-specific settings.
 type TypeScriptLanguageConfig struct {
+	SourceDir         string  `yaml:"source_dir,omitempty"`      // Subdirectory containing TypeScript code
 	PackageManager    string  `yaml:"package_manager,omitempty"` // auto, npm, yarn, pnpm, bun
 	TestRunner        string  `yaml:"test_runner,omitempty"`     // auto, jest, vitest, mocha
 	Formatter         string  `yaml:"formatter,omitempty"`       // auto, prettier, biome, dprint
@@ -207,6 +213,52 @@ var checkAliases = map[string]string{
 	"precommit":   "common:precommit",
 	"k8s":         "common:k8s",
 	"shutdown":    "common:shutdown",
+}
+
+// GetSourceDir returns the configured source directory for a language.
+// Returns empty string if not configured (meaning use root path).
+func (c *Config) GetSourceDir(lang string) string {
+	switch lang {
+	case "go":
+		return c.Language.Go.SourceDir
+	case "python":
+		return c.Language.Python.SourceDir
+	case "node":
+		return c.Language.Node.SourceDir
+	case "java":
+		return c.Language.Java.SourceDir
+	case "rust":
+		return c.Language.Rust.SourceDir
+	case "typescript":
+		return c.Language.TypeScript.SourceDir
+	default:
+		return ""
+	}
+}
+
+// GetSourceDirs returns a map of all configured source directories.
+// Only languages with non-empty source directories are included.
+func (c *Config) GetSourceDirs() map[string]string {
+	dirs := make(map[string]string)
+	if c.Language.Go.SourceDir != "" {
+		dirs["go"] = c.Language.Go.SourceDir
+	}
+	if c.Language.Python.SourceDir != "" {
+		dirs["python"] = c.Language.Python.SourceDir
+	}
+	if c.Language.Node.SourceDir != "" {
+		dirs["node"] = c.Language.Node.SourceDir
+	}
+	if c.Language.Java.SourceDir != "" {
+		dirs["java"] = c.Language.Java.SourceDir
+	}
+	if c.Language.Rust.SourceDir != "" {
+		dirs["rust"] = c.Language.Rust.SourceDir
+	}
+	if c.Language.TypeScript.SourceDir != "" {
+		dirs["typescript"] = c.Language.TypeScript.SourceDir
+	}
+	return dirs
 }
 
 // IsCheckDisabled returns true if the given check ID is disabled.

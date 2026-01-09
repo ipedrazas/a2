@@ -158,8 +158,8 @@ func runCheck(cmd *cobra.Command, args []string) error {
 		}
 		detected = language.DetectWithOverride(path, langs)
 	} else {
-		// Auto-detect languages
-		detected = language.Detect(path)
+		// Auto-detect languages, checking configured source directories
+		detected = language.DetectWithSourceDirs(path, cfg.GetSourceDirs())
 	}
 
 	// Fallback to Go if nothing detected (backward compatibility)
