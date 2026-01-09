@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.3.1] - 2026-01-09
+
 ### Added
+- **Monorepo support** via `source_dir` configuration per language:
+  - Configure subdirectories for each language (e.g., `rust.source_dir: src-tauri`)
+  - Language detection checks configured subdirectories for indicator files
+  - Language-specific checks run in the configured source directory
+  - Enables multi-language projects like Tauri (React + Rust) to be properly analyzed
+- **Configurable profiles and targets**: User-defined profiles and targets stored in `~/.config/a2/`:
+  - `~/.config/a2/profiles/` - Custom application profiles (override or extend built-ins)
+  - `~/.config/a2/targets/` - Custom maturity targets
+  - New commands: `a2 profiles init` and `a2 targets init` to bootstrap directories
+  - User definitions override built-in profiles/targets with the same name
+  - Profiles/targets show source indicator (built-in/user) in list output
 - **Info status**: New check status for informational checks that don't affect maturity score
   - Checks with Info status are executed and displayed but excluded from score calculation
   - Useful for optional recommendations (e.g., "license not found" without penalty)
