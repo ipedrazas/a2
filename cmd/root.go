@@ -88,6 +88,7 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(profilesCmd)
 	rootCmd.AddCommand(targetsCmd)
+	rootCmd.AddCommand(addCmd)
 
 	// Add init subcommands
 	profilesCmd.AddCommand(profilesInitCmd)
