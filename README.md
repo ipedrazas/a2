@@ -22,14 +22,14 @@ This tool does not replace your coding agent, it complements it. What you do wit
 
 ## Features
 
-- **7 Languages Supported**: Go, Python, Node.js, TypeScript, Java, Rust (auto-detected or explicit)
+- **8 Languages Supported**: Go, Python, Node.js, TypeScript, Java, Rust, Swift (auto-detected or explicit)
 - **70+ Built-in Checks**: Build, tests, coverage, formatting, linting, type checking, vulnerabilities, and more
 - **Application Profiles**: CLI, API, Library, Desktop - tailor checks to your app type
 - **Maturity Targets**: PoC or Production - control check strictness
 - **Maturity Assessment**: Automatic scoring with Production-Ready, Mature, Development, or PoC levels
 - **Veto System**: Critical checks (build, tests) stop execution on failure
 - **Pretty Output**: Colored terminal output with recommendations
-- **JSON Output**: Machine-readable format for CI/CD integration
+- **JSON & TOON Output**: Machine-readable formats for CI/CD and coding agents
 - **Configurable**: `.a2.yaml` for thresholds, disabled checks, and custom checks
 - **Config Generator**: Interactive or CLI-based `.a2.yaml` generation with `a2 add`
 - **Extensible**: Add your own checks via external binaries
@@ -71,6 +71,9 @@ a2 check --profile=cli --target=poc
 
 # JSON output for CI/CD
 a2 check --format json
+
+# TOON output for coding agents (minimal token usage)
+a2 check --format toon
 
 # Skip specific checks
 a2 check --skip=license,k8s
@@ -129,7 +132,7 @@ a2 add --output custom-config.yaml
 | `-i, --interactive` | Run in interactive mode | `false` |
 | `--profile` | Application profile (cli, api, library, desktop) | - |
 | `--target` | Maturity target (poc, production) | - |
-| `--lang` | Languages (go, python, node, java, rust, typescript) | auto-detect |
+| `--lang` | Languages (go, python, node, java, rust, typescript, swift) | auto-detect |
 | `--files` | Required files (comma-separated) | README.md,LICENSE |
 | `--coverage` | Coverage threshold (0-100) | 80 |
 | `-o, --output` | Output file path | .a2.yaml |
@@ -181,7 +184,7 @@ A2 automatically assesses your project's maturity level based on check results:
 
 ## Supported Languages
 
-A2 supports 6 programming languages with auto-detection:
+A2 supports 8 programming languages with auto-detection:
 
 | Language | Indicator Files | Checks |
 |----------|-----------------|--------|
@@ -191,6 +194,7 @@ A2 supports 6 programming languages with auto-detection:
 | **TypeScript** | `tsconfig.json` | 9 checks |
 | **Java** | `pom.xml`, `build.gradle`, `build.gradle.kts` | 8 checks |
 | **Rust** | `Cargo.toml` | 8 checks |
+| **Swift** | `Package.swift`, `Package.resolved` | 8 checks |
 
 Use `--lang` flag or `language.explicit` config to override auto-detection.
 
@@ -279,6 +283,19 @@ Use `--lang` flag or `language.explicit` config to override auto-detection.
 | Rust Coverage | `rust:coverage` | Warn | Coverage tools configured (tarpaulin/llvm-cov) |
 | Rust Vulnerabilities | `rust:deps` | Warn | No known vulns (`cargo audit`) |
 | Rust Logging | `rust:logging` | Warn | Uses tracing/log crate, not println! |
+
+### Swift Checks (8)
+
+| Check | ID | Severity | Description |
+|-------|-----|----------|-------------|
+| Swift Project | `swift:project` | Fail | Package.swift exists |
+| Swift Build | `swift:build` | Fail | `swift build` succeeds |
+| Swift Tests | `swift:tests` | Fail | `swift test` passes |
+| Swift Format | `swift:format` | Warn | Code formatted (swift-format/SwiftLint) |
+| Swift Lint | `swift:lint` | Warn | No SwiftLint warnings |
+| Swift Coverage | `swift:coverage` | Warn | Coverage tools configured (llvm-cov) |
+| Swift Vulnerabilities | `swift:deps` | Warn | Dependency scanning configured |
+| Swift Logging | `swift:logging` | Warn | Uses OSLog/swift-log, not print() |
 
 ### Common Checks (23)
 

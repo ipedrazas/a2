@@ -7,7 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-01-12
+
 ### Added
+- **Swift language support** with 8 checks:
+  - `swift:project` - Detects Package.swift, extracts package info and dependencies
+  - `swift:build` - Runs `swift build` to verify compilation
+  - `swift:tests` - Runs `swift test` to execute tests
+  - `swift:format` - Checks code formatting with swift-format or SwiftLint
+  - `swift:lint` - Runs SwiftLint for linting and code quality
+  - `swift:coverage` - Detects coverage tools (llvm-cov) and reports
+  - `swift:deps` - Checks for dependency scanning configuration
+  - `swift:logging` - Detects logging (OSLog, swift-log), warns on print()
+- **TOON output format** (`--format toon`) for coding agents:
+  - Token-Oriented Object Notation - minimal token usage for LLM consumption
+  - Line-oriented format with indentation-based structure
+  - Efficient encoding of arrays and tabular data
+  - Spec: https://github.com/toon-format/spec
 - **Config generator command** (`a2 add`) for creating `.a2.yaml` configuration files:
   - Interactive mode (`-i` flag) with guided prompts for profile, target, languages, files, and coverage
   - Non-interactive mode with CLI flags for scripted/automated config generation
@@ -16,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Generates minimal YAML (only non-default values) with helpful comments
   - Supports `--force` flag to overwrite existing config files
   - Supports custom output path via `--output` flag
+
+### Changed
+- **No-language detection now exits with error**: When no supported language is detected, a2 now exits with an error message listing supported languages instead of silently falling back to Go checks. Use `--lang` to explicitly specify the language.
 
 ## [0.3.1] - 2026-01-09
 
