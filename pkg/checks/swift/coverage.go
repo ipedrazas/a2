@@ -1,0 +1,118 @@
+package swiftcheck
+
+import (
+	"encoding/json"
+	"fmt"
+	"os/exec"
+
+	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/safepath"
+)
+
+// CoverageCheck verifies test coverage meets the threshold.
+type CoverageCheck struct {
+	Threshold float64
+}
+
+func (c *CoverageCheck) ID() string   { return "swift:coverage" }
+func (c *CoverageCheck) Name() string { return "Swift Coverage" }
+
+// Run checks test coverage using swift test with coverage enabled.
+func (c *CoverageCheck) Run(path string) (checker.Result, error) {
+	result := checker.Result{
+		Name:     c.Name(),
+		ID:       c.ID(),
+		Language: checker.LangSwift,
+	}
+
+	// Check for Package.swift first
+	if !safepath.Exists(path, "Package.swift") {
+		result.Passed = false
+		result.Status = checker.Fail
+		result.Message = "No Package.swift found"
+		return result, nil
+	}
+
+	// Run swift test with coverage
+	cmd := exec.Command("swift", "test", "--enable-code-coverage")
+	cmd.Dir = path
+	_, err := cmd.CombinedOutput()
+
+	if err != nil {
+		result.Passed = false
+		result.Status = checker.Warn
+		result.Message = "Cannot generate coverage: " + err.Error()
+		return result, nil
+	}
+
+	// Get coverage data using llvm-cov
+	// First, find the test binary and profdata
+	coverage, err := c.extractCoverage(path)
+	if err != nil {
+		result.Passed = true
+		result.Status = checker.Info
+		result.Message = "Coverage data not available (llvm-cov not configured)"
+		return result, nil
+	}
+
+	threshold := c.Threshold
+	if threshold == 0 {
+		threshold = 80.0
+	}
+
+	if coverage >= threshold {
+		result.Passed = true
+		result.Status = checker.Pass
+		result.Message = fmt.Sprintf("Coverage: %.1f%% (threshold: %.1f%%)", coverage, threshold)
+	} else {
+		result.Passed = false
+		result.Status = checker.Warn
+		result.Message = fmt.Sprintf("Coverage: %.1f%% (below threshold: %.1f%%)", coverage, threshold)
+	}
+
+	return result, nil
+}
+
+// extractCoverage attempts to get coverage percentage from swift test output.
+func (c *CoverageCheck) extractCoverage(path string) (float64, error) {
+	// Use swift package show-codecov-path to find the coverage file
+	cmd := exec.Command("swift", "package", "show-codecov-path")
+	cmd.Dir = path
+	output, err := cmd.Output()
+	if err != nil {
+		return 0, err
+	}
+
+	// The codecov path points to a JSON file with coverage data
+	codecovPath := string(output)
+	if codecovPath == "" {
+		return 0, fmt.Errorf("no codecov path")
+	}
+
+	// Read the codecov JSON
+	data, err := safepath.ReadFile(path, codecovPath)
+	if err != nil {
+		return 0, err
+	}
+
+	// Parse the JSON to extract coverage percentage
+	var codecov struct {
+		Data []struct {
+			Totals struct {
+				Lines struct {
+					Percent float64 `json:"percent"`
+				} `json:"lines"`
+			} `json:"totals"`
+		} `json:"data"`
+	}
+
+	if err := json.Unmarshal(data, &codecov); err != nil {
+		return 0, err
+	}
+
+	if len(codecov.Data) > 0 {
+		return codecov.Data[0].Totals.Lines.Percent, nil
+	}
+
+	return 0, fmt.Errorf("no coverage data")
+}

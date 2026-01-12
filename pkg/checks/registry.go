@@ -11,6 +11,7 @@ import (
 	nodecheck "github.com/ipedrazas/a2/pkg/checks/node"
 	pythoncheck "github.com/ipedrazas/a2/pkg/checks/python"
 	rustcheck "github.com/ipedrazas/a2/pkg/checks/rust"
+	swiftcheck "github.com/ipedrazas/a2/pkg/checks/swift"
 	typescriptcheck "github.com/ipedrazas/a2/pkg/checks/typescript"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/language"
@@ -97,6 +98,8 @@ func getChecksForLanguage(lang checker.Language, cfg *config.Config) []checker.C
 		return rustcheck.Register(cfg)
 	case checker.LangTypeScript:
 		return typescriptcheck.Register(cfg)
+	case checker.LangSwift:
+		return swiftcheck.Register(cfg)
 	default:
 		return nil
 	}

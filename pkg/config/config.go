@@ -25,6 +25,7 @@ type LanguageConfig struct {
 	Java       JavaLanguageConfig       `yaml:"java,omitempty"`
 	Rust       RustLanguageConfig       `yaml:"rust,omitempty"`
 	TypeScript TypeScriptLanguageConfig `yaml:"typescript,omitempty"`
+	Swift      SwiftLanguageConfig      `yaml:"swift,omitempty"`
 }
 
 // GoLanguageConfig contains Go-specific settings.
@@ -77,6 +78,14 @@ type TypeScriptLanguageConfig struct {
 	Formatter         string  `yaml:"formatter,omitempty"`       // auto, prettier, biome, dprint
 	Linter            string  `yaml:"linter,omitempty"`          // auto, eslint, biome, oxlint
 	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"`
+}
+
+// SwiftLanguageConfig contains Swift-specific settings.
+type SwiftLanguageConfig struct {
+	SourceDir         string  `yaml:"source_dir,omitempty"`         // Subdirectory containing Swift code
+	Formatter         string  `yaml:"formatter,omitempty"`          // auto, swift-format, swiftformat
+	Linter            string  `yaml:"linter,omitempty"`             // auto, swiftlint
+	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"` // default 80
 }
 
 // ExecutionConfig configures how checks are executed.
@@ -159,6 +168,11 @@ func DefaultConfig() *Config {
 				Linter:            "auto",
 				CoverageThreshold: 80.0,
 			},
+			Swift: SwiftLanguageConfig{
+				Formatter:         "auto",
+				Linter:            "auto",
+				CoverageThreshold: 80.0,
+			},
 		},
 	}
 }
@@ -231,6 +245,8 @@ func (c *Config) GetSourceDir(lang string) string {
 		return c.Language.Rust.SourceDir
 	case "typescript":
 		return c.Language.TypeScript.SourceDir
+	case "swift":
+		return c.Language.Swift.SourceDir
 	default:
 		return ""
 	}
@@ -257,6 +273,9 @@ func (c *Config) GetSourceDirs() map[string]string {
 	}
 	if c.Language.TypeScript.SourceDir != "" {
 		dirs["typescript"] = c.Language.TypeScript.SourceDir
+	}
+	if c.Language.Swift.SourceDir != "" {
+		dirs["swift"] = c.Language.Swift.SourceDir
 	}
 	return dirs
 }

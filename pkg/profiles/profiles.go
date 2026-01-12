@@ -66,12 +66,14 @@ var BuiltInProfiles = map[string]Profile{
 		Name:        "desktop",
 		Description: "Desktop application - focus on user-facing quality",
 		Disabled: []string{
-			"common:health",   // No health endpoints
-			"common:k8s",      // Not containerized
-			"common:api_docs", // No REST API
-			"common:tracing",  // No distributed tracing
-			"common:metrics",  // Different metrics approach
-			"common:shutdown", // OS handles shutdown
+			"common:health",     // No health endpoints
+			"common:k8s",        // Not containerized
+			"common:api_docs",   // No REST API
+			"common:tracing",    // No distributed tracing
+			"common:metrics",    // Different metrics approach
+			"common:shutdown",   // OS handles shutdown
+			"common:dockerfile", // No Dockerfile
+			"common:health",     // No health endpoints
 		},
 	},
 }

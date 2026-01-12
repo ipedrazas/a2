@@ -57,6 +57,10 @@ var LanguageIndicators = map[checker.Language][]string{
 		"tsconfig.base.json",
 		"tsconfig.build.json",
 	},
+	checker.LangSwift: {
+		"Package.swift",
+		"Package.resolved",
+	},
 }
 
 // Detect analyzes a directory and returns detected languages.
@@ -67,7 +71,7 @@ func Detect(path string) DetectionResult {
 	}
 
 	// Check languages in a defined order for consistent primary selection
-	orderedLanguages := []checker.Language{checker.LangGo, checker.LangPython, checker.LangNode, checker.LangJava, checker.LangRust, checker.LangTypeScript}
+	orderedLanguages := []checker.Language{checker.LangGo, checker.LangPython, checker.LangNode, checker.LangJava, checker.LangRust, checker.LangTypeScript, checker.LangSwift}
 
 	for _, lang := range orderedLanguages {
 		indicators := LanguageIndicators[lang]
@@ -125,7 +129,7 @@ func DetectWithSourceDirs(path string, sourceDirs map[string]string) DetectionRe
 	}
 
 	// Check languages in a defined order for consistent primary selection
-	orderedLanguages := []checker.Language{checker.LangGo, checker.LangPython, checker.LangNode, checker.LangJava, checker.LangRust, checker.LangTypeScript}
+	orderedLanguages := []checker.Language{checker.LangGo, checker.LangPython, checker.LangNode, checker.LangJava, checker.LangRust, checker.LangTypeScript, checker.LangSwift}
 
 	for _, lang := range orderedLanguages {
 		indicators := LanguageIndicators[lang]

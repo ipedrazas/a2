@@ -23,4 +23,4 @@ This document tracks proposed new languages for a2.
 2. Profile/target inheritance: Allow extends: cli to inherit from another profile/target
 3. Validation command: a2 profiles validate / a2 targets validate to check user definitions
 4. Environment-based loading: Support A2_CONFIG_DIR environment variable to override config location
-5. Add a command `a2 init .` to create a `.a2.yaml`, we could have a flag to indicate if we want to initialise profiles and targets too.
+5. If the language is not detected, exit with error
