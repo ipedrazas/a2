@@ -1,4 +1,4 @@
-package swiftcheck
+package rustcheck
 
 import (
 	"os"
@@ -15,7 +15,7 @@ type BuildTestSuite struct {
 }
 
 func (s *BuildTestSuite) SetupTest() {
-	dir, err := os.MkdirTemp("", "swift-build-test-*")
+	dir, err := os.MkdirTemp("", "rust-build-test-*")
 	s.NoError(err)
 	s.tempDir = dir
 	s.check = &BuildCheck{}
@@ -28,27 +28,27 @@ func (s *BuildTestSuite) TearDownTest() {
 }
 
 func (s *BuildTestSuite) TestID() {
-	s.Equal("swift:build", s.check.ID())
+	s.Equal("rust:build", s.check.ID())
 }
 
 func (s *BuildTestSuite) TestName() {
-	s.Equal("Swift Build", s.check.Name())
+	s.Equal("Rust Build", s.check.Name())
 }
 
-func (s *BuildTestSuite) TestRun_NoPackageSwift() {
+func (s *BuildTestSuite) TestRun_NoCargoToml() {
 	result, err := s.check.Run(s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "No Package.swift found")
+	s.Contains(result.Message, "No Cargo.toml found")
 }
 
 func (s *BuildTestSuite) TestRun_ResultLanguage() {
 	result, err := s.check.Run(s.tempDir)
 
 	s.NoError(err)
-	s.Equal(checker.LangSwift, result.Language)
+	s.Equal(checker.LangRust, result.Language)
 }
 
 func TestBuildTestSuite(t *testing.T) {
