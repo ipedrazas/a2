@@ -1,78 +1,24 @@
-# A2 - Application Analysis
+# A2 - AI Application Status
 
-A2 is a multi-language code quality checker. It auto-detects project language(s), runs a suite of checks, and provides a health score with recommendations that you can give to your Coding Agent to improve your application.
+A2 is the answer to the over growing problem of "too much code generated. The main issue of trying to review vibecode applications is that, well, they might be very different from each other. I wanted to have an objective way of understanding where the application is in regards of the application maturity lifecycle.
 
-Because of the amount of new code and projects created with the rise of `vibecoding`, I needed a way to assess the level of maturity of any project.
+`a2` is built on checks (or tests), that succed or fail, to give you a quick overview of the application. You can define your own checks, because it's not about the application, but about your expectations with the application. The idea is very simple: clone a repo, run `a2 check` get an idea of what and what not (documentation, tests, obserrvability, healthchecks, migration, security scan...). Whatever your expectations are, `a2` helps you to know if you're there or if there's a long way to go.
 
-`a2` should help you to understand if a project is production-ready or not, or in which level of the application life cycle it is: PoC, alpha, beta, prod ready?
 
-Checks are configurable and they cover big themes like:
+A2 auto-detects project language(s), runs a suite of checks, and provides a health score with recommendations that you can give to your Coding Agent to improve your application. Because that was the other thing. I use Coding Agents, so, I wanted a tool that I could use to give to the Agents to make my application meet my expectations. That's why we have `profiles` (api, lib, desktop...), and `targets` (PoC, Dev, Production), because every application has different expectations, I don't need all my side projects to be production-ready. But I want an easy way to get there if needed (or stay in line).
 
-- Security best practices
-- Proper documentation
-- Comprehensive testing
-- Observability instrumentation
-- Production-ready configuration
-- Clean architecture patterns
-- Solid development workflow
 
 It's up to you to decide which checks make sense for you and your project. `a2` allows you to configure what and what not to run. For example, if you run `a2 check` in this repo, you will get a response like this one:
 
-```
-%> a2 check --profile=cli
-A2 Analysis: a2
+For example, this repo uses `a2` to stay on track:, if you run `a2 check`, you will get something like this:
 
-─────────────────────────────────────
-Languages: go
+![2a check screenshot](./docs/assets/a2-screenshot.png)
 
-✓ PASS Go Module
-    Module: github.com/ipedrazas/a2 (Go 1.23)
-✓ PASS Go Build
-    Build successful
-✓ PASS Go Tests
-    All tests passed
-✓ PASS Go Race Detection
-    No data races detected
-✓ PASS Go Format
-    All Go files are properly formatted
-✓ PASS Go Vet
-    No issues found
-✓ PASS Go Coverage
-    Coverage: 57.2%
-✓ PASS Go Vulnerabilities
-    No known vulnerabilities found
-✓ PASS Go Complexity
-    No functions exceed complexity threshold (15)
-✓ PASS Required Files
-    All required files present
-✓ PASS Container Ready
-    Dockerfile found
-✓ PASS CI Pipeline
-    GitHub Actions configured
-✓ PASS Secrets Detection
-    Secret scanning configured: Gitleaks
-✓ PASS Environment Config
-    Environment config: .env in .gitignore
-✓ PASS SAST Security Scanning
-    SAST configured: gosec
-✓ PASS Changelog
-    CHANGELOG.md found
-✓ PASS Contributing Guidelines
-    Found: CONTRIBUTING.md
-✓ PASS Editor Config
-    .editorconfig configured
-
-─────────────────────────────────────
-
-STATUS: ✓ ALL CHECKS PASSED
-
-Score: 23/23 checks passed (100%)
-
-Maturity: Production-Ready
-   All checks pass, ready for production deployment
-```
+Checks are defined in [.a2.yaml](.a2.yaml) in case you're curious.
 
 As you can see `a2` will tell you the maturity level of the project based on the results of the checks. While it's true that you could use `Claude Code` or any other coding agent to do the same, I'd rather use a deterministic approach because saying that something is "Production-ready" depends on what you consider what production level is.
+
+This tool does not replace your coding agent, it complements it. What you do with `a2` is delegate a set of expectations to a series of `Checks` (or tests), you can look at the different tests in [docs/CHECKS.md](docs/CHECKS.md). Your coding agent and you are in charge of implementing telemetry, `a2` only checks if you have it or not.
 
 ## Features
 
@@ -87,6 +33,8 @@ As you can see `a2` will tell you the maturity level of the project based on the
 - **Configurable**: `.a2.yaml` for thresholds, disabled checks, and custom checks
 - **Extensible**: Add your own checks via external binaries
 - **CI/CD Ready**: GitHub Action and pre-commit hook support
+
+You can run `a2` in CI if you want to, the original idea was not that but I found it's much easier to have the same validation in local dev than CI.
 
 ## Installation
 
@@ -506,14 +454,11 @@ repos:
 ## Docker
 
 ```bash
-# Build image
-docker build -t a2 .
-
 # Run checks
-docker run -v $(pwd):/workspace a2 check
+docker run -v $(pwd):/workspace ipedrazas/a2 check
 
 # Run with profile
-docker run -v $(pwd):/workspace a2 check --profile=api
+docker run -v $(pwd):/workspace ipedrazas/a2 check --profile=api
 ```
 
 ## Exit Codes
