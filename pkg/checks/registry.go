@@ -105,21 +105,16 @@ func getChecksForLanguage(lang checker.Language, cfg *config.Config) []checker.C
 	}
 }
 
-// DefaultChecks returns checks for auto-detected languages (backward compatibility).
+// DefaultChecks returns checks for auto-detected languages.
+// Returns empty slice if no language is detected.
 func DefaultChecks() []checker.Checker {
 	cfg := config.DefaultConfig()
 	detected := language.Detect(".")
-
-	// Fallback to Go if nothing detected (backward compatibility)
-	if len(detected.Languages) == 0 {
-		detected.Languages = []checker.Language{checker.LangGo}
-		detected.Primary = checker.LangGo
-	}
-
 	return GetChecks(cfg, detected)
 }
 
 // GetChecksForPath returns checks for a specific path with auto-detection.
+// Returns empty checks slice if no language is detected.
 func GetChecksForPath(path string, cfg *config.Config) ([]checker.Checker, language.DetectionResult) {
 	// Detect languages or use explicit config
 	var detected language.DetectionResult
@@ -132,12 +127,6 @@ func GetChecksForPath(path string, cfg *config.Config) ([]checker.Checker, langu
 	} else {
 		// Auto-detect languages, checking configured source directories
 		detected = language.DetectWithSourceDirs(path, cfg.GetSourceDirs())
-	}
-
-	// Fallback to Go if nothing detected (backward compatibility)
-	if len(detected.Languages) == 0 {
-		detected.Languages = []checker.Language{checker.LangGo}
-		detected.Primary = checker.LangGo
 	}
 
 	return GetChecks(cfg, detected), detected

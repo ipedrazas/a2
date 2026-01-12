@@ -235,22 +235,23 @@ func (suite *RegistryTestSuite) TestGetChecks_AllDisabled() {
 	suite.False(checkIDs["go:tests"])
 }
 
-// TestDefaultChecks tests that DefaultChecks returns default set of checks.
+// TestDefaultChecks tests that DefaultChecks returns checks based on detected language.
+// When run from a directory without language indicator files (like go.mod),
+// only common checks are returned.
 func (suite *RegistryTestSuite) TestDefaultChecks() {
 	checks := DefaultChecks()
 
+	// Should at least have common checks
 	suite.NotEmpty(checks)
-	suite.GreaterOrEqual(len(checks), 7) // Should have default checks
 
-	// Verify it uses default config
+	// Verify common checks are present
 	checkIDs := make(map[string]bool)
 	for _, check := range checks {
 		checkIDs[check.ID()] = true
 	}
 
-	suite.True(checkIDs["go:module"])
-	suite.True(checkIDs["go:build"])
-	suite.True(checkIDs["go:tests"])
+	// Common checks should always be present
+	suite.True(checkIDs["file_exists"], "file_exists should be present as common check")
 }
 
 // TestGetChecks_ExternalWithDisabled tests that external checks respect disabled list.
@@ -293,15 +294,14 @@ func (suite *RegistryTestSuite) TestGetChecks_ExternalWithDisabled() {
 	suite.False(checkIDs["external-1"], "external-1 should be disabled")
 }
 
-// TestGetChecks_NoLanguageDetected tests fallback to Go when no language is detected.
+// TestGetChecks_NoLanguageDetected tests that only common checks are returned when no language is detected.
 func (suite *RegistryTestSuite) TestGetChecks_NoLanguageDetected() {
 	cfg := config.DefaultConfig()
 	detected := language.DetectionResult{
 		Languages: []checker.Language{}, // No languages detected
 	}
 
-	// When using GetChecksForPath or DefaultChecks, it will fallback to Go
-	// For GetChecks, it returns only common checks if no language specified
+	// GetChecks returns only common checks if no language specified
 	checks := GetChecks(cfg, detected)
 
 	// Should only have common checks (file_exists)

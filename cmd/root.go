@@ -163,10 +163,9 @@ func runCheck(cmd *cobra.Command, args []string) error {
 		detected = language.DetectWithSourceDirs(path, cfg.GetSourceDirs())
 	}
 
-	// Fallback to Go if nothing detected (backward compatibility)
+	// Exit with error if no language detected
 	if len(detected.Languages) == 0 {
-		detected.Languages = []checker.Language{checker.LangGo}
-		detected.Primary = checker.LangGo
+		return fmt.Errorf("no supported language detected. Supported languages: go, python, node, java, rust, typescript, swift. Use --lang to specify explicitly")
 	}
 
 	// Get the list of checks to run

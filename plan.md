@@ -14,13 +14,10 @@ This document tracks proposed new languages for a2.
 2. Rust [P1] ✅
 3. Typescript [P0] ✅
 4. Ruby [P2]
-5. Swift [P2]
+5. Swift [P2] ✅ 
 
 
 ## Tasks
 
-1. Project-level profiles: Support .a2/profiles/ in project directory (not in this iteration)
-2. Profile/target inheritance: Allow extends: cli to inherit from another profile/target
+
 3. Validation command: a2 profiles validate / a2 targets validate to check user definitions
-4. Environment-based loading: Support A2_CONFIG_DIR environment variable to override config location
-5. If the language is not detected, exit with error
