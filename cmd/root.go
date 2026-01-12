@@ -79,7 +79,7 @@ var targetsInitCmd = &cobra.Command{
 }
 
 func init() {
-	checkCmd.Flags().StringVarP(&format, "format", "f", "pretty", "Output format: pretty or json")
+	checkCmd.Flags().StringVarP(&format, "format", "f", "pretty", "Output format: pretty, json, or toon")
 	checkCmd.Flags().StringSliceVarP(&languages, "lang", "l", nil, "Languages to check (go, python). Auto-detects if not specified.")
 	checkCmd.Flags().StringSliceVar(&skippedChecks, "skip", nil, "Checks to skip (e.g., --skip=license,k8s)")
 	checkCmd.Flags().StringVar(&profile, "profile", "", "Application profile (cli, api, library, desktop)")
@@ -179,6 +179,8 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	switch format {
 	case "json":
 		return output.JSON(result, detected)
+	case "toon":
+		return output.TOON(result, detected)
 	default:
 		return output.Pretty(result, path, detected)
 	}

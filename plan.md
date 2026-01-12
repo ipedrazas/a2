@@ -19,5 +19,5 @@ This document tracks proposed new languages for a2.
 
 ## Tasks
 
-
+1. implement Format `toon` (Token-Oriented Object Notation) to use from coding agents. Spec: https://github.com/toon-format/spec/blob/main/SPEC.md
 3. Validation command: a2 profiles validate / a2 targets validate to check user definitions

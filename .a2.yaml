@@ -1,7 +1,7 @@
 language:
   explicit: ["go"]           # Override auto-detect: ["go", "python"]
   go:   
-    coverage_threshold: 50
+    coverage_threshold: 60
 
 # Required files to check
 files:
