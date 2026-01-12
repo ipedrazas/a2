@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Config generator command** (`a2 add`) for creating `.a2.yaml` configuration files:
+  - Interactive mode (`-i` flag) with guided prompts for profile, target, languages, files, and coverage
+  - Non-interactive mode with CLI flags for scripted/automated config generation
+  - Auto-detects project languages and shows them for confirmation in interactive mode
+  - Validates profile and target names against available options
+  - Generates minimal YAML (only non-default values) with helpful comments
+  - Supports `--force` flag to overwrite existing config files
+  - Supports custom output path via `--output` flag
 
 ## [0.3.1] - 2026-01-09
 

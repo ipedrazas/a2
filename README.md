@@ -31,6 +31,7 @@ This tool does not replace your coding agent, it complements it. What you do wit
 - **Pretty Output**: Colored terminal output with recommendations
 - **JSON Output**: Machine-readable format for CI/CD integration
 - **Configurable**: `.a2.yaml` for thresholds, disabled checks, and custom checks
+- **Config Generator**: Interactive or CLI-based `.a2.yaml` generation with `a2 add`
 - **Extensible**: Add your own checks via external binaries
 - **CI/CD Ready**: GitHub Action and pre-commit hook support
 
@@ -78,6 +79,61 @@ a2 check --skip=license,k8s
 a2 profiles  # List application profiles
 a2 targets   # List maturity targets
 ```
+
+## Generating Configuration
+
+Use `a2 add` to generate a `.a2.yaml` configuration file. Two modes are available:
+
+### Interactive Mode
+
+Run with `-i` flag for guided prompts:
+
+```bash
+a2 add -i
+```
+
+This will prompt you for:
+1. **Application profile** (cli, api, library, desktop)
+2. **Maturity target** (poc, production)
+3. **Languages** (auto-detected, with option to modify)
+4. **Required files** (README.md, LICENSE, etc.)
+5. **Coverage threshold** (default: 80%)
+
+Shows a preview before writing the file.
+
+### Non-Interactive Mode
+
+Pass options directly via flags:
+
+```bash
+# Basic usage
+a2 add --profile cli --target poc
+
+# With language and coverage
+a2 add --lang go,python --coverage 90
+
+# Custom required files
+a2 add --files README.md,LICENSE,CHANGELOG.md
+
+# Overwrite existing config
+a2 add --profile api --force
+
+# Custom output path
+a2 add --output custom-config.yaml
+```
+
+### Available Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-i, --interactive` | Run in interactive mode | `false` |
+| `--profile` | Application profile (cli, api, library, desktop) | - |
+| `--target` | Maturity target (poc, production) | - |
+| `--lang` | Languages (go, python, node, java, rust, typescript) | auto-detect |
+| `--files` | Required files (comma-separated) | README.md,LICENSE |
+| `--coverage` | Coverage threshold (0-100) | 80 |
+| `-o, --output` | Output file path | .a2.yaml |
+| `-f, --force` | Overwrite existing file | `false` |
 
 ## Application Profiles
 
