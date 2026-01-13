@@ -9,6 +9,8 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checks"
+	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/language"
 	"github.com/ipedrazas/a2/pkg/maturity"
 	"github.com/ipedrazas/a2/pkg/runner"
@@ -237,38 +239,18 @@ func printMaturity(result runner.SuiteResult) {
 }
 
 func printRecommendations(result runner.SuiteResult) {
+	// Get suggestions from check metadata
+	cfg := config.DefaultConfig()
+	suggestions := checks.GetSuggestions(cfg)
+
 	var recommendations []string
+	seen := make(map[string]bool) // Avoid duplicate recommendations
 
 	for _, r := range result.Results {
 		if !r.Passed {
-			switch r.ID {
-			// Go checks (new IDs)
-			case "go:coverage":
-				recommendations = append(recommendations, "→ Add more tests to improve coverage")
-			case "go:format":
-				recommendations = append(recommendations, "→ Run 'gofmt -w .' to format code")
-			case "go:vet":
-				recommendations = append(recommendations, "→ Fix issues reported by 'go vet ./...'")
-			case "go:tests":
-				recommendations = append(recommendations, "→ Fix failing tests before continuing")
-			case "go:build":
-				recommendations = append(recommendations, "→ Fix build errors before continuing")
-			case "go:deps":
-				recommendations = append(recommendations, "→ Update dependencies to fix vulnerabilities")
-			// Python checks
-			case "python:tests":
-				recommendations = append(recommendations, "→ Fix failing tests before continuing")
-			case "python:format":
-				recommendations = append(recommendations, "→ Run formatter (black/ruff) to format code")
-			case "python:lint":
-				recommendations = append(recommendations, "→ Fix linting issues")
-			case "python:coverage":
-				recommendations = append(recommendations, "→ Add more tests to improve coverage")
-			case "python:deps":
-				recommendations = append(recommendations, "→ Update dependencies to fix vulnerabilities")
-			// Common checks
-			case "file_exists":
-				recommendations = append(recommendations, "→ Add missing documentation files")
+			if suggestion, ok := suggestions[r.ID]; ok && !seen[r.ID] {
+				recommendations = append(recommendations, "→ "+suggestion)
+				seen[r.ID] = true
 			}
 		}
 	}

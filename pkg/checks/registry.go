@@ -131,3 +131,28 @@ func GetChecksForPath(path string, cfg *config.Config) ([]checker.Checker, langu
 
 	return GetChecks(cfg, detected), detected
 }
+
+// GetSuggestions returns a map of check ID to suggestion string.
+// This aggregates suggestions from all language check registrations.
+func GetSuggestions(cfg *config.Config) map[string]string {
+	suggestions := make(map[string]string)
+
+	// Collect from all languages
+	allRegs := []checker.CheckRegistration{}
+	allRegs = append(allRegs, gocheck.Register(cfg)...)
+	allRegs = append(allRegs, pythoncheck.Register(cfg)...)
+	allRegs = append(allRegs, nodecheck.Register(cfg)...)
+	allRegs = append(allRegs, javacheck.Register(cfg)...)
+	allRegs = append(allRegs, rustcheck.Register(cfg)...)
+	allRegs = append(allRegs, typescriptcheck.Register(cfg)...)
+	allRegs = append(allRegs, swiftcheck.Register(cfg)...)
+	allRegs = append(allRegs, common.Register(cfg)...)
+
+	for _, reg := range allRegs {
+		if reg.Meta.Suggestion != "" {
+			suggestions[reg.Meta.ID] = reg.Meta.Suggestion
+		}
+	}
+
+	return suggestions
+}

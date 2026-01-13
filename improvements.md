@@ -10,13 +10,9 @@ This file tracks planned improvements for the A2 codebase.
 - [x] **Exit Code Return** - Output formatters now return `(bool, error)` instead of calling `os.Exit(1)` directly. Exit code handling moved to `cmd/root.go` for proper graceful shutdown support.
 - [x] **Context/Timeout Support** - Added `Timeout` field to `RunSuiteOptions`, `runCheckWithTimeout()` function with context-based timeout, and CLI flag `--timeout 30s`. Individual checks that exceed timeout fail with "Check timed out" message.
 - [x] **Consistent Message Truncation** - Applied `checkutil.TruncateMessage()` to all Go checks (tests, build, format, vet, deps), Python build, and TypeScript build. Tool output is now consistently truncated to 200 chars.
+- [x] **Recommendations Metadata** - Added `Suggestion` field to `CheckMeta` and populated it for all checks across all languages. `printRecommendations()` now dynamically looks up suggestions from check metadata via `checks.GetSuggestions()`.
 
 ## Medium Priority
-
-- [ ] **Recommendations Metadata**
-  - Location: `pkg/output/pretty.go:241-285`, `pkg/checker/types.go`
-  - Issue: Hardcoded recommendations only cover subset of check IDs (missing many language checks)
-  - Solution: Add `Suggestion` field to `CheckMeta` for auto-population of recommendations
 
 ## Low Priority
 
