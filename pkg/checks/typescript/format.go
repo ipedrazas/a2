@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -20,18 +21,11 @@ func (c *FormatCheck) Name() string { return "TypeScript Format" }
 
 // Run checks code formatting.
 func (c *FormatCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json
 	if !safepath.Exists(path, "tsconfig.json") && !safepath.Exists(path, "tsconfig.base.json") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No tsconfig.json found"
-		return result, nil
+		return rb.Fail("No tsconfig.json found"), nil
 	}
 
 	// Detect formatter
@@ -40,16 +34,13 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 
 	switch formatter {
 	case "prettier":
-		return c.runPrettier(path, pm)
+		return c.runPrettier(path, pm, rb)
 	case "biome":
-		return c.runBiome(path, pm)
+		return c.runBiome(path, pm, rb)
 	case "dprint":
-		return c.runDprint(path, pm)
+		return c.runDprint(path, pm, rb)
 	default:
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No formatter configured (consider Prettier or Biome)"
-		return result, nil
+		return rb.Warn("No formatter configured (consider Prettier or Biome)"), nil
 	}
 }
 
@@ -119,13 +110,7 @@ func (c *FormatCheck) detectPackageManager(path string) string {
 }
 
 // runPrettier checks formatting with Prettier.
-func (c *FormatCheck) runPrettier(path, pm string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
-
+func (c *FormatCheck) runPrettier(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
@@ -147,31 +132,16 @@ func (c *FormatCheck) runPrettier(path, pm string) (checker.Result, error) {
 		output := stdout.String() + stderr.String()
 		unformatted := countUnformattedFiles(output)
 		if unformatted > 0 {
-			result.Passed = false
-			result.Status = checker.Warn
-			result.Message = "Formatting issues found. Run: npx prettier --write ."
-		} else {
-			result.Passed = false
-			result.Status = checker.Warn
-			result.Message = "Prettier check failed"
+			return rb.Warn("Formatting issues found. Run: npx prettier --write ."), nil
 		}
-		return result, nil
+		return rb.Warn("Prettier check failed"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "All files formatted correctly (Prettier)"
-	return result, nil
+	return rb.Pass("All files formatted correctly (Prettier)"), nil
 }
 
 // runBiome checks formatting with Biome.
-func (c *FormatCheck) runBiome(path, pm string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
-
+func (c *FormatCheck) runBiome(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
@@ -190,26 +160,14 @@ func (c *FormatCheck) runBiome(path, pm string) (checker.Result, error) {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "Formatting issues found. Run: npx @biomejs/biome format --write ."
-		return result, nil
+		return rb.Warn("Formatting issues found. Run: npx @biomejs/biome format --write ."), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "All files formatted correctly (Biome)"
-	return result, nil
+	return rb.Pass("All files formatted correctly (Biome)"), nil
 }
 
 // runDprint checks formatting with dprint.
-func (c *FormatCheck) runDprint(path, pm string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
-
+func (c *FormatCheck) runDprint(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
@@ -228,16 +186,10 @@ func (c *FormatCheck) runDprint(path, pm string) (checker.Result, error) {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "Formatting issues found. Run: npx dprint fmt"
-		return result, nil
+		return rb.Warn("Formatting issues found. Run: npx dprint fmt"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "All files formatted correctly (dprint)"
-	return result, nil
+	return rb.Pass("All files formatted correctly (dprint)"), nil
 }
 
 // countUnformattedFiles counts files that need formatting from Prettier output.

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -15,11 +16,7 @@ func (c *ChangelogCheck) Name() string { return "Changelog" }
 
 // Run checks for changelog files and release tooling configuration.
 func (c *ChangelogCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Check for changelog files
 	changelogFiles := []string{
@@ -87,33 +84,22 @@ func (c *ChangelogCheck) Run(path string) (checker.Result, error) {
 
 	// Determine result based on findings
 	if foundChangelog != "" {
-		result.Passed = true
-		result.Status = checker.Pass
-
 		// Check if it follows Keep a Changelog format
 		format := c.detectChangelogFormat(changelogContent)
 
 		if len(foundReleaseTools) > 0 {
-			result.Message = foundChangelog + " found (" + format + "), " + strings.Join(foundReleaseTools, ", ") + " configured"
-		} else {
-			result.Message = foundChangelog + " found (" + format + ")"
+			return rb.Pass(foundChangelog + " found (" + format + "), " + strings.Join(foundReleaseTools, ", ") + " configured"), nil
 		}
-		return result, nil
+		return rb.Pass(foundChangelog + " found (" + format + ")"), nil
 	}
 
 	// No changelog file, but release tooling is configured
 	if len(foundReleaseTools) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Release tooling configured: " + strings.Join(foundReleaseTools, ", ")
-		return result, nil
+		return rb.Pass("Release tooling configured: " + strings.Join(foundReleaseTools, ", ")), nil
 	}
 
 	// Nothing found
-	result.Passed = false
-	result.Status = checker.Warn
-	result.Message = "No changelog found (consider adding CHANGELOG.md)"
-	return result, nil
+	return rb.Warn("No changelog found (consider adding CHANGELOG.md)"), nil
 }
 
 // detectChangelogFormat checks if the changelog follows a known format.

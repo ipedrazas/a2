@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -22,18 +23,11 @@ func (c *CoverageCheck) Name() string { return "TypeScript Coverage" }
 
 // Run checks for coverage tooling and reports.
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json
 	if !safepath.Exists(path, "tsconfig.json") && !safepath.Exists(path, "tsconfig.base.json") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No tsconfig.json found"
-		return result, nil
+		return rb.Fail("No tsconfig.json found"), nil
 	}
 
 	// Look for coverage configuration
@@ -70,24 +64,16 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 
 	// Build result
 	if coverage >= 0 {
-		result.Passed = coverage >= c.Threshold
-		if result.Passed {
-			result.Status = checker.Pass
-		} else {
-			result.Status = checker.Warn
+		msg := fmt.Sprintf("Coverage %.1f%% (threshold %.1f%%)", coverage, c.Threshold)
+		if coverage >= c.Threshold {
+			return rb.Pass(msg), nil
 		}
-		result.Message = fmt.Sprintf("Coverage %.1f%% (threshold %.1f%%)", coverage, c.Threshold)
+		return rb.Warn(msg), nil
 	} else if len(coverageTools) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Coverage configured: " + strings.Join(coverageTools, ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No coverage tooling found (consider Jest or Vitest coverage)"
+		return rb.Pass("Coverage configured: " + strings.Join(coverageTools, ", ")), nil
 	}
 
-	return result, nil
+	return rb.Warn("No coverage tooling found (consider Jest or Vitest coverage)"), nil
 }
 
 // hasJestCoverage checks if Jest coverage is configured.

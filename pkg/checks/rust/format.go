@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -16,18 +17,11 @@ func (c *FormatCheck) Name() string { return "Rust Format" }
 
 // Run checks if code is properly formatted using rustfmt.
 func (c *FormatCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangRust,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	// Check for Cargo.toml first
 	if !safepath.Exists(path, "Cargo.toml") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No Cargo.toml found"
-		return result, nil
+		return rb.Fail("No Cargo.toml found"), nil
 	}
 
 	// Check for rustfmt config
@@ -50,29 +44,17 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 					count++
 				}
 			}
-			result.Passed = false
-			result.Status = checker.Warn
 			if count > 0 {
-				result.Message = "Code not formatted: " + string(rune(count)) + " file(s) need formatting"
-			} else {
-				result.Message = "Code not formatted (run 'cargo fmt')"
+				return rb.Warn("Code not formatted: " + string(rune(count)) + " file(s) need formatting"), nil
 			}
-		} else {
-			// Some other error (rustfmt not installed, etc.)
-			result.Passed = false
-			result.Status = checker.Warn
-			result.Message = "Cannot check format: " + err.Error()
+			return rb.Warn("Code not formatted (run 'cargo fmt')"), nil
 		}
-		return result, nil
+		// Some other error (rustfmt not installed, etc.)
+		return rb.Warn("Cannot check format: " + err.Error()), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
 	if hasConfig {
-		result.Message = "Code formatted (custom config)"
-	} else {
-		result.Message = "Code formatted"
+		return rb.Pass("Code formatted (custom config)"), nil
 	}
-
-	return result, nil
+	return rb.Pass("Code formatted"), nil
 }

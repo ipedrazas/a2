@@ -29,44 +29,28 @@ func (c *TestsCheck) Name() string {
 
 // Run executes the tests check.
 func (c *TestsCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangNode,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists
 	if !safepath.Exists(path, "package.json") {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = "package.json not found"
-		return result, nil
+		return rb.Fail("package.json not found"), nil
 	}
 
 	// Parse package.json to check for test script
 	pkg, err := ParsePackageJSON(path)
 	if err != nil {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = fmt.Sprintf("Failed to parse package.json: %v", err)
-		return result, nil
+		return rb.Fail(fmt.Sprintf("Failed to parse package.json: %v", err)), nil
 	}
 
 	// Check if test script exists
 	testScript, hasTest := pkg.Scripts["test"]
 	if !hasTest || testScript == "" {
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = "No test script defined in package.json"
-		return result, nil
+		return rb.Pass("No test script defined in package.json"), nil
 	}
 
 	// Check for default "no test specified" script
 	if strings.Contains(testScript, "no test specified") {
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = "No tests configured (default npm init script)"
-		return result, nil
+		return rb.Pass("No tests configured (default npm init script)"), nil
 	}
 
 	// Detect test runner and run tests
@@ -108,16 +92,10 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 		if output == "" {
 			output = stdout.String()
 		}
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = fmt.Sprintf("Tests failed: %s", checkutil.TruncateMessage(output, 200))
-		return result, nil
+		return rb.Fail(fmt.Sprintf("Tests failed: %s", checkutil.TruncateMessage(output, 200))), nil
 	}
 
-	result.Status = checker.Pass
-	result.Passed = true
-	result.Message = "All tests passed"
-	return result, nil
+	return rb.Pass("All tests passed"), nil
 }
 
 // createTestCommand creates a test command for the given package manager.

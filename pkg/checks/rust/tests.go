@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -17,18 +18,11 @@ func (c *TestsCheck) Name() string { return "Rust Tests" }
 
 // Run executes cargo test.
 func (c *TestsCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangRust,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	// Check for Cargo.toml first
 	if !safepath.Exists(path, "Cargo.toml") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No Cargo.toml found"
-		return result, nil
+		return rb.Fail("No Cargo.toml found"), nil
 	}
 
 	// Run cargo test
@@ -38,21 +32,16 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	outputStr := string(output)
 
 	if err != nil {
-		result.Passed = false
-		result.Status = checker.Fail
 		// Try to extract test failure info
 		if strings.Contains(outputStr, "FAILED") {
 			// Count failures
 			failRe := regexp.MustCompile(`(\d+) failed`)
 			if matches := failRe.FindStringSubmatch(outputStr); len(matches) > 1 {
-				result.Message = "Tests failed: " + matches[1] + " test(s) failed"
-			} else {
-				result.Message = "Tests failed"
+				return rb.Fail("Tests failed: " + matches[1] + " test(s) failed"), nil
 			}
-		} else {
-			result.Message = "Tests failed: " + err.Error()
+			return rb.Fail("Tests failed"), nil
 		}
-		return result, nil
+		return rb.Fail("Tests failed: " + err.Error()), nil
 	}
 
 	// Parse test results - cargo test output format:
@@ -61,18 +50,10 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	passedRe := regexp.MustCompile(`(\d+) passed`)
 	matches := passedRe.FindStringSubmatch(outputStr)
 	if len(matches) > 1 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = matches[1] + " test(s) passed"
-	} else if strings.Contains(outputStr, "running 0 tests") || strings.Contains(outputStr, "0 passed") {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "No tests found"
-	} else {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Tests passed"
+		return rb.Pass(matches[1] + " test(s) passed"), nil
 	}
-
-	return result, nil
+	if strings.Contains(outputStr, "running 0 tests") || strings.Contains(outputStr, "0 passed") {
+		return rb.Pass("No tests found"), nil
+	}
+	return rb.Pass("Tests passed"), nil
 }

@@ -1,9 +1,7 @@
 package pythoncheck
 
 import (
-	"bytes"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -17,73 +15,38 @@ func (c *DepsCheck) ID() string   { return "python:deps" }
 func (c *DepsCheck) Name() string { return "Python Vulnerabilities" }
 
 func (c *DepsCheck) Run(path string) (checker.Result, error) {
+	rb := checkutil.NewResultBuilder(c, checker.LangPython)
+
 	// Try pip-audit first, then safety
-	var cmd *exec.Cmd
+	var result *checkutil.CommandResult
 	var cmdDesc string
 
-	if _, err := exec.LookPath("pip-audit"); err == nil {
-		cmd = exec.Command("pip-audit")
+	if checkutil.ToolAvailable("pip-audit") {
+		result = checkutil.RunCommand(path, "pip-audit")
 		cmdDesc = "pip-audit"
-	} else if _, err := exec.LookPath("safety"); err == nil {
-		cmd = exec.Command("safety", "check")
+	} else if checkutil.ToolAvailable("safety") {
+		result = checkutil.RunCommand(path, "safety", "check")
 		cmdDesc = "safety"
 	} else {
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   true,
-			Status:   checker.Pass,
-			Message:  "No vulnerability scanner installed (install pip-audit or safety)",
-			Language: checker.LangPython,
-		}, nil
+		return rb.Pass("No vulnerability scanner installed (install pip-audit or safety)"), nil
 	}
 
-	cmd.Dir = path
-
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	output := strings.TrimSpace(stdout.String())
-
-	if err != nil {
+	if !result.Success() {
 		// pip-audit and safety exit with non-zero when vulnerabilities are found
+		output := strings.TrimSpace(result.Stdout)
 		vulnCount := countPythonVulnerabilities(output, cmdDesc)
 
 		if vulnCount > 0 {
-			return checker.Result{
-				Name:     c.Name(),
-				ID:       c.ID(),
-				Passed:   false,
-				Status:   checker.Warn,
-				Message:  fmt.Sprintf("%d vulnerabilities found. Run '%s' for details.", vulnCount, cmdDesc),
-				Language: checker.LangPython,
-			}, nil
+			return rb.Warn(fmt.Sprintf("%d vulnerabilities found. Run '%s' for details.", vulnCount, cmdDesc)), nil
 		}
 
 		// Some other error
-		errOutput := strings.TrimSpace(stderr.String())
-		if errOutput != "" {
-			return checker.Result{
-				Name:     c.Name(),
-				ID:       c.ID(),
-				Passed:   false,
-				Status:   checker.Warn,
-				Message:  cmdDesc + " error: " + checkutil.TruncateMessage(errOutput, 150),
-				Language: checker.LangPython,
-			}, nil
+		if result.Stderr != "" {
+			return rb.Warn(cmdDesc + " error: " + checkutil.TruncateMessage(strings.TrimSpace(result.Stderr), 150)), nil
 		}
 	}
 
-	return checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Passed:   true,
-		Status:   checker.Pass,
-		Message:  "No known vulnerabilities found",
-		Language: checker.LangPython,
-	}, nil
+	return rb.Pass("No known vulnerabilities found"), nil
 }
 
 // countPythonVulnerabilities counts vulnerabilities in pip-audit or safety output.

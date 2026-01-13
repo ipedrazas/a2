@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -41,11 +42,7 @@ type PackageJSON struct {
 
 // Run checks for TypeScript project configuration.
 func (c *ProjectCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json
 	tsconfigs := []string{"tsconfig.json", "tsconfig.base.json", "tsconfig.build.json"}
@@ -58,28 +55,19 @@ func (c *ProjectCheck) Run(path string) (checker.Result, error) {
 	}
 
 	if foundConfig == "" {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No tsconfig.json found"
-		return result, nil
+		return rb.Fail("No tsconfig.json found"), nil
 	}
 
 	// Parse tsconfig.json
 	content, err := safepath.ReadFile(path, foundConfig)
 	if err != nil {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = fmt.Sprintf("Cannot read %s: %v", foundConfig, err)
-		return result, nil
+		return rb.Fail(fmt.Sprintf("Cannot read %s: %v", foundConfig, err)), nil
 	}
 
 	var tsconfig TSConfig
 	if err := json.Unmarshal(content, &tsconfig); err != nil {
 		// tsconfig might use comments or extends, try basic detection
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = fmt.Sprintf("Found %s", foundConfig)
-		return result, nil
+		return rb.Pass(fmt.Sprintf("Found %s", foundConfig)), nil
 	}
 
 	// Build info message
@@ -110,10 +98,7 @@ func (c *ProjectCheck) Run(path string) (checker.Result, error) {
 		}
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = strings.Join(info, ", ")
-	return result, nil
+	return rb.Pass(strings.Join(info, ", ")), nil
 }
 
 // ParsePackageJSON reads and parses package.json from the given path.

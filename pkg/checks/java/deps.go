@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -15,11 +16,7 @@ func (c *DepsCheck) Name() string { return "Java Dependencies" }
 
 // Run checks for dependency vulnerability scanning tools.
 func (c *DepsCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangJava,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	var tools []string
 
@@ -54,16 +51,9 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 	}
 
 	if len(tools) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Dependency scanning configured: " + strings.Join(tools, ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No dependency scanning configured (consider OWASP Dependency-Check or Snyk)"
+		return rb.Pass("Dependency scanning configured: " + strings.Join(tools, ", ")), nil
 	}
-
-	return result, nil
+	return rb.Warn("No dependency scanning configured (consider OWASP Dependency-Check or Snyk)"), nil
 }
 
 func (c *DepsCheck) hasOWASPDependencyCheck(path string) bool {

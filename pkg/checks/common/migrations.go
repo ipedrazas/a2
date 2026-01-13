@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -15,11 +16,7 @@ func (c *MigrationsCheck) Name() string { return "Database Migrations" }
 
 // Run checks for database migration configuration.
 func (c *MigrationsCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string
 
@@ -183,14 +180,7 @@ func (c *MigrationsCheck) Run(path string) (checker.Result, error) {
 
 	// Build result
 	if len(found) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Migrations: " + strings.Join(found, ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No database migrations found (consider adding if using a database)"
+		return rb.Pass("Migrations: " + strings.Join(found, ", ")), nil
 	}
-
-	return result, nil
+	return rb.Warn("No database migrations found (consider adding if using a database)"), nil
 }

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -31,36 +32,23 @@ func (c *CoverageCheck) Name() string {
 
 // Run executes the coverage check.
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangNode,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists
 	if !safepath.Exists(path, "package.json") {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = "package.json not found"
-		return result, nil
+		return rb.Fail("package.json not found"), nil
 	}
 
 	// Parse package.json to check for test script
 	pkg, err := ParsePackageJSON(path)
 	if err != nil {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = fmt.Sprintf("Failed to parse package.json: %v", err)
-		return result, nil
+		return rb.Fail(fmt.Sprintf("Failed to parse package.json: %v", err)), nil
 	}
 
 	// Check if test script exists
 	testScript, hasTest := pkg.Scripts["test"]
 	if !hasTest || testScript == "" || strings.Contains(testScript, "no test specified") {
-		result.Status = checker.Warn
-		result.Passed = false
-		result.Message = "No test script configured, coverage is 0%"
-		return result, nil
+		return rb.Warn("No test script configured, coverage is 0%"), nil
 	}
 
 	threshold := c.Threshold
@@ -73,30 +61,18 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 	coverage, err := c.runCoverage(path, runner)
 
 	if err != nil {
-		result.Status = checker.Warn
-		result.Passed = false
-		result.Message = fmt.Sprintf("Failed to measure coverage: %v", err)
-		return result, nil
+		return rb.Warn(fmt.Sprintf("Failed to measure coverage: %v", err)), nil
 	}
 
 	if coverage < 0 {
-		result.Status = checker.Warn
-		result.Passed = false
-		result.Message = "Could not determine coverage. Ensure coverage tools are installed."
-		return result, nil
+		return rb.Warn("Could not determine coverage. Ensure coverage tools are installed."), nil
 	}
 
 	if coverage < threshold {
-		result.Status = checker.Warn
-		result.Passed = false
-		result.Message = fmt.Sprintf("Coverage %.1f%% is below threshold %.1f%%", coverage, threshold)
-		return result, nil
+		return rb.Warn(fmt.Sprintf("Coverage %.1f%% is below threshold %.1f%%", coverage, threshold)), nil
 	}
 
-	result.Status = checker.Pass
-	result.Passed = true
-	result.Message = fmt.Sprintf("Coverage: %.1f%% (threshold: %.1f%%)", coverage, threshold)
-	return result, nil
+	return rb.Pass(fmt.Sprintf("Coverage: %.1f%% (threshold: %.1f%%)", coverage, threshold)), nil
 }
 
 // detectTestRunner determines which test runner to use.

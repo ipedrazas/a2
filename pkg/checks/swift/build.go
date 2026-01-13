@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -16,18 +17,11 @@ func (c *BuildCheck) Name() string { return "Swift Build" }
 
 // Run executes swift build to check compilation.
 func (c *BuildCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangSwift,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangSwift)
 
 	// Check for Package.swift first
 	if !safepath.Exists(path, "Package.swift") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No Package.swift found"
-		return result, nil
+		return rb.Fail("No Package.swift found"), nil
 	}
 
 	// Run swift build
@@ -36,22 +30,14 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
-		result.Passed = false
-		result.Status = checker.Fail
 		// Extract first line of error for message
 		errOutput := strings.TrimSpace(string(output))
 		lines := strings.Split(errOutput, "\n")
 		if len(lines) > 0 && lines[0] != "" {
-			result.Message = "Build failed: " + lines[0]
-		} else {
-			result.Message = "Build failed: " + err.Error()
+			return rb.Fail("Build failed: " + lines[0]), nil
 		}
-		return result, nil
+		return rb.Fail("Build failed: " + err.Error()), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "Build successful"
-
-	return result, nil
+	return rb.Pass("Build successful"), nil
 }

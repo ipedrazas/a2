@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 )
 
 // CyclomaticCheck measures cyclomatic complexity of Go functions.
@@ -30,11 +31,7 @@ type FunctionComplexity struct {
 }
 
 func (c *CyclomaticCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangGo,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
 	threshold := c.Threshold
 	if threshold <= 0 {
@@ -44,10 +41,7 @@ func (c *CyclomaticCheck) Run(path string) (checker.Result, error) {
 	// Check if go.mod exists
 	goModPath := filepath.Join(path, "go.mod")
 	if _, err := os.Stat(goModPath); os.IsNotExist(err) {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = "go.mod not found"
-		return result, nil
+		return rb.Fail("go.mod not found"), nil
 	}
 
 	var complexFunctions []FunctionComplexity
@@ -109,17 +103,11 @@ func (c *CyclomaticCheck) Run(path string) (checker.Result, error) {
 	})
 
 	if err != nil {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "Error scanning files: " + err.Error()
-		return result, nil
+		return rb.Warn("Error scanning files: " + err.Error()), nil
 	}
 
 	if len(complexFunctions) == 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = fmt.Sprintf("No functions exceed complexity threshold (%d)", threshold)
-		return result, nil
+		return rb.Pass(fmt.Sprintf("No functions exceed complexity threshold (%d)", threshold)), nil
 	}
 
 	// Sort by complexity descending
@@ -128,15 +116,8 @@ func (c *CyclomaticCheck) Run(path string) (checker.Result, error) {
 	})
 
 	// Build message with top offenders
-	result.Passed = false
-	result.Status = checker.Warn
-
-	funcWord := "function"
-	if len(complexFunctions) > 1 {
-		funcWord = "functions"
-	}
-
-	msg := fmt.Sprintf("%d %s exceed complexity threshold (%d)", len(complexFunctions), funcWord, threshold)
+	msg := checkutil.PluralizeCount(len(complexFunctions), "function exceeds", "functions exceed") +
+		fmt.Sprintf(" complexity threshold (%d)", threshold)
 
 	// Show top 3 offenders
 	showCount := 3
@@ -153,8 +134,7 @@ func (c *CyclomaticCheck) Run(path string) (checker.Result, error) {
 		msg += fmt.Sprintf("\n  ... and %d more", len(complexFunctions)-showCount)
 	}
 
-	result.Message = msg
-	return result, nil
+	return rb.Warn(msg), nil
 }
 
 // functionName returns the name of a function, including receiver if present.

@@ -1,14 +1,13 @@
 package pythoncheck
 
 import (
-	"bytes"
 	"fmt"
-	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 )
 
@@ -21,83 +20,38 @@ func (c *CoverageCheck) ID() string   { return "python:coverage" }
 func (c *CoverageCheck) Name() string { return "Python Coverage" }
 
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {
+	rb := checkutil.NewResultBuilder(c, checker.LangPython)
+
 	threshold := 80.0
 	if c.Config != nil && c.Config.CoverageThreshold > 0 {
 		threshold = c.Config.CoverageThreshold
 	}
 
-	// Check if pytest-cov is available by trying to run pytest with coverage
-	cmd := exec.Command("pytest", "--cov=.", "--cov-report=term-missing", "-q")
-	cmd.Dir = path
-
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	output := stdout.String()
-	errOutput := stderr.String()
+	result := checkutil.RunCommand(path, "pytest", "--cov=.", "--cov-report=term-missing", "-q")
 
 	// Check if pytest or pytest-cov is not installed
-	if strings.Contains(errOutput, "unrecognized arguments: --cov") ||
-		strings.Contains(errOutput, "No module named pytest") {
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   true,
-			Status:   checker.Pass,
-			Message:  "pytest-cov not installed (run: pip install pytest-cov)",
-			Language: checker.LangPython,
-		}, nil
+	if strings.Contains(result.Stderr, "unrecognized arguments: --cov") ||
+		strings.Contains(result.Stderr, "No module named pytest") {
+		return rb.Pass("pytest-cov not installed (run: pip install pytest-cov)"), nil
 	}
 
-	if err != nil {
-		if strings.Contains(err.Error(), "executable file not found") {
-			return checker.Result{
-				Name:     c.Name(),
-				ID:       c.ID(),
-				Passed:   true,
-				Status:   checker.Pass,
-				Message:  "pytest not installed, skipping coverage",
-				Language: checker.LangPython,
-			}, nil
-		}
+	if checkutil.ToolNotFoundError(result.Err) {
+		return rb.Pass("pytest not installed, skipping coverage"), nil
 	}
 
 	// Check for no tests
-	if strings.Contains(output, "no tests ran") || strings.Contains(output, "collected 0 items") {
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   false,
-			Status:   checker.Warn,
-			Message:  "No tests found - coverage is 0%",
-			Language: checker.LangPython,
-		}, nil
+	if strings.Contains(result.Stdout, "no tests ran") || strings.Contains(result.Stdout, "collected 0 items") {
+		return rb.Warn("No tests found - coverage is 0%"), nil
 	}
 
 	// Parse coverage from output
-	coverage := parsePythonCoverage(output)
+	coverage := parsePythonCoverage(result.Stdout)
 
 	if coverage < threshold {
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   false,
-			Status:   checker.Warn,
-			Message:  fmt.Sprintf("Coverage %.1f%% is below threshold %.1f%%", coverage, threshold),
-			Language: checker.LangPython,
-		}, nil
+		return rb.Warn(fmt.Sprintf("Coverage %.1f%% is below threshold %.1f%%", coverage, threshold)), nil
 	}
 
-	return checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Passed:   true,
-		Status:   checker.Pass,
-		Message:  fmt.Sprintf("Coverage: %.1f%%", coverage),
-		Language: checker.LangPython,
-	}, nil
+	return rb.Pass(fmt.Sprintf("Coverage: %.1f%%", coverage)), nil
 }
 
 // parsePythonCoverage extracts the total coverage percentage from pytest-cov output.

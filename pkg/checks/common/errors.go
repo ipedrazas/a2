@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -15,11 +16,7 @@ func (c *ErrorsCheck) Name() string { return "Error Tracking" }
 
 // Run checks for error tracking SDKs and configuration.
 func (c *ErrorsCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string
 
@@ -177,14 +174,7 @@ func (c *ErrorsCheck) Run(path string) (checker.Result, error) {
 	// Build result
 	found = unique(found)
 	if len(found) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Error tracking configured: " + strings.Join(found, ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No error tracking found (consider adding Sentry, Rollbar, or Bugsnag)"
+		return rb.Pass("Error tracking configured: " + strings.Join(found, ", ")), nil
 	}
-
-	return result, nil
+	return rb.Warn("No error tracking found (consider adding Sentry, Rollbar, or Bugsnag)"), nil
 }

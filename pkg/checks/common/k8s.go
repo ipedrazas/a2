@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -19,11 +20,7 @@ func (c *K8sCheck) Name() string { return "Kubernetes Ready" }
 
 // Run checks for Kubernetes manifests, Helm charts, or Kustomize configurations.
 func (c *K8sCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var foundConfigs []string
 
@@ -78,16 +75,10 @@ func (c *K8sCheck) Run(path string) (checker.Result, error) {
 	}
 
 	if len(foundConfigs) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Deployment config found: " + strings.Join(foundConfigs, ", ")
-		return result, nil
+		return rb.Pass("Deployment config found: " + strings.Join(foundConfigs, ", ")), nil
 	}
 
-	result.Passed = false
-	result.Status = checker.Warn
-	result.Message = "No Kubernetes manifests or deployment config found"
-	return result, nil
+	return rb.Warn("No Kubernetes manifests or deployment config found"), nil
 }
 
 // hasHelmChart checks if a Helm chart exists.

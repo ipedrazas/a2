@@ -1,8 +1,6 @@
 package pythoncheck
 
 import (
-	"bytes"
-	"os/exec"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -20,62 +18,38 @@ func (c *FormatCheck) ID() string   { return "python:format" }
 func (c *FormatCheck) Name() string { return "Python Format" }
 
 func (c *FormatCheck) Run(path string) (checker.Result, error) {
+	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 	formatter := c.detectFormatter(path)
 
-	var cmd *exec.Cmd
+	var result *checkutil.CommandResult
 	var cmdDesc string
 
 	switch formatter {
 	case "ruff":
-		cmd = exec.Command("ruff", "format", "--check", ".")
+		result = checkutil.RunCommand(path, "ruff", "format", "--check", ".")
 		cmdDesc = "ruff format"
 	case "black":
-		cmd = exec.Command("black", "--check", ".")
+		result = checkutil.RunCommand(path, "black", "--check", ".")
 		cmdDesc = "black"
 	default:
 		// Try ruff first, fall back to black
-		if _, err := exec.LookPath("ruff"); err == nil {
-			cmd = exec.Command("ruff", "format", "--check", ".")
+		if checkutil.ToolAvailable("ruff") {
+			result = checkutil.RunCommand(path, "ruff", "format", "--check", ".")
 			cmdDesc = "ruff format"
-		} else if _, err := exec.LookPath("black"); err == nil {
-			cmd = exec.Command("black", "--check", ".")
+		} else if checkutil.ToolAvailable("black") {
+			result = checkutil.RunCommand(path, "black", "--check", ".")
 			cmdDesc = "black"
 		} else {
-			return checker.Result{
-				Name:     c.Name(),
-				ID:       c.ID(),
-				Passed:   true,
-				Status:   checker.Pass,
-				Message:  "No formatter installed (install ruff or black)",
-				Language: checker.LangPython,
-			}, nil
+			return rb.Pass("No formatter installed (install ruff or black)"), nil
 		}
 	}
 
-	cmd.Dir = path
-
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	if err != nil {
-		// Check if tool is not installed
-		if strings.Contains(err.Error(), "executable file not found") {
-			return checker.Result{
-				Name:     c.Name(),
-				ID:       c.ID(),
-				Passed:   true,
-				Status:   checker.Pass,
-				Message:  formatter + " not installed, skipping format check",
-				Language: checker.LangPython,
-			}, nil
+	if !result.Success() {
+		if checkutil.ToolNotFoundError(result.Err) {
+			return rb.Pass(formatter + " not installed, skipping format check"), nil
 		}
 
-		output := strings.TrimSpace(stderr.String())
-		if output == "" {
-			output = strings.TrimSpace(stdout.String())
-		}
+		output := result.Output()
 
 		// Count unformatted files
 		lines := strings.Split(output, "\n")
@@ -87,34 +61,13 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 		}
 
 		if fileCount > 0 {
-			return checker.Result{
-				Name:     c.Name(),
-				ID:       c.ID(),
-				Passed:   false,
-				Status:   checker.Warn,
-				Message:  cmdDesc + ": " + checkutil.PluralizeCount(fileCount, "file", "files") + " need formatting",
-				Language: checker.LangPython,
-			}, nil
+			return rb.Warn(cmdDesc + ": " + checkutil.PluralizeCount(fileCount, "file", "files") + " need formatting"), nil
 		}
 
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   false,
-			Status:   checker.Warn,
-			Message:  cmdDesc + " found issues: " + checkutil.TruncateMessage(output, 150),
-			Language: checker.LangPython,
-		}, nil
+		return rb.Warn(cmdDesc + " found issues: " + checkutil.TruncateMessage(output, 150)), nil
 	}
 
-	return checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Passed:   true,
-		Status:   checker.Pass,
-		Message:  "All Python files are properly formatted",
-		Language: checker.LangPython,
-	}, nil
+	return rb.Pass("All Python files are properly formatted"), nil
 }
 
 func (c *FormatCheck) detectFormatter(path string) string {

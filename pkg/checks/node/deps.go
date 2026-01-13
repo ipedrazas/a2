@@ -29,50 +29,31 @@ func (c *DepsCheck) Name() string {
 
 // Run executes the dependency vulnerability check.
 func (c *DepsCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangNode,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists
 	if !safepath.Exists(path, "package.json") {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = "package.json not found"
-		return result, nil
+		return rb.Fail("package.json not found"), nil
 	}
 
 	pm := c.detectPackageManager(path)
 
 	// Bun doesn't have built-in audit
 	if pm == "bun" {
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = "Bun does not have built-in security audit"
-		return result, nil
+		return rb.Pass("Bun does not have built-in security audit"), nil
 	}
 
 	// Run security audit
 	vulnCount, err := c.runAudit(path, pm)
 	if err != nil {
-		result.Status = checker.Warn
-		result.Passed = false
-		result.Message = fmt.Sprintf("Security audit failed: %v", err)
-		return result, nil
+		return rb.Warn(fmt.Sprintf("Security audit failed: %v", err)), nil
 	}
 
 	if vulnCount > 0 {
-		result.Status = checker.Warn
-		result.Passed = false
-		result.Message = fmt.Sprintf("%d %s found. Run: %s audit for details", vulnCount, checkutil.Pluralize(vulnCount, "vulnerability", "vulnerabilities"), pm)
-		return result, nil
+		return rb.Warn(fmt.Sprintf("%d %s found. Run: %s audit for details", vulnCount, checkutil.Pluralize(vulnCount, "vulnerability", "vulnerabilities"), pm)), nil
 	}
 
-	result.Status = checker.Pass
-	result.Passed = true
-	result.Message = fmt.Sprintf("No known vulnerabilities found (%s audit)", pm)
-	return result, nil
+	return rb.Pass(fmt.Sprintf("No known vulnerabilities found (%s audit)", pm)), nil
 }
 
 // detectPackageManager determines which package manager to use.

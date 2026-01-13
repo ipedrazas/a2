@@ -2,6 +2,7 @@ package gocheck
 
 import (
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 	"golang.org/x/mod/modfile"
 )
@@ -13,18 +14,13 @@ func (c *ModuleCheck) ID() string   { return "go:module" }
 func (c *ModuleCheck) Name() string { return "Go Module" }
 
 func (c *ModuleCheck) Run(path string) (checker.Result, error) {
+	rb := checkutil.NewResultBuilder(c, checker.LangGo)
+
 	// Use safepath to prevent directory traversal attacks
 	data, err := safepath.ReadFile(path, "go.mod")
 	if err != nil {
 		if !safepath.Exists(path, "go.mod") {
-			return checker.Result{
-				Name:     c.Name(),
-				ID:       c.ID(),
-				Passed:   false,
-				Status:   checker.Fail,
-				Message:  "go.mod not found. Run 'go mod init' to create one.",
-				Language: checker.LangGo,
-			}, nil
+			return rb.Fail("go.mod not found. Run 'go mod init' to create one."), nil
 		}
 		return checker.Result{}, err
 	}
@@ -35,34 +31,13 @@ func (c *ModuleCheck) Run(path string) (checker.Result, error) {
 	// Parse go.mod to validate it
 	modFile, err := modfile.Parse(modPath, data, nil)
 	if err != nil {
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   false,
-			Status:   checker.Fail,
-			Message:  "go.mod is invalid: " + err.Error(),
-			Language: checker.LangGo,
-		}, nil
+		return rb.Fail("go.mod is invalid: " + err.Error()), nil
 	}
 
 	// Check for Go version
 	if modFile.Go == nil || modFile.Go.Version == "" {
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   false,
-			Status:   checker.Warn,
-			Message:  "go.mod does not specify a Go version.",
-			Language: checker.LangGo,
-		}, nil
+		return rb.Warn("go.mod does not specify a Go version."), nil
 	}
 
-	return checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Passed:   true,
-		Status:   checker.Pass,
-		Message:  "Module: " + modFile.Module.Mod.Path + " (Go " + modFile.Go.Version + ")",
-		Language: checker.LangGo,
-	}, nil
+	return rb.Pass("Module: " + modFile.Module.Mod.Path + " (Go " + modFile.Go.Version + ")"), nil
 }

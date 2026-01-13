@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -18,11 +19,7 @@ func (c *PrecommitCheck) Name() string { return "Pre-commit Hooks" }
 
 // Run checks for pre-commit hook configurations.
 func (c *PrecommitCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var foundTools []string
 
@@ -62,16 +59,10 @@ func (c *PrecommitCheck) Run(path string) (checker.Result, error) {
 	}
 
 	if len(foundTools) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Pre-commit hooks configured: " + strings.Join(foundTools, ", ")
-		return result, nil
+		return rb.Pass("Pre-commit hooks configured: " + strings.Join(foundTools, ", ")), nil
 	}
 
-	result.Passed = false
-	result.Status = checker.Warn
-	result.Message = "No pre-commit hooks configured (consider adding pre-commit, Husky, or Lefthook)"
-	return result, nil
+	return rb.Warn("No pre-commit hooks configured (consider adding pre-commit, Husky, or Lefthook)"), nil
 }
 
 // hasHusky checks if Husky is configured.

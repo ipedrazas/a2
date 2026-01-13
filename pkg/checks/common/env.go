@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -15,11 +16,7 @@ func (c *EnvCheck) Name() string { return "Environment Config" }
 
 // Run checks for proper environment variable handling.
 func (c *EnvCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var findings []string
 	var issues []string
@@ -52,25 +49,15 @@ func (c *EnvCheck) Run(path string) (checker.Result, error) {
 
 	// Build result
 	if len(findings) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Environment config: " + strings.Join(findings, ", ")
+		message := "Environment config: " + strings.Join(findings, ", ")
 		if len(issues) > 0 {
-			result.Passed = false
-			result.Status = checker.Warn
-			result.Message += " (warning: " + strings.Join(issues, "; ") + ")"
+			return rb.Warn(message + " (warning: " + strings.Join(issues, "; ") + ")"), nil
 		}
+		return rb.Pass(message), nil
 	} else if len(issues) > 0 {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "Environment issues: " + strings.Join(issues, "; ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No environment configuration found (add .env.example to document required vars)"
+		return rb.Warn("Environment issues: " + strings.Join(issues, "; ")), nil
 	}
-
-	return result, nil
+	return rb.Warn("No environment configuration found (add .env.example to document required vars)"), nil
 }
 
 // hasDotenvLibrary checks if dotenv library is used in the project.

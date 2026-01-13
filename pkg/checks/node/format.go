@@ -29,18 +29,11 @@ func (c *FormatCheck) Name() string {
 
 // Run executes the format check.
 func (c *FormatCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangNode,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists
 	if !safepath.Exists(path, "package.json") {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = "package.json not found"
-		return result, nil
+		return rb.Fail("package.json not found"), nil
 	}
 
 	formatter := c.detectFormatter(path)
@@ -48,57 +41,42 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 	// Handle auto mode - try available formatters
 	if formatter == "auto" {
 		if _, err := exec.LookPath("npx"); err != nil {
-			result.Status = checker.Pass
-			result.Passed = true
-			result.Message = "npx not available, skipping format check"
-			return result, nil
+			return rb.Pass("npx not available, skipping format check"), nil
 		}
 
 		// Try prettier first, then biome
-		prettierResult := c.runPrettier(path)
+		prettierResult := c.runPrettier(path, rb)
 		if prettierResult != nil {
 			return *prettierResult, nil
 		}
 
-		biomeResult := c.runBiome(path)
+		biomeResult := c.runBiome(path, rb)
 		if biomeResult != nil {
 			return *biomeResult, nil
 		}
 
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = "No formatter configured (prettier or biome)"
-		return result, nil
+		return rb.Pass("No formatter configured (prettier or biome)"), nil
 	}
 
 	// Run specific formatter
 	switch formatter {
 	case "prettier":
-		if prettierResult := c.runPrettier(path); prettierResult != nil {
+		if prettierResult := c.runPrettier(path, rb); prettierResult != nil {
 			return *prettierResult, nil
 		}
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = "Prettier not installed"
-		return result, nil
+		return rb.Pass("Prettier not installed"), nil
 	case "biome":
-		if biomeResult := c.runBiome(path); biomeResult != nil {
+		if biomeResult := c.runBiome(path, rb); biomeResult != nil {
 			return *biomeResult, nil
 		}
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = "Biome not installed"
-		return result, nil
+		return rb.Pass("Biome not installed"), nil
 	default:
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = fmt.Sprintf("Unknown formatter: %s", formatter)
-		return result, nil
+		return rb.Pass(fmt.Sprintf("Unknown formatter: %s", formatter)), nil
 	}
 }
 
 // runPrettier runs prettier --check and returns a result or nil if prettier is not available.
-func (c *FormatCheck) runPrettier(path string) *checker.Result {
+func (c *FormatCheck) runPrettier(path string, rb *checkutil.ResultBuilder) *checker.Result {
 	// Check if prettier config exists
 	if !c.hasPrettierConfig(path) {
 		return nil
@@ -122,33 +100,21 @@ func (c *FormatCheck) runPrettier(path string) *checker.Result {
 		}
 	}
 
-	result := &checker.Result{
-		Name:     "Node Format",
-		ID:       "node:format",
-		Language: checker.LangNode,
-	}
-
 	if err != nil {
 		if unformattedCount > 0 {
-			result.Status = checker.Warn
-			result.Passed = false
-			result.Message = fmt.Sprintf("%d %s need formatting. Run: npx prettier --write .", unformattedCount, checkutil.Pluralize(unformattedCount, "file", "files"))
-		} else {
-			result.Status = checker.Warn
-			result.Passed = false
-			result.Message = "Files need formatting. Run: npx prettier --write ."
+			result := rb.Warn(fmt.Sprintf("%d %s need formatting. Run: npx prettier --write .", unformattedCount, checkutil.Pluralize(unformattedCount, "file", "files")))
+			return &result
 		}
-		return result
+		result := rb.Warn("Files need formatting. Run: npx prettier --write .")
+		return &result
 	}
 
-	result.Status = checker.Pass
-	result.Passed = true
-	result.Message = "All files properly formatted (prettier)"
-	return result
+	result := rb.Pass("All files properly formatted (prettier)")
+	return &result
 }
 
 // runBiome runs biome format --check and returns a result or nil if biome is not available.
-func (c *FormatCheck) runBiome(path string) *checker.Result {
+func (c *FormatCheck) runBiome(path string, rb *checkutil.ResultBuilder) *checker.Result {
 	// Check if biome config exists
 	if !c.hasBiomeConfig(path) {
 		return nil
@@ -162,23 +128,13 @@ func (c *FormatCheck) runBiome(path string) *checker.Result {
 
 	err := cmd.Run()
 
-	result := &checker.Result{
-		Name:     "Node Format",
-		ID:       "node:format",
-		Language: checker.LangNode,
-	}
-
 	if err != nil {
-		result.Status = checker.Warn
-		result.Passed = false
-		result.Message = "Files need formatting. Run: npx @biomejs/biome format --write ."
-		return result
+		result := rb.Warn("Files need formatting. Run: npx @biomejs/biome format --write .")
+		return &result
 	}
 
-	result.Status = checker.Pass
-	result.Passed = true
-	result.Message = "All files properly formatted (biome)"
-	return result
+	result := rb.Pass("All files properly formatted (biome)")
+	return &result
 }
 
 // detectFormatter determines which formatter to use.

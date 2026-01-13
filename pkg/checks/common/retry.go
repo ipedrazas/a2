@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -15,11 +16,7 @@ func (c *RetryCheck) Name() string { return "Retry Logic" }
 
 // Run checks for retry and backoff libraries.
 func (c *RetryCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string
 
@@ -144,14 +141,7 @@ func (c *RetryCheck) Run(path string) (checker.Result, error) {
 
 	// Build result
 	if len(found) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Retry/resilience: " + strings.Join(found, ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No retry logic found (consider adding for external calls)"
+		return rb.Pass("Retry/resilience: " + strings.Join(found, ", ")), nil
 	}
-
-	return result, nil
+	return rb.Warn("No retry logic found (consider adding for external calls)"), nil
 }

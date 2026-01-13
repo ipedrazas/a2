@@ -20,11 +20,7 @@ func (c *LoggingCheck) ID() string   { return "go:logging" }
 func (c *LoggingCheck) Name() string { return "Go Logging" }
 
 func (c *LoggingCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangGo,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
 	// Structured logging imports to detect
 	structuredLoggers := []string{
@@ -112,37 +108,22 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 	})
 
 	if err != nil {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "Error scanning files: " + err.Error()
-		return result, nil
+		return rb.Warn("Error scanning files: " + err.Error()), nil
 	}
 
 	// Determine result based on findings
 	if hasStructuredLogger && printCount == 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Uses structured logging, no fmt.Print statements"
-		return result, nil
+		return rb.Pass("Uses structured logging, no fmt.Print statements"), nil
 	}
 
 	if hasStructuredLogger && printCount > 0 {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "Uses structured logging but found " + checkutil.PluralizeCount(printCount, "fmt.Print statement", "fmt.Print statements")
-		return result, nil
+		return rb.Warn("Uses structured logging but found " + checkutil.PluralizeCount(printCount, "fmt.Print statement", "fmt.Print statements")), nil
 	}
 
 	if !hasStructuredLogger && printCount == 0 {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No structured logging detected (consider slog, zap, or zerolog)"
-		return result, nil
+		return rb.Warn("No structured logging detected (consider slog, zap, or zerolog)"), nil
 	}
 
 	// !hasStructuredLogger && printCount > 0
-	result.Passed = false
-	result.Status = checker.Warn
-	result.Message = "No structured logging and found " + checkutil.PluralizeCount(printCount, "fmt.Print statement", "fmt.Print statements")
-	return result, nil
+	return rb.Warn("No structured logging and found " + checkutil.PluralizeCount(printCount, "fmt.Print statement", "fmt.Print statements")), nil
 }

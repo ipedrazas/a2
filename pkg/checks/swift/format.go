@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -19,27 +20,17 @@ func (c *FormatCheck) Name() string { return "Swift Format" }
 
 // Run checks if code is properly formatted using swift-format or swiftformat.
 func (c *FormatCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangSwift,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangSwift)
 
 	// Check for Package.swift first
 	if !safepath.Exists(path, "Package.swift") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No Package.swift found"
-		return result, nil
+		return rb.Fail("No Package.swift found"), nil
 	}
 
 	// Determine which formatter to use
 	formatter := c.detectFormatter(path)
 	if formatter == "" {
-		result.Passed = true
-		result.Status = checker.Info
-		result.Message = "No Swift formatter found (install swift-format or swiftformat)"
-		return result, nil
+		return rb.Info("No Swift formatter found (install swift-format or swiftformat)"), nil
 	}
 
 	// Check for formatter config
@@ -69,25 +60,16 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 				issueCount++
 			}
 		}
-		result.Passed = false
-		result.Status = checker.Warn
 		if issueCount > 0 {
-			result.Message = "Code not formatted: " + formatCount(issueCount) + " issue(s) found"
-		} else {
-			result.Message = "Code not formatted (run '" + formatter + "')"
+			return rb.Warn("Code not formatted: " + formatCount(issueCount) + " issue(s) found"), nil
 		}
-		return result, nil
+		return rb.Warn("Code not formatted (run '" + formatter + "')"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
 	if hasConfig {
-		result.Message = "Code formatted (" + formatter + ", custom config)"
-	} else {
-		result.Message = "Code formatted (" + formatter + ")"
+		return rb.Pass("Code formatted (" + formatter + ", custom config)"), nil
 	}
-
-	return result, nil
+	return rb.Pass("Code formatted (" + formatter + ")"), nil
 }
 
 // detectFormatter determines which formatter is available.

@@ -1,11 +1,10 @@
 package gocheck
 
 import (
-	"bytes"
-	"os/exec"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 )
 
 // FormatCheck verifies that all Go code is properly formatted.
@@ -15,49 +14,22 @@ func (c *FormatCheck) ID() string   { return "go:format" }
 func (c *FormatCheck) Name() string { return "Go Format" }
 
 func (c *FormatCheck) Run(path string) (checker.Result, error) {
+	rb := checkutil.NewResultBuilder(c, checker.LangGo)
+
 	// Run gofmt -l to list files that need formatting
-	cmd := exec.Command("gofmt", "-l", ".")
-	cmd.Dir = path
+	result := checkutil.RunCommand(path, "gofmt", "-l", ".")
 
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	if err != nil {
-		// gofmt returns non-zero if there's an error (not just unformatted files)
-		if stderr.Len() > 0 {
-			return checker.Result{
-				Name:     c.Name(),
-				ID:       c.ID(),
-				Passed:   false,
-				Status:   checker.Warn,
-				Message:  "gofmt error: " + stderr.String(),
-				Language: checker.LangGo,
-			}, nil
-		}
+	// gofmt returns non-zero if there's an error (not just unformatted files)
+	if result.Err != nil && result.Stderr != "" {
+		return rb.Warn("gofmt error: " + result.Stderr), nil
 	}
 
-	output := strings.TrimSpace(stdout.String())
+	output := strings.TrimSpace(result.Stdout)
 	if output != "" {
 		// Count unformatted files
 		files := strings.Split(output, "\n")
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   false,
-			Status:   checker.Warn,
-			Message:  "Unformatted files: " + strings.Join(files, ", ") + ". Run 'gofmt -w .' to fix.",
-			Language: checker.LangGo,
-		}, nil
+		return rb.Warn("Unformatted files: " + strings.Join(files, ", ") + ". Run 'gofmt -w .' to fix."), nil
 	}
 
-	return checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Passed:   true,
-		Status:   checker.Pass,
-		Message:  "All Go files are properly formatted",
-		Language: checker.LangGo,
-	}, nil
+	return rb.Pass("All Go files are properly formatted"), nil
 }

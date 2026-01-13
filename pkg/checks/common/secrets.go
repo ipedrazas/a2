@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -26,11 +27,7 @@ type secretPattern struct {
 
 // Run checks for secret scanning configuration or scans for hardcoded secrets.
 func (c *SecretsCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// First, check if secret scanning tools are configured
 	scannerConfigs := []struct {
@@ -62,35 +59,25 @@ func (c *SecretsCheck) Run(path string) (checker.Result, error) {
 
 	// If secret scanning is configured, that's a pass
 	if len(foundScanners) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
 		// Deduplicate scanner names
 		unique := uniqueStrings(foundScanners)
-		result.Message = "Secret scanning configured: " + strings.Join(unique, ", ")
-		return result, nil
+		return rb.Pass("Secret scanning configured: " + strings.Join(unique, ", ")), nil
 	}
 
 	// No scanner configured - scan for potential secrets
 	findings := c.scanForSecrets(path)
 
 	if len(findings) > 0 {
-		result.Passed = false
-		result.Status = checker.Warn
 		if len(findings) == 1 {
-			result.Message = fmt.Sprintf("Potential secret found: %s", findings[0])
+			return rb.Warn(fmt.Sprintf("Potential secret found: %s", findings[0])), nil
 		} else if len(findings) <= 3 {
-			result.Message = fmt.Sprintf("Potential secrets found: %s", strings.Join(findings, ", "))
-		} else {
-			result.Message = fmt.Sprintf("%d potential secrets found (e.g., %s)", len(findings), strings.Join(findings[:3], ", "))
+			return rb.Warn(fmt.Sprintf("Potential secrets found: %s", strings.Join(findings, ", "))), nil
 		}
-		return result, nil
+		return rb.Warn(fmt.Sprintf("%d potential secrets found (e.g., %s)", len(findings), strings.Join(findings[:3], ", "))), nil
 	}
 
 	// No secrets found but no scanner configured
-	result.Passed = false
-	result.Status = checker.Warn
-	result.Message = "No secret scanning configured (consider adding gitleaks or similar)"
-	return result, nil
+	return rb.Warn("No secret scanning configured (consider adding gitleaks or similar)"), nil
 }
 
 // hasSecretScanningInPreCommit checks if pre-commit config includes secret scanning.

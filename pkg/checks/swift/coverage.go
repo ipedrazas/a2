@@ -6,6 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -19,18 +20,11 @@ func (c *CoverageCheck) Name() string { return "Swift Coverage" }
 
 // Run checks test coverage using swift test with coverage enabled.
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangSwift,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangSwift)
 
 	// Check for Package.swift first
 	if !safepath.Exists(path, "Package.swift") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No Package.swift found"
-		return result, nil
+		return rb.Fail("No Package.swift found"), nil
 	}
 
 	// Run swift test with coverage
@@ -39,20 +33,14 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 	_, err := cmd.CombinedOutput()
 
 	if err != nil {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "Cannot generate coverage: " + err.Error()
-		return result, nil
+		return rb.Warn("Cannot generate coverage: " + err.Error()), nil
 	}
 
 	// Get coverage data using llvm-cov
 	// First, find the test binary and profdata
 	coverage, err := c.extractCoverage(path)
 	if err != nil {
-		result.Passed = true
-		result.Status = checker.Info
-		result.Message = "Coverage data not available (llvm-cov not configured)"
-		return result, nil
+		return rb.Info("Coverage data not available (llvm-cov not configured)"), nil
 	}
 
 	threshold := c.Threshold
@@ -61,16 +49,9 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 	}
 
 	if coverage >= threshold {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = fmt.Sprintf("Coverage: %.1f%% (threshold: %.1f%%)", coverage, threshold)
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = fmt.Sprintf("Coverage: %.1f%% (below threshold: %.1f%%)", coverage, threshold)
+		return rb.Pass(fmt.Sprintf("Coverage: %.1f%% (threshold: %.1f%%)", coverage, threshold)), nil
 	}
-
-	return result, nil
+	return rb.Warn(fmt.Sprintf("Coverage: %.1f%% (below threshold: %.1f%%)", coverage, threshold)), nil
 }
 
 // extractCoverage attempts to get coverage percentage from swift test output.

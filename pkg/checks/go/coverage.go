@@ -1,14 +1,13 @@
 package gocheck
 
 import (
-	"bytes"
 	"fmt"
-	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 )
 
 // CoverageCheck verifies that test coverage meets a threshold.
@@ -20,67 +19,33 @@ func (c *CoverageCheck) ID() string   { return "go:coverage" }
 func (c *CoverageCheck) Name() string { return "Go Coverage" }
 
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {
+	rb := checkutil.NewResultBuilder(c, checker.LangGo)
+
 	threshold := c.Threshold
 	if threshold == 0 {
 		threshold = 80.0 // Default threshold
 	}
 
-	cmd := exec.Command("go", "test", "-cover", "./...")
-	cmd.Dir = path
-
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	output := stdout.String()
+	result := checkutil.RunCommand(path, "go", "test", "-cover", "./...")
 
 	// Check for no test files
-	if strings.Contains(output, "no test files") && !strings.Contains(output, "coverage:") {
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   false,
-			Status:   checker.Warn,
-			Message:  "No test files found - coverage is 0%",
-			Language: checker.LangGo,
-		}, nil
+	if strings.Contains(result.Stdout, "no test files") && !strings.Contains(result.Stdout, "coverage:") {
+		return rb.Warn("No test files found - coverage is 0%"), nil
 	}
 
 	// If tests failed, report that
-	if err != nil {
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   false,
-			Status:   checker.Warn,
-			Message:  "Could not measure coverage: tests failed",
-			Language: checker.LangGo,
-		}, nil
+	if !result.Success() {
+		return rb.Warn("Could not measure coverage: tests failed"), nil
 	}
 
 	// Parse coverage from output
-	coverage := parseCoverage(output)
+	coverage := parseCoverage(result.Stdout)
 
 	if coverage < threshold {
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   false,
-			Status:   checker.Warn,
-			Message:  fmt.Sprintf("Coverage %.1f%% is below threshold %.1f%%", coverage, threshold),
-			Language: checker.LangGo,
-		}, nil
+		return rb.Warn(fmt.Sprintf("Coverage %.1f%% is below threshold %.1f%%", coverage, threshold)), nil
 	}
 
-	return checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Passed:   true,
-		Status:   checker.Pass,
-		Message:  fmt.Sprintf("Coverage: %.1f%%", coverage),
-		Language: checker.LangGo,
-	}, nil
+	return rb.Pass(fmt.Sprintf("Coverage: %.1f%%", coverage)), nil
 }
 
 // parseCoverage extracts the average coverage percentage from go test -cover output.

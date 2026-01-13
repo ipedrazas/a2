@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -15,11 +16,7 @@ func (c *APIDocsCheck) Name() string { return "API Documentation" }
 
 // Run checks for API documentation files and generators.
 func (c *APIDocsCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string
 
@@ -135,16 +132,9 @@ func (c *APIDocsCheck) Run(path string) (checker.Result, error) {
 
 	// Build result
 	if len(found) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "API documentation found: " + strings.Join(unique(found), ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No API documentation found (consider adding OpenAPI/Swagger specs)"
+		return rb.Pass("API documentation found: " + strings.Join(unique(found), ", ")), nil
 	}
-
-	return result, nil
+	return rb.Warn("No API documentation found (consider adding OpenAPI/Swagger specs)"), nil
 }
 
 func hasProtoFiles(path string) bool {

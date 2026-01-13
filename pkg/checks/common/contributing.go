@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -15,11 +16,7 @@ func (c *ContributingCheck) Name() string { return "Contributing Guidelines" }
 
 // Run checks for contribution guidelines and templates.
 func (c *ContributingCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string
 
@@ -80,14 +77,7 @@ func (c *ContributingCheck) Run(path string) (checker.Result, error) {
 
 	// Build result
 	if len(found) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Found: " + strings.Join(found, ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No contribution guidelines found (consider adding CONTRIBUTING.md)"
+		return rb.Pass("Found: " + strings.Join(found, ", ")), nil
 	}
-
-	return result, nil
+	return rb.Warn("No contribution guidelines found (consider adding CONTRIBUTING.md)"), nil
 }

@@ -29,18 +29,11 @@ func (c *LintCheck) Name() string {
 
 // Run executes the lint check.
 func (c *LintCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangNode,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists
 	if !safepath.Exists(path, "package.json") {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = "package.json not found"
-		return result, nil
+		return rb.Fail("package.json not found"), nil
 	}
 
 	linter := c.detectLinter(path)
@@ -48,70 +41,52 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 	// Handle auto mode - try available linters
 	if linter == "auto" {
 		if _, err := exec.LookPath("npx"); err != nil {
-			result.Status = checker.Pass
-			result.Passed = true
-			result.Message = "npx not available, skipping lint check"
-			return result, nil
+			return rb.Pass("npx not available, skipping lint check"), nil
 		}
 
 		// Try eslint first, then biome, then oxlint
-		eslintResult := c.runESLint(path)
+		eslintResult := c.runESLint(path, rb)
 		if eslintResult != nil {
 			return *eslintResult, nil
 		}
 
-		biomeResult := c.runBiome(path)
+		biomeResult := c.runBiome(path, rb)
 		if biomeResult != nil {
 			return *biomeResult, nil
 		}
 
-		oxlintResult := c.runOxlint(path)
+		oxlintResult := c.runOxlint(path, rb)
 		if oxlintResult != nil {
 			return *oxlintResult, nil
 		}
 
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = "No linter configured (eslint, biome, or oxlint)"
-		return result, nil
+		return rb.Pass("No linter configured (eslint, biome, or oxlint)"), nil
 	}
 
 	// Run specific linter
 	switch linter {
 	case "eslint":
-		if eslintResult := c.runESLint(path); eslintResult != nil {
+		if eslintResult := c.runESLint(path, rb); eslintResult != nil {
 			return *eslintResult, nil
 		}
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = "ESLint not installed"
-		return result, nil
+		return rb.Pass("ESLint not installed"), nil
 	case "biome":
-		if biomeResult := c.runBiome(path); biomeResult != nil {
+		if biomeResult := c.runBiome(path, rb); biomeResult != nil {
 			return *biomeResult, nil
 		}
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = "Biome not installed"
-		return result, nil
+		return rb.Pass("Biome not installed"), nil
 	case "oxlint":
-		if oxlintResult := c.runOxlint(path); oxlintResult != nil {
+		if oxlintResult := c.runOxlint(path, rb); oxlintResult != nil {
 			return *oxlintResult, nil
 		}
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = "Oxlint not installed"
-		return result, nil
+		return rb.Pass("Oxlint not installed"), nil
 	default:
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = fmt.Sprintf("Unknown linter: %s", linter)
-		return result, nil
+		return rb.Pass(fmt.Sprintf("Unknown linter: %s", linter)), nil
 	}
 }
 
 // runESLint runs eslint and returns a result or nil if eslint is not available.
-func (c *LintCheck) runESLint(path string) *checker.Result {
+func (c *LintCheck) runESLint(path string, rb *checkutil.ResultBuilder) *checker.Result {
 	// Check if eslint config exists
 	if !c.hasESLintConfig(path) {
 		return nil
@@ -126,34 +101,22 @@ func (c *LintCheck) runESLint(path string) *checker.Result {
 	err := cmd.Run()
 	output := stdout.String() + stderr.String()
 
-	result := &checker.Result{
-		Name:     "Node Lint",
-		ID:       "node:lint",
-		Language: checker.LangNode,
-	}
-
 	if err != nil {
 		issueCount := countLintIssues(output)
 		if issueCount > 0 {
-			result.Status = checker.Warn
-			result.Passed = false
-			result.Message = fmt.Sprintf("%d linting %s found. Run: npx eslint . --fix", issueCount, checkutil.Pluralize(issueCount, "issue", "issues"))
-		} else {
-			result.Status = checker.Warn
-			result.Passed = false
-			result.Message = "Linting issues found. Run: npx eslint . --fix"
+			result := rb.Warn(fmt.Sprintf("%d linting %s found. Run: npx eslint . --fix", issueCount, checkutil.Pluralize(issueCount, "issue", "issues")))
+			return &result
 		}
-		return result
+		result := rb.Warn("Linting issues found. Run: npx eslint . --fix")
+		return &result
 	}
 
-	result.Status = checker.Pass
-	result.Passed = true
-	result.Message = "No linting issues found (eslint)"
-	return result
+	result := rb.Pass("No linting issues found (eslint)")
+	return &result
 }
 
 // runBiome runs biome lint and returns a result or nil if biome is not available.
-func (c *LintCheck) runBiome(path string) *checker.Result {
+func (c *LintCheck) runBiome(path string, rb *checkutil.ResultBuilder) *checker.Result {
 	// Check if biome config exists
 	if !c.hasBiomeConfig(path) {
 		return nil
@@ -167,27 +130,17 @@ func (c *LintCheck) runBiome(path string) *checker.Result {
 
 	err := cmd.Run()
 
-	result := &checker.Result{
-		Name:     "Node Lint",
-		ID:       "node:lint",
-		Language: checker.LangNode,
-	}
-
 	if err != nil {
-		result.Status = checker.Warn
-		result.Passed = false
-		result.Message = "Linting issues found. Run: npx @biomejs/biome lint --apply ."
-		return result
+		result := rb.Warn("Linting issues found. Run: npx @biomejs/biome lint --apply .")
+		return &result
 	}
 
-	result.Status = checker.Pass
-	result.Passed = true
-	result.Message = "No linting issues found (biome)"
-	return result
+	result := rb.Pass("No linting issues found (biome)")
+	return &result
 }
 
 // runOxlint runs oxlint and returns a result or nil if oxlint is not available.
-func (c *LintCheck) runOxlint(path string) *checker.Result {
+func (c *LintCheck) runOxlint(path string, rb *checkutil.ResultBuilder) *checker.Result {
 	// Check if oxlint config exists or is in devDependencies
 	if !c.hasOxlintConfig(path) {
 		return nil
@@ -201,23 +154,13 @@ func (c *LintCheck) runOxlint(path string) *checker.Result {
 
 	err := cmd.Run()
 
-	result := &checker.Result{
-		Name:     "Node Lint",
-		ID:       "node:lint",
-		Language: checker.LangNode,
-	}
-
 	if err != nil {
-		result.Status = checker.Warn
-		result.Passed = false
-		result.Message = "Linting issues found (oxlint)"
-		return result
+		result := rb.Warn("Linting issues found (oxlint)")
+		return &result
 	}
 
-	result.Status = checker.Pass
-	result.Passed = true
-	result.Message = "No linting issues found (oxlint)"
-	return result
+	result := rb.Pass("No linting issues found (oxlint)")
+	return &result
 }
 
 // detectLinter determines which linter to use.

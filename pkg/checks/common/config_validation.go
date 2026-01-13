@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -15,11 +16,7 @@ func (c *ConfigValidationCheck) Name() string { return "Config Validation" }
 
 // Run checks for configuration validation libraries and patterns.
 func (c *ConfigValidationCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string
 
@@ -156,14 +153,7 @@ func (c *ConfigValidationCheck) Run(path string) (checker.Result, error) {
 
 	// Build result
 	if len(found) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Config validation: " + strings.Join(found, ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No config validation found (consider adding validation at startup)"
+		return rb.Pass("Config validation: " + strings.Join(found, ", ")), nil
 	}
-
-	return result, nil
+	return rb.Warn("No config validation found (consider adding validation at startup)"), nil
 }

@@ -1,11 +1,10 @@
 package gocheck
 
 import (
-	"bytes"
-	"os/exec"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 )
 
 // TestsCheck runs go test to verify all tests pass.
@@ -15,62 +14,18 @@ func (c *TestsCheck) ID() string   { return "go:tests" }
 func (c *TestsCheck) Name() string { return "Go Tests" }
 
 func (c *TestsCheck) Run(path string) (checker.Result, error) {
-	cmd := exec.Command("go", "test", "./...")
-	cmd.Dir = path
+	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	result := checkutil.RunCommand(path, "go", "test", "./...")
 
-	err := cmd.Run()
-	if err != nil {
-		// Combine output for error message
-		output := strings.TrimSpace(stderr.String())
-		if output == "" {
-			output = strings.TrimSpace(stdout.String())
-		}
-
-		// Check if it's "no test files" which is not a failure
-		if strings.Contains(output, "no test files") || strings.Contains(stdout.String(), "no test files") {
-			return checker.Result{
-				Name:     c.Name(),
-				ID:       c.ID(),
-				Passed:   true,
-				Status:   checker.Pass,
-				Message:  "No test files found",
-				Language: checker.LangGo,
-			}, nil
-		}
-
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   false,
-			Status:   checker.Fail, // Critical - stops execution
-			Message:  "Tests failed: " + output,
-			Language: checker.LangGo,
-		}, nil
+	// Check if it's "no test files" which is not a failure
+	if strings.Contains(result.Stdout, "no test files") || strings.Contains(result.Stderr, "no test files") {
+		return rb.Pass("No test files found"), nil
 	}
 
-	// Parse output to count tests
-	output := stdout.String()
-	if strings.Contains(output, "no test files") {
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   true,
-			Status:   checker.Pass,
-			Message:  "No test files found",
-			Language: checker.LangGo,
-		}, nil
+	if !result.Success() {
+		return rb.Fail("Tests failed: " + result.Output()), nil
 	}
 
-	return checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Passed:   true,
-		Status:   checker.Pass,
-		Message:  "All tests passed",
-		Language: checker.LangGo,
-	}, nil
+	return rb.Pass("All tests passed"), nil
 }

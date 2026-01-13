@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 )
 
 // ExternalCheck runs an external binary as a check.
@@ -38,29 +39,17 @@ func (c *ExternalCheck) ID() string   { return c.CheckID }
 func (c *ExternalCheck) Name() string { return c.CheckName }
 
 func (c *ExternalCheck) Run(path string) (checker.Result, error) {
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
+
 	// Validate command before execution
 	if err := c.validateCommand(); err != nil {
-		return checker.Result{
-			Name:     c.CheckName,
-			ID:       c.CheckID,
-			Passed:   false,
-			Status:   checker.Warn,
-			Message:  err.Error(),
-			Language: checker.LangCommon,
-		}, nil
+		return rb.Warn(err.Error()), nil
 	}
 
 	// Resolve command to absolute path for security
 	cmdPath, err := exec.LookPath(c.Command)
 	if err != nil {
-		return checker.Result{
-			Name:     c.CheckName,
-			ID:       c.CheckID,
-			Passed:   false,
-			Status:   checker.Warn,
-			Message:  fmt.Sprintf("Command not found: %s", c.Command),
-			Language: checker.LangCommon,
-		}, nil
+		return rb.Warn(fmt.Sprintf("Command not found: %s", c.Command)), nil
 	}
 
 	// Sanitize arguments - remove any that contain shell metacharacters
@@ -134,39 +123,24 @@ func (c *ExternalCheck) sanitizeArgs() []string {
 }
 
 func (c *ExternalCheck) resultFromJSON(out ExternalOutput) (checker.Result, error) {
-	status := checker.Pass
-	passed := true
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	switch strings.ToLower(out.Status) {
 	case "warn", "warning":
-		status = checker.Warn
-		passed = false
+		return rb.Warn(out.Message), nil
 	case "fail", "error":
-		status = checker.Fail
-		passed = false
+		return rb.Fail(out.Message), nil
+	default:
+		return rb.Pass(out.Message), nil
 	}
-
-	return checker.Result{
-		Name:     c.CheckName,
-		ID:       c.CheckID,
-		Passed:   passed,
-		Status:   status,
-		Message:  out.Message,
-		Language: checker.LangCommon,
-	}, nil
 }
 
 func (c *ExternalCheck) resultFromExitCode(output string, err error) (checker.Result, error) {
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
+
 	if err == nil {
 		// Exit code 0 = pass
-		return checker.Result{
-			Name:     c.CheckName,
-			ID:       c.CheckID,
-			Passed:   true,
-			Status:   checker.Pass,
-			Message:  output,
-			Language: checker.LangCommon,
-		}, nil
+		return rb.Pass(output), nil
 	}
 
 	// Get exit code
@@ -175,23 +149,14 @@ func (c *ExternalCheck) resultFromExitCode(output string, err error) (checker.Re
 		exitCode = exitErr.ExitCode()
 	}
 
-	// Determine severity
-	status := checker.Warn
-	if exitCode >= 2 || c.Severity == "fail" {
-		status = checker.Fail
-	}
-
 	message := output
 	if message == "" {
 		message = "Check failed"
 	}
 
-	return checker.Result{
-		Name:     c.CheckName,
-		ID:       c.CheckID,
-		Passed:   false,
-		Status:   status,
-		Message:  message,
-		Language: checker.LangCommon,
-	}, nil
+	// Determine severity
+	if exitCode >= 2 || c.Severity == "fail" {
+		return rb.Fail(message), nil
+	}
+	return rb.Warn(message), nil
 }

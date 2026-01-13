@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -17,26 +18,16 @@ func (c *DepsCheck) Name() string { return "Rust Vulnerabilities" }
 
 // Run checks for dependency vulnerabilities using cargo audit.
 func (c *DepsCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangRust,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	// Check for Cargo.toml first
 	if !safepath.Exists(path, "Cargo.toml") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No Cargo.toml found"
-		return result, nil
+		return rb.Fail("No Cargo.toml found"), nil
 	}
 
 	// Check for Cargo.lock (required for audit)
 	if !safepath.Exists(path, "Cargo.lock") {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "No Cargo.lock found (run cargo build to generate)"
-		return result, nil
+		return rb.Pass("No Cargo.lock found (run cargo build to generate)"), nil
 	}
 
 	// Check for deny.toml (cargo-deny config)
@@ -52,25 +43,16 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 	if err != nil && strings.Contains(outputStr, "no such subcommand") {
 		// Check if cargo-deny is configured
 		if hasDeny {
-			result.Passed = true
-			result.Status = checker.Pass
-			result.Message = "cargo-deny configured for security scanning"
-			return result, nil
+			return rb.Pass("cargo-deny configured for security scanning"), nil
 		}
 
 		// Check for audit in CI
 		ciConfigured := c.checkCIForAudit(path)
 		if ciConfigured {
-			result.Passed = true
-			result.Status = checker.Pass
-			result.Message = "Security audit configured in CI"
-			return result, nil
+			return rb.Pass("Security audit configured in CI"), nil
 		}
 
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No security audit tool found (consider cargo-audit or cargo-deny)"
-		return result, nil
+		return rb.Warn("No security audit tool found (consider cargo-audit or cargo-deny)"), nil
 	}
 
 	if err != nil {
@@ -78,22 +60,12 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 		vulnRe := regexp.MustCompile(`(\d+) vulnerabilit`)
 		matches := vulnRe.FindStringSubmatch(outputStr)
 		if len(matches) > 1 {
-			result.Passed = false
-			result.Status = checker.Warn
-			result.Message = matches[1] + " vulnerabilities found"
-		} else {
-			result.Passed = false
-			result.Status = checker.Warn
-			result.Message = "Vulnerabilities found in dependencies"
+			return rb.Warn(matches[1] + " vulnerabilities found"), nil
 		}
-		return result, nil
+		return rb.Warn("Vulnerabilities found in dependencies"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "No known vulnerabilities found"
-
-	return result, nil
+	return rb.Pass("No known vulnerabilities found"), nil
 }
 
 // checkCIForAudit looks for audit configuration in CI files.

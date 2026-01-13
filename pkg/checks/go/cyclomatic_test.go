@@ -107,7 +107,7 @@ func complex(x, y, z int) int {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "exceed complexity threshold")
+	s.Contains(result.Message, "exceeds complexity threshold")
 	s.Contains(result.Message, "complex")
 }
 

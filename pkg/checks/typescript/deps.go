@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -20,18 +21,11 @@ func (c *DepsCheck) Name() string { return "TypeScript Vulnerabilities" }
 
 // Run checks for dependency vulnerabilities.
 func (c *DepsCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for package.json
 	if !safepath.Exists(path, "package.json") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No package.json found"
-		return result, nil
+		return rb.Fail("No package.json found"), nil
 	}
 
 	// Detect package manager
@@ -60,29 +54,17 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 	auditResult := c.runAudit(path, pm)
 	if auditResult != "" {
 		if len(tools) > 0 {
-			result.Passed = true
-			result.Status = checker.Pass
-			result.Message = auditResult + "; configured: " + strings.Join(tools, ", ")
-		} else {
-			result.Passed = true
-			result.Status = checker.Pass
-			result.Message = auditResult
+			return rb.Pass(auditResult + "; configured: " + strings.Join(tools, ", ")), nil
 		}
-		return result, nil
+		return rb.Pass(auditResult), nil
 	}
 
 	// If audit failed or not available, check for tools
 	if len(tools) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Vulnerability scanning configured: " + strings.Join(tools, ", ")
-		return result, nil
+		return rb.Pass("Vulnerability scanning configured: " + strings.Join(tools, ", ")), nil
 	}
 
-	result.Passed = false
-	result.Status = checker.Warn
-	result.Message = "No vulnerability scanning configured (consider npm audit or Snyk)"
-	return result, nil
+	return rb.Warn("No vulnerability scanning configured (consider npm audit or Snyk)"), nil
 }
 
 // detectPackageManager determines which package manager to use.

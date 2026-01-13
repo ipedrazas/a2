@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -15,11 +16,7 @@ func (c *IntegrationCheck) Name() string { return "Integration Tests" }
 
 // Run checks for integration test directories and files.
 func (c *IntegrationCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string
 
@@ -136,16 +133,9 @@ func (c *IntegrationCheck) Run(path string) (checker.Result, error) {
 	// Build result
 	found = unique(found)
 	if len(found) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Integration tests found: " + strings.Join(found, ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No integration tests found (consider adding tests/integration/ directory)"
+		return rb.Pass("Integration tests found: " + strings.Join(found, ", ")), nil
 	}
-
-	return result, nil
+	return rb.Warn("No integration tests found (consider adding tests/integration/ directory)"), nil
 }
 
 func (c *IntegrationCheck) hasTestcontainers(path string) bool {

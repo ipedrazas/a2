@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -15,11 +16,7 @@ func (c *EditorconfigCheck) Name() string { return "Editor Config" }
 
 // Run checks for editor configuration files.
 func (c *EditorconfigCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string
 
@@ -97,14 +94,7 @@ func (c *EditorconfigCheck) Run(path string) (checker.Result, error) {
 
 	// Build result
 	if len(found) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Editor config: " + strings.Join(found, ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No editor config found (consider adding .editorconfig)"
+		return rb.Pass("Editor config: " + strings.Join(found, ", ")), nil
 	}
-
-	return result, nil
+	return rb.Warn("No editor config found (consider adding .editorconfig)"), nil
 }

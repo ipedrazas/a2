@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -20,18 +21,11 @@ func (c *CoverageCheck) Name() string { return "Rust Coverage" }
 
 // Run checks for coverage tooling and reports.
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangRust,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	// Check for Cargo.toml first
 	if !safepath.Exists(path, "Cargo.toml") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No Cargo.toml found"
-		return result, nil
+		return rb.Fail("No Cargo.toml found"), nil
 	}
 
 	// Look for coverage tools/config
@@ -78,24 +72,16 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 
 	// Build result
 	if coverage >= 0 {
-		result.Passed = coverage >= c.Threshold
-		if result.Passed {
-			result.Status = checker.Pass
-		} else {
-			result.Status = checker.Warn
+		msg := fmt.Sprintf("Coverage %.1f%% (threshold %.1f%%)", coverage, c.Threshold)
+		if coverage >= c.Threshold {
+			return rb.Pass(msg), nil
 		}
-		result.Message = fmt.Sprintf("Coverage %.1f%% (threshold %.1f%%)", coverage, c.Threshold)
-	} else if len(coverageTools) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Coverage configured: " + strings.Join(coverageTools, ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No coverage tooling found (consider cargo-tarpaulin or cargo-llvm-cov)"
+		return rb.Warn(msg), nil
 	}
-
-	return result, nil
+	if len(coverageTools) > 0 {
+		return rb.Pass("Coverage configured: " + strings.Join(coverageTools, ", ")), nil
+	}
+	return rb.Warn("No coverage tooling found (consider cargo-tarpaulin or cargo-llvm-cov)"), nil
 }
 
 // findCoverageReports looks for coverage report files and extracts percentage.

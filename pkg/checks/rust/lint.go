@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -17,18 +18,11 @@ func (c *LintCheck) Name() string { return "Rust Clippy" }
 
 // Run executes cargo clippy.
 func (c *LintCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangRust,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	// Check for Cargo.toml first
 	if !safepath.Exists(path, "Cargo.toml") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No Cargo.toml found"
-		return result, nil
+		return rb.Fail("No Cargo.toml found"), nil
 	}
 
 	// Check for clippy config
@@ -64,23 +58,14 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 			msg.WriteString(err.Error())
 		}
 
-		result.Passed = false
 		if errors > 0 {
-			result.Status = checker.Fail
-		} else {
-			result.Status = checker.Warn
+			return rb.Fail(msg.String()), nil
 		}
-		result.Message = msg.String()
-		return result, nil
+		return rb.Warn(msg.String()), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
 	if hasConfig {
-		result.Message = "Clippy passed (custom config)"
-	} else {
-		result.Message = "Clippy passed"
+		return rb.Pass("Clippy passed (custom config)"), nil
 	}
-
-	return result, nil
+	return rb.Pass("Clippy passed"), nil
 }

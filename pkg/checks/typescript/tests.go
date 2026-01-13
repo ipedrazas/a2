@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -20,18 +21,11 @@ func (c *TestsCheck) Name() string { return "TypeScript Tests" }
 
 // Run executes the test suite.
 func (c *TestsCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json
 	if !safepath.Exists(path, "tsconfig.json") && !safepath.Exists(path, "tsconfig.base.json") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No tsconfig.json found"
-		return result, nil
+		return rb.Fail("No tsconfig.json found"), nil
 	}
 
 	// Detect test runner
@@ -40,18 +34,15 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 
 	switch runner {
 	case "jest":
-		return c.runJest(path, pm)
+		return c.runJest(path, pm, rb)
 	case "vitest":
-		return c.runVitest(path, pm)
+		return c.runVitest(path, pm, rb)
 	case "mocha":
-		return c.runMocha(path, pm)
+		return c.runMocha(path, pm, rb)
 	case "npm-test":
-		return c.runNpmTest(path, pm)
+		return c.runNpmTest(path, pm, rb)
 	default:
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "No test runner detected"
-		return result, nil
+		return rb.Pass("No test runner detected"), nil
 	}
 }
 
@@ -123,13 +114,7 @@ func (c *TestsCheck) detectPackageManager(path string) string {
 }
 
 // runJest runs Jest tests.
-func (c *TestsCheck) runJest(path, pm string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
-
+func (c *TestsCheck) runJest(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
@@ -148,26 +133,14 @@ func (c *TestsCheck) runJest(path, pm string) (checker.Result, error) {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "Jest tests failed"
-		return result, nil
+		return rb.Fail("Jest tests failed"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "Jest tests passed"
-	return result, nil
+	return rb.Pass("Jest tests passed"), nil
 }
 
 // runVitest runs Vitest tests.
-func (c *TestsCheck) runVitest(path, pm string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
-
+func (c *TestsCheck) runVitest(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
@@ -186,26 +159,14 @@ func (c *TestsCheck) runVitest(path, pm string) (checker.Result, error) {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "Vitest tests failed"
-		return result, nil
+		return rb.Fail("Vitest tests failed"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "Vitest tests passed"
-	return result, nil
+	return rb.Pass("Vitest tests passed"), nil
 }
 
 // runMocha runs Mocha tests.
-func (c *TestsCheck) runMocha(path, pm string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
-
+func (c *TestsCheck) runMocha(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
@@ -224,26 +185,14 @@ func (c *TestsCheck) runMocha(path, pm string) (checker.Result, error) {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "Mocha tests failed"
-		return result, nil
+		return rb.Fail("Mocha tests failed"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "Mocha tests passed"
-	return result, nil
+	return rb.Pass("Mocha tests passed"), nil
 }
 
 // runNpmTest runs npm test script.
-func (c *TestsCheck) runNpmTest(path, pm string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
-
+func (c *TestsCheck) runNpmTest(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
@@ -265,19 +214,10 @@ func (c *TestsCheck) runNpmTest(path, pm string) (checker.Result, error) {
 		output := strings.TrimSpace(stderr.String())
 		// Check if it's just "no tests found" type message
 		if strings.Contains(output, "no test") || strings.Contains(stdout.String(), "no test") {
-			result.Passed = true
-			result.Status = checker.Pass
-			result.Message = "No tests found"
-			return result, nil
+			return rb.Pass("No tests found"), nil
 		}
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "Tests failed"
-		return result, nil
+		return rb.Fail("Tests failed"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "Tests passed"
-	return result, nil
+	return rb.Pass("Tests passed"), nil
 }

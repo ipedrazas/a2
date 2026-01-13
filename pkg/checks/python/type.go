@@ -1,14 +1,13 @@
 package pythoncheck
 
 import (
-	"bytes"
 	"fmt"
-	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -22,62 +21,32 @@ func (c *TypeCheck) ID() string   { return "python:type" }
 func (c *TypeCheck) Name() string { return "Python Type Check" }
 
 func (c *TypeCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangPython,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 
 	// Check if this is a typed Python project
 	if !c.isTypedProject(path) {
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = "Not a typed Python project (no py.typed marker or mypy config)"
-		return result, nil
+		return rb.Pass("Not a typed Python project (no py.typed marker or mypy config)"), nil
 	}
 
 	// Check if mypy is installed
-	if _, err := exec.LookPath("mypy"); err != nil {
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = "mypy not installed, skipping type check"
-		return result, nil
+	if !checkutil.ToolAvailable("mypy") {
+		return rb.Pass("mypy not installed, skipping type check"), nil
 	}
 
 	// Run mypy
-	cmd := exec.Command("mypy", ".", "--ignore-missing-imports")
-	cmd.Dir = path
+	result := checkutil.RunCommand(path, "mypy", ".", "--ignore-missing-imports")
+	output := result.CombinedOutput()
 
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	output := stdout.String() + stderr.String()
-
-	if err != nil {
+	if !result.Success() {
 		// Parse error count
 		errorCount := c.countTypeErrors(output)
 		if errorCount > 0 {
-			result.Status = checker.Warn
-			result.Passed = false
-			errWord := "errors"
-			if errorCount == 1 {
-				errWord = "error"
-			}
-			result.Message = fmt.Sprintf("%d type %s found. Run: mypy .", errorCount, errWord)
-		} else {
-			result.Status = checker.Warn
-			result.Passed = false
-			result.Message = "Type errors found. Run: mypy ."
+			return rb.Warn(fmt.Sprintf("%s found. Run: mypy .", checkutil.PluralizeCount(errorCount, "type error", "type errors"))), nil
 		}
-		return result, nil
+		return rb.Warn("Type errors found. Run: mypy ."), nil
 	}
 
-	result.Status = checker.Pass
-	result.Passed = true
-	result.Message = "No type errors found"
-	return result, nil
+	return rb.Pass("No type errors found"), nil
 }
 
 // isTypedProject checks if the project uses Python type hints.

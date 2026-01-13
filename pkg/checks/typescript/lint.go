@@ -24,18 +24,11 @@ func (c *LintCheck) Name() string { return "TypeScript Lint" }
 
 // Run executes the linter.
 func (c *LintCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json
 	if !safepath.Exists(path, "tsconfig.json") && !safepath.Exists(path, "tsconfig.base.json") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No tsconfig.json found"
-		return result, nil
+		return rb.Fail("No tsconfig.json found"), nil
 	}
 
 	// Detect linter
@@ -44,16 +37,13 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 
 	switch linter {
 	case "eslint":
-		return c.runESLint(path, pm)
+		return c.runESLint(path, pm, rb)
 	case "biome":
-		return c.runBiomeLint(path, pm)
+		return c.runBiomeLint(path, pm, rb)
 	case "oxlint":
-		return c.runOxlint(path, pm)
+		return c.runOxlint(path, pm, rb)
 	default:
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No linter configured (consider ESLint or Biome)"
-		return result, nil
+		return rb.Warn("No linter configured (consider ESLint or Biome)"), nil
 	}
 }
 
@@ -117,13 +107,7 @@ func (c *LintCheck) detectPackageManager(path string) string {
 }
 
 // runESLint runs ESLint.
-func (c *LintCheck) runESLint(path, pm string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
-
+func (c *LintCheck) runESLint(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
@@ -145,33 +129,18 @@ func (c *LintCheck) runESLint(path, pm string) (checker.Result, error) {
 		output := stdout.String() + stderr.String()
 		errors, warnings := parseESLintOutput(output)
 		if errors > 0 || warnings > 0 {
-			result.Passed = false
-			result.Status = checker.Warn
-			result.Message = fmt.Sprintf("ESLint: %d %s, %d %s",
+			return rb.Warn(fmt.Sprintf("ESLint: %d %s, %d %s",
 				errors, checkutil.Pluralize(errors, "error", "errors"),
-				warnings, checkutil.Pluralize(warnings, "warning", "warnings"))
-		} else {
-			result.Passed = false
-			result.Status = checker.Warn
-			result.Message = "ESLint found issues"
+				warnings, checkutil.Pluralize(warnings, "warning", "warnings"))), nil
 		}
-		return result, nil
+		return rb.Warn("ESLint found issues"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "ESLint: No issues found"
-	return result, nil
+	return rb.Pass("ESLint: No issues found"), nil
 }
 
 // runBiomeLint runs Biome linter.
-func (c *LintCheck) runBiomeLint(path, pm string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
-
+func (c *LintCheck) runBiomeLint(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
@@ -190,26 +159,14 @@ func (c *LintCheck) runBiomeLint(path, pm string) (checker.Result, error) {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "Biome lint found issues"
-		return result, nil
+		return rb.Warn("Biome lint found issues"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "Biome lint: No issues found"
-	return result, nil
+	return rb.Pass("Biome lint: No issues found"), nil
 }
 
 // runOxlint runs oxlint.
-func (c *LintCheck) runOxlint(path, pm string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
-
+func (c *LintCheck) runOxlint(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
@@ -228,16 +185,10 @@ func (c *LintCheck) runOxlint(path, pm string) (checker.Result, error) {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "oxlint found issues"
-		return result, nil
+		return rb.Warn("oxlint found issues"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "oxlint: No issues found"
-	return result, nil
+	return rb.Pass("oxlint: No issues found"), nil
 }
 
 // parseESLintOutput extracts error and warning counts from ESLint output.

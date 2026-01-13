@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -16,59 +17,36 @@ func (c *DepsCheck) Name() string { return "Swift Vulnerabilities" }
 
 // Run checks Package.resolved for outdated or potentially vulnerable dependencies.
 func (c *DepsCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangSwift,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangSwift)
 
 	// Check for Package.swift first
 	if !safepath.Exists(path, "Package.swift") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No Package.swift found"
-		return result, nil
+		return rb.Fail("No Package.swift found"), nil
 	}
 
 	// Check for Package.resolved
 	if !safepath.Exists(path, "Package.resolved") {
-		result.Passed = true
-		result.Status = checker.Info
-		result.Message = "No Package.resolved (run 'swift package resolve')"
-		return result, nil
+		return rb.Info("No Package.resolved (run 'swift package resolve')"), nil
 	}
 
 	// Read and parse Package.resolved
 	data, err := safepath.ReadFile(path, "Package.resolved")
 	if err != nil {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "Cannot read Package.resolved: " + err.Error()
-		return result, nil
+		return rb.Warn("Cannot read Package.resolved: " + err.Error()), nil
 	}
 
 	deps, err := parsePackageResolved(data)
 	if err != nil {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "Cannot parse Package.resolved: " + err.Error()
-		return result, nil
+		return rb.Warn("Cannot parse Package.resolved: " + err.Error()), nil
 	}
 
 	// Note: Swift doesn't have a built-in vulnerability database like npm or cargo
 	// We can only report dependency count and check for pinning issues
 	if len(deps) == 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "No dependencies"
-		return result, nil
+		return rb.Pass("No dependencies"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = formatDepsMessage(len(deps))
-
-	return result, nil
+	return rb.Pass(formatDepsMessage(len(deps))), nil
 }
 
 // packageResolved represents the Package.resolved file structure.

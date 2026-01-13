@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -15,11 +16,7 @@ func (c *LintCheck) Name() string { return "Java Lint" }
 
 // Run checks for Checkstyle, SpotBugs, and PMD configuration.
 func (c *LintCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangJava,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	var linters []string
 
@@ -49,16 +46,9 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 	}
 
 	if len(linters) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Static analysis configured: " + strings.Join(linters, ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No static analysis tools configured (consider Checkstyle, SpotBugs, or PMD)"
+		return rb.Pass("Static analysis configured: " + strings.Join(linters, ", ")), nil
 	}
-
-	return result, nil
+	return rb.Warn("No static analysis tools configured (consider Checkstyle, SpotBugs, or PMD)"), nil
 }
 
 func (c *LintCheck) hasCheckstyle(path string) bool {

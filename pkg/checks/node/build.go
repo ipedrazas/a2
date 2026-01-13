@@ -1,9 +1,7 @@
 package nodecheck
 
 import (
-	"bytes"
 	"fmt"
-	"os/exec"
 
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checkutil"
@@ -28,69 +26,42 @@ func (c *BuildCheck) Name() string {
 
 // Run executes the build check.
 func (c *BuildCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangNode,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists first
 	if !safepath.Exists(path, "package.json") {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = "package.json not found"
-		return result, nil
+		return rb.Fail("package.json not found"), nil
 	}
 
 	pm := c.detectPackageManager(path)
 
 	// Verify package manager is available
-	if _, err := exec.LookPath(pm); err != nil {
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = fmt.Sprintf("%s not installed. Install it to verify dependencies.", pm)
-		return result, nil
+	if !checkutil.ToolAvailable(pm) {
+		return rb.Pass(fmt.Sprintf("%s not installed. Install it to verify dependencies.", pm)), nil
 	}
 
 	// Run validation command based on package manager
-	var cmd *exec.Cmd
+	var result *checkutil.CommandResult
 	switch pm {
 	case "pnpm":
-		cmd = exec.Command("pnpm", "install", "--frozen-lockfile", "--dry-run")
+		result = checkutil.RunCommand(path, "pnpm", "install", "--frozen-lockfile", "--dry-run")
 	case "yarn":
-		cmd = exec.Command("yarn", "install", "--check-files")
+		result = checkutil.RunCommand(path, "yarn", "install", "--check-files")
 	case "bun":
-		cmd = exec.Command("bun", "install", "--dry-run")
+		result = checkutil.RunCommand(path, "bun", "install", "--dry-run")
 	default: // npm
-		// Check if package-lock.json exists for npm ci
 		if safepath.Exists(path, "package-lock.json") {
-			cmd = exec.Command("npm", "ci", "--dry-run")
+			result = checkutil.RunCommand(path, "npm", "ci", "--dry-run")
 		} else {
-			cmd = exec.Command("npm", "install", "--dry-run")
+			result = checkutil.RunCommand(path, "npm", "install", "--dry-run")
 		}
 	}
 
-	cmd.Dir = path
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	if err != nil {
-		output := stderr.String()
-		if output == "" {
-			output = stdout.String()
-		}
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = fmt.Sprintf("Dependency validation failed (%s): %s", pm, checkutil.TruncateMessage(output, 200))
-		return result, nil
+	if !result.Success() {
+		return rb.Fail(fmt.Sprintf("Dependency validation failed (%s): %s", pm, checkutil.TruncateMessage(result.Output(), 200))), nil
 	}
 
-	result.Status = checker.Pass
-	result.Passed = true
-	result.Message = fmt.Sprintf("Dependencies valid (%s)", pm)
-	return result, nil
+	return rb.Pass(fmt.Sprintf("Dependencies valid (%s)", pm)), nil
 }
 
 // detectPackageManager determines which package manager to use.

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -20,26 +21,16 @@ func (c *LintCheck) Name() string { return "Swift Lint" }
 
 // Run executes swiftlint.
 func (c *LintCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangSwift,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangSwift)
 
 	// Check for Package.swift first
 	if !safepath.Exists(path, "Package.swift") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No Package.swift found"
-		return result, nil
+		return rb.Fail("No Package.swift found"), nil
 	}
 
 	// Check if swiftlint is available
 	if _, err := exec.LookPath("swiftlint"); err != nil {
-		result.Passed = true
-		result.Status = checker.Info
-		result.Message = "SwiftLint not installed (install with 'brew install swiftlint')"
-		return result, nil
+		return rb.Info("SwiftLint not installed (install with 'brew install swiftlint')"), nil
 	}
 
 	// Check for SwiftLint config
@@ -75,25 +66,16 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 			msg.WriteString(err.Error())
 		}
 
-		result.Passed = false
 		if errors > 0 {
-			result.Status = checker.Fail
-		} else {
-			result.Status = checker.Warn
+			return rb.Fail(msg.String()), nil
 		}
-		result.Message = msg.String()
-		return result, nil
+		return rb.Warn(msg.String()), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
 	if hasConfig {
-		result.Message = "SwiftLint passed (custom config)"
-	} else {
-		result.Message = "SwiftLint passed"
+		return rb.Pass("SwiftLint passed (custom config)"), nil
 	}
-
-	return result, nil
+	return rb.Pass("SwiftLint passed"), nil
 }
 
 // formatIssueCount converts an int to a string for display.

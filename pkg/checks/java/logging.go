@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -18,11 +19,7 @@ func (c *LoggingCheck) Name() string { return "Java Logging" }
 
 // Run checks for structured logging libraries and anti-patterns.
 func (c *LoggingCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangJava,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	var loggers []string
 	var issues []string
@@ -46,25 +43,15 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 
 	// Build result
 	if len(loggers) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Structured logging: " + strings.Join(loggers, ", ")
+		msg := "Structured logging: " + strings.Join(loggers, ", ")
 		if len(issues) > 0 {
-			result.Passed = false
-			result.Status = checker.Warn
-			result.Message += " (but found " + strings.Join(issues, ", ") + ")"
+			return rb.Warn(msg + " (but found " + strings.Join(issues, ", ") + ")"), nil
 		}
+		return rb.Pass(msg), nil
 	} else if len(issues) > 0 {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No structured logging library found; " + strings.Join(issues, ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No structured logging detected (consider SLF4J with Logback or Log4j2)"
+		return rb.Warn("No structured logging library found; " + strings.Join(issues, ", ")), nil
 	}
-
-	return result, nil
+	return rb.Warn("No structured logging detected (consider SLF4J with Logback or Log4j2)"), nil
 }
 
 func (c *LoggingCheck) hasSLF4J(path string) bool {

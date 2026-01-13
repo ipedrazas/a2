@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -21,11 +22,7 @@ func (c *CoverageCheck) Name() string { return "Java Coverage" }
 
 // Run checks for JaCoCo coverage reports and validates against threshold.
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangJava,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	threshold := c.Threshold
 	if threshold <= 0 {
@@ -34,32 +31,19 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 
 	// Check if JaCoCo is configured
 	if !c.hasJaCoCo(path) {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "JaCoCo not configured (add jacoco plugin to enable coverage)"
-		return result, nil
+		return rb.Warn("JaCoCo not configured (add jacoco plugin to enable coverage)"), nil
 	}
 
 	// Try to find and parse JaCoCo reports
 	coverage, found := c.findCoverage(path)
 	if !found {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "JaCoCo configured but no coverage report found (run tests first)"
-		return result, nil
+		return rb.Warn("JaCoCo configured but no coverage report found (run tests first)"), nil
 	}
 
 	if coverage >= threshold {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = fmt.Sprintf("Coverage: %.1f%% (threshold: %.1f%%)", coverage, threshold)
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = fmt.Sprintf("Coverage %.1f%% below threshold %.1f%%", coverage, threshold)
+		return rb.Pass(fmt.Sprintf("Coverage: %.1f%% (threshold: %.1f%%)", coverage, threshold)), nil
 	}
-
-	return result, nil
+	return rb.Warn(fmt.Sprintf("Coverage %.1f%% below threshold %.1f%%", coverage, threshold)), nil
 }
 
 func (c *CoverageCheck) hasJaCoCo(path string) bool {

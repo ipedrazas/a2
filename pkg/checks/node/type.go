@@ -31,34 +31,21 @@ func (c *TypeCheck) Name() string {
 
 // Run executes the TypeScript type check.
 func (c *TypeCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangNode,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists
 	if !safepath.Exists(path, "package.json") {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = "package.json not found"
-		return result, nil
+		return rb.Fail("package.json not found"), nil
 	}
 
 	// Check if this is a TypeScript project
 	if !c.isTypeScriptProject(path) {
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = "Not a TypeScript project (no tsconfig.json)"
-		return result, nil
+		return rb.Pass("Not a TypeScript project (no tsconfig.json)"), nil
 	}
 
 	// Check if npx is available
 	if _, err := exec.LookPath("npx"); err != nil {
-		result.Status = checker.Pass
-		result.Passed = true
-		result.Message = "npx not available, skipping type check"
-		return result, nil
+		return rb.Pass("npx not available, skipping type check"), nil
 	}
 
 	// Run tsc --noEmit for type checking
@@ -76,21 +63,12 @@ func (c *TypeCheck) Run(path string) (checker.Result, error) {
 		// Parse error count from output
 		errorCount := c.countTypeErrors(output)
 		if errorCount > 0 {
-			result.Status = checker.Warn
-			result.Passed = false
-			result.Message = fmt.Sprintf("%d type %s found. Run: npx tsc --noEmit", errorCount, checkutil.Pluralize(errorCount, "error", "errors"))
-		} else {
-			result.Status = checker.Warn
-			result.Passed = false
-			result.Message = "Type errors found. Run: npx tsc --noEmit"
+			return rb.Warn(fmt.Sprintf("%d type %s found. Run: npx tsc --noEmit", errorCount, checkutil.Pluralize(errorCount, "error", "errors"))), nil
 		}
-		return result, nil
+		return rb.Warn("Type errors found. Run: npx tsc --noEmit"), nil
 	}
 
-	result.Status = checker.Pass
-	result.Passed = true
-	result.Message = "No type errors found"
-	return result, nil
+	return rb.Pass("No type errors found"), nil
 }
 
 // isTypeScriptProject checks if the project uses TypeScript.

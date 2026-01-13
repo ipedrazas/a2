@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -20,18 +21,11 @@ func (c *BuildCheck) Name() string { return "Java Build" }
 
 // Run compiles the Java project using Maven or Gradle.
 func (c *BuildCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangJava,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	buildTool := c.detectBuildTool(path)
 	if buildTool == "" {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No build tool detected (pom.xml or build.gradle)"
-		return result, nil
+		return rb.Fail("No build tool detected (pom.xml or build.gradle)"), nil
 	}
 
 	var cmd *exec.Cmd
@@ -52,8 +46,6 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 	errOutput := strings.TrimSpace(stderr.String())
 
 	if err != nil {
-		result.Passed = false
-		result.Status = checker.Fail
 		msg := "Build failed"
 		if errOutput != "" {
 			// Truncate long error messages
@@ -67,14 +59,10 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 			}
 			msg += ": " + output
 		}
-		result.Message = msg
-		return result, nil
+		return rb.Fail(msg), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "Build successful (" + buildTool + ")"
-	return result, nil
+	return rb.Pass("Build successful (" + buildTool + ")"), nil
 }
 
 func (c *BuildCheck) detectBuildTool(path string) string {

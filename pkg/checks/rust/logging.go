@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -15,27 +16,17 @@ func (c *LoggingCheck) Name() string { return "Rust Logging" }
 
 // Run checks for structured logging libraries.
 func (c *LoggingCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangRust,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	// Check for Cargo.toml first
 	if !safepath.Exists(path, "Cargo.toml") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No Cargo.toml found"
-		return result, nil
+		return rb.Fail("No Cargo.toml found"), nil
 	}
 
 	// Read Cargo.toml to check dependencies
 	content, err := safepath.ReadFile(path, "Cargo.toml")
 	if err != nil {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "Cannot read Cargo.toml"
-		return result, nil
+		return rb.Warn("Cannot read Cargo.toml"), nil
 	}
 
 	contentStr := strings.ToLower(string(content))
@@ -81,24 +72,16 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 
 	// Build result
 	if len(loggingLibs) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Logging configured: " + strings.Join(uniqueStrings(loggingLibs), ", ")
+		msg := "Logging configured: " + strings.Join(uniqueStrings(loggingLibs), ", ")
 		if hasPrintln {
-			result.Status = checker.Warn
-			result.Message += " (but println! found in source)"
+			return rb.Warn(msg + " (but println! found in source)"), nil
 		}
-	} else if hasPrintln {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "Using println! instead of structured logging (consider tracing or log crate)"
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No logging library detected (consider tracing or log crate)"
+		return rb.Pass(msg), nil
 	}
-
-	return result, nil
+	if hasPrintln {
+		return rb.Warn("Using println! instead of structured logging (consider tracing or log crate)"), nil
+	}
+	return rb.Warn("No logging library detected (consider tracing or log crate)"), nil
 }
 
 // checkForPrintln looks for println! macro usage in Rust source files.

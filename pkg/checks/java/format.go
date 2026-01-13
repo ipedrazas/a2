@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -17,11 +18,7 @@ func (c *FormatCheck) Name() string { return "Java Format" }
 
 // Run checks for formatting tools configuration.
 func (c *FormatCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangJava,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	var formatters []string
 
@@ -53,16 +50,9 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 	}
 
 	if len(formatters) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Formatting configured: " + strings.Join(formatters, ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No formatter configuration found (consider Spotless or google-java-format)"
+		return rb.Pass("Formatting configured: " + strings.Join(formatters, ", ")), nil
 	}
-
-	return result, nil
+	return rb.Warn("No formatter configuration found (consider Spotless or google-java-format)"), nil
 }
 
 func (c *FormatCheck) hasGoogleJavaFormat(path string) bool {

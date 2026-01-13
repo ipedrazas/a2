@@ -1,12 +1,11 @@
 package pythoncheck
 
 import (
-	"bytes"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -20,67 +19,42 @@ func (c *LintCheck) ID() string   { return "python:lint" }
 func (c *LintCheck) Name() string { return "Python Lint" }
 
 func (c *LintCheck) Run(path string) (checker.Result, error) {
+	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 	linter := c.detectLinter(path)
 
-	var cmd *exec.Cmd
+	var result *checkutil.CommandResult
 	var cmdDesc string
 
 	switch linter {
 	case "ruff":
-		cmd = exec.Command("ruff", "check", ".")
+		result = checkutil.RunCommand(path, "ruff", "check", ".")
 		cmdDesc = "ruff"
 	case "flake8":
-		cmd = exec.Command("flake8", ".")
+		result = checkutil.RunCommand(path, "flake8", ".")
 		cmdDesc = "flake8"
 	case "pylint":
-		cmd = exec.Command("pylint", ".", "--output-format=text")
+		result = checkutil.RunCommand(path, "pylint", ".", "--output-format=text")
 		cmdDesc = "pylint"
 	default:
 		// Try ruff first, fall back to flake8
-		if _, err := exec.LookPath("ruff"); err == nil {
-			cmd = exec.Command("ruff", "check", ".")
+		if checkutil.ToolAvailable("ruff") {
+			result = checkutil.RunCommand(path, "ruff", "check", ".")
 			cmdDesc = "ruff"
-		} else if _, err := exec.LookPath("flake8"); err == nil {
-			cmd = exec.Command("flake8", ".")
+		} else if checkutil.ToolAvailable("flake8") {
+			result = checkutil.RunCommand(path, "flake8", ".")
 			cmdDesc = "flake8"
 		} else {
-			return checker.Result{
-				Name:     c.Name(),
-				ID:       c.ID(),
-				Passed:   true,
-				Status:   checker.Pass,
-				Message:  "No linter installed (install ruff or flake8)",
-				Language: checker.LangPython,
-			}, nil
+			return rb.Pass("No linter installed (install ruff or flake8)"), nil
 		}
 	}
 
-	cmd.Dir = path
-
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	if err != nil {
-		// Check if tool is not installed
-		if strings.Contains(err.Error(), "executable file not found") {
-			return checker.Result{
-				Name:     c.Name(),
-				ID:       c.ID(),
-				Passed:   true,
-				Status:   checker.Pass,
-				Message:  linter + " not installed, skipping lint check",
-				Language: checker.LangPython,
-			}, nil
-		}
-
-		output := strings.TrimSpace(stdout.String())
-		if output == "" {
-			output = strings.TrimSpace(stderr.String())
+	if !result.Success() {
+		if checkutil.ToolNotFoundError(result.Err) {
+			return rb.Pass(linter + " not installed, skipping lint check"), nil
 		}
 
 		// Count issues
+		output := result.Output()
 		lines := strings.Split(output, "\n")
 		issueCount := 0
 		for _, line := range lines {
@@ -89,24 +63,10 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 			}
 		}
 
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   false,
-			Status:   checker.Warn,
-			Message:  fmt.Sprintf("%s found %d issues", cmdDesc, issueCount),
-			Language: checker.LangPython,
-		}, nil
+		return rb.Warn(fmt.Sprintf("%s found %d issues", cmdDesc, issueCount)), nil
 	}
 
-	return checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Passed:   true,
-		Status:   checker.Pass,
-		Message:  "No linting issues found",
-		Language: checker.LangPython,
-	}, nil
+	return rb.Pass("No linting issues found"), nil
 }
 
 func (c *LintCheck) detectLinter(path string) string {

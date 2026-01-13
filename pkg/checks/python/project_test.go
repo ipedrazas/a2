@@ -75,7 +75,7 @@ setup(name='test')`)
 	result, err := s.check.Run(s.tempDir)
 
 	s.NoError(err)
-	s.True(result.Passed)
+	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
 	s.Contains(result.Message, "setup.py")
 	s.Contains(result.Message, "consider migrating")
@@ -87,7 +87,7 @@ func (s *ProjectTestSuite) TestRun_RequirementsTxt() {
 	result, err := s.check.Run(s.tempDir)
 
 	s.NoError(err)
-	s.True(result.Passed)
+	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
 	s.Contains(result.Message, "requirements.txt")
 }

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -15,27 +16,17 @@ func (c *ProjectCheck) Name() string { return "Rust Project" }
 
 // Run checks for Cargo.toml and extracts project information.
 func (c *ProjectCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangRust,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	// Check for Cargo.toml
 	if !safepath.Exists(path, "Cargo.toml") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No Cargo.toml found"
-		return result, nil
+		return rb.Fail("No Cargo.toml found"), nil
 	}
 
 	// Read Cargo.toml to extract package info
 	content, err := safepath.ReadFile(path, "Cargo.toml")
 	if err != nil {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "Cannot read Cargo.toml: " + err.Error()
-		return result, nil
+		return rb.Fail("Cannot read Cargo.toml: " + err.Error()), nil
 	}
 
 	// Parse basic info from Cargo.toml
@@ -56,15 +47,10 @@ func (c *ProjectCheck) Run(path string) (checker.Result, error) {
 		info = append(info, "(workspace)")
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
 	if len(info) > 0 {
-		result.Message = "Package: " + strings.Join(info, " ")
-	} else {
-		result.Message = "Cargo.toml found"
+		return rb.Pass("Package: " + strings.Join(info, " ")), nil
 	}
-
-	return result, nil
+	return rb.Pass("Cargo.toml found"), nil
 }
 
 // extractTomlValue extracts a simple string value from TOML content.

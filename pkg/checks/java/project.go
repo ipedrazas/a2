@@ -2,6 +2,7 @@ package javacheck
 
 import (
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -13,25 +14,18 @@ func (c *ProjectCheck) Name() string { return "Java Project" }
 
 // Run checks for Maven or Gradle project files.
 func (c *ProjectCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangJava,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	buildTool := detectBuildTool(path)
 
 	switch buildTool {
 	case "maven":
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Maven project (pom.xml)"
+		msg := "Maven project (pom.xml)"
 		if safepath.Exists(path, "mvnw") {
-			result.Message += " with wrapper"
+			msg += " with wrapper"
 		}
+		return rb.Pass(msg), nil
 	case "gradle":
-		result.Passed = true
-		result.Status = checker.Pass
 		msg := "Gradle project"
 		if safepath.Exists(path, "build.gradle.kts") {
 			msg += " (Kotlin DSL)"
@@ -41,14 +35,10 @@ func (c *ProjectCheck) Run(path string) (checker.Result, error) {
 		if safepath.Exists(path, "gradlew") {
 			msg += " with wrapper"
 		}
-		result.Message = msg
+		return rb.Pass(msg), nil
 	default:
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No Java project file found (pom.xml or build.gradle)"
+		return rb.Fail("No Java project file found (pom.xml or build.gradle)"), nil
 	}
-
-	return result, nil
 }
 
 // detectBuildTool returns "maven", "gradle", or "" based on project files.

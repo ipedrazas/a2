@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -34,56 +35,34 @@ func (c *ProjectCheck) Name() string {
 
 // Run executes the project check.
 func (c *ProjectCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangNode,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists
 	if !safepath.Exists(path, "package.json") {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = "package.json not found"
-		return result, nil
+		return rb.Fail("package.json not found"), nil
 	}
 
 	// Read and parse package.json
 	data, err := safepath.ReadFile(path, "package.json")
 	if err != nil {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = fmt.Sprintf("Failed to read package.json: %v", err)
-		return result, nil
+		return rb.Fail(fmt.Sprintf("Failed to read package.json: %v", err)), nil
 	}
 
 	var pkg PackageJSON
 	if err := json.Unmarshal(data, &pkg); err != nil {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = fmt.Sprintf("package.json is invalid JSON: %v", err)
-		return result, nil
+		return rb.Fail(fmt.Sprintf("package.json is invalid JSON: %v", err)), nil
 	}
 
 	// Validate required fields
 	if pkg.Name == "" {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = "package.json is missing required 'name' field"
-		return result, nil
+		return rb.Fail("package.json is missing required 'name' field"), nil
 	}
 
 	if pkg.Version == "" {
-		result.Status = checker.Warn
-		result.Passed = false
-		result.Message = fmt.Sprintf("Package %s is missing 'version' field", pkg.Name)
-		return result, nil
+		return rb.Warn(fmt.Sprintf("Package %s is missing 'version' field", pkg.Name)), nil
 	}
 
-	result.Status = checker.Pass
-	result.Passed = true
-	result.Message = fmt.Sprintf("Package: %s v%s", pkg.Name, pkg.Version)
-	return result, nil
+	return rb.Pass(fmt.Sprintf("Package: %s v%s", pkg.Name, pkg.Version)), nil
 }
 
 // ParsePackageJSON reads and parses package.json from the given path.

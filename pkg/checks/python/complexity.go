@@ -2,15 +2,14 @@ package pythoncheck
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
-	"os/exec"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -33,11 +32,7 @@ type ComplexFunction struct {
 }
 
 func (c *ComplexityCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangPython,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 
 	// Check if Python project exists
 	hasPython := safepath.Exists(path, "pyproject.toml") ||
@@ -45,10 +40,7 @@ func (c *ComplexityCheck) Run(path string) (checker.Result, error) {
 		safepath.Exists(path, "requirements.txt")
 
 	if !hasPython {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = "Python project not found"
-		return result, nil
+		return rb.Fail("Python project not found"), nil
 	}
 
 	// Get threshold
@@ -58,43 +50,27 @@ func (c *ComplexityCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Check if radon is installed
-	if _, err := exec.LookPath("radon"); err != nil {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "radon not installed (pip install radon for complexity analysis)"
-		return result, nil
+	if !checkutil.ToolAvailable("radon") {
+		return rb.Pass("radon not installed (pip install radon for complexity analysis)"), nil
 	}
 
 	// Run radon cc with show-complexity flag
-	// -s shows complexity scores, -a shows average
-	cmd := exec.Command("radon", "cc", "-s", ".")
-	cmd.Dir = path
+	result := checkutil.RunCommand(path, "radon", "cc", "-s", ".")
 
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	if err != nil {
+	if !result.Success() {
 		// radon may fail if no Python files found
-		if strings.Contains(stderr.String(), "No such file") ||
-			strings.Contains(stderr.String(), "Invalid") {
-			result.Passed = true
-			result.Status = checker.Pass
-			result.Message = "No Python files to analyze"
-			return result, nil
+		if strings.Contains(result.Stderr, "No such file") ||
+			strings.Contains(result.Stderr, "Invalid") {
+			return rb.Pass("No Python files to analyze"), nil
 		}
 		// Continue even if there's an error, try to parse output
 	}
 
 	// Parse radon output
-	complexFunctions := parseRadonOutput(stdout.String(), threshold)
+	complexFunctions := parseRadonOutput(result.Stdout, threshold)
 
 	if len(complexFunctions) == 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = fmt.Sprintf("No functions exceed complexity threshold (%d)", threshold)
-		return result, nil
+		return rb.Pass(fmt.Sprintf("No functions exceed complexity threshold (%d)", threshold)), nil
 	}
 
 	// Sort by complexity descending
@@ -103,15 +79,8 @@ func (c *ComplexityCheck) Run(path string) (checker.Result, error) {
 	})
 
 	// Build message with top offenders
-	result.Passed = false
-	result.Status = checker.Warn
-
-	funcWord := "function"
-	if len(complexFunctions) > 1 {
-		funcWord = "functions"
-	}
-
-	msg := fmt.Sprintf("%d %s exceed complexity threshold (%d)", len(complexFunctions), funcWord, threshold)
+	msg := checkutil.PluralizeCount(len(complexFunctions), "function exceeds", "functions exceed") +
+		fmt.Sprintf(" complexity threshold (%d)", threshold)
 
 	// Show top 3 offenders
 	showCount := 3
@@ -128,8 +97,7 @@ func (c *ComplexityCheck) Run(path string) (checker.Result, error) {
 		msg += fmt.Sprintf("\n  ... and %d more", len(complexFunctions)-showCount)
 	}
 
-	result.Message = msg
-	return result, nil
+	return rb.Warn(msg), nil
 }
 
 // parseRadonOutput parses radon cc output and returns functions exceeding threshold.

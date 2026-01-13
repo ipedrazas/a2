@@ -20,18 +20,11 @@ func (c *LoggingCheck) Name() string { return "TypeScript Logging" }
 
 // Run checks for logging configuration.
 func (c *LoggingCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json
 	if !safepath.Exists(path, "tsconfig.json") && !safepath.Exists(path, "tsconfig.base.json") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No tsconfig.json found"
-		return result, nil
+		return rb.Fail("No tsconfig.json found"), nil
 	}
 
 	// Detect logging libraries
@@ -70,30 +63,19 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 	// Build result
 	if len(loggingLibs) > 0 {
 		if consoleLogCount > 0 {
-			result.Passed = true
-			result.Status = checker.Warn
-			result.Message = fmt.Sprintf("Logging: %s; found %d console.log %s (consider removing)",
+			return rb.Warn(fmt.Sprintf("Logging: %s; found %d console.log %s (consider removing)",
 				strings.Join(loggingLibs, ", "),
 				consoleLogCount,
-				checkutil.Pluralize(consoleLogCount, "call", "calls"))
-		} else {
-			result.Passed = true
-			result.Status = checker.Pass
-			result.Message = "Logging configured: " + strings.Join(loggingLibs, ", ")
+				checkutil.Pluralize(consoleLogCount, "call", "calls"))), nil
 		}
+		return rb.Pass("Logging configured: " + strings.Join(loggingLibs, ", ")), nil
 	} else if consoleLogCount > 0 {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = fmt.Sprintf("Found %d console.log %s; consider a logging library (winston, pino)",
+		return rb.Warn(fmt.Sprintf("Found %d console.log %s; consider a logging library (winston, pino)",
 			consoleLogCount,
-			checkutil.Pluralize(consoleLogCount, "call", "calls"))
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No logging library detected (consider winston, pino, or tslog)"
+			checkutil.Pluralize(consoleLogCount, "call", "calls"))), nil
 	}
 
-	return result, nil
+	return rb.Warn("No logging library detected (consider winston, pino, or tslog)"), nil
 }
 
 // countConsoleLog counts console.log calls in TypeScript source files.

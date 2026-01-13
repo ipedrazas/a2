@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -21,18 +22,11 @@ func (c *TestsCheck) Name() string { return "Java Tests" }
 
 // Run executes Java tests using Maven or Gradle.
 func (c *TestsCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangJava,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	buildTool := c.detectBuildTool(path)
 	if buildTool == "" {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No build tool detected"
-		return result, nil
+		return rb.Fail("No build tool detected"), nil
 	}
 
 	var cmd *exec.Cmd
@@ -52,27 +46,20 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	output := stdout.String() + stderr.String()
 
 	if err != nil {
-		result.Passed = false
-		result.Status = checker.Fail
 		msg := "Tests failed"
 		// Try to extract test summary
 		summary := extractTestSummary(output, buildTool)
 		if summary != "" {
 			msg += ": " + summary
 		}
-		result.Message = msg
-		return result, nil
+		return rb.Fail(msg), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
 	summary := extractTestSummary(output, buildTool)
 	if summary != "" {
-		result.Message = summary
-	} else {
-		result.Message = "All tests passed"
+		return rb.Pass(summary), nil
 	}
-	return result, nil
+	return rb.Pass("All tests passed"), nil
 }
 
 func (c *TestsCheck) detectBuildTool(path string) string {

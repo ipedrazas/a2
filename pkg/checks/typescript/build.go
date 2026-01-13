@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -20,18 +21,11 @@ func (c *BuildCheck) Name() string { return "TypeScript Build" }
 
 // Run checks if TypeScript compiles successfully.
 func (c *BuildCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json
 	if !safepath.Exists(path, "tsconfig.json") && !safepath.Exists(path, "tsconfig.base.json") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No tsconfig.json found"
-		return result, nil
+		return rb.Fail("No tsconfig.json found"), nil
 	}
 
 	// Try to find package manager and run build script
@@ -41,12 +35,12 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 	// Check if there's a build script in package.json
 	if pkg != nil {
 		if _, hasBuild := pkg.Scripts["build"]; hasBuild {
-			return c.runBuildScript(path, pm)
+			return c.runBuildScript(path, pm, rb)
 		}
 	}
 
 	// Fall back to tsc --noEmit for type checking only
-	return c.runTscNoEmit(path)
+	return c.runTscNoEmit(path, rb)
 }
 
 // detectPackageManager determines which package manager to use.
@@ -69,13 +63,7 @@ func (c *BuildCheck) detectPackageManager(path string) string {
 }
 
 // runBuildScript runs the package.json build script.
-func (c *BuildCheck) runBuildScript(path, pm string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
-
+func (c *BuildCheck) runBuildScript(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
@@ -93,41 +81,25 @@ func (c *BuildCheck) runBuildScript(path, pm string) (checker.Result, error) {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		result.Passed = false
-		result.Status = checker.Fail
 		errMsg := strings.TrimSpace(stderr.String())
 		if errMsg != "" {
 			// Truncate long error messages
 			if len(errMsg) > 200 {
 				errMsg = errMsg[:200] + "..."
 			}
-			result.Message = "Build failed: " + errMsg
-		} else {
-			result.Message = "Build failed"
+			return rb.Fail("Build failed: " + errMsg), nil
 		}
-		return result, nil
+		return rb.Fail("Build failed"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "Build successful"
-	return result, nil
+	return rb.Pass("Build successful"), nil
 }
 
 // runTscNoEmit runs tsc --noEmit for type checking.
-func (c *BuildCheck) runTscNoEmit(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
-
+func (c *BuildCheck) runTscNoEmit(path string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	// Check if npx is available
 	if _, err := exec.LookPath("npx"); err != nil {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "npx not available, skipping build check"
-		return result, nil
+		return rb.Pass("npx not available, skipping build check"), nil
 	}
 
 	cmd := exec.Command("npx", "tsc", "--noEmit")
@@ -137,14 +109,8 @@ func (c *BuildCheck) runTscNoEmit(path string) (checker.Result, error) {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "TypeScript compilation failed"
-		return result, nil
+		return rb.Fail("TypeScript compilation failed"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "TypeScript compiles successfully"
-	return result, nil
+	return rb.Pass("TypeScript compiles successfully"), nil
 }

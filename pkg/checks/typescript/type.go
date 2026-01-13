@@ -24,26 +24,16 @@ func (c *TypeCheck) Name() string { return "TypeScript Type Check" }
 
 // Run executes the TypeScript type check.
 func (c *TypeCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangTypeScript,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json
 	if !safepath.Exists(path, "tsconfig.json") && !safepath.Exists(path, "tsconfig.base.json") {
-		result.Passed = false
-		result.Status = checker.Fail
-		result.Message = "No tsconfig.json found"
-		return result, nil
+		return rb.Fail("No tsconfig.json found"), nil
 	}
 
 	// Check if npx is available
 	if _, err := exec.LookPath("npx"); err != nil {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "npx not available, skipping type check"
-		return result, nil
+		return rb.Pass("npx not available, skipping type check"), nil
 	}
 
 	// Run tsc --noEmit for type checking
@@ -61,22 +51,13 @@ func (c *TypeCheck) Run(path string) (checker.Result, error) {
 		// Parse error count from output
 		errorCount := countTypeErrors(output)
 		if errorCount > 0 {
-			result.Status = checker.Fail
-			result.Passed = false
-			result.Message = fmt.Sprintf("%d type %s found. Run: npx tsc --noEmit",
-				errorCount, checkutil.Pluralize(errorCount, "error", "errors"))
-		} else {
-			result.Status = checker.Fail
-			result.Passed = false
-			result.Message = "Type errors found. Run: npx tsc --noEmit"
+			return rb.Fail(fmt.Sprintf("%d type %s found. Run: npx tsc --noEmit",
+				errorCount, checkutil.Pluralize(errorCount, "error", "errors"))), nil
 		}
-		return result, nil
+		return rb.Fail("Type errors found. Run: npx tsc --noEmit"), nil
 	}
 
-	result.Status = checker.Pass
-	result.Passed = true
-	result.Message = "No type errors found"
-	return result, nil
+	return rb.Pass("No type errors found"), nil
 }
 
 // countTypeErrors parses tsc output to count errors.

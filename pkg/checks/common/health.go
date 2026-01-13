@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -18,11 +19,7 @@ func (c *HealthCheck) ID() string   { return "common:health" }
 func (c *HealthCheck) Name() string { return "Health Endpoint" }
 
 func (c *HealthCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Health endpoint patterns to search for
 	patterns := []string{
@@ -92,21 +89,14 @@ func (c *HealthCheck) Run(path string) (checker.Result, error) {
 	})
 
 	if err != nil {
-		return result, err
+		return rb.Fail(err.Error()), err
 	}
 
 	if !found {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No health endpoint pattern detected"
-		return result, nil
+		return rb.Warn("No health endpoint pattern detected"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
-	result.Message = "Health endpoint pattern found: " + foundPattern
-
-	return result, nil
+	return rb.Pass("Health endpoint pattern found: " + foundPattern), nil
 }
 
 // searchFileForPatterns searches a file for any of the given patterns.

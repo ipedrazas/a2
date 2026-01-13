@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -16,11 +17,7 @@ func (c *CICheck) ID() string   { return "common:ci" }
 func (c *CICheck) Name() string { return "CI Pipeline" }
 
 func (c *CICheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Check for various CI configurations
 	ciConfigs := []struct {
@@ -46,21 +43,13 @@ func (c *CICheck) Run(path string) (checker.Result, error) {
 	}
 
 	if len(foundCIs) == 0 {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No CI/CD configuration found"
-		return result, nil
+		return rb.Warn("No CI/CD configuration found"), nil
 	}
 
-	result.Passed = true
-	result.Status = checker.Pass
 	if len(foundCIs) == 1 {
-		result.Message = foundCIs[0] + " configured"
-	} else {
-		result.Message = strings.Join(foundCIs, ", ") + " configured"
+		return rb.Pass(foundCIs[0] + " configured"), nil
 	}
-
-	return result, nil
+	return rb.Pass(strings.Join(foundCIs, ", ") + " configured"), nil
 }
 
 // hasGitHubActions checks for GitHub Actions workflow files.

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -16,11 +17,7 @@ func (c *ShutdownCheck) Name() string { return "Graceful Shutdown" }
 
 // Run checks for graceful shutdown signal handling.
 func (c *ShutdownCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangCommon,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string
 
@@ -57,16 +54,9 @@ func (c *ShutdownCheck) Run(path string) (checker.Result, error) {
 	// Build result
 	found = unique(found)
 	if len(found) > 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Graceful shutdown configured: " + strings.Join(found, ", ")
-	} else {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No graceful shutdown handling found (handle SIGTERM/SIGINT for clean shutdown)"
+		return rb.Pass("Graceful shutdown configured: " + strings.Join(found, ", ")), nil
 	}
-
-	return result, nil
+	return rb.Warn("No graceful shutdown handling found (handle SIGTERM/SIGINT for clean shutdown)"), nil
 }
 
 func (c *ShutdownCheck) hasGoSignalHandling(path string) bool {

@@ -1,12 +1,11 @@
 package gocheck
 
 import (
-	"bytes"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 )
 
 // DepsCheck scans for known vulnerabilities using govulncheck.
@@ -16,66 +15,31 @@ func (c *DepsCheck) ID() string   { return "go:deps" }
 func (c *DepsCheck) Name() string { return "Go Vulnerabilities" }
 
 func (c *DepsCheck) Run(path string) (checker.Result, error) {
+	rb := checkutil.NewResultBuilder(c, checker.LangGo)
+
 	// Check if govulncheck is available
-	if _, err := exec.LookPath("govulncheck"); err != nil {
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   true,
-			Status:   checker.Pass,
-			Message:  "govulncheck not installed (run: go install golang.org/x/vuln/cmd/govulncheck@latest)",
-			Language: checker.LangGo,
-		}, nil
+	if !checkutil.ToolAvailable("govulncheck") {
+		return rb.Pass("govulncheck not installed (run: go install golang.org/x/vuln/cmd/govulncheck@latest)"), nil
 	}
 
-	cmd := exec.Command("govulncheck", "./...")
-	cmd.Dir = path
+	result := checkutil.RunCommand(path, "govulncheck", "./...")
 
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	output := strings.TrimSpace(stdout.String())
-
-	if err != nil {
+	if !result.Success() {
 		// govulncheck exits with non-zero when vulnerabilities are found
-		// Count vulnerabilities from output
+		output := strings.TrimSpace(result.Stdout)
 		vulnCount := countVulnerabilities(output)
 
 		if vulnCount > 0 {
-			return checker.Result{
-				Name:     c.Name(),
-				ID:       c.ID(),
-				Passed:   false,
-				Status:   checker.Warn,
-				Message:  formatVulnMessage(vulnCount),
-				Language: checker.LangGo,
-			}, nil
+			return rb.Warn(formatVulnMessage(vulnCount)), nil
 		}
 
 		// Some other error
-		errOutput := strings.TrimSpace(stderr.String())
-		if errOutput != "" {
-			return checker.Result{
-				Name:     c.Name(),
-				ID:       c.ID(),
-				Passed:   false,
-				Status:   checker.Warn,
-				Message:  "govulncheck error: " + errOutput,
-				Language: checker.LangGo,
-			}, nil
+		if result.Stderr != "" {
+			return rb.Warn("govulncheck error: " + strings.TrimSpace(result.Stderr)), nil
 		}
 	}
 
-	return checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Passed:   true,
-		Status:   checker.Pass,
-		Message:  "No known vulnerabilities found",
-		Language: checker.LangGo,
-	}, nil
+	return rb.Pass("No known vulnerabilities found"), nil
 }
 
 // countVulnerabilities counts the number of vulnerabilities in govulncheck output.

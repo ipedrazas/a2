@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -19,18 +20,11 @@ func (c *LoggingCheck) ID() string   { return "node:logging" }
 func (c *LoggingCheck) Name() string { return "Node Logging" }
 
 func (c *LoggingCheck) Run(path string) (checker.Result, error) {
-	result := checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Language: checker.LangNode,
-	}
+	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists
 	if !safepath.Exists(path, "package.json") {
-		result.Status = checker.Fail
-		result.Passed = false
-		result.Message = "package.json not found"
-		return result, nil
+		return rb.Fail("package.json not found"), nil
 	}
 
 	// Structured logging libraries to detect
@@ -133,37 +127,22 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 	})
 
 	if err != nil {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "Error scanning files: " + err.Error()
-		return result, nil
+		return rb.Warn("Error scanning files: " + err.Error()), nil
 	}
 
 	// Determine result based on findings
 	if hasLoggingLib && consoleCount == 0 {
-		result.Passed = true
-		result.Status = checker.Pass
-		result.Message = "Uses structured logging, no console.* statements"
-		return result, nil
+		return rb.Pass("Uses structured logging, no console.* statements"), nil
 	}
 
 	if hasLoggingLib && consoleCount > 0 {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = fmt.Sprintf("Uses structured logging but found %d console.* statement(s)", consoleCount)
-		return result, nil
+		return rb.Warn(fmt.Sprintf("Uses structured logging but found %d console.* statement(s)", consoleCount)), nil
 	}
 
 	if !hasLoggingLib && consoleCount == 0 {
-		result.Passed = false
-		result.Status = checker.Warn
-		result.Message = "No structured logging detected (consider using winston or pino)"
-		return result, nil
+		return rb.Warn("No structured logging detected (consider using winston or pino)"), nil
 	}
 
 	// !hasLoggingLib && consoleCount > 0
-	result.Passed = false
-	result.Status = checker.Warn
-	result.Message = fmt.Sprintf("No structured logging and found %d console.* statement(s)", consoleCount)
-	return result, nil
+	return rb.Warn(fmt.Sprintf("No structured logging and found %d console.* statement(s)", consoleCount)), nil
 }
