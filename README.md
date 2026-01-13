@@ -82,6 +82,10 @@ a2 check --skip=license,k8s
 a2 list checks  # List all available checks with IDs
 a2 profiles     # List application profiles
 a2 targets      # List maturity targets
+
+# Check system for required tools
+a2 doctor       # Show installed/missing tools for detected languages
+a2 doctor --all # Show tools for all languages
 ```
 
 ## Generating Configuration

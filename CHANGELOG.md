@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Doctor command** (`a2 doctor`) to check system for required external tools:
+  - Detects OS, architecture, and available package managers
+  - Shows installed vs missing tools for detected languages
+  - Provides platform-specific install commands (brew, apt, go install, cargo, npm, pip)
+  - Use `--all` to show tools for all languages
+  - Supports `--format json` and `--format toon` for coding agents
 - **List checks command** (`a2 list checks`) to display all available checks:
   - Shows all 84 checks grouped by language (Go, Python, Node.js, TypeScript, Java, Rust, Swift, Common)
   - Displays check IDs for use with `--skip` flag
