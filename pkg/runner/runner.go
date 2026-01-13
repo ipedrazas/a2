@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -20,7 +21,8 @@ type SuiteResult struct {
 
 // RunSuiteOptions configures how the suite is executed.
 type RunSuiteOptions struct {
-	Parallel bool // Run checks in parallel (default: true)
+	Parallel bool          // Run checks in parallel (default: true)
+	Timeout  time.Duration // Timeout for each individual check (0 = no timeout)
 }
 
 // RunSuite executes a suite of checks against the given path.
@@ -41,13 +43,13 @@ func RunSuiteSequential(path string, checks []checker.Checker) SuiteResult {
 // In sequential mode: stops immediately on first critical failure (veto power).
 func RunSuiteWithOptions(path string, checks []checker.Checker, opts RunSuiteOptions) SuiteResult {
 	if opts.Parallel {
-		return runParallel(path, checks)
+		return runParallel(path, checks, opts.Timeout)
 	}
-	return runSequential(path, checks)
+	return runSequential(path, checks, opts.Timeout)
 }
 
 // runParallel executes all checks concurrently.
-func runParallel(path string, checks []checker.Checker) SuiteResult {
+func runParallel(path string, checks []checker.Checker, timeout time.Duration) SuiteResult {
 	result := SuiteResult{
 		Results: make([]checker.Result, len(checks)),
 	}
@@ -64,19 +66,7 @@ func runParallel(path string, checks []checker.Checker) SuiteResult {
 	for i, check := range checks {
 		go func(idx int, c checker.Checker) {
 			defer wg.Done()
-			start := time.Now()
-			res, err := c.Run(path)
-			duration := time.Since(start)
-			if err != nil {
-				res = checker.Result{
-					Name:    c.Name(),
-					ID:      c.ID(),
-					Passed:  false,
-					Status:  checker.Fail,
-					Message: "Internal error: " + err.Error(),
-				}
-			}
-			res.Duration = duration
+			res := runCheckWithTimeout(path, c, timeout)
 			result.Results[idx] = res
 		}(i, check)
 	}
@@ -105,7 +95,7 @@ func runParallel(path string, checks []checker.Checker) SuiteResult {
 }
 
 // runSequential executes checks one by one, stopping on first critical failure.
-func runSequential(path string, checks []checker.Checker) SuiteResult {
+func runSequential(path string, checks []checker.Checker, timeout time.Duration) SuiteResult {
 	result := SuiteResult{
 		Results: make([]checker.Result, 0, len(checks)),
 	}
@@ -113,20 +103,7 @@ func runSequential(path string, checks []checker.Checker) SuiteResult {
 	suiteStart := time.Now()
 
 	for _, check := range checks {
-		start := time.Now()
-		res, err := check.Run(path)
-		duration := time.Since(start)
-		if err != nil {
-			res = checker.Result{
-				Name:    check.Name(),
-				ID:      check.ID(),
-				Passed:  false,
-				Status:  checker.Fail,
-				Message: "Internal error: " + err.Error(),
-			}
-		}
-		res.Duration = duration
-
+		res := runCheckWithTimeout(path, check, timeout)
 		result.Results = append(result.Results, res)
 
 		switch res.Status {
@@ -149,6 +126,73 @@ func runSequential(path string, checks []checker.Checker) SuiteResult {
 
 	result.TotalDuration = time.Since(suiteStart)
 	return result
+}
+
+// runCheckWithTimeout executes a single check with an optional timeout.
+// If timeout is 0, no timeout is applied.
+func runCheckWithTimeout(path string, c checker.Checker, timeout time.Duration) checker.Result {
+	start := time.Now()
+
+	// If no timeout, run directly
+	if timeout == 0 {
+		res, err := c.Run(path)
+		duration := time.Since(start)
+		if err != nil {
+			res = checker.Result{
+				Name:    c.Name(),
+				ID:      c.ID(),
+				Passed:  false,
+				Status:  checker.Fail,
+				Message: "Internal error: " + err.Error(),
+			}
+		}
+		res.Duration = duration
+		return res
+	}
+
+	// Run with timeout using context
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	// Channel for result
+	type checkResult struct {
+		res checker.Result
+		err error
+	}
+	resultCh := make(chan checkResult, 1)
+
+	go func() {
+		res, err := c.Run(path)
+		resultCh <- checkResult{res: res, err: err}
+	}()
+
+	select {
+	case <-ctx.Done():
+		// Timeout occurred
+		duration := time.Since(start)
+		return checker.Result{
+			Name:     c.Name(),
+			ID:       c.ID(),
+			Passed:   false,
+			Status:   checker.Fail,
+			Message:  "Check timed out after " + timeout.String(),
+			Duration: duration,
+		}
+	case cr := <-resultCh:
+		duration := time.Since(start)
+		res := cr.res
+		if cr.err != nil {
+			res = checker.Result{
+				Name:    c.Name(),
+				ID:      c.ID(),
+				Passed:  false,
+				Status:  checker.Fail,
+				Message: "Internal error: " + cr.err.Error(),
+			}
+		}
+		res.Duration = duration
+		return res
+	}
 }
 
 // TotalChecks returns the total number of checks that were run.

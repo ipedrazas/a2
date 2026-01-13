@@ -50,7 +50,8 @@ type JSONMaturity struct {
 }
 
 // JSON outputs the results as formatted JSON.
-func JSON(result runner.SuiteResult, detected language.DetectionResult) error {
+// Returns true if all checks passed, false otherwise, along with any output error.
+func JSON(result runner.SuiteResult, detected language.DetectionResult) (bool, error) {
 	// Convert languages to strings
 	langs := make([]string, len(detected.Languages))
 	for i, l := range detected.Languages {
@@ -96,13 +97,10 @@ func JSON(result runner.SuiteResult, detected language.DetectionResult) error {
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
 	if err := enc.Encode(output); err != nil {
-		return err
+		return false, err
 	}
 
-	if !result.Success() {
-		os.Exit(1)
-	}
-	return nil
+	return result.Success(), nil
 }
 
 func statusToString(s checker.Status) string {

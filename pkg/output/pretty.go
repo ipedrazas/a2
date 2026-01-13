@@ -83,7 +83,8 @@ var (
 )
 
 // Pretty outputs the results in a formatted, colorful way.
-func Pretty(result runner.SuiteResult, path string, detected language.DetectionResult) error {
+// Returns true if all checks passed, false otherwise, along with any output error.
+func Pretty(result runner.SuiteResult, path string, detected language.DetectionResult) (bool, error) {
 	// Get project name from path
 	projectName := filepath.Base(path)
 	if path == "." {
@@ -126,10 +127,7 @@ func Pretty(result runner.SuiteResult, path string, detected language.DetectionR
 	// Recommendations
 	printRecommendations(result)
 
-	if !result.Success() {
-		os.Exit(1)
-	}
-	return nil
+	return result.Success(), nil
 }
 
 func printResult(r checker.Result) {

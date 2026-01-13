@@ -16,7 +16,7 @@ func (c *VetCheck) Run(path string) (checker.Result, error) {
 
 	result := checkutil.RunCommand(path, "go", "vet", "./...")
 	if !result.Success() {
-		return rb.Warn(result.Output()), nil
+		return rb.Warn("go vet issues: " + checkutil.TruncateMessage(result.Output(), 200)), nil
 	}
 
 	return rb.Pass("No issues found"), nil

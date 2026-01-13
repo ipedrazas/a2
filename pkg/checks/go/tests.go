@@ -24,7 +24,7 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	}
 
 	if !result.Success() {
-		return rb.Fail("Tests failed: " + result.Output()), nil
+		return rb.Fail("Tests failed: " + checkutil.TruncateMessage(result.Output(), 200)), nil
 	}
 
 	return rb.Pass("All tests passed"), nil

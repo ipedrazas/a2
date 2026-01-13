@@ -7,25 +7,11 @@ This file tracks planned improvements for the A2 codebase.
 - [x] **Common Utilities Extraction** - Created `pkg/checkutil` package with shared utilities (`TruncateMessage`, `Pluralize`, `RunCommand`, etc.)
 - [x] **Check Execution Timing Metrics** - Added `Duration` field to results and `TotalDuration` to suite, displayed in all output formats
 - [x] **Result Builder Pattern** - Added `ResultBuilder` to `pkg/checkutil` with `Pass()`, `Fail()`, `Warn()`, `Info()` methods. Updated ALL checks across all languages (Go, Python, Node, TypeScript, Java, Rust, Swift, Common). Reduces 6-field struct construction to single method call.
-
-## High Priority
-
-- [ ] **Exit Code Return**
-  - Location: `pkg/output/pretty.go`, `json.go`, `toon.go`
-  - Issue: All output formatters call `os.Exit(1)` directly, preventing graceful shutdown or signal handling
-  - Solution: Return an exit code from output functions and let `cmd/root.go` handle the exit
+- [x] **Exit Code Return** - Output formatters now return `(bool, error)` instead of calling `os.Exit(1)` directly. Exit code handling moved to `cmd/root.go` for proper graceful shutdown support.
+- [x] **Context/Timeout Support** - Added `Timeout` field to `RunSuiteOptions`, `runCheckWithTimeout()` function with context-based timeout, and CLI flag `--timeout 30s`. Individual checks that exceed timeout fail with "Check timed out" message.
+- [x] **Consistent Message Truncation** - Applied `checkutil.TruncateMessage()` to all Go checks (tests, build, format, vet, deps), Python build, and TypeScript build. Tool output is now consistently truncated to 200 chars.
 
 ## Medium Priority
-
-- [ ] **Context/Timeout Support**
-  - Location: `pkg/runner/runner.go`, `pkg/checker/types.go`
-  - Issue: No timeout mechanism - slow/hanging checks can block the entire suite
-  - Solution: Add `context.Context` with timeout to `Run()` method; add CLI flag `--timeout 30s`
-
-- [ ] **Consistent Message Truncation**
-  - Location: `pkg/checks/` (various)
-  - Issue: `checkutil.TruncateMessage()` exists but isn't used consistently across checks
-  - Solution: Apply truncation consistently to all checks that report tool output
 
 - [ ] **Recommendations Metadata**
   - Location: `pkg/output/pretty.go:241-285`, `pkg/checker/types.go`

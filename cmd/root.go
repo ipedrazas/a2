@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checks"
@@ -20,10 +21,11 @@ import (
 
 var (
 	format        string
-	languages     []string // Explicit language selection
-	skippedChecks []string // Checks to skip via CLI
-	profile       string   // Application type profile (cli, api, library, desktop)
-	target        string   // Maturity target (poc, production)
+	languages     []string      // Explicit language selection
+	skippedChecks []string      // Checks to skip via CLI
+	profile       string        // Application type profile (cli, api, library, desktop)
+	target        string        // Maturity target (poc, production)
+	timeout       time.Duration // Timeout for each individual check
 )
 
 var rootCmd = &cobra.Command{
@@ -84,6 +86,7 @@ func init() {
 	checkCmd.Flags().StringSliceVar(&skippedChecks, "skip", nil, "Checks to skip (e.g., --skip=license,k8s)")
 	checkCmd.Flags().StringVar(&profile, "profile", "", "Application profile (cli, api, library, desktop)")
 	checkCmd.Flags().StringVar(&target, "target", "", "Maturity target (poc, production)")
+	checkCmd.Flags().DurationVar(&timeout, "timeout", 0, "Timeout for each individual check (e.g., 30s, 1m). 0 means no timeout")
 	rootCmd.AddCommand(checkCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(profilesCmd)
@@ -172,18 +175,35 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	checkList := checks.GetChecks(cfg, detected)
 
 	// Run the suite with configured execution options
-	opts := runner.RunSuiteOptions{Parallel: cfg.Execution.Parallel}
+	opts := runner.RunSuiteOptions{
+		Parallel: cfg.Execution.Parallel,
+		Timeout:  timeout,
+	}
 	result := runner.RunSuiteWithOptions(path, checkList, opts)
 
-	// Output results
+	// Output results and handle exit code
+	var success bool
+	var outputErr error
+
 	switch format {
 	case "json":
-		return output.JSON(result, detected)
+		success, outputErr = output.JSON(result, detected)
 	case "toon":
-		return output.TOON(result, detected)
+		success, outputErr = output.TOON(result, detected)
 	default:
-		return output.Pretty(result, path, detected)
+		success, outputErr = output.Pretty(result, path, detected)
 	}
+
+	if outputErr != nil {
+		return outputErr
+	}
+
+	// Exit with code 1 if checks failed
+	if !success {
+		os.Exit(1)
+	}
+
+	return nil
 }
 
 func runVersion(cmd *cobra.Command, args []string) {

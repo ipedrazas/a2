@@ -83,11 +83,7 @@ func (c *BuildCheck) runBuildScript(path, pm string, rb *checkutil.ResultBuilder
 	if err := cmd.Run(); err != nil {
 		errMsg := strings.TrimSpace(stderr.String())
 		if errMsg != "" {
-			// Truncate long error messages
-			if len(errMsg) > 200 {
-				errMsg = errMsg[:200] + "..."
-			}
-			return rb.Fail("Build failed: " + errMsg), nil
+			return rb.Fail("Build failed: " + checkutil.TruncateMessage(errMsg, 200)), nil
 		}
 		return rb.Fail("Build failed"), nil
 	}

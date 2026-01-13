@@ -2,7 +2,6 @@ package output
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -30,7 +29,8 @@ func newToonEncoder() *toonEncoder {
 
 // TOON outputs the results in TOON format (Token-Oriented Object Notation).
 // TOON is optimized for consumption by coding agents.
-func TOON(result runner.SuiteResult, detected language.DetectionResult) error {
+// Returns true if all checks passed, false otherwise, along with any output error.
+func TOON(result runner.SuiteResult, detected language.DetectionResult) (bool, error) {
 	enc := newToonEncoder()
 
 	// Convert languages to strings
@@ -77,10 +77,7 @@ func TOON(result runner.SuiteResult, detected language.DetectionResult) error {
 	output := strings.TrimSuffix(enc.builder.String(), "\n")
 	fmt.Print(output)
 
-	if !result.Success() {
-		os.Exit(1)
-	}
-	return nil
+	return result.Success(), nil
 }
 
 // writeIndent writes the current indentation.

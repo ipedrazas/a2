@@ -35,7 +35,7 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 
 		// Some other error
 		if result.Stderr != "" {
-			return rb.Warn("govulncheck error: " + strings.TrimSpace(result.Stderr)), nil
+			return rb.Warn("govulncheck error: " + checkutil.TruncateMessage(strings.TrimSpace(result.Stderr), 150)), nil
 		}
 	}
 

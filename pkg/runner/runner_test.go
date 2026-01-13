@@ -925,6 +925,164 @@ func (suite *RunnerTestSuite) TestRunSuite_EmptyChecksTiming() {
 	suite.GreaterOrEqual(result.TotalDuration.Nanoseconds(), int64(0))
 }
 
+// TestRunSuite_TimeoutNotExceeded tests that checks complete normally when timeout is not exceeded.
+func (suite *RunnerTestSuite) TestRunSuite_TimeoutNotExceeded() {
+	checks := []checker.Checker{
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check1",
+				name: "Check 1",
+				result: checker.Result{
+					Name:    "Check 1",
+					ID:      "check1",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "Completed in time",
+				},
+			},
+			delay: 10 * time.Millisecond,
+		},
+	}
+
+	// Timeout is 100ms, check takes 10ms - should succeed
+	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{
+		Parallel: true,
+		Timeout:  100 * time.Millisecond,
+	})
+
+	suite.Equal(1, result.TotalChecks())
+	suite.Equal(1, result.Passed)
+	suite.Equal(0, result.Failed)
+	suite.True(result.Success())
+	suite.Equal("Completed in time", result.Results[0].Message)
+}
+
+// TestRunSuite_TimeoutExceeded tests that checks fail when timeout is exceeded.
+func (suite *RunnerTestSuite) TestRunSuite_TimeoutExceeded() {
+	checks := []checker.Checker{
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check1",
+				name: "Check 1",
+				result: checker.Result{
+					Name:    "Check 1",
+					ID:      "check1",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "Should not see this",
+				},
+			},
+			delay: 100 * time.Millisecond, // Takes 100ms
+		},
+	}
+
+	// Timeout is 20ms, check takes 100ms - should timeout
+	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{
+		Parallel: true,
+		Timeout:  20 * time.Millisecond,
+	})
+
+	suite.Equal(1, result.TotalChecks())
+	suite.Equal(0, result.Passed)
+	suite.Equal(1, result.Failed)
+	suite.False(result.Success())
+	suite.Contains(result.Results[0].Message, "timed out")
+	suite.Equal("check1", result.Results[0].ID)
+	suite.Equal("Check 1", result.Results[0].Name)
+}
+
+// TestRunSuite_TimeoutSequential tests timeout in sequential mode.
+func (suite *RunnerTestSuite) TestRunSuite_TimeoutSequential() {
+	checks := []checker.Checker{
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check1",
+				name: "Check 1",
+				result: checker.Result{
+					Name:    "Check 1",
+					ID:      "check1",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "Fast check",
+				},
+			},
+			delay: 5 * time.Millisecond,
+		},
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check2",
+				name: "Check 2",
+				result: checker.Result{
+					Name:    "Check 2",
+					ID:      "check2",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "Slow check",
+				},
+			},
+			delay: 100 * time.Millisecond, // Too slow
+		},
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check3",
+				name: "Check 3",
+				result: checker.Result{
+					Name:    "Check 3",
+					ID:      "check3",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "Should not run",
+				},
+			},
+			delay: 5 * time.Millisecond,
+		},
+	}
+
+	// Timeout is 20ms per check
+	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{
+		Parallel: false,
+		Timeout:  20 * time.Millisecond,
+	})
+
+	// First check passes, second times out (causing abort in sequential mode)
+	suite.Equal(2, result.TotalChecks())
+	suite.Equal(1, result.Passed)
+	suite.Equal(1, result.Failed)
+	suite.True(result.Aborted) // Should abort because timeout produces a Fail result
+	suite.Contains(result.Results[1].Message, "timed out")
+}
+
+// TestRunSuite_TimeoutZeroMeansNoTimeout tests that timeout=0 means no timeout.
+func (suite *RunnerTestSuite) TestRunSuite_TimeoutZeroMeansNoTimeout() {
+	checks := []checker.Checker{
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check1",
+				name: "Check 1",
+				result: checker.Result{
+					Name:    "Check 1",
+					ID:      "check1",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "Slow but should complete",
+				},
+			},
+			delay: 50 * time.Millisecond,
+		},
+	}
+
+	// Timeout is 0 (no timeout)
+	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{
+		Parallel: true,
+		Timeout:  0,
+	})
+
+	suite.Equal(1, result.TotalChecks())
+	suite.Equal(1, result.Passed)
+	suite.True(result.Success())
+	suite.Equal("Slow but should complete", result.Results[0].Message)
+}
+
 // TestRunnerTestSuite runs all the tests in the suite.
 func TestRunnerTestSuite(t *testing.T) {
 	suite.Run(t, new(RunnerTestSuite))

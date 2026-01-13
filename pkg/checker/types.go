@@ -59,11 +59,12 @@ type Result struct {
 
 // CheckMeta provides metadata about a check for registration.
 type CheckMeta struct {
-	ID        string     // Unique identifier (e.g., "go:build", "python:tests")
-	Name      string     // Human-readable name
-	Languages []Language // Which languages this check applies to
-	Critical  bool       // If true, failure = veto/abort
-	Order     int        // Execution priority (lower = first)
+	ID         string     // Unique identifier (e.g., "go:build", "python:tests")
+	Name       string     // Human-readable name
+	Languages  []Language // Which languages this check applies to
+	Critical   bool       // If true, failure = veto/abort
+	Order      int        // Execution priority (lower = first)
+	Suggestion string     // Recommendation shown when check fails (e.g., "Run 'go fmt' to fix")
 }
 
 // CheckRegistration combines a Checker with its metadata.

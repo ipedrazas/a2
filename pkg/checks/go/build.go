@@ -16,7 +16,7 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 
 	result := checkutil.RunCommand(path, "go", "build", "./...")
 	if !result.Success() {
-		return rb.Fail("Build failed: " + result.Output()), nil
+		return rb.Fail("Build failed: " + checkutil.TruncateMessage(result.Output(), 200)), nil
 	}
 
 	return rb.Pass("Build successful"), nil
