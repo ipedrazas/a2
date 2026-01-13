@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **List checks command** (`a2 list checks`) to display all available checks:
+  - Shows all 84 checks grouped by language (Go, Python, Node.js, TypeScript, Java, Rust, Swift, Common)
+  - Displays check IDs for use with `--skip` flag
+  - Marks critical checks that cause failure
+  - Alias: `a2 list c`
+
 ## [0.4.0] - 2026-01-12
 
 ### Added

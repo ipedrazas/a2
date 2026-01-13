@@ -79,8 +79,9 @@ a2 check --format toon
 a2 check --skip=license,k8s
 
 # List available options
-a2 profiles  # List application profiles
-a2 targets   # List maturity targets
+a2 list checks  # List all available checks with IDs
+a2 profiles     # List application profiles
+a2 targets      # List maturity targets
 ```
 
 ## Generating Configuration

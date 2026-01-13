@@ -138,6 +138,20 @@ func GetSuggestions(cfg *config.Config) map[string]string {
 	suggestions := make(map[string]string)
 
 	// Collect from all languages
+	allRegs := GetAllCheckRegistrations(cfg)
+
+	for _, reg := range allRegs {
+		if reg.Meta.Suggestion != "" {
+			suggestions[reg.Meta.ID] = reg.Meta.Suggestion
+		}
+	}
+
+	return suggestions
+}
+
+// GetAllCheckRegistrations returns all check registrations from all languages.
+// This is useful for listing available checks.
+func GetAllCheckRegistrations(cfg *config.Config) []checker.CheckRegistration {
 	allRegs := []checker.CheckRegistration{}
 	allRegs = append(allRegs, gocheck.Register(cfg)...)
 	allRegs = append(allRegs, pythoncheck.Register(cfg)...)
@@ -148,11 +162,10 @@ func GetSuggestions(cfg *config.Config) map[string]string {
 	allRegs = append(allRegs, swiftcheck.Register(cfg)...)
 	allRegs = append(allRegs, common.Register(cfg)...)
 
-	for _, reg := range allRegs {
-		if reg.Meta.Suggestion != "" {
-			suggestions[reg.Meta.ID] = reg.Meta.Suggestion
-		}
-	}
+	// Sort by order
+	sort.Slice(allRegs, func(i, j int) bool {
+		return allRegs[i].Meta.Order < allRegs[j].Meta.Order
+	})
 
-	return suggestions
+	return allRegs
 }
