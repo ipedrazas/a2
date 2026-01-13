@@ -6,7 +6,79 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"github.com/ipedrazas/a2/pkg/checker"
 )
+
+// ResultBuilder simplifies creating checker.Result with consistent fields.
+// It eliminates the need to repeatedly set Name, ID, and Language for each result.
+type ResultBuilder struct {
+	name     string
+	id       string
+	language checker.Language
+}
+
+// NewResultBuilder creates a new ResultBuilder for a checker.
+// The builder captures the checker's Name() and ID() so they don't need
+// to be repeated in every result construction.
+func NewResultBuilder(c checker.Checker, lang checker.Language) *ResultBuilder {
+	return &ResultBuilder{
+		name:     c.Name(),
+		id:       c.ID(),
+		language: lang,
+	}
+}
+
+// Pass creates a passing result with the given message.
+func (b *ResultBuilder) Pass(message string) checker.Result {
+	return checker.Result{
+		Name:     b.name,
+		ID:       b.id,
+		Passed:   true,
+		Status:   checker.Pass,
+		Message:  message,
+		Language: b.language,
+	}
+}
+
+// Fail creates a failing result with the given message.
+// Fail status indicates a critical failure that may abort execution.
+func (b *ResultBuilder) Fail(message string) checker.Result {
+	return checker.Result{
+		Name:     b.name,
+		ID:       b.id,
+		Passed:   false,
+		Status:   checker.Fail,
+		Message:  message,
+		Language: b.language,
+	}
+}
+
+// Warn creates a warning result with the given message.
+// Warnings indicate issues but don't cause execution to abort.
+func (b *ResultBuilder) Warn(message string) checker.Result {
+	return checker.Result{
+		Name:     b.name,
+		ID:       b.id,
+		Passed:   false,
+		Status:   checker.Warn,
+		Message:  message,
+		Language: b.language,
+	}
+}
+
+// Info creates an informational result with the given message.
+// Info results don't affect the pass/fail status or maturity score.
+func (b *ResultBuilder) Info(message string) checker.Result {
+	return checker.Result{
+		Name:     b.name,
+		ID:       b.id,
+		Passed:   true,
+		Status:   checker.Info,
+		Message:  message,
+		Language: b.language,
+	}
+}
 
 // TruncateMessage limits a message to maxLen characters.
 // It trims whitespace and appends "..." if truncated.

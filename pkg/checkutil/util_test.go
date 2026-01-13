@@ -3,9 +3,22 @@ package checkutil
 import (
 	"testing"
 
+	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
+
+// mockChecker is a simple mock for testing ResultBuilder.
+type mockChecker struct {
+	id   string
+	name string
+}
+
+func (m *mockChecker) ID() string   { return m.id }
+func (m *mockChecker) Name() string { return m.name }
+func (m *mockChecker) Run(path string) (checker.Result, error) {
+	return checker.Result{}, nil
+}
 
 type UtilTestSuite struct {
 	suite.Suite
@@ -148,4 +161,83 @@ func (s *UtilTestSuite) TestToolNotFoundError_False() {
 
 func (s *UtilTestSuite) TestToolNotFoundError_NilError() {
 	assert.False(s.T(), ToolNotFoundError(nil))
+}
+
+// ResultBuilder tests
+
+func (s *UtilTestSuite) TestNewResultBuilder() {
+	mc := &mockChecker{id: "test:check", name: "Test Check"}
+	rb := NewResultBuilder(mc, checker.LangGo)
+
+	assert.NotNil(s.T(), rb)
+}
+
+func (s *UtilTestSuite) TestResultBuilder_Pass() {
+	mc := &mockChecker{id: "go:build", name: "Go Build"}
+	rb := NewResultBuilder(mc, checker.LangGo)
+
+	result := rb.Pass("Build successful")
+
+	assert.Equal(s.T(), "Go Build", result.Name)
+	assert.Equal(s.T(), "go:build", result.ID)
+	assert.True(s.T(), result.Passed)
+	assert.Equal(s.T(), checker.Pass, result.Status)
+	assert.Equal(s.T(), "Build successful", result.Message)
+	assert.Equal(s.T(), checker.LangGo, result.Language)
+}
+
+func (s *UtilTestSuite) TestResultBuilder_Fail() {
+	mc := &mockChecker{id: "python:tests", name: "Python Tests"}
+	rb := NewResultBuilder(mc, checker.LangPython)
+
+	result := rb.Fail("Tests failed: 3 errors")
+
+	assert.Equal(s.T(), "Python Tests", result.Name)
+	assert.Equal(s.T(), "python:tests", result.ID)
+	assert.False(s.T(), result.Passed)
+	assert.Equal(s.T(), checker.Fail, result.Status)
+	assert.Equal(s.T(), "Tests failed: 3 errors", result.Message)
+	assert.Equal(s.T(), checker.LangPython, result.Language)
+}
+
+func (s *UtilTestSuite) TestResultBuilder_Warn() {
+	mc := &mockChecker{id: "node:deps", name: "Node Dependencies"}
+	rb := NewResultBuilder(mc, checker.LangNode)
+
+	result := rb.Warn("Outdated dependencies found")
+
+	assert.Equal(s.T(), "Node Dependencies", result.Name)
+	assert.Equal(s.T(), "node:deps", result.ID)
+	assert.False(s.T(), result.Passed)
+	assert.Equal(s.T(), checker.Warn, result.Status)
+	assert.Equal(s.T(), "Outdated dependencies found", result.Message)
+	assert.Equal(s.T(), checker.LangNode, result.Language)
+}
+
+func (s *UtilTestSuite) TestResultBuilder_Info() {
+	mc := &mockChecker{id: "common:version", name: "Version Info"}
+	rb := NewResultBuilder(mc, checker.LangCommon)
+
+	result := rb.Info("Version: 1.0.0")
+
+	assert.Equal(s.T(), "Version Info", result.Name)
+	assert.Equal(s.T(), "common:version", result.ID)
+	assert.True(s.T(), result.Passed) // Info doesn't affect pass/fail
+	assert.Equal(s.T(), checker.Info, result.Status)
+	assert.Equal(s.T(), "Version: 1.0.0", result.Message)
+	assert.Equal(s.T(), checker.LangCommon, result.Language)
+}
+
+func (s *UtilTestSuite) TestResultBuilder_MultipleResults() {
+	mc := &mockChecker{id: "go:vet", name: "Go Vet"}
+	rb := NewResultBuilder(mc, checker.LangGo)
+
+	// Builder can be reused to create multiple results
+	result1 := rb.Pass("No issues")
+	result2 := rb.Fail("Found issues")
+
+	assert.True(s.T(), result1.Passed)
+	assert.False(s.T(), result2.Passed)
+	assert.Equal(s.T(), result1.Name, result2.Name)
+	assert.Equal(s.T(), result1.ID, result2.ID)
 }

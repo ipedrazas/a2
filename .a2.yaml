@@ -20,7 +20,6 @@ checks:
     - common:integration  # Skip integration check
     - common:metrics  # Skip metrics check
     - common:errors  # Skip errors check
-    - common:precommit  # Skip precommit check
     - common:shutdown  # Skip shutdown check
     - common:license  # Skip license check
     - common:tracing  # Skip tracing check
@@ -41,6 +40,7 @@ external:
     args: ["run", "./..."]
     severity: warn
 
+# This check is an order of magnitude slower than the others
   - id: security
     name: Security Scan
     command: gosec
@@ -63,4 +63,10 @@ external:
     name: Static Analysis
     command: staticcheck
     args: ["./..."]
+    severity: warn
+  
+  - id: go:golicense
+    name: Go License
+    command: go-licenses
+    args: ["check", "./..."]
     severity: warn

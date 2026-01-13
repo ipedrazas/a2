@@ -1,8 +1,6 @@
 package pythoncheck
 
 import (
-	"bytes"
-	"os/exec"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -20,98 +18,51 @@ func (c *TestsCheck) ID() string   { return "python:tests" }
 func (c *TestsCheck) Name() string { return "Python Tests" }
 
 func (c *TestsCheck) Run(path string) (checker.Result, error) {
+	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 	runner := c.detectTestRunner(path)
 
-	var cmd *exec.Cmd
+	// First check if tests exist
+	var collectResult *checkutil.CommandResult
 	switch runner {
 	case "pytest":
-		cmd = exec.Command("pytest", "--collect-only", "-q")
+		collectResult = checkutil.RunCommand(path, "pytest", "--collect-only", "-q")
 	case "unittest":
-		cmd = exec.Command("python", "-m", "unittest", "discover", "--list")
+		collectResult = checkutil.RunCommand(path, "python", "-m", "unittest", "discover", "--list")
 	default:
-		cmd = exec.Command("pytest", "--collect-only", "-q")
+		collectResult = checkutil.RunCommand(path, "pytest", "--collect-only", "-q")
 	}
 
-	cmd.Dir = path
-
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	output := strings.TrimSpace(stdout.String())
-	errOutput := strings.TrimSpace(stderr.String())
-
 	// Check if test runner is not installed
-	if err != nil {
-		if strings.Contains(err.Error(), "executable file not found") {
-			return checker.Result{
-				Name:     c.Name(),
-				ID:       c.ID(),
-				Passed:   true,
-				Status:   checker.Pass,
-				Message:  runner + " not installed, skipping tests",
-				Language: checker.LangPython,
-			}, nil
-		}
+	if checkutil.ToolNotFoundError(collectResult.Err) {
+		return rb.Pass(runner + " not installed, skipping tests"), nil
 	}
 
 	// Check for no tests
+	output := collectResult.Stdout
+	errOutput := collectResult.Stderr
 	if strings.Contains(output, "no tests ran") ||
 		strings.Contains(output, "0 tests") ||
 		strings.Contains(output, "collected 0 items") ||
 		strings.Contains(errOutput, "no tests") {
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   true,
-			Status:   checker.Pass,
-			Message:  "No tests found",
-			Language: checker.LangPython,
-		}, nil
+		return rb.Pass("No tests found"), nil
 	}
 
 	// Now run actual tests
+	var testResult *checkutil.CommandResult
 	switch runner {
 	case "pytest":
-		cmd = exec.Command("pytest", "-v", "--tb=short")
+		testResult = checkutil.RunCommand(path, "pytest", "-v", "--tb=short")
 	case "unittest":
-		cmd = exec.Command("python", "-m", "unittest", "discover", "-v")
+		testResult = checkutil.RunCommand(path, "python", "-m", "unittest", "discover", "-v")
 	default:
-		cmd = exec.Command("pytest", "-v", "--tb=short")
+		testResult = checkutil.RunCommand(path, "pytest", "-v", "--tb=short")
 	}
 
-	cmd.Dir = path
-	stdout.Reset()
-	stderr.Reset()
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err = cmd.Run()
-	if err != nil {
-		output = strings.TrimSpace(stderr.String())
-		if output == "" {
-			output = strings.TrimSpace(stdout.String())
-		}
-
-		return checker.Result{
-			Name:     c.Name(),
-			ID:       c.ID(),
-			Passed:   false,
-			Status:   checker.Fail,
-			Message:  "Tests failed: " + checkutil.TruncateMessage(output, 200),
-			Language: checker.LangPython,
-		}, nil
+	if !testResult.Success() {
+		return rb.Fail("Tests failed: " + checkutil.TruncateMessage(testResult.Output(), 200)), nil
 	}
 
-	return checker.Result{
-		Name:     c.Name(),
-		ID:       c.ID(),
-		Passed:   true,
-		Status:   checker.Pass,
-		Message:  "All tests passed",
-		Language: checker.LangPython,
-	}, nil
+	return rb.Pass("All tests passed"), nil
 }
 
 func (c *TestsCheck) detectTestRunner(path string) string {
