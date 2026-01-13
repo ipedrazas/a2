@@ -19,7 +19,7 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 
 	// Check if govulncheck is available
 	if !checkutil.ToolAvailable("govulncheck") {
-		return rb.Pass("govulncheck not installed (run: go install golang.org/x/vuln/cmd/govulncheck@latest)"), nil
+		return rb.ToolNotInstalled("govulncheck", "go install golang.org/x/vuln/cmd/govulncheck@latest"), nil
 	}
 
 	result := checkutil.RunCommand(path, "govulncheck", "./...")

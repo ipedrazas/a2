@@ -64,12 +64,12 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 		if prettierResult := c.runPrettier(path, rb); prettierResult != nil {
 			return *prettierResult, nil
 		}
-		return rb.Pass("Prettier not installed"), nil
+		return rb.ToolNotInstalled("Prettier", "npm install prettier"), nil
 	case "biome":
 		if biomeResult := c.runBiome(path, rb); biomeResult != nil {
 			return *biomeResult, nil
 		}
-		return rb.Pass("Biome not installed"), nil
+		return rb.ToolNotInstalled("Biome", "npm install @biomejs/biome"), nil
 	default:
 		return rb.Pass(fmt.Sprintf("Unknown formatter: %s", formatter)), nil
 	}

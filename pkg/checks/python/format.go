@@ -46,7 +46,7 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 
 	if !result.Success() {
 		if checkutil.ToolNotFoundError(result.Err) {
-			return rb.Pass(formatter + " not installed, skipping format check"), nil
+			return rb.ToolNotInstalled(formatter, ""), nil
 		}
 
 		output := result.Output()

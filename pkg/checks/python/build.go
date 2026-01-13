@@ -36,7 +36,7 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 
 	if !result.Success() {
 		if checkutil.ToolNotFoundError(result.Err) {
-			return rb.Pass(pm + " not installed, skipping build check"), nil
+			return rb.ToolNotInstalled(pm, ""), nil
 		}
 		return rb.Fail(cmdDesc + " failed: " + checkutil.TruncateMessage(result.Output(), 200)), nil
 	}

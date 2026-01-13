@@ -66,6 +66,17 @@ func runParallel(path string, checks []checker.Checker, timeout time.Duration) S
 	for i, check := range checks {
 		go func(idx int, c checker.Checker) {
 			defer wg.Done()
+			defer func() {
+				if r := recover(); r != nil {
+					result.Results[idx] = checker.Result{
+						Name:    c.Name(),
+						ID:      c.ID(),
+						Passed:  false,
+						Status:  checker.Fail,
+						Message: formatPanicMessage(r),
+					}
+				}
+			}()
 			res := runCheckWithTimeout(path, c, timeout)
 			result.Results[idx] = res
 		}(i, check)
@@ -162,6 +173,19 @@ func runCheckWithTimeout(path string, c checker.Checker, timeout time.Duration) 
 	resultCh := make(chan checkResult, 1)
 
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				resultCh <- checkResult{
+					res: checker.Result{
+						Name:    c.Name(),
+						ID:      c.ID(),
+						Passed:  false,
+						Status:  checker.Fail,
+						Message: formatPanicMessage(r),
+					},
+				}
+			}
+		}()
 		res, err := c.Run(path)
 		resultCh <- checkResult{res: res, err: err}
 	}()
@@ -209,4 +233,16 @@ func (s *SuiteResult) ScoredChecks() int {
 // Success returns true if no checks failed (warnings are allowed).
 func (s *SuiteResult) Success() bool {
 	return s.Failed == 0
+}
+
+// formatPanicMessage creates a user-friendly message from a panic value.
+func formatPanicMessage(r interface{}) string {
+	switch v := r.(type) {
+	case error:
+		return "Check panicked: " + v.Error()
+	case string:
+		return "Check panicked: " + v
+	default:
+		return "Check panicked unexpectedly"
+	}
 }

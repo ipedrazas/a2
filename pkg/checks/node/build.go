@@ -37,7 +37,7 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 
 	// Verify package manager is available
 	if !checkutil.ToolAvailable(pm) {
-		return rb.Pass(fmt.Sprintf("%s not installed. Install it to verify dependencies.", pm)), nil
+		return rb.ToolNotInstalled(pm, ""), nil
 	}
 
 	// Run validation command based on package manager

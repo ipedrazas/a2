@@ -40,6 +40,19 @@ func (m *slowMockChecker) Run(path string) (checker.Result, error) {
 	return m.result, m.err
 }
 
+// panicMockChecker is a mock checker that panics when Run is called.
+type panicMockChecker struct {
+	id         string
+	name       string
+	panicValue interface{}
+}
+
+func (m *panicMockChecker) ID() string   { return m.id }
+func (m *panicMockChecker) Name() string { return m.name }
+func (m *panicMockChecker) Run(path string) (checker.Result, error) {
+	panic(m.panicValue)
+}
+
 // RunnerTestSuite is the test suite for the runner package.
 type RunnerTestSuite struct {
 	suite.Suite
@@ -1081,6 +1094,194 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutZeroMeansNoTimeout() {
 	suite.Equal(1, result.Passed)
 	suite.True(result.Success())
 	suite.Equal("Slow but should complete", result.Results[0].Message)
+}
+
+// TestRunSuite_PanicRecoveryParallel tests that panics are recovered in parallel mode.
+func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryParallel() {
+	checks := []checker.Checker{
+		&mockChecker{
+			id:   "check1",
+			name: "Check 1",
+			result: checker.Result{
+				Name:    "Check 1",
+				ID:      "check1",
+				Passed:  true,
+				Status:  checker.Pass,
+				Message: "Should complete",
+			},
+		},
+		&panicMockChecker{
+			id:         "check2",
+			name:       "Panicking Check",
+			panicValue: "something went wrong",
+		},
+		&mockChecker{
+			id:   "check3",
+			name: "Check 3",
+			result: checker.Result{
+				Name:    "Check 3",
+				ID:      "check3",
+				Passed:  true,
+				Status:  checker.Pass,
+				Message: "Should also complete",
+			},
+		},
+	}
+
+	// Parallel mode should recover from panic and continue
+	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{Parallel: true})
+
+	suite.Equal(3, result.TotalChecks()) // All 3 checks should have results
+	suite.Equal(2, result.Passed)
+	suite.Equal(1, result.Failed)
+	suite.True(result.Aborted)
+	suite.False(result.Success())
+
+	// Verify the panicking check was converted to a Fail result
+	suite.Equal("check2", result.Results[1].ID)
+	suite.Equal("Panicking Check", result.Results[1].Name)
+	suite.False(result.Results[1].Passed)
+	suite.Equal(checker.Fail, result.Results[1].Status)
+	suite.Contains(result.Results[1].Message, "panicked")
+	suite.Contains(result.Results[1].Message, "something went wrong")
+
+	// Verify other checks completed normally
+	suite.True(result.Results[0].Passed)
+	suite.True(result.Results[2].Passed)
+}
+
+// TestRunSuite_PanicRecoveryWithError tests panic with error value.
+func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithError() {
+	checks := []checker.Checker{
+		&panicMockChecker{
+			id:         "check1",
+			name:       "Error Panicking Check",
+			panicValue: errors.New("error panic value"),
+		},
+	}
+
+	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{Parallel: true})
+
+	suite.Equal(1, result.TotalChecks())
+	suite.Equal(0, result.Passed)
+	suite.Equal(1, result.Failed)
+	suite.Contains(result.Results[0].Message, "panicked")
+	suite.Contains(result.Results[0].Message, "error panic value")
+}
+
+// TestRunSuite_PanicRecoveryWithUnknownValue tests panic with non-string/non-error value.
+func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithUnknownValue() {
+	checks := []checker.Checker{
+		&panicMockChecker{
+			id:         "check1",
+			name:       "Unknown Panic Check",
+			panicValue: 12345, // integer panic value
+		},
+	}
+
+	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{Parallel: true})
+
+	suite.Equal(1, result.TotalChecks())
+	suite.Equal(0, result.Passed)
+	suite.Equal(1, result.Failed)
+	suite.Contains(result.Results[0].Message, "panicked unexpectedly")
+}
+
+// TestRunSuite_PanicRecoveryWithTimeout tests panic recovery when timeout is set.
+func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithTimeout() {
+	checks := []checker.Checker{
+		&mockChecker{
+			id:   "check1",
+			name: "Check 1",
+			result: checker.Result{
+				Name:    "Check 1",
+				ID:      "check1",
+				Passed:  true,
+				Status:  checker.Pass,
+				Message: "Should complete",
+			},
+		},
+		&panicMockChecker{
+			id:         "check2",
+			name:       "Panicking Check",
+			panicValue: "timeout test panic",
+		},
+	}
+
+	// Panic recovery should work with timeout enabled
+	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{
+		Parallel: true,
+		Timeout:  1 * time.Second,
+	})
+
+	suite.Equal(2, result.TotalChecks())
+	suite.Equal(1, result.Passed)
+	suite.Equal(1, result.Failed)
+
+	// Verify the panicking check was recovered
+	suite.Contains(result.Results[1].Message, "panicked")
+	suite.Contains(result.Results[1].Message, "timeout test panic")
+}
+
+// TestRunSuite_PanicRecoverySequential tests panic recovery in sequential mode.
+func (suite *RunnerTestSuite) TestRunSuite_PanicRecoverySequential() {
+	checks := []checker.Checker{
+		&mockChecker{
+			id:   "check1",
+			name: "Check 1",
+			result: checker.Result{
+				Name:    "Check 1",
+				ID:      "check1",
+				Passed:  true,
+				Status:  checker.Pass,
+				Message: "Should complete first",
+			},
+		},
+		&panicMockChecker{
+			id:         "check2",
+			name:       "Panicking Check",
+			panicValue: "sequential panic",
+		},
+		&mockChecker{
+			id:   "check3",
+			name: "Check 3",
+			result: checker.Result{
+				Name:    "Check 3",
+				ID:      "check3",
+				Passed:  true,
+				Status:  checker.Pass,
+				Message: "Should not run (aborted)",
+			},
+		},
+	}
+
+	// Sequential mode should recover from panic but abort
+	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{
+		Parallel: false,
+		Timeout:  1 * time.Second,
+	})
+
+	// Panic recovery converts to Fail, which aborts in sequential mode
+	suite.Equal(2, result.TotalChecks()) // Only 2 ran (aborted after panic)
+	suite.Equal(1, result.Passed)
+	suite.Equal(1, result.Failed)
+	suite.True(result.Aborted)
+
+	suite.Contains(result.Results[1].Message, "panicked")
+}
+
+// TestFormatPanicMessage tests the formatPanicMessage helper function.
+func (suite *RunnerTestSuite) TestFormatPanicMessage() {
+	// Test with string value
+	suite.Equal("Check panicked: test string", formatPanicMessage("test string"))
+
+	// Test with error value
+	suite.Equal("Check panicked: test error", formatPanicMessage(errors.New("test error")))
+
+	// Test with other value
+	suite.Equal("Check panicked unexpectedly", formatPanicMessage(123))
+	suite.Equal("Check panicked unexpectedly", formatPanicMessage(nil))
+	suite.Equal("Check panicked unexpectedly", formatPanicMessage(struct{}{}))
 }
 
 // TestRunnerTestSuite runs all the tests in the suite.

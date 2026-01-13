@@ -80,6 +80,25 @@ func (b *ResultBuilder) Info(message string) checker.Result {
 	}
 }
 
+// ToolNotInstalled creates an Info result indicating a tool is not installed.
+// This standardizes the handling of missing tools across all checks.
+// Use this when a check cannot run because an optional tool is not available.
+// The installHint should provide installation instructions (e.g., "pip install black").
+func (b *ResultBuilder) ToolNotInstalled(toolName, installHint string) checker.Result {
+	message := toolName + " not installed"
+	if installHint != "" {
+		message += " (" + installHint + ")"
+	}
+	return checker.Result{
+		Name:     b.name,
+		ID:       b.id,
+		Passed:   true,
+		Status:   checker.Info,
+		Message:  message,
+		Language: b.language,
+	}
+}
+
 // TruncateMessage limits a message to maxLen characters.
 // It trims whitespace and appends "..." if truncated.
 func TruncateMessage(msg string, maxLen int) string {

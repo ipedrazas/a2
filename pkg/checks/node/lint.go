@@ -69,17 +69,17 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 		if eslintResult := c.runESLint(path, rb); eslintResult != nil {
 			return *eslintResult, nil
 		}
-		return rb.Pass("ESLint not installed"), nil
+		return rb.ToolNotInstalled("ESLint", "npm install eslint"), nil
 	case "biome":
 		if biomeResult := c.runBiome(path, rb); biomeResult != nil {
 			return *biomeResult, nil
 		}
-		return rb.Pass("Biome not installed"), nil
+		return rb.ToolNotInstalled("Biome", "npm install @biomejs/biome"), nil
 	case "oxlint":
 		if oxlintResult := c.runOxlint(path, rb); oxlintResult != nil {
 			return *oxlintResult, nil
 		}
-		return rb.Pass("Oxlint not installed"), nil
+		return rb.ToolNotInstalled("Oxlint", "npm install oxlint"), nil
 	default:
 		return rb.Pass(fmt.Sprintf("Unknown linter: %s", linter)), nil
 	}

@@ -50,7 +50,7 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 
 	if !result.Success() {
 		if checkutil.ToolNotFoundError(result.Err) {
-			return rb.Pass(linter + " not installed, skipping lint check"), nil
+			return rb.ToolNotInstalled(linter, ""), nil
 		}
 
 		// Count issues

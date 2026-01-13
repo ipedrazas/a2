@@ -34,7 +34,7 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 
 	// Check if test runner is not installed
 	if checkutil.ToolNotFoundError(collectResult.Err) {
-		return rb.Pass(runner + " not installed, skipping tests"), nil
+		return rb.ToolNotInstalled(runner, ""), nil
 	}
 
 	// Check for no tests

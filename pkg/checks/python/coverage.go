@@ -32,11 +32,11 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 	// Check if pytest or pytest-cov is not installed
 	if strings.Contains(result.Stderr, "unrecognized arguments: --cov") ||
 		strings.Contains(result.Stderr, "No module named pytest") {
-		return rb.Pass("pytest-cov not installed (run: pip install pytest-cov)"), nil
+		return rb.ToolNotInstalled("pytest-cov", "pip install pytest-cov"), nil
 	}
 
 	if checkutil.ToolNotFoundError(result.Err) {
-		return rb.Pass("pytest not installed, skipping coverage"), nil
+		return rb.ToolNotInstalled("pytest", "pip install pytest"), nil
 	}
 
 	// Check for no tests

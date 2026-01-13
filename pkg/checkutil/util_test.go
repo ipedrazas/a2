@@ -228,6 +228,34 @@ func (s *UtilTestSuite) TestResultBuilder_Info() {
 	assert.Equal(s.T(), checker.LangCommon, result.Language)
 }
 
+func (s *UtilTestSuite) TestResultBuilder_ToolNotInstalled_WithHint() {
+	mc := &mockChecker{id: "go:deps", name: "Go Dependencies"}
+	rb := NewResultBuilder(mc, checker.LangGo)
+
+	result := rb.ToolNotInstalled("govulncheck", "go install golang.org/x/vuln/cmd/govulncheck@latest")
+
+	assert.Equal(s.T(), "Go Dependencies", result.Name)
+	assert.Equal(s.T(), "go:deps", result.ID)
+	assert.True(s.T(), result.Passed) // Info doesn't affect pass/fail
+	assert.Equal(s.T(), checker.Info, result.Status)
+	assert.Equal(s.T(), "govulncheck not installed (go install golang.org/x/vuln/cmd/govulncheck@latest)", result.Message)
+	assert.Equal(s.T(), checker.LangGo, result.Language)
+}
+
+func (s *UtilTestSuite) TestResultBuilder_ToolNotInstalled_WithoutHint() {
+	mc := &mockChecker{id: "python:lint", name: "Python Lint"}
+	rb := NewResultBuilder(mc, checker.LangPython)
+
+	result := rb.ToolNotInstalled("ruff", "")
+
+	assert.Equal(s.T(), "Python Lint", result.Name)
+	assert.Equal(s.T(), "python:lint", result.ID)
+	assert.True(s.T(), result.Passed)
+	assert.Equal(s.T(), checker.Info, result.Status)
+	assert.Equal(s.T(), "ruff not installed", result.Message)
+	assert.Equal(s.T(), checker.LangPython, result.Language)
+}
+
 func (s *UtilTestSuite) TestResultBuilder_MultipleResults() {
 	mc := &mockChecker{id: "go:vet", name: "Go Vet"}
 	rb := NewResultBuilder(mc, checker.LangGo)

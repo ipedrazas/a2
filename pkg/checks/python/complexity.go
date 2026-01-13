@@ -51,7 +51,7 @@ func (c *ComplexityCheck) Run(path string) (checker.Result, error) {
 
 	// Check if radon is installed
 	if !checkutil.ToolAvailable("radon") {
-		return rb.Pass("radon not installed (pip install radon for complexity analysis)"), nil
+		return rb.ToolNotInstalled("radon", "pip install radon"), nil
 	}
 
 	// Run radon cc with show-complexity flag

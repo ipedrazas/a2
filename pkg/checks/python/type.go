@@ -30,7 +30,7 @@ func (c *TypeCheck) Run(path string) (checker.Result, error) {
 
 	// Check if mypy is installed
 	if !checkutil.ToolAvailable("mypy") {
-		return rb.Pass("mypy not installed, skipping type check"), nil
+		return rb.ToolNotInstalled("mypy", "pip install mypy"), nil
 	}
 
 	// Run mypy
