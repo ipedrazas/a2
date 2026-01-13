@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -73,13 +74,13 @@ func (s *TestsTestSuite) TestDetectTestRunner_Default() {
 
 func (s *TestsTestSuite) TestTruncateMessage_Short() {
 	msg := "Short message"
-	result := truncateMessage(msg, 100)
+	result := checkutil.TruncateMessage(msg, 100)
 	s.Equal(msg, result)
 }
 
 func (s *TestsTestSuite) TestTruncateMessage_Long() {
 	msg := "This is a very long message that exceeds the maximum length"
-	result := truncateMessage(msg, 20)
+	result := checkutil.TruncateMessage(msg, 20)
 	s.Equal("This is a very long ...", result)
 }
 

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/stretchr/testify/suite"
 )
@@ -200,12 +201,12 @@ func (suite *FormatTestSuite) TestFormatCheck_HasBiomeConfig() {
 	suite.True(check.hasBiomeConfig(suite.tempDir))
 }
 
-// TestPluralize tests the pluralize helper function.
+// TestPluralize tests the Pluralize helper function.
 func (suite *FormatTestSuite) TestPluralize() {
-	suite.Equal("file", pluralize(1, "file", "files"))
-	suite.Equal("files", pluralize(0, "file", "files"))
-	suite.Equal("files", pluralize(2, "file", "files"))
-	suite.Equal("files", pluralize(10, "file", "files"))
+	suite.Equal("file", checkutil.Pluralize(1, "file", "files"))
+	suite.Equal("files", checkutil.Pluralize(0, "file", "files"))
+	suite.Equal("files", checkutil.Pluralize(2, "file", "files"))
+	suite.Equal("files", checkutil.Pluralize(10, "file", "files"))
 }
 
 // TestFormatCheck_Run_NonExistentPath tests that FormatCheck handles non-existent paths.

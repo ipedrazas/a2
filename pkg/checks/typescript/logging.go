@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -74,7 +75,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 			result.Message = fmt.Sprintf("Logging: %s; found %d console.log %s (consider removing)",
 				strings.Join(loggingLibs, ", "),
 				consoleLogCount,
-				pluralize(consoleLogCount, "call", "calls"))
+				checkutil.Pluralize(consoleLogCount, "call", "calls"))
 		} else {
 			result.Passed = true
 			result.Status = checker.Pass
@@ -85,7 +86,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 		result.Status = checker.Warn
 		result.Message = fmt.Sprintf("Found %d console.log %s; consider a logging library (winston, pino)",
 			consoleLogCount,
-			pluralize(consoleLogCount, "call", "calls"))
+			checkutil.Pluralize(consoleLogCount, "call", "calls"))
 	} else {
 		result.Passed = false
 		result.Status = checker.Warn

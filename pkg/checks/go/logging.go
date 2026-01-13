@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
@@ -128,7 +129,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 	if hasStructuredLogger && printCount > 0 {
 		result.Passed = false
 		result.Status = checker.Warn
-		result.Message = "Uses structured logging but found " + pluralizeCount(printCount, "fmt.Print statement", "fmt.Print statements")
+		result.Message = "Uses structured logging but found " + checkutil.PluralizeCount(printCount, "fmt.Print statement", "fmt.Print statements")
 		return result, nil
 	}
 
@@ -142,13 +143,6 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 	// !hasStructuredLogger && printCount > 0
 	result.Passed = false
 	result.Status = checker.Warn
-	result.Message = "No structured logging and found " + pluralizeCount(printCount, "fmt.Print statement", "fmt.Print statements")
+	result.Message = "No structured logging and found " + checkutil.PluralizeCount(printCount, "fmt.Print statement", "fmt.Print statements")
 	return result, nil
-}
-
-func pluralizeCount(count int, singular, plural string) string {
-	if count == 1 {
-		return "1 " + singular
-	}
-	return fmt.Sprintf("%d %s", count, plural)
 }

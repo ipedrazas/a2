@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/stretchr/testify/suite"
 )
@@ -134,21 +135,21 @@ func (suite *BuildTestSuite) TestBuildCheck_Run_NonExistentPath() {
 	suite.Contains(result.Message, "package.json not found")
 }
 
-// TestTruncateMessage tests the truncateMessage helper function.
+// TestTruncateMessage tests the TruncateMessage helper function.
 func (suite *BuildTestSuite) TestTruncateMessage() {
 	// Short message should not be truncated
 	short := "short message"
-	suite.Equal(short, truncateMessage(short, 100))
+	suite.Equal(short, checkutil.TruncateMessage(short, 100))
 
 	// Long message should be truncated
 	long := "this is a very long message that should be truncated at some point"
-	truncated := truncateMessage(long, 20)
+	truncated := checkutil.TruncateMessage(long, 20)
 	suite.Equal("this is a very long ...", truncated)
 	suite.Len(truncated, 23) // 20 + "..."
 
 	// Message with leading/trailing whitespace
 	whitespace := "  trimmed  "
-	suite.Equal("trimmed", truncateMessage(whitespace, 100))
+	suite.Equal("trimmed", checkutil.TruncateMessage(whitespace, 100))
 }
 
 // TestBuildTestSuite runs all the tests in the suite.

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -147,8 +148,8 @@ func (c *LintCheck) runESLint(path, pm string) (checker.Result, error) {
 			result.Passed = false
 			result.Status = checker.Warn
 			result.Message = fmt.Sprintf("ESLint: %d %s, %d %s",
-				errors, pluralize(errors, "error", "errors"),
-				warnings, pluralize(warnings, "warning", "warnings"))
+				errors, checkutil.Pluralize(errors, "error", "errors"),
+				warnings, checkutil.Pluralize(warnings, "warning", "warnings"))
 		} else {
 			result.Passed = false
 			result.Status = checker.Warn
@@ -260,12 +261,4 @@ func parseESLintOutput(output string) (errors, warnings int) {
 		}
 	}
 	return
-}
-
-// pluralize returns singular or plural form based on count.
-func pluralize(count int, singular, plural string) string {
-	if count == 1 {
-		return singular
-	}
-	return plural
 }

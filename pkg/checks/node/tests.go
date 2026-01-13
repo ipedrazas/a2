@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -109,7 +110,7 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 		}
 		result.Status = checker.Fail
 		result.Passed = false
-		result.Message = fmt.Sprintf("Tests failed: %s", truncateMessage(output, 200))
+		result.Message = fmt.Sprintf("Tests failed: %s", checkutil.TruncateMessage(output, 200))
 		return result, nil
 	}
 

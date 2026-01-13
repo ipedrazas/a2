@@ -7,6 +7,7 @@ import (
 	"os/exec"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -64,7 +65,7 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 	if vulnCount > 0 {
 		result.Status = checker.Warn
 		result.Passed = false
-		result.Message = fmt.Sprintf("%d %s found. Run: %s audit for details", vulnCount, pluralize(vulnCount, "vulnerability", "vulnerabilities"), pm)
+		result.Message = fmt.Sprintf("%d %s found. Run: %s audit for details", vulnCount, checkutil.Pluralize(vulnCount, "vulnerability", "vulnerabilities"), pm)
 		return result, nil
 	}
 

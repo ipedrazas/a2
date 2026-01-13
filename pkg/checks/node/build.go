@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
-	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -83,7 +83,7 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 		}
 		result.Status = checker.Fail
 		result.Passed = false
-		result.Message = fmt.Sprintf("Dependency validation failed (%s): %s", pm, truncateMessage(output, 200))
+		result.Message = fmt.Sprintf("Dependency validation failed (%s): %s", pm, checkutil.TruncateMessage(output, 200))
 		return result, nil
 	}
 
@@ -112,13 +112,4 @@ func (c *BuildCheck) detectPackageManager(path string) string {
 	}
 
 	return "npm"
-}
-
-// truncateMessage limits message length for display.
-func truncateMessage(msg string, maxLen int) string {
-	msg = strings.TrimSpace(msg)
-	if len(msg) > maxLen {
-		return msg[:maxLen] + "..."
-	}
-	return msg
 }

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 )
 
 // DepsCheck scans for known vulnerabilities in Python dependencies.
@@ -69,7 +70,7 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 				ID:       c.ID(),
 				Passed:   false,
 				Status:   checker.Warn,
-				Message:  cmdDesc + " error: " + truncateMessage(errOutput, 150),
+				Message:  cmdDesc + " error: " + checkutil.TruncateMessage(errOutput, 150),
 				Language: checker.LangPython,
 			}, nil
 		}

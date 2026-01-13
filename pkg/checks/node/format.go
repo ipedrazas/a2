@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -131,7 +132,7 @@ func (c *FormatCheck) runPrettier(path string) *checker.Result {
 		if unformattedCount > 0 {
 			result.Status = checker.Warn
 			result.Passed = false
-			result.Message = fmt.Sprintf("%d %s need formatting. Run: npx prettier --write .", unformattedCount, pluralize(unformattedCount, "file", "files"))
+			result.Message = fmt.Sprintf("%d %s need formatting. Run: npx prettier --write .", unformattedCount, checkutil.Pluralize(unformattedCount, "file", "files"))
 		} else {
 			result.Status = checker.Warn
 			result.Passed = false
@@ -260,12 +261,4 @@ func (c *FormatCheck) hasBiomeConfig(path string) bool {
 	}
 
 	return false
-}
-
-// pluralize returns singular or plural form based on count.
-func pluralize(count int, singular, plural string) string {
-	if count == 1 {
-		return singular
-	}
-	return plural
 }

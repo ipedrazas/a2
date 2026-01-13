@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -136,7 +137,7 @@ func (c *LintCheck) runESLint(path string) *checker.Result {
 		if issueCount > 0 {
 			result.Status = checker.Warn
 			result.Passed = false
-			result.Message = fmt.Sprintf("%d linting %s found. Run: npx eslint . --fix", issueCount, pluralize(issueCount, "issue", "issues"))
+			result.Message = fmt.Sprintf("%d linting %s found. Run: npx eslint . --fix", issueCount, checkutil.Pluralize(issueCount, "issue", "issues"))
 		} else {
 			result.Status = checker.Warn
 			result.Passed = false

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -77,7 +78,7 @@ func (c *TypeCheck) Run(path string) (checker.Result, error) {
 		if errorCount > 0 {
 			result.Status = checker.Warn
 			result.Passed = false
-			result.Message = fmt.Sprintf("%d type %s found. Run: npx tsc --noEmit", errorCount, pluralize(errorCount, "error", "errors"))
+			result.Message = fmt.Sprintf("%d type %s found. Run: npx tsc --noEmit", errorCount, checkutil.Pluralize(errorCount, "error", "errors"))
 		} else {
 			result.Status = checker.Warn
 			result.Passed = false

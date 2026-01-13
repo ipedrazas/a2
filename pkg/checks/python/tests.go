@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -98,7 +99,7 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 			ID:       c.ID(),
 			Passed:   false,
 			Status:   checker.Fail,
-			Message:  "Tests failed: " + truncateMessage(output, 200),
+			Message:  "Tests failed: " + checkutil.TruncateMessage(output, 200),
 			Language: checker.LangPython,
 		}, nil
 	}
@@ -126,11 +127,4 @@ func (c *TestsCheck) detectTestRunner(path string) string {
 	}
 
 	return "pytest" // Default
-}
-
-func truncateMessage(msg string, maxLen int) string {
-	if len(msg) <= maxLen {
-		return msg
-	}
-	return msg[:maxLen] + "..."
 }

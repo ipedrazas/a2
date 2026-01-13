@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -94,9 +95,9 @@ func (s *LintTestSuite) TestParseESLintOutput_WithSummary() {
 }
 
 func (s *LintTestSuite) TestPluralize() {
-	s.Equal("error", pluralize(1, "error", "errors"))
-	s.Equal("errors", pluralize(2, "error", "errors"))
-	s.Equal("errors", pluralize(0, "error", "errors"))
+	s.Equal("error", checkutil.Pluralize(1, "error", "errors"))
+	s.Equal("errors", checkutil.Pluralize(2, "error", "errors"))
+	s.Equal("errors", checkutil.Pluralize(0, "error", "errors"))
 }
 
 func TestLintTestSuite(t *testing.T) {

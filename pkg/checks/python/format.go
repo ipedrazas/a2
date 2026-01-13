@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
@@ -91,7 +92,7 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 				ID:       c.ID(),
 				Passed:   false,
 				Status:   checker.Warn,
-				Message:  cmdDesc + ": " + pluralize(fileCount, "file", "files") + " need formatting",
+				Message:  cmdDesc + ": " + checkutil.PluralizeCount(fileCount, "file", "files") + " need formatting",
 				Language: checker.LangPython,
 			}, nil
 		}
@@ -101,7 +102,7 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 			ID:       c.ID(),
 			Passed:   false,
 			Status:   checker.Warn,
-			Message:  cmdDesc + " found issues: " + truncateMessage(output, 150),
+			Message:  cmdDesc + " found issues: " + checkutil.TruncateMessage(output, 150),
 			Language: checker.LangPython,
 		}, nil
 	}
@@ -137,11 +138,4 @@ func (c *FormatCheck) detectFormatter(path string) string {
 	}
 
 	return "auto"
-}
-
-func pluralize(count int, singular, plural string) string {
-	if count == 1 {
-		return "1 " + singular
-	}
-	return strings.Replace(plural, "files", string(rune(count+'0'))+" files", 1)
 }

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -83,9 +84,9 @@ func (s *FormatTestSuite) TestDetectFormatter_Auto() {
 	s.Equal("auto", formatter)
 }
 
-func (s *FormatTestSuite) TestPluralize() {
-	s.Equal("1 file", pluralize(1, "file", "files"))
-	s.Contains(pluralize(2, "file", "files"), "files")
+func (s *FormatTestSuite) TestPluralizeCount() {
+	s.Equal("1 file", checkutil.PluralizeCount(1, "file", "files"))
+	s.Equal("2 files", checkutil.PluralizeCount(2, "file", "files"))
 }
 
 func TestFormatTestSuite(t *testing.T) {
