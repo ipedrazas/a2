@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -76,6 +77,9 @@ var (
 
 	maturityDescStyle = lipgloss.NewStyle().
 				Foreground(gray)
+
+	durationStyle = lipgloss.NewStyle().
+			Foreground(gray)
 )
 
 // Pretty outputs the results in a formatted, colorful way.
@@ -151,17 +155,33 @@ func printResult(r checker.Result) {
 		style = infoStyle
 	}
 
-	// Print the check result
-	fmt.Printf("%s %s %s\n",
+	// Format duration
+	durationStr := formatDuration(r.Duration)
+
+	// Print the check result with duration
+	fmt.Printf("%s %s %s %s\n",
 		style.Render(symbol),
 		style.Render(status),
 		r.Name,
+		durationStyle.Render(durationStr),
 	)
 
 	// Print message if present
 	if r.Message != "" {
 		fmt.Println(messageStyle.Render(r.Message))
 	}
+}
+
+// formatDuration formats a duration for display.
+// Shows milliseconds for short durations, seconds for longer ones.
+func formatDuration(d time.Duration) string {
+	if d == 0 {
+		return ""
+	}
+	if d < time.Second {
+		return fmt.Sprintf("(%dms)", d.Milliseconds())
+	}
+	return fmt.Sprintf("(%.1fs)", d.Seconds())
 }
 
 func printStatus(result runner.SuiteResult) {
@@ -195,6 +215,10 @@ func printScore(result runner.SuiteResult) {
 	scoreMsg := fmt.Sprintf("Score: %d/%d checks passed (%.0f%%)", passed, scoredTotal, pct)
 	if result.Info > 0 {
 		scoreMsg += fmt.Sprintf(" + %d info", result.Info)
+	}
+	// Add total duration
+	if result.TotalDuration > 0 {
+		scoreMsg += fmt.Sprintf(" in %s", formatDuration(result.TotalDuration))
 	}
 	fmt.Println(scoreStyle.Render(scoreMsg))
 }

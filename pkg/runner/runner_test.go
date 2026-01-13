@@ -3,6 +3,7 @@ package runner
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/stretchr/testify/suite"
@@ -25,6 +26,17 @@ func (m *mockChecker) Name() string {
 }
 
 func (m *mockChecker) Run(path string) (checker.Result, error) {
+	return m.result, m.err
+}
+
+// slowMockChecker is a mock checker that adds a delay to simulate execution time.
+type slowMockChecker struct {
+	mockChecker
+	delay time.Duration
+}
+
+func (m *slowMockChecker) Run(path string) (checker.Result, error) {
+	time.Sleep(m.delay)
 	return m.result, m.err
 }
 
@@ -743,6 +755,174 @@ func (suite *RunnerTestSuite) TestSuiteResult_ScoredChecks() {
 
 	suite.Equal(5, result.TotalChecks())
 	suite.Equal(3, result.ScoredChecks()) // Excludes Info
+}
+
+// TestRunSuite_DurationIsSet tests that Duration is set on individual check results.
+func (suite *RunnerTestSuite) TestRunSuite_DurationIsSet() {
+	checks := []checker.Checker{
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check1",
+				name: "Check 1",
+				result: checker.Result{
+					Name:    "Check 1",
+					ID:      "check1",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "All good",
+				},
+			},
+			delay: 10 * time.Millisecond,
+		},
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check2",
+				name: "Check 2",
+				result: checker.Result{
+					Name:    "Check 2",
+					ID:      "check2",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "All good",
+				},
+			},
+			delay: 20 * time.Millisecond,
+		},
+	}
+
+	result := RunSuite("/test/path", checks)
+
+	suite.Equal(2, result.TotalChecks())
+	// Verify Duration is set on each result
+	for i, r := range result.Results {
+		suite.Greater(r.Duration.Nanoseconds(), int64(0), "Result %d should have non-zero duration", i)
+	}
+	// Verify durations are reasonable (at least as long as the delay)
+	suite.GreaterOrEqual(result.Results[0].Duration, 10*time.Millisecond)
+	suite.GreaterOrEqual(result.Results[1].Duration, 20*time.Millisecond)
+}
+
+// TestRunSuite_TotalDurationIsSet tests that TotalDuration is set on SuiteResult.
+func (suite *RunnerTestSuite) TestRunSuite_TotalDurationIsSet() {
+	checks := []checker.Checker{
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check1",
+				name: "Check 1",
+				result: checker.Result{
+					Name:    "Check 1",
+					ID:      "check1",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "All good",
+				},
+			},
+			delay: 15 * time.Millisecond,
+		},
+	}
+
+	result := RunSuite("/test/path", checks)
+
+	// Verify TotalDuration is set and reasonable
+	suite.Greater(result.TotalDuration.Nanoseconds(), int64(0), "TotalDuration should be non-zero")
+	suite.GreaterOrEqual(result.TotalDuration, 15*time.Millisecond)
+}
+
+// TestRunSuite_SequentialTiming tests timing in sequential mode.
+func (suite *RunnerTestSuite) TestRunSuite_SequentialTiming() {
+	checks := []checker.Checker{
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check1",
+				name: "Check 1",
+				result: checker.Result{
+					Name:    "Check 1",
+					ID:      "check1",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "All good",
+				},
+			},
+			delay: 10 * time.Millisecond,
+		},
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check2",
+				name: "Check 2",
+				result: checker.Result{
+					Name:    "Check 2",
+					ID:      "check2",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "All good",
+				},
+			},
+			delay: 10 * time.Millisecond,
+		},
+	}
+
+	result := RunSuiteSequential("/test/path", checks)
+
+	// In sequential mode, TotalDuration should be at least the sum of delays
+	suite.GreaterOrEqual(result.TotalDuration, 20*time.Millisecond)
+	// Individual durations should be set
+	suite.GreaterOrEqual(result.Results[0].Duration, 10*time.Millisecond)
+	suite.GreaterOrEqual(result.Results[1].Duration, 10*time.Millisecond)
+}
+
+// TestRunSuite_ParallelTiming tests timing in parallel mode.
+func (suite *RunnerTestSuite) TestRunSuite_ParallelTiming() {
+	checks := []checker.Checker{
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check1",
+				name: "Check 1",
+				result: checker.Result{
+					Name:    "Check 1",
+					ID:      "check1",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "All good",
+				},
+			},
+			delay: 20 * time.Millisecond,
+		},
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check2",
+				name: "Check 2",
+				result: checker.Result{
+					Name:    "Check 2",
+					ID:      "check2",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "All good",
+				},
+			},
+			delay: 20 * time.Millisecond,
+		},
+	}
+
+	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{Parallel: true})
+
+	// In parallel mode, TotalDuration should be less than the sum of delays
+	// (since checks run concurrently) but at least as long as the longest check
+	suite.GreaterOrEqual(result.TotalDuration, 20*time.Millisecond)
+	// Should be significantly less than 40ms (sequential would take 40ms+)
+	suite.Less(result.TotalDuration, 35*time.Millisecond)
+	// Individual durations should still be set
+	suite.GreaterOrEqual(result.Results[0].Duration, 20*time.Millisecond)
+	suite.GreaterOrEqual(result.Results[1].Duration, 20*time.Millisecond)
+}
+
+// TestRunSuite_EmptyChecksTiming tests timing with empty check list.
+func (suite *RunnerTestSuite) TestRunSuite_EmptyChecksTiming() {
+	checks := []checker.Checker{}
+
+	result := RunSuite("/test/path", checks)
+
+	// TotalDuration should be very small but not negative
+	suite.GreaterOrEqual(result.TotalDuration.Nanoseconds(), int64(0))
 }
 
 // TestRunnerTestSuite runs all the tests in the suite.

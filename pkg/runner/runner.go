@@ -2,18 +2,20 @@ package runner
 
 import (
 	"sync"
+	"time"
 
 	"github.com/ipedrazas/a2/pkg/checker"
 )
 
 // SuiteResult holds the results of running a suite of checks.
 type SuiteResult struct {
-	Results  []checker.Result // All check results
-	Aborted  bool             // True if a Fail (veto) check stopped execution
-	Passed   int              // Number of passed checks
-	Warnings int              // Number of warning checks
-	Failed   int              // Number of failed checks
-	Info     int              // Number of informational checks (excluded from score)
+	Results       []checker.Result // All check results
+	Aborted       bool             // True if a Fail (veto) check stopped execution
+	Passed        int              // Number of passed checks
+	Warnings      int              // Number of warning checks
+	Failed        int              // Number of failed checks
+	Info          int              // Number of informational checks (excluded from score)
+	TotalDuration time.Duration    // Total time taken to run all checks
 }
 
 // RunSuiteOptions configures how the suite is executed.
@@ -54,13 +56,17 @@ func runParallel(path string, checks []checker.Checker) SuiteResult {
 		return result
 	}
 
+	suiteStart := time.Now()
+
 	var wg sync.WaitGroup
 	wg.Add(len(checks))
 
 	for i, check := range checks {
 		go func(idx int, c checker.Checker) {
 			defer wg.Done()
+			start := time.Now()
 			res, err := c.Run(path)
+			duration := time.Since(start)
 			if err != nil {
 				res = checker.Result{
 					Name:    c.Name(),
@@ -70,11 +76,13 @@ func runParallel(path string, checks []checker.Checker) SuiteResult {
 					Message: "Internal error: " + err.Error(),
 				}
 			}
+			res.Duration = duration
 			result.Results[idx] = res
 		}(i, check)
 	}
 
 	wg.Wait()
+	result.TotalDuration = time.Since(suiteStart)
 
 	// Count results and check for critical failures
 	for _, res := range result.Results {
@@ -102,8 +110,12 @@ func runSequential(path string, checks []checker.Checker) SuiteResult {
 		Results: make([]checker.Result, 0, len(checks)),
 	}
 
+	suiteStart := time.Now()
+
 	for _, check := range checks {
+		start := time.Now()
 		res, err := check.Run(path)
+		duration := time.Since(start)
 		if err != nil {
 			res = checker.Result{
 				Name:    check.Name(),
@@ -113,6 +125,7 @@ func runSequential(path string, checks []checker.Checker) SuiteResult {
 				Message: "Internal error: " + err.Error(),
 			}
 		}
+		res.Duration = duration
 
 		result.Results = append(result.Results, res)
 
@@ -134,6 +147,7 @@ func runSequential(path string, checks []checker.Checker) SuiteResult {
 		}
 	}
 
+	result.TotalDuration = time.Since(suiteStart)
 	return result
 }
 

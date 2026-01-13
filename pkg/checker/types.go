@@ -1,5 +1,7 @@
 package checker
 
+import "time"
+
 // Language represents a supported programming language.
 type Language string
 
@@ -46,12 +48,13 @@ func (s Status) String() string {
 
 // Result represents the outcome of running a check.
 type Result struct {
-	Name     string   // Human-readable name of the check
-	ID       string   // Unique identifier for the check
-	Passed   bool     // Whether the check passed
-	Status   Status   // Severity level (Pass, Warn, Fail)
-	Message  string   // Descriptive message about the result
-	Language Language // Which language this check applies to
+	Name     string        // Human-readable name of the check
+	ID       string        // Unique identifier for the check
+	Passed   bool          // Whether the check passed
+	Status   Status        // Severity level (Pass, Warn, Fail)
+	Message  string        // Descriptive message about the result
+	Language Language      // Which language this check applies to
+	Duration time.Duration // How long the check took to execute
 }
 
 // CheckMeta provides metadata about a check for registration.

@@ -58,6 +58,7 @@ func TOON(result runner.SuiteResult, detected language.DetectionResult) error {
 	enc.writeKeyValue("failed", enc.formatNumber(float64(result.Failed)))
 	enc.writeKeyValue("info", enc.formatNumber(float64(result.Info)))
 	enc.writeKeyValue("score", enc.formatNumber(calculateScore(result)))
+	enc.writeKeyValue("total_duration_ms", enc.formatNumber(float64(result.TotalDuration.Milliseconds())))
 	enc.indent--
 
 	// maturity object
@@ -123,11 +124,11 @@ func (e *toonEncoder) writeStringArray(key string, values []string) {
 func (e *toonEncoder) writeResultsArray(results []checker.Result) {
 	e.writeIndent()
 	// Use tabular format: results[N]{fields}:
-	e.builder.WriteString(fmt.Sprintf("results[%d]{name,id,passed,status,message,language}:\n", len(results)))
+	e.builder.WriteString(fmt.Sprintf("results[%d]{name,id,passed,status,message,language,duration_ms}:\n", len(results)))
 	e.indent++
 	for _, r := range results {
 		e.writeIndent()
-		// Each row: name,id,passed,status,message,language
+		// Each row: name,id,passed,status,message,language,duration_ms
 		row := []string{
 			e.encodeStringForArray(r.Name, ','),
 			e.encodeStringForArray(r.ID, ','),
@@ -135,6 +136,7 @@ func (e *toonEncoder) writeResultsArray(results []checker.Result) {
 			e.encodeStringForArray(statusToString(r.Status), ','),
 			e.encodeStringForArray(r.Message, ','),
 			e.encodeStringForArray(string(r.Language), ','),
+			e.formatNumber(float64(r.Duration.Milliseconds())),
 		}
 		e.builder.WriteString(strings.Join(row, ","))
 		e.builder.WriteByte('\n')

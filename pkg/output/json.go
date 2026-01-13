@@ -12,12 +12,13 @@ import (
 
 // JSONResult is the JSON-friendly version of a check result.
 type JSONResult struct {
-	Name     string `json:"name"`
-	ID       string `json:"id"`
-	Passed   bool   `json:"passed"`
-	Status   string `json:"status"`
-	Message  string `json:"message,omitempty"`
-	Language string `json:"language,omitempty"`
+	Name       string `json:"name"`
+	ID         string `json:"id"`
+	Passed     bool   `json:"passed"`
+	Status     string `json:"status"`
+	Message    string `json:"message,omitempty"`
+	Language   string `json:"language,omitempty"`
+	DurationMs int64  `json:"duration_ms"` // Duration in milliseconds
 }
 
 // JSONOutput is the complete JSON output structure.
@@ -32,12 +33,13 @@ type JSONOutput struct {
 
 // JSONSummary provides aggregate statistics.
 type JSONSummary struct {
-	Total    int     `json:"total"`
-	Passed   int     `json:"passed"`
-	Warnings int     `json:"warnings"`
-	Failed   int     `json:"failed"`
-	Info     int     `json:"info"`
-	Score    float64 `json:"score"`
+	Total           int     `json:"total"`
+	Passed          int     `json:"passed"`
+	Warnings        int     `json:"warnings"`
+	Failed          int     `json:"failed"`
+	Info            int     `json:"info"`
+	Score           float64 `json:"score"`
+	TotalDurationMs int64   `json:"total_duration_ms"` // Total duration in milliseconds
 }
 
 // JSONMaturity provides maturity assessment.
@@ -62,12 +64,13 @@ func JSON(result runner.SuiteResult, detected language.DetectionResult) error {
 		Languages: langs,
 		Results:   make([]JSONResult, 0, len(result.Results)),
 		Summary: JSONSummary{
-			Total:    result.ScoredChecks(), // Excludes Info from total
-			Passed:   result.Passed,
-			Warnings: result.Warnings,
-			Failed:   result.Failed,
-			Info:     result.Info,
-			Score:    calculateScore(result),
+			Total:           result.ScoredChecks(), // Excludes Info from total
+			Passed:          result.Passed,
+			Warnings:        result.Warnings,
+			Failed:          result.Failed,
+			Info:            result.Info,
+			Score:           calculateScore(result),
+			TotalDurationMs: result.TotalDuration.Milliseconds(),
 		},
 		Maturity: JSONMaturity{
 			Level:       est.Level.String(),
@@ -80,12 +83,13 @@ func JSON(result runner.SuiteResult, detected language.DetectionResult) error {
 
 	for _, r := range result.Results {
 		output.Results = append(output.Results, JSONResult{
-			Name:     r.Name,
-			ID:       r.ID,
-			Passed:   r.Passed,
-			Status:   statusToString(r.Status),
-			Message:  r.Message,
-			Language: string(r.Language),
+			Name:       r.Name,
+			ID:         r.ID,
+			Passed:     r.Passed,
+			Status:     statusToString(r.Status),
+			Message:    r.Message,
+			Language:   string(r.Language),
+			DurationMs: r.Duration.Milliseconds(),
 		})
 	}
 
