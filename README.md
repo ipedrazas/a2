@@ -1,12 +1,31 @@
-# A2 - AI Application Status
+# a2 - (AI) Application Analysis 
 
-A2 is the answer to the over growing problem of "too much code generated. The main issue of trying to review vibecode applications is that, well, they might be very different from each other. I wanted to have an objective way of understanding where the application is in regards of the application maturity lifecycle.
+By far, the biggest complain I've heard recently is about fighting the AI Slop fight. This is my approach of trying to deal with precissely "too much code" and then, how to know if that code is any good. 
 
-`a2` is built on checks (or tests), that succed or fail, to give you a quick overview of the application. You can define your own checks, because it's not about the application, but about your expectations with the application. The idea is very simple: clone a repo, run `a2 check` get an idea of what and what not (documentation, tests, obserrvability, healthchecks, migration, security scan...). Whatever your expectations are, `a2` helps you to know if you're there or if there's a long way to go.
+The main issue of trying to **review vibecode applications** is that, well, they might be very different from each other, but that doesn't mean is bad. Quality is a series of conventions and routines that we follow to help keeping our applications above certain baseline.
 
+It might be that the AI Slop application that you have inherited is a hot mess, but AI Generated applications can conform to your standards if you know how to prompt the Coding Agent. `a2` provides a deterministic way of keeping your coding agent above that baseline (whatever it is).
+
+My approach is the following: I don't know in which shape this application is, but I'm going to run `a2` and it's going to check if there are tests, and if they pass. If I think that 50% coverage is good, it will check for that as well, it will scan for secrets, and other security analysis that we forget to run most of the times... because as I said, I might not know the shape of the app, but if `a2` returns a bunch of `✓ PASS`, at least I know it matches what I consider good.
+
+I know, it's not perfect, but it's fast. You go to your coding agent and just tell them to do what I have in my [slash command](.claude/commands/a2.md), and see how that AI slop, is turned into a well-shaped AI Slop 🙈.
+
+```
+run `a2 check -f toon` and fix all the reported issues
+```
+If you run this for the first time, you might want to tell the agent to write an execution plan to a file and use it to track progress. In particular if you have very few tests (or even zero).
+
+There are 3 formats: text (for humans), JSON (for CI), toon (for Coding Agents). The other thing you might need is to install a set of tools to run the checks, but `a2 doctor` will help you with that.
+
+## a2 Checks
+
+`a2` is built on checks (or tests), that succed or fail, to give you a quick overview of the application. You can define your own checks, because it's not about the application, but about your expectations with the application. 
+
+The idea is very simple: clone a repo, run `a2 check` get an idea of what and what not (documentation, tests, obserrvability, healthchecks, migration, security scan...) matches with your baseline expectation and decide if you want the agent to deal with it.
+
+I have a `Claude Code` slash command `a2` that basically does that. You can take a look to it [here](.claude/commands/a2.md).
 
 A2 auto-detects project language(s), runs a suite of checks, and provides a health score with recommendations that you can give to your Coding Agent to improve your application. Because that was the other thing. I use Coding Agents, so, I wanted a tool that I could use to give to the Agents to make my application meet my expectations. That's why we have `profiles` (api, lib, desktop...), and `targets` (PoC, Dev, Production), because every application has different expectations, I don't need all my side projects to be production-ready. But I want an easy way to get there if needed (or stay in line).
-
 
 It's up to you to decide which checks make sense for you and your project. `a2` allows you to configure what and what not to run. For example, if you run `a2 check` in this repo, you will get a response like this one:
 
@@ -547,3 +566,4 @@ docker run -v $(pwd):/workspace ipedrazas/a2 check --profile=api
 ## License
 
 MIT License - see [LICENSE](LICENSE)
+

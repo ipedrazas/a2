@@ -64,18 +64,59 @@ func CheckInstalled(tool Tool) ToolStatus {
 		return status
 	}
 
+	// First, check if the binary exists in PATH
+	binPath, err := exec.LookPath(tool.CheckCmd[0])
+	if err != nil {
+		return status
+	}
+
+	// Binary exists, mark as installed
+	status.Installed = true
+
+	// Try to run the command to get version info
 	cmd := exec.Command(tool.CheckCmd[0], tool.CheckCmd[1:]...) // #nosec G204 -- command comes from hardcoded tool registry, not user input
 	output, err := cmd.CombinedOutput()
 	if err == nil {
-		status.Installed = true
-		// Try to extract version from first line
-		lines := strings.Split(strings.TrimSpace(string(output)), "\n")
-		if len(lines) > 0 {
-			status.Version = strings.TrimSpace(lines[0])
+		status.Version = extractVersion(string(output))
+	}
+
+	// If no version yet, try --help as fallback
+	if status.Version == "" {
+		cmd = exec.Command(binPath, "--help") // #nosec G204 -- binPath comes from LookPath
+		output, err = cmd.CombinedOutput()
+		if err == nil {
+			status.Version = extractVersion(string(output))
 		}
 	}
 
 	return status
+}
+
+// extractVersion tries to extract a version string from command output.
+func extractVersion(output string) string {
+	output = strings.TrimSpace(output)
+	if output == "" {
+		return ""
+	}
+
+	lines := strings.Split(output, "\n")
+	firstLine := strings.TrimSpace(lines[0])
+
+	// Look for version patterns in the first few lines
+	for i := 0; i < len(lines) && i < 3; i++ {
+		line := strings.ToLower(lines[i])
+		// Check if line contains version info
+		if strings.Contains(line, "version") || strings.Contains(line, " v") {
+			return strings.TrimSpace(lines[i])
+		}
+	}
+
+	// If first line is short enough, use it as-is (likely version output)
+	if len(firstLine) < 50 {
+		return firstLine
+	}
+
+	return ""
 }
 
 // CheckAllInstalled checks installation status for multiple tools.

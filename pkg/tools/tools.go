@@ -45,7 +45,7 @@ func Registry() []Tool {
 		{
 			Name:        "gocyclo",
 			Description: "Go cyclomatic complexity analyzer",
-			CheckCmd:    []string{"gocyclo", "--version"},
+			CheckCmd:    []string{"gocyclo"},
 			Language:    checker.LangGo,
 			CheckIDs:    []string{"go:cyclomatic"},
 			Required:    false,
