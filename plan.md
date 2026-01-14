@@ -19,8 +19,6 @@ This document tracks proposed new changes for a2.
 
 ## Tasks
 
-
-- Sometimes we have the tools installed, but because there're no files like gitleaks, etc, we don't run the check. I don't think this is right. We should run the check with defaults if the tools are installed. I guess we should keep an entry somewhere of the locally installed tools (or the result of `a2 doctor` so we can run default checks: gitleaks)
 - New command `run` to run a particular check. For example, when we do `a2 check` we might get this result: 
 ```
 ! WARN Go Race Detection (2.4s)

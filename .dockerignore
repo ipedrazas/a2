@@ -1,0 +1,11 @@
+.claude/
+.github/
+.task/
+.dist/
+scripts/
+.env*
+.gitleaks.toml
+.pre-commit-config.yaml
+*.md
+*.out
+Taskfile.yaml

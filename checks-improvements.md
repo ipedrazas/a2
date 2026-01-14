@@ -64,7 +64,7 @@ These checks only verify config exists but don't run the tool. **High priority f
 |----------|------|--------|-------|
 | `common:secrets` | gitleaks | ✅ DONE | Runs gitleaks with defaults if installed |
 | `common:sast` | semgrep | ✅ DONE | Runs semgrep with auto rules if installed |
-| `common:dockerfile` | trivy | ⬜ TODO | Should run trivy for Dockerfile scanning |
+| `common:dockerfile` | trivy | ✅ DONE | Runs trivy config scan on Dockerfile if installed |
 | `python:lint` | ruff, flake8, pylint | ⬜ TODO | Should run linter if installed |
 | `python:format` | ruff, black | ⬜ TODO | Should run formatter check if installed |
 | `python:deps` | pip-audit, safety | ⬜ TODO | Should run scanner if installed |
