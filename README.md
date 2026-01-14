@@ -98,9 +98,23 @@ a2 check --format toon
 a2 check --skip=license,k8s
 
 # List available options
-a2 list checks  # List all available checks with IDs
-a2 profiles     # List application profiles
-a2 targets      # List maturity targets
+a2 list checks           # List all available checks with IDs
+a2 list checks --explain # List checks with detailed descriptions
+a2 profiles              # List application profiles
+a2 targets               # List maturity targets
+
+# Run and debug individual checks
+a2 run go:race           # Run a specific check with full output
+a2 run go:build ./path   # Run check on specific path
+a2 run common:secrets --format json
+
+# Get detailed information about a check
+a2 explain go:race       # Show what the check does
+a2 explain common:health
+
+# Validate user-defined configurations
+a2 profiles validate     # Validate profiles in ~/.config/a2/profiles/
+a2 targets validate      # Validate targets in ~/.config/a2/targets/
 
 # Check system for required tools
 a2 doctor       # Show installed/missing tools for detected languages
@@ -194,6 +208,60 @@ a2 targets
 # Combine with profiles
 a2 check --profile=api --target=poc  # API in early development
 ```
+
+## Running and Debugging Checks
+
+### Run a Single Check
+
+Use `a2 run CHECK_ID` to run a specific check and see the complete output from the underlying tool. This is useful for debugging why a check failed.
+
+```bash
+# Run a check with full output
+a2 run go:race
+
+# Output shows status, duration, and complete stdout/stderr
+# ✓ PASS Go Race Detection (2.4s) - go:race
+#     No data races detected
+#
+# --- Output ---
+# ok      github.com/example/pkg  2.4s
+```
+
+The `--format json` flag is supported for machine-readable output.
+
+### Explain a Check
+
+Use `a2 explain CHECK_ID` to see detailed information about what a check does:
+
+```bash
+a2 explain go:race
+
+# Check ID:     go:race
+# Name:         Go Race Detection
+# Description:  Runs tests with the -race flag to detect data races...
+# Languages:    go
+# Critical:     No
+# Suggestion:   Fix race conditions detected by -race flag
+```
+
+You can also use `a2 list checks --explain` to see descriptions inline with all checks.
+
+### Validate User Configurations
+
+If you have custom profiles or targets in `~/.config/a2/`, validate them to catch typos and errors:
+
+```bash
+# Validate all user-defined profiles
+a2 profiles validate
+
+# Validate all user-defined targets
+a2 targets validate
+```
+
+Validation checks for:
+- Unknown check IDs (with typo suggestions using Levenshtein distance)
+- Duplicate disabled checks
+- Warnings when overriding built-in profiles/targets
 
 ## Maturity Assessment
 

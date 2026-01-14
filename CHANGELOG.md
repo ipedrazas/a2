@@ -7,11 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-01-14
+
 ### Added
+- **Run command** (`a2 run CHECK_ID`) to run a specific check with full output:
+  - Shows complete stdout/stderr from the underlying tool (not truncated)
+  - Useful for debugging why a check failed
+  - Supports `--format json` for machine-readable output
+  - Example: `a2 run go:race`, `a2 run common:secrets`
+- **Explain command** (`a2 explain CHECK_ID`) to show detailed check information:
+  - Displays: ID, Name, Description, Languages, Critical status, Suggestion
+  - Example: `a2 explain go:race`
+- **List checks with descriptions** (`a2 list checks --explain`):
+  - Shows detailed descriptions inline with each check
+  - Helps understand what each check does without running it
+- **Validate commands** for user-defined profiles and targets:
+  - `a2 profiles validate` - Validates all user profiles in ~/.config/a2/profiles/
+  - `a2 targets validate` - Validates all user targets in ~/.config/a2/targets/
+  - Checks for unknown check IDs with typo suggestions (using Levenshtein distance)
+  - Warns about duplicate disabled checks
+  - Warns when overriding built-in profiles/targets
+- **Check descriptions**: Added detailed descriptions to all 80+ checks for use with `explain` command
 - Added progress feedback to a2 check that shows "Running checks... (X/Y completed)" during execution.
   - Pretty format: Shows progress on stderr, e.g., "Running checks... (5/25 completed)"
   - JSON/TOON formats: No progress output (stdout remains clean for piping)
   - Progress updates as each check completes (works with both parallel and sequential modes)
+
+### Changed
+- **Check output now shows check ID**: Each result line now displays the check ID at the end
+  - Example: `✓ PASS Go Build (1.9s) - go:build`
+  - Helps users learn check IDs for use with `--skip`, `a2 run`, or `a2 explain`
 
 ## [0.5.0] - 2026-01-13
 
