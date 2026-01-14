@@ -158,12 +158,13 @@ func printResult(r checker.Result) {
 	// Format duration
 	durationStr := formatDuration(r.Duration)
 
-	// Print the check result with duration
-	fmt.Printf("%s %s %s %s\n",
+	// Print the check result with duration and ID
+	fmt.Printf("%s %s %s %s %s\n",
 		style.Render(symbol),
 		style.Render(status),
 		r.Name,
 		durationStyle.Render(durationStr),
+		durationStyle.Render("- "+r.ID),
 	)
 
 	// Print message if present

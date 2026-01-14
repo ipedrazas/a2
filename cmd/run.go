@@ -108,7 +108,7 @@ func outputRunResultPretty(result checker.Result, meta checker.CheckMeta) {
 	statusLabel := result.Status.String()
 
 	// Print header
-	fmt.Printf("%s %s %s (%.1fs)\n", symbol, statusLabel, result.Name, result.Duration.Seconds())
+	fmt.Printf("%s %s %s (%.1fs) - %s\n", symbol, statusLabel, result.Name, result.Duration.Seconds(), result.ID)
 	fmt.Printf("    %s\n", result.Message)
 
 	// Print suggestion if available and check didn't pass
