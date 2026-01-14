@@ -6,12 +6,18 @@ import (
 	"testing"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/stretchr/testify/suite"
 )
 
 type SASTCheckTestSuite struct {
 	suite.Suite
-	tempDir string
+	tempDir          string
+	semgrepInstalled bool
+}
+
+func (s *SASTCheckTestSuite) SetupSuite() {
+	s.semgrepInstalled = checkutil.ToolAvailable("semgrep")
 }
 
 func (s *SASTCheckTestSuite) SetupTest() {
@@ -30,7 +36,44 @@ func (s *SASTCheckTestSuite) TestIDAndName() {
 	s.Equal("SAST Security Scanning", check.Name())
 }
 
+// Tests that run when semgrep IS installed
+func (s *SASTCheckTestSuite) TestSemgrepInstalled_RunsWithDefaults() {
+	if !s.semgrepInstalled {
+		s.T().Skip("semgrep not installed")
+	}
+
+	check := &SASTCheck{}
+	result, err := check.Run(s.tempDir)
+
+	s.NoError(err)
+	s.True(result.Passed)
+	s.Contains(result.Message, "semgrep:")
+	s.Contains(result.Message, "auto rules")
+}
+
+func (s *SASTCheckTestSuite) TestSemgrepInstalled_UsesConfig() {
+	if !s.semgrepInstalled {
+		s.T().Skip("semgrep not installed")
+	}
+
+	err := os.WriteFile(filepath.Join(s.tempDir, ".semgrep.yml"), []byte("rules: []"), 0644)
+	s.Require().NoError(err)
+
+	check := &SASTCheck{}
+	result, err := check.Run(s.tempDir)
+
+	s.NoError(err)
+	s.True(result.Passed)
+	s.Contains(result.Message, "semgrep:")
+	s.Contains(result.Message, ".semgrep.yml")
+}
+
+// Tests for config detection when semgrep is NOT installed
 func (s *SASTCheckTestSuite) TestSemgrepYml() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	err := os.WriteFile(filepath.Join(s.tempDir, ".semgrep.yml"), []byte("rules: []"), 0644)
 	s.Require().NoError(err)
 
@@ -44,6 +87,10 @@ func (s *SASTCheckTestSuite) TestSemgrepYml() {
 }
 
 func (s *SASTCheckTestSuite) TestSemgrepYaml() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	err := os.WriteFile(filepath.Join(s.tempDir, "semgrep.yaml"), []byte("rules: []"), 0644)
 	s.Require().NoError(err)
 
@@ -56,6 +103,10 @@ func (s *SASTCheckTestSuite) TestSemgrepYaml() {
 }
 
 func (s *SASTCheckTestSuite) TestSemgrepDir() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	err := os.MkdirAll(filepath.Join(s.tempDir, ".semgrep"), 0755)
 	s.Require().NoError(err)
 
@@ -67,7 +118,14 @@ func (s *SASTCheckTestSuite) TestSemgrepDir() {
 	s.Contains(result.Message, "Semgrep")
 }
 
+// The following tests check config detection and only run when semgrep is NOT installed
+// When semgrep IS installed, it runs semgrep instead of detecting other tools
+
 func (s *SASTCheckTestSuite) TestSonarProperties() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	content := `sonar.projectKey=myproject
 sonar.organization=myorg
 `
@@ -84,6 +142,10 @@ sonar.organization=myorg
 }
 
 func (s *SASTCheckTestSuite) TestSonarCloudProperties() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	err := os.WriteFile(filepath.Join(s.tempDir, ".sonarcloud.properties"), []byte("sonar.projectKey=test"), 0644)
 	s.Require().NoError(err)
 
@@ -96,6 +158,10 @@ func (s *SASTCheckTestSuite) TestSonarCloudProperties() {
 }
 
 func (s *SASTCheckTestSuite) TestSonarInGradle() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	content := `plugins {
     id 'java'
     id 'org.sonarqube' version '4.0.0'
@@ -113,6 +179,10 @@ func (s *SASTCheckTestSuite) TestSonarInGradle() {
 }
 
 func (s *SASTCheckTestSuite) TestSonarInMaven() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	content := `<?xml version="1.0" encoding="UTF-8"?>
 <project>
     <properties>
@@ -132,6 +202,10 @@ func (s *SASTCheckTestSuite) TestSonarInMaven() {
 }
 
 func (s *SASTCheckTestSuite) TestSnykConfig() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	err := os.WriteFile(filepath.Join(s.tempDir, ".snyk"), []byte("version: v1.0.0"), 0644)
 	s.Require().NoError(err)
 
@@ -145,6 +219,10 @@ func (s *SASTCheckTestSuite) TestSnykConfig() {
 }
 
 func (s *SASTCheckTestSuite) TestSnykJson() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	err := os.WriteFile(filepath.Join(s.tempDir, "snyk.json"), []byte("{}"), 0644)
 	s.Require().NoError(err)
 
@@ -157,6 +235,10 @@ func (s *SASTCheckTestSuite) TestSnykJson() {
 }
 
 func (s *SASTCheckTestSuite) TestCodeQLConfig() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	codeqlDir := filepath.Join(s.tempDir, ".github", "codeql")
 	err := os.MkdirAll(codeqlDir, 0755)
 	s.Require().NoError(err)
@@ -171,6 +253,10 @@ func (s *SASTCheckTestSuite) TestCodeQLConfig() {
 }
 
 func (s *SASTCheckTestSuite) TestCodeQLWorkflow() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	workflowsDir := filepath.Join(s.tempDir, ".github", "workflows")
 	err := os.MkdirAll(workflowsDir, 0755)
 	s.Require().NoError(err)
@@ -196,6 +282,10 @@ jobs:
 }
 
 func (s *SASTCheckTestSuite) TestCodeQLWorkflowByContent() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	workflowsDir := filepath.Join(s.tempDir, ".github", "workflows")
 	err := os.MkdirAll(workflowsDir, 0755)
 	s.Require().NoError(err)
@@ -220,6 +310,10 @@ jobs:
 }
 
 func (s *SASTCheckTestSuite) TestCheckmarx() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	err := os.WriteFile(filepath.Join(s.tempDir, "checkmarx.config"), []byte("{}"), 0644)
 	s.Require().NoError(err)
 
@@ -232,6 +326,10 @@ func (s *SASTCheckTestSuite) TestCheckmarx() {
 }
 
 func (s *SASTCheckTestSuite) TestVeracode() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	err := os.WriteFile(filepath.Join(s.tempDir, "veracode.json"), []byte("{}"), 0644)
 	s.Require().NoError(err)
 
@@ -244,6 +342,10 @@ func (s *SASTCheckTestSuite) TestVeracode() {
 }
 
 func (s *SASTCheckTestSuite) TestFortify() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	err := os.WriteFile(filepath.Join(s.tempDir, "fortify-sca.properties"), []byte(""), 0644)
 	s.Require().NoError(err)
 
@@ -256,6 +358,10 @@ func (s *SASTCheckTestSuite) TestFortify() {
 }
 
 func (s *SASTCheckTestSuite) TestBearer() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	err := os.WriteFile(filepath.Join(s.tempDir, "bearer.yml"), []byte(""), 0644)
 	s.Require().NoError(err)
 
@@ -268,6 +374,10 @@ func (s *SASTCheckTestSuite) TestBearer() {
 }
 
 func (s *SASTCheckTestSuite) TestHorusec() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	err := os.WriteFile(filepath.Join(s.tempDir, "horusec-config.json"), []byte("{}"), 0644)
 	s.Require().NoError(err)
 
@@ -280,6 +390,10 @@ func (s *SASTCheckTestSuite) TestHorusec() {
 }
 
 func (s *SASTCheckTestSuite) TestGosecInMakefile() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	// Create go.mod to indicate Go project
 	err := os.WriteFile(filepath.Join(s.tempDir, "go.mod"), []byte("module test\n\ngo 1.21"), 0644)
 	s.Require().NoError(err)
@@ -299,6 +413,10 @@ func (s *SASTCheckTestSuite) TestGosecInMakefile() {
 }
 
 func (s *SASTCheckTestSuite) TestGosecInTaskfile() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	// Create go.mod to indicate Go project
 	err := os.WriteFile(filepath.Join(s.tempDir, "go.mod"), []byte("module test\n\ngo 1.21"), 0644)
 	s.Require().NoError(err)
@@ -321,6 +439,10 @@ tasks:
 }
 
 func (s *SASTCheckTestSuite) TestBanditConfig() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	err := os.WriteFile(filepath.Join(s.tempDir, ".bandit"), []byte("[bandit]\nexclude_dirs = tests"), 0644)
 	s.Require().NoError(err)
 
@@ -333,6 +455,10 @@ func (s *SASTCheckTestSuite) TestBanditConfig() {
 }
 
 func (s *SASTCheckTestSuite) TestBanditInPyproject() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	content := `[tool.bandit]
 exclude_dirs = ["tests"]
 `
@@ -348,6 +474,10 @@ exclude_dirs = ["tests"]
 }
 
 func (s *SASTCheckTestSuite) TestSafetyPolicy() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	err := os.WriteFile(filepath.Join(s.tempDir, ".safety-policy.yml"), []byte(""), 0644)
 	s.Require().NoError(err)
 
@@ -360,6 +490,10 @@ func (s *SASTCheckTestSuite) TestSafetyPolicy() {
 }
 
 func (s *SASTCheckTestSuite) TestEslintPluginSecurity() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	content := `{
   "name": "myapp",
   "devDependencies": {
@@ -378,6 +512,10 @@ func (s *SASTCheckTestSuite) TestEslintPluginSecurity() {
 }
 
 func (s *SASTCheckTestSuite) TestAuditCI() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	content := `{
   "name": "myapp",
   "devDependencies": {
@@ -396,6 +534,10 @@ func (s *SASTCheckTestSuite) TestAuditCI() {
 }
 
 func (s *SASTCheckTestSuite) TestFindSecBugs() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	content := `<?xml version="1.0" encoding="UTF-8"?>
 <project>
     <build>
@@ -428,6 +570,10 @@ func (s *SASTCheckTestSuite) TestFindSecBugs() {
 }
 
 func (s *SASTCheckTestSuite) TestCISemgrep() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	workflowsDir := filepath.Join(s.tempDir, ".github", "workflows")
 	err := os.MkdirAll(workflowsDir, 0755)
 	s.Require().NoError(err)
@@ -452,6 +598,10 @@ jobs:
 }
 
 func (s *SASTCheckTestSuite) TestCITrivy() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	workflowsDir := filepath.Join(s.tempDir, ".github", "workflows")
 	err := os.MkdirAll(workflowsDir, 0755)
 	s.Require().NoError(err)
@@ -476,6 +626,10 @@ jobs:
 }
 
 func (s *SASTCheckTestSuite) TestGitLabSAST() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	content := `include:
   - template: Security/SAST.gitlab-ci.yml
 
@@ -494,6 +648,10 @@ sast:
 }
 
 func (s *SASTCheckTestSuite) TestMultipleFindings() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	// Create Semgrep config
 	err := os.WriteFile(filepath.Join(s.tempDir, ".semgrep.yml"), []byte("rules: []"), 0644)
 	s.Require().NoError(err)
@@ -512,6 +670,10 @@ func (s *SASTCheckTestSuite) TestMultipleFindings() {
 }
 
 func (s *SASTCheckTestSuite) TestNoSASTTooling() {
+	if s.semgrepInstalled {
+		s.T().Skip("semgrep installed - this test checks config detection fallback")
+	}
+
 	check := &SASTCheck{}
 	result, err := check.Run(s.tempDir)
 

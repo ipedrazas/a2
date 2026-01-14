@@ -63,7 +63,7 @@ These checks only verify config exists but don't run the tool. **High priority f
 | Check ID | Tool | Status | Notes |
 |----------|------|--------|-------|
 | `common:secrets` | gitleaks | ✅ DONE | Runs gitleaks with defaults if installed |
-| `common:sast` | semgrep, trivy | ⬜ TODO | Should run with defaults |
+| `common:sast` | semgrep | ✅ DONE | Runs semgrep with auto rules if installed |
 | `common:dockerfile` | trivy | ⬜ TODO | Should run trivy for Dockerfile scanning |
 | `python:lint` | ruff, flake8, pylint | ⬜ TODO | Should run linter if installed |
 | `python:format` | ruff, black | ⬜ TODO | Should run formatter check if installed |
@@ -235,15 +235,14 @@ func (c *MyCheck) Run(path string) (checker.Result, error) {
 
 ### Completed
 - [x] `common:secrets` - gitleaks runs with defaults
+- [x] `common:sast` - semgrep runs with auto rules
 - [x] `RunByDefault` attribute added to Tool struct
 - [x] Config override support (`tools:` section in `.a2.yaml`)
 - [x] Helper function `tools.ShouldRunByDefault()`
 - [x] Tests for all new functionality
 
 ### To Do - Check Implementations
-These checks need to be updated to use `tools.ShouldRunByDefault()`:
-
-- [ ] `common:sast` - semgrep
+These checks need to be updated to run tools with defaults:
 - [ ] `common:dockerfile` - trivy
 - [ ] `python:lint` - ruff/flake8
 - [ ] `python:format` - ruff/black
