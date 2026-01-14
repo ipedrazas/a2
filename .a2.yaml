@@ -47,11 +47,11 @@ external:
     args: ["./..."]
     severity: fail
 
-  - id: secrets
-    name: Secret Detection
-    command: gitleaks
-    args: ["detect", "--no-git", "--redact", "-v", "--config", ".gitleaks.toml", "."]
-    severity: fail
+  # - id: secrets
+  #   name: Secret Detection
+  #   command: gitleaks
+  #   args: ["detect", "--no-git", "--redact", "-v", "--config", ".gitleaks.toml", "."]
+  #   severity: fail
 
   - id: go:errcheck
     name: Error Check

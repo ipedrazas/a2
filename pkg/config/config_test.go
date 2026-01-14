@@ -295,6 +295,89 @@ language:
 	suite.Equal("", cfg.Language.Go.SourceDir) // Not configured
 }
 
+// TestGetToolRunByDefault_NotConfigured tests that GetToolRunByDefault returns nil when no tool override.
+func (suite *ConfigTestSuite) TestGetToolRunByDefault_NotConfigured() {
+	cfg := DefaultConfig()
+
+	result := cfg.GetToolRunByDefault("gitleaks")
+	suite.Nil(result)
+}
+
+// TestGetToolRunByDefault_ConfiguredTrue tests that GetToolRunByDefault returns true override.
+func (suite *ConfigTestSuite) TestGetToolRunByDefault_ConfiguredTrue() {
+	runByDefault := true
+	cfg := &Config{
+		Tools: map[string]ToolConfig{
+			"gitleaks": {RunByDefault: &runByDefault},
+		},
+	}
+
+	result := cfg.GetToolRunByDefault("gitleaks")
+	suite.NotNil(result)
+	suite.True(*result)
+}
+
+// TestGetToolRunByDefault_ConfiguredFalse tests that GetToolRunByDefault returns false override.
+func (suite *ConfigTestSuite) TestGetToolRunByDefault_ConfiguredFalse() {
+	runByDefault := false
+	cfg := &Config{
+		Tools: map[string]ToolConfig{
+			"gitleaks": {RunByDefault: &runByDefault},
+		},
+	}
+
+	result := cfg.GetToolRunByDefault("gitleaks")
+	suite.NotNil(result)
+	suite.False(*result)
+}
+
+// TestGetToolRunByDefault_DifferentTool tests that GetToolRunByDefault only affects the specified tool.
+func (suite *ConfigTestSuite) TestGetToolRunByDefault_DifferentTool() {
+	runByDefault := false
+	cfg := &Config{
+		Tools: map[string]ToolConfig{
+			"gitleaks": {RunByDefault: &runByDefault},
+		},
+	}
+
+	// The configured tool should have an override
+	gitleaksResult := cfg.GetToolRunByDefault("gitleaks")
+	suite.NotNil(gitleaksResult)
+
+	// Other tools should not have an override
+	semgrepResult := cfg.GetToolRunByDefault("semgrep")
+	suite.Nil(semgrepResult)
+}
+
+// TestLoad_WithToolOverrides tests that Load parses tool configuration.
+func (suite *ConfigTestSuite) TestLoad_WithToolOverrides() {
+	configContent := `
+tools:
+  gitleaks:
+    run_by_default: false
+  semgrep:
+    run_by_default: true
+`
+	suite.createTempFile(".a2.yaml", configContent)
+
+	cfg, err := Load(suite.tempDir)
+
+	suite.NoError(err)
+	suite.NotNil(cfg)
+
+	gitleaksOverride := cfg.GetToolRunByDefault("gitleaks")
+	suite.NotNil(gitleaksOverride)
+	suite.False(*gitleaksOverride)
+
+	semgrepOverride := cfg.GetToolRunByDefault("semgrep")
+	suite.NotNil(semgrepOverride)
+	suite.True(*semgrepOverride)
+
+	// Tools not in config should return nil
+	trivyOverride := cfg.GetToolRunByDefault("trivy")
+	suite.Nil(trivyOverride)
+}
+
 // TestConfigTestSuite runs all the tests in the suite.
 func TestConfigTestSuite(t *testing.T) {
 	suite.Run(t, new(ConfigTestSuite))

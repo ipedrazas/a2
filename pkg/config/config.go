@@ -7,12 +7,20 @@ import (
 
 // Config represents the .a2.yaml configuration file.
 type Config struct {
-	Coverage  CoverageConfig  `yaml:"coverage"`
-	Files     FilesConfig     `yaml:"files"`
-	Checks    ChecksConfig    `yaml:"checks"`
-	External  []ExternalCheck `yaml:"external"`
-	Execution ExecutionConfig `yaml:"execution"`
-	Language  LanguageConfig  `yaml:"language"`
+	Coverage  CoverageConfig        `yaml:"coverage"`
+	Files     FilesConfig           `yaml:"files"`
+	Checks    ChecksConfig          `yaml:"checks"`
+	External  []ExternalCheck       `yaml:"external"`
+	Execution ExecutionConfig       `yaml:"execution"`
+	Language  LanguageConfig        `yaml:"language"`
+	Tools     map[string]ToolConfig `yaml:"tools,omitempty"`
+}
+
+// ToolConfig allows per-tool configuration overrides.
+type ToolConfig struct {
+	// RunByDefault overrides the tool's default run behavior.
+	// nil = use tool's default, true = run, false = don't run
+	RunByDefault *bool `yaml:"run_by_default,omitempty"`
 }
 
 // LanguageConfig handles language detection and settings.
@@ -297,4 +305,17 @@ func (c *Config) IsCheckDisabled(checkID string) bool {
 		}
 	}
 	return false
+}
+
+// GetToolRunByDefault returns the run_by_default override for a tool.
+// Returns nil if no override is configured (use tool's default).
+// Returns pointer to bool if override is configured.
+func (c *Config) GetToolRunByDefault(toolName string) *bool {
+	if c.Tools == nil {
+		return nil
+	}
+	if toolCfg, ok := c.Tools[toolName]; ok {
+		return toolCfg.RunByDefault
+	}
+	return nil
 }

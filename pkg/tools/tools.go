@@ -6,13 +6,14 @@ import (
 
 // Tool represents an external tool that checks may depend on.
 type Tool struct {
-	Name        string           // Tool name (e.g., "govulncheck")
-	Description string           // What the tool does
-	CheckCmd    []string         // Command to check if installed (e.g., ["govulncheck", "--version"])
-	Language    checker.Language // Which language this tool is for
-	CheckIDs    []string         // Which check IDs use this tool
-	Required    bool             // If true, check will fail without it; if false, check will skip
-	Install     InstallCommands  // Platform-specific install commands
+	Name         string           // Tool name (e.g., "govulncheck")
+	Description  string           // What the tool does
+	CheckCmd     []string         // Command to check if installed (e.g., ["govulncheck", "--version"])
+	Language     checker.Language // Which language this tool is for
+	CheckIDs     []string         // Which check IDs use this tool
+	Required     bool             // If true, check will fail without it; if false, check will skip
+	RunByDefault bool             // If true, run with default settings when installed (even without config)
+	Install      InstallCommands  // Platform-specific install commands
 }
 
 // InstallCommands contains install commands for different platforms/methods.
@@ -32,23 +33,25 @@ func Registry() []Tool {
 	return []Tool{
 		// Go tools
 		{
-			Name:        "govulncheck",
-			Description: "Go vulnerability scanner",
-			CheckCmd:    []string{"govulncheck", "--version"},
-			Language:    checker.LangGo,
-			CheckIDs:    []string{"go:deps"},
-			Required:    false,
+			Name:         "govulncheck",
+			Description:  "Go vulnerability scanner",
+			CheckCmd:     []string{"govulncheck", "--version"},
+			Language:     checker.LangGo,
+			CheckIDs:     []string{"go:deps"},
+			Required:     false,
+			RunByDefault: true, // Security tool - run with defaults
 			Install: InstallCommands{
 				Go: "go install golang.org/x/vuln/cmd/govulncheck@latest",
 			},
 		},
 		{
-			Name:        "gocyclo",
-			Description: "Go cyclomatic complexity analyzer",
-			CheckCmd:    []string{"gocyclo"},
-			Language:    checker.LangGo,
-			CheckIDs:    []string{"go:cyclomatic"},
-			Required:    false,
+			Name:         "gocyclo",
+			Description:  "Go cyclomatic complexity analyzer",
+			CheckCmd:     []string{"gocyclo"},
+			Language:     checker.LangGo,
+			CheckIDs:     []string{"go:cyclomatic"},
+			Required:     false,
+			RunByDefault: true, // Fast analysis tool
 			Install: InstallCommands{
 				Go: "go install github.com/fzipp/gocyclo/cmd/gocyclo@latest",
 			},
@@ -56,68 +59,74 @@ func Registry() []Tool {
 
 		// Python tools
 		{
-			Name:        "pytest",
-			Description: "Python testing framework",
-			CheckCmd:    []string{"pytest", "--version"},
-			Language:    checker.LangPython,
-			CheckIDs:    []string{"python:tests", "python:coverage"},
-			Required:    false,
+			Name:         "pytest",
+			Description:  "Python testing framework",
+			CheckCmd:     []string{"pytest", "--version"},
+			Language:     checker.LangPython,
+			CheckIDs:     []string{"python:tests", "python:coverage"},
+			Required:     false,
+			RunByDefault: false, // Tests should be explicit
 			Install: InstallCommands{
 				Pip: "pip install pytest",
 			},
 		},
 		{
-			Name:        "ruff",
-			Description: "Fast Python linter and formatter",
-			CheckCmd:    []string{"ruff", "--version"},
-			Language:    checker.LangPython,
-			CheckIDs:    []string{"python:lint", "python:format"},
-			Required:    false,
+			Name:         "ruff",
+			Description:  "Fast Python linter and formatter",
+			CheckCmd:     []string{"ruff", "--version"},
+			Language:     checker.LangPython,
+			CheckIDs:     []string{"python:lint", "python:format"},
+			Required:     false,
+			RunByDefault: true, // Fast linter with good defaults
 			Install: InstallCommands{
 				Pip:  "pip install ruff",
 				Brew: "brew install ruff",
 			},
 		},
 		{
-			Name:        "black",
-			Description: "Python code formatter",
-			CheckCmd:    []string{"black", "--version"},
-			Language:    checker.LangPython,
-			CheckIDs:    []string{"python:format"},
-			Required:    false,
+			Name:         "black",
+			Description:  "Python code formatter",
+			CheckCmd:     []string{"black", "--version"},
+			Language:     checker.LangPython,
+			CheckIDs:     []string{"python:format"},
+			Required:     false,
+			RunByDefault: true, // Formatter with good defaults
 			Install: InstallCommands{
 				Pip: "pip install black",
 			},
 		},
 		{
-			Name:        "mypy",
-			Description: "Python static type checker",
-			CheckCmd:    []string{"mypy", "--version"},
-			Language:    checker.LangPython,
-			CheckIDs:    []string{"python:type"},
-			Required:    false,
+			Name:         "mypy",
+			Description:  "Python static type checker",
+			CheckCmd:     []string{"mypy", "--version"},
+			Language:     checker.LangPython,
+			CheckIDs:     []string{"python:type"},
+			Required:     false,
+			RunByDefault: false, // Needs project-specific config
 			Install: InstallCommands{
 				Pip: "pip install mypy",
 			},
 		},
 		{
-			Name:        "pip-audit",
-			Description: "Python dependency vulnerability scanner",
-			CheckCmd:    []string{"pip-audit", "--version"},
-			Language:    checker.LangPython,
-			CheckIDs:    []string{"python:deps"},
-			Required:    false,
+			Name:         "pip-audit",
+			Description:  "Python dependency vulnerability scanner",
+			CheckCmd:     []string{"pip-audit", "--version"},
+			Language:     checker.LangPython,
+			CheckIDs:     []string{"python:deps"},
+			Required:     false,
+			RunByDefault: true, // Security tool - run with defaults
 			Install: InstallCommands{
 				Pip: "pip install pip-audit",
 			},
 		},
 		{
-			Name:        "radon",
-			Description: "Python code complexity analyzer",
-			CheckCmd:    []string{"radon", "--version"},
-			Language:    checker.LangPython,
-			CheckIDs:    []string{"python:complexity"},
-			Required:    false,
+			Name:         "radon",
+			Description:  "Python code complexity analyzer",
+			CheckCmd:     []string{"radon", "--version"},
+			Language:     checker.LangPython,
+			CheckIDs:     []string{"python:complexity"},
+			Required:     false,
+			RunByDefault: true, // Fast analysis tool
 			Install: InstallCommands{
 				Pip: "pip install radon",
 			},
@@ -125,34 +134,37 @@ func Registry() []Tool {
 
 		// Node.js tools
 		{
-			Name:        "eslint",
-			Description: "JavaScript/TypeScript linter",
-			CheckCmd:    []string{"eslint", "--version"},
-			Language:    checker.LangNode,
-			CheckIDs:    []string{"node:lint", "typescript:lint"},
-			Required:    false,
+			Name:         "eslint",
+			Description:  "JavaScript/TypeScript linter",
+			CheckCmd:     []string{"eslint", "--version"},
+			Language:     checker.LangNode,
+			CheckIDs:     []string{"node:lint", "typescript:lint"},
+			Required:     false,
+			RunByDefault: true, // Linter with good defaults
 			Install: InstallCommands{
 				Npm: "npm install -g eslint",
 			},
 		},
 		{
-			Name:        "prettier",
-			Description: "Code formatter",
-			CheckCmd:    []string{"prettier", "--version"},
-			Language:    checker.LangNode,
-			CheckIDs:    []string{"node:format", "typescript:format"},
-			Required:    false,
+			Name:         "prettier",
+			Description:  "Code formatter",
+			CheckCmd:     []string{"prettier", "--version"},
+			Language:     checker.LangNode,
+			CheckIDs:     []string{"node:format", "typescript:format"},
+			Required:     false,
+			RunByDefault: true, // Formatter with good defaults
 			Install: InstallCommands{
 				Npm: "npm install -g prettier",
 			},
 		},
 		{
-			Name:        "biome",
-			Description: "Fast linter and formatter for JS/TS",
-			CheckCmd:    []string{"biome", "--version"},
-			Language:    checker.LangNode,
-			CheckIDs:    []string{"node:lint", "node:format", "typescript:lint", "typescript:format"},
-			Required:    false,
+			Name:         "biome",
+			Description:  "Fast linter and formatter for JS/TS",
+			CheckCmd:     []string{"biome", "--version"},
+			Language:     checker.LangNode,
+			CheckIDs:     []string{"node:lint", "node:format", "typescript:lint", "typescript:format"},
+			Required:     false,
+			RunByDefault: true, // Fast linter with good defaults
 			Install: InstallCommands{
 				Npm:  "npm install -g @biomejs/biome",
 				Brew: "brew install biome",
@@ -161,23 +173,25 @@ func Registry() []Tool {
 
 		// Rust tools
 		{
-			Name:        "cargo-audit",
-			Description: "Rust dependency vulnerability scanner",
-			CheckCmd:    []string{"cargo", "audit", "--version"},
-			Language:    checker.LangRust,
-			CheckIDs:    []string{"rust:deps"},
-			Required:    false,
+			Name:         "cargo-audit",
+			Description:  "Rust dependency vulnerability scanner",
+			CheckCmd:     []string{"cargo", "audit", "--version"},
+			Language:     checker.LangRust,
+			CheckIDs:     []string{"rust:deps"},
+			Required:     false,
+			RunByDefault: true, // Security tool - run with defaults
 			Install: InstallCommands{
 				Cargo: "cargo install cargo-audit",
 			},
 		},
 		{
-			Name:        "cargo-tarpaulin",
-			Description: "Rust code coverage tool",
-			CheckCmd:    []string{"cargo", "tarpaulin", "--version"},
-			Language:    checker.LangRust,
-			CheckIDs:    []string{"rust:coverage"},
-			Required:    false,
+			Name:         "cargo-tarpaulin",
+			Description:  "Rust code coverage tool",
+			CheckCmd:     []string{"cargo", "tarpaulin", "--version"},
+			Language:     checker.LangRust,
+			CheckIDs:     []string{"rust:coverage"},
+			Required:     false,
+			RunByDefault: false, // Slow tool - explicit opt-in
 			Install: InstallCommands{
 				Cargo: "cargo install cargo-tarpaulin",
 			},
@@ -185,24 +199,26 @@ func Registry() []Tool {
 
 		// Swift tools
 		{
-			Name:        "swiftlint",
-			Description: "Swift linter",
-			CheckCmd:    []string{"swiftlint", "version"},
-			Language:    checker.LangSwift,
-			CheckIDs:    []string{"swift:lint"},
-			Required:    false,
+			Name:         "swiftlint",
+			Description:  "Swift linter",
+			CheckCmd:     []string{"swiftlint", "version"},
+			Language:     checker.LangSwift,
+			CheckIDs:     []string{"swift:lint"},
+			Required:     false,
+			RunByDefault: true, // Linter with good defaults
 			Install: InstallCommands{
 				Brew:   "brew install swiftlint",
 				Manual: "https://github.com/realm/SwiftLint#installation",
 			},
 		},
 		{
-			Name:        "swift-format",
-			Description: "Swift code formatter",
-			CheckCmd:    []string{"swift-format", "--version"},
-			Language:    checker.LangSwift,
-			CheckIDs:    []string{"swift:format"},
-			Required:    false,
+			Name:         "swift-format",
+			Description:  "Swift code formatter",
+			CheckCmd:     []string{"swift-format", "--version"},
+			Language:     checker.LangSwift,
+			CheckIDs:     []string{"swift:format"},
+			Required:     false,
+			RunByDefault: true, // Formatter with good defaults
 			Install: InstallCommands{
 				Brew:   "brew install swift-format",
 				Manual: "https://github.com/apple/swift-format#getting-swift-format",
@@ -211,12 +227,13 @@ func Registry() []Tool {
 
 		// Common tools
 		{
-			Name:        "gitleaks",
-			Description: "Secret scanner for git repos",
-			CheckCmd:    []string{"gitleaks", "version"},
-			Language:    checker.LangCommon,
-			CheckIDs:    []string{"common:secrets"},
-			Required:    false,
+			Name:         "gitleaks",
+			Description:  "Secret scanner for git repos",
+			CheckCmd:     []string{"gitleaks", "version"},
+			Language:     checker.LangCommon,
+			CheckIDs:     []string{"common:secrets"},
+			Required:     false,
+			RunByDefault: true, // Security tool - run with defaults
 			Install: InstallCommands{
 				Brew:   "brew install gitleaks",
 				Go:     "go install github.com/gitleaks/gitleaks/v8@latest",
@@ -224,12 +241,13 @@ func Registry() []Tool {
 			},
 		},
 		{
-			Name:        "semgrep",
-			Description: "Static analysis security scanner",
-			CheckCmd:    []string{"semgrep", "--version"},
-			Language:    checker.LangCommon,
-			CheckIDs:    []string{"common:sast"},
-			Required:    false,
+			Name:         "semgrep",
+			Description:  "Static analysis security scanner",
+			CheckCmd:     []string{"semgrep", "--version"},
+			Language:     checker.LangCommon,
+			CheckIDs:     []string{"common:sast"},
+			Required:     false,
+			RunByDefault: true, // Security tool - run with defaults
 			Install: InstallCommands{
 				Pip:    "pip install semgrep",
 				Brew:   "brew install semgrep",
@@ -237,12 +255,13 @@ func Registry() []Tool {
 			},
 		},
 		{
-			Name:        "trivy",
-			Description: "Vulnerability scanner for containers and code",
-			CheckCmd:    []string{"trivy", "--version"},
-			Language:    checker.LangCommon,
-			CheckIDs:    []string{"common:sast", "common:dockerfile"},
-			Required:    false,
+			Name:         "trivy",
+			Description:  "Vulnerability scanner for containers and code",
+			CheckCmd:     []string{"trivy", "--version"},
+			Language:     checker.LangCommon,
+			CheckIDs:     []string{"common:sast", "common:dockerfile"},
+			Required:     false,
+			RunByDefault: true, // Security tool - run with defaults
 			Install: InstallCommands{
 				Brew:   "brew install trivy",
 				Apt:    "apt install trivy",
@@ -289,4 +308,21 @@ func ByName(name string) *Tool {
 		}
 	}
 	return nil
+}
+
+// ShouldRunByDefault returns whether a tool should run with default settings.
+// It checks the config override first, then falls back to the tool's registry default.
+// configOverride should be the result of Config.GetToolRunByDefault(toolName).
+func ShouldRunByDefault(toolName string, configOverride *bool) bool {
+	// Config override takes precedence
+	if configOverride != nil {
+		return *configOverride
+	}
+
+	// Fall back to registry default
+	tool := ByName(toolName)
+	if tool == nil {
+		return false // Unknown tool, don't run
+	}
+	return tool.RunByDefault
 }
