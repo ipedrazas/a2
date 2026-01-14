@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var listExplain bool
+
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List available resources",
@@ -30,6 +32,7 @@ Checks marked as [critical] will cause the run to fail if they don't pass.`,
 func init() {
 	rootCmd.AddCommand(listCmd)
 	listCmd.AddCommand(listChecksCmd)
+	listChecksCmd.Flags().BoolVar(&listExplain, "explain", false, "Show detailed descriptions for each check")
 }
 
 func runListChecks(cmd *cobra.Command, args []string) {
@@ -82,6 +85,9 @@ func runListChecks(cmd *cobra.Command, args []string) {
 				critical = " [critical]"
 			}
 			fmt.Printf("  %-25s %s%s\n", reg.Meta.ID, reg.Meta.Name, critical)
+			if listExplain && reg.Meta.Description != "" {
+				fmt.Printf("    %s\n", reg.Meta.Description)
+			}
 		}
 		fmt.Println()
 	}

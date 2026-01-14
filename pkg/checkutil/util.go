@@ -99,6 +99,45 @@ func (b *ResultBuilder) ToolNotInstalled(toolName, installHint string) checker.R
 	}
 }
 
+// PassWithOutput creates a passing result with the given message and raw output.
+func (b *ResultBuilder) PassWithOutput(message, rawOutput string) checker.Result {
+	return checker.Result{
+		Name:      b.name,
+		ID:        b.id,
+		Passed:    true,
+		Status:    checker.Pass,
+		Message:   message,
+		Language:  b.language,
+		RawOutput: rawOutput,
+	}
+}
+
+// FailWithOutput creates a failing result with the given message and raw output.
+func (b *ResultBuilder) FailWithOutput(message, rawOutput string) checker.Result {
+	return checker.Result{
+		Name:      b.name,
+		ID:        b.id,
+		Passed:    false,
+		Status:    checker.Fail,
+		Message:   message,
+		Language:  b.language,
+		RawOutput: rawOutput,
+	}
+}
+
+// WarnWithOutput creates a warning result with the given message and raw output.
+func (b *ResultBuilder) WarnWithOutput(message, rawOutput string) checker.Result {
+	return checker.Result{
+		Name:      b.name,
+		ID:        b.id,
+		Passed:    false,
+		Status:    checker.Warn,
+		Message:   message,
+		Language:  b.language,
+		RawOutput: rawOutput,
+	}
+}
+
 // TruncateMessage limits a message to maxLen characters.
 // It trims whitespace and appends "..." if truncated.
 func TruncateMessage(msg string, maxLen int) string {

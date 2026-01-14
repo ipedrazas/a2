@@ -104,6 +104,7 @@ tasks:
 
   install:
     desc: Install a2 to GOPATH/bin
+    deps: [build]
     cmds:
       - go install -ldflags="-s -w -X github.com/ipedrazas/a2/pkg/version.Version={{.VERSION}} -X github.com/ipedrazas/a2/pkg/version.GitSHA={{.GITSHA}} -X github.com/ipedrazas/a2/pkg/version.BuildDate={{.BUILDDATE}}" .
 

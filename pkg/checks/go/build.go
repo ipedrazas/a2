@@ -15,9 +15,10 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
 	result := checkutil.RunCommand(path, "go", "build", "./...")
+	output := result.CombinedOutput()
 	if !result.Success() {
-		return rb.Fail("Build failed: " + checkutil.TruncateMessage(result.Output(), 200)), nil
+		return rb.FailWithOutput("Build failed: "+checkutil.TruncateMessage(result.Output(), 200), output), nil
 	}
 
-	return rb.Pass("Build successful"), nil
+	return rb.PassWithOutput("Build successful", output), nil
 }

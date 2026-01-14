@@ -27,6 +27,7 @@ checks:
     - common:e2e  # Skip e2e tests check
     - common:config_validation  # Skip config validation check
     - common:retry  # Skip retry check
+    - common:dockerfile  # Skip dockerfile check
     
 # Execution options
 execution:

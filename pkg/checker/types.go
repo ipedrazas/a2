@@ -48,23 +48,25 @@ func (s Status) String() string {
 
 // Result represents the outcome of running a check.
 type Result struct {
-	Name     string        // Human-readable name of the check
-	ID       string        // Unique identifier for the check
-	Passed   bool          // Whether the check passed
-	Status   Status        // Severity level (Pass, Warn, Fail)
-	Message  string        // Descriptive message about the result
-	Language Language      // Which language this check applies to
-	Duration time.Duration // How long the check took to execute
+	Name      string        // Human-readable name of the check
+	ID        string        // Unique identifier for the check
+	Passed    bool          // Whether the check passed
+	Status    Status        // Severity level (Pass, Warn, Fail)
+	Message   string        // Descriptive message about the result
+	Language  Language      // Which language this check applies to
+	Duration  time.Duration // How long the check took to execute
+	RawOutput string        // Full command output for verbose display
 }
 
 // CheckMeta provides metadata about a check for registration.
 type CheckMeta struct {
-	ID         string     // Unique identifier (e.g., "go:build", "python:tests")
-	Name       string     // Human-readable name
-	Languages  []Language // Which languages this check applies to
-	Critical   bool       // If true, failure = veto/abort
-	Order      int        // Execution priority (lower = first)
-	Suggestion string     // Recommendation shown when check fails (e.g., "Run 'go fmt' to fix")
+	ID          string     // Unique identifier (e.g., "go:build", "python:tests")
+	Name        string     // Human-readable name
+	Description string     // Detailed explanation of what this check does
+	Languages   []Language // Which languages this check applies to
+	Critical    bool       // If true, failure = veto/abort
+	Order       int        // Execution priority (lower = first)
+	Suggestion  string     // Recommendation shown when check fails (e.g., "Run 'go fmt' to fix")
 }
 
 // CheckRegistration combines a Checker with its metadata.

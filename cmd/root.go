@@ -80,6 +80,30 @@ var targetsInitCmd = &cobra.Command{
 	RunE:  runTargetsInit,
 }
 
+var profilesValidateCmd = &cobra.Command{
+	Use:   "validate",
+	Short: "Validate user-defined profiles",
+	Long: `Validate all user-defined profiles for correctness.
+
+Checks for:
+- Unknown check IDs (typos or invalid references)
+- Duplicate disabled check IDs
+- Profiles that override built-in profiles`,
+	Run: runProfilesValidate,
+}
+
+var targetsValidateCmd = &cobra.Command{
+	Use:   "validate",
+	Short: "Validate user-defined targets",
+	Long: `Validate all user-defined targets for correctness.
+
+Checks for:
+- Unknown check IDs (typos or invalid references)
+- Duplicate disabled check IDs
+- Targets that override built-in targets`,
+	Run: runTargetsValidate,
+}
+
 func init() {
 	checkCmd.Flags().StringVarP(&format, "format", "f", "pretty", "Output format: pretty, json, or toon")
 	checkCmd.Flags().StringSliceVarP(&languages, "lang", "l", nil, "Languages to check (go, python). Auto-detects if not specified.")
@@ -96,6 +120,10 @@ func init() {
 	// Add init subcommands
 	profilesCmd.AddCommand(profilesInitCmd)
 	targetsCmd.AddCommand(targetsInitCmd)
+
+	// Add validate subcommands
+	profilesCmd.AddCommand(profilesValidateCmd)
+	targetsCmd.AddCommand(targetsValidateCmd)
 }
 
 func Execute() {
@@ -279,4 +307,82 @@ func runTargets(cmd *cobra.Command, args []string) {
 func runTargetsInit(cmd *cobra.Command, args []string) error {
 	fmt.Println("Initializing user targets directory...")
 	return targets.WriteBuiltInTargets()
+}
+
+func runProfilesValidate(cmd *cobra.Command, args []string) {
+	results := profiles.ValidateAllUserProfiles()
+
+	if len(results) == 0 {
+		fmt.Println("No user profiles found to validate.")
+		fmt.Println()
+		fmt.Println("User profiles are stored in ~/.config/a2/profiles/")
+		fmt.Println("Run 'a2 profiles init' to create sample profiles.")
+		return
+	}
+
+	hasErrors := false
+	for name, result := range results {
+		if name == "_error" {
+			fmt.Printf("Error: %s\n", result.Errors[0])
+			os.Exit(1)
+		}
+
+		fmt.Printf("Profile: %s\n", name)
+		if result.Valid {
+			fmt.Printf("  Status: VALID\n")
+		} else {
+			fmt.Printf("  Status: INVALID\n")
+			hasErrors = true
+		}
+		for _, err := range result.Errors {
+			fmt.Printf("  ERROR: %s\n", err)
+		}
+		for _, warn := range result.Warnings {
+			fmt.Printf("  WARNING: %s\n", warn)
+		}
+		fmt.Println()
+	}
+
+	if hasErrors {
+		os.Exit(1)
+	}
+}
+
+func runTargetsValidate(cmd *cobra.Command, args []string) {
+	results := targets.ValidateAllUserTargets()
+
+	if len(results) == 0 {
+		fmt.Println("No user targets found to validate.")
+		fmt.Println()
+		fmt.Println("User targets are stored in ~/.config/a2/targets/")
+		fmt.Println("Run 'a2 targets init' to create sample targets.")
+		return
+	}
+
+	hasErrors := false
+	for name, result := range results {
+		if name == "_error" {
+			fmt.Printf("Error: %s\n", result.Errors[0])
+			os.Exit(1)
+		}
+
+		fmt.Printf("Target: %s\n", name)
+		if result.Valid {
+			fmt.Printf("  Status: VALID\n")
+		} else {
+			fmt.Printf("  Status: INVALID\n")
+			hasErrors = true
+		}
+		for _, err := range result.Errors {
+			fmt.Printf("  ERROR: %s\n", err)
+		}
+		for _, warn := range result.Warnings {
+			fmt.Printf("  WARNING: %s\n", warn)
+		}
+		fmt.Println()
+	}
+
+	if hasErrors {
+		os.Exit(1)
+	}
 }

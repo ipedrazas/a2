@@ -21,18 +21,18 @@ func (c *RaceCheck) Run(path string) (checker.Result, error) {
 
 	// Check for race conditions in output
 	if strings.Contains(output, "WARNING: DATA RACE") {
-		return rb.Warn("Race condition detected"), nil
+		return rb.WarnWithOutput("Race condition detected", output), nil
 	}
 
 	// Handle no test files
 	if strings.Contains(output, "no test files") {
-		return rb.Pass("No test files to check for races"), nil
+		return rb.PassWithOutput("No test files to check for races", output), nil
 	}
 
 	// Handle test failures (separate from race detection)
 	if !result.Success() {
-		return rb.Warn("Tests failed during race detection"), nil
+		return rb.WarnWithOutput("Tests failed during race detection", output), nil
 	}
 
-	return rb.Pass("No race conditions detected"), nil
+	return rb.PassWithOutput("No race conditions detected", output), nil
 }

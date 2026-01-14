@@ -17,15 +17,16 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
 	result := checkutil.RunCommand(path, "go", "test", "./...")
+	output := result.CombinedOutput()
 
 	// Check if it's "no test files" which is not a failure
 	if strings.Contains(result.Stdout, "no test files") || strings.Contains(result.Stderr, "no test files") {
-		return rb.Pass("No test files found"), nil
+		return rb.PassWithOutput("No test files found", output), nil
 	}
 
 	if !result.Success() {
-		return rb.Fail("Tests failed: " + checkutil.TruncateMessage(result.Output(), 200)), nil
+		return rb.FailWithOutput("Tests failed: "+checkutil.TruncateMessage(result.Output(), 200), output), nil
 	}
 
-	return rb.Pass("All tests passed"), nil
+	return rb.PassWithOutput("All tests passed", output), nil
 }
