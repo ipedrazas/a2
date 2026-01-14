@@ -29,7 +29,86 @@ type secretPattern struct {
 func (c *SecretsCheck) Run(path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
-	// First, check if secret scanning tools are configured
+	// Check if gitleaks is installed
+	gitleaksInstalled := checkutil.ToolAvailable("gitleaks")
+	configFile := c.findGitleaksConfig(path)
+
+	// Priority 1 & 2: If gitleaks is installed, run it
+	if gitleaksInstalled {
+		return c.runGitleaks(path, configFile, rb)
+	}
+
+	// Priority 3: Check if any scanner is configured (trust CI/pre-commit runs it)
+	foundScanners := c.findConfiguredScanners(path)
+	if len(foundScanners) > 0 {
+		unique := uniqueStrings(foundScanners)
+		return rb.Pass("Secret scanning configured: " + strings.Join(unique, ", ")), nil
+	}
+
+	// Priority 4: Fall back to regex scanning
+	findings := c.scanForSecrets(path)
+	if len(findings) > 0 {
+		return c.formatFindingsResult(findings, rb), nil
+	}
+
+	// No scanner configured and no secrets found by regex
+	return rb.Warn("No secret scanning configured (consider adding gitleaks)"), nil
+}
+
+// findGitleaksConfig returns the path to a gitleaks config file if one exists.
+func (c *SecretsCheck) findGitleaksConfig(path string) string {
+	configs := []string{".gitleaks.toml", ".gitleaks.yaml", "gitleaks.toml"}
+	for _, cfg := range configs {
+		if safepath.Exists(path, cfg) {
+			return cfg
+		}
+	}
+	return ""
+}
+
+// runGitleaks executes gitleaks and returns the result.
+func (c *SecretsCheck) runGitleaks(path, configFile string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+	args := []string{"detect", "--no-git", "-v", "."}
+	configMsg := "default rules"
+
+	if configFile != "" {
+		args = []string{"detect", "--no-git", "-v", "--config", configFile, "."}
+		configMsg = "using " + configFile
+	}
+
+	result := checkutil.RunCommand(path, "gitleaks", args...)
+
+	if result.Success() {
+		return rb.Pass(fmt.Sprintf("gitleaks: No secrets detected (%s)", configMsg)), nil
+	}
+
+	// gitleaks exits with non-zero when leaks are found
+	output := result.CombinedOutput()
+	leakCount := c.countGitleaksFindings(output)
+
+	if leakCount > 0 {
+		return rb.Warn(fmt.Sprintf("gitleaks: %d %s found", leakCount, pluralize(leakCount, "leak", "leaks"))), nil
+	}
+
+	// Some other error (e.g., bad config) - but still passed (no leaks detected)
+	return rb.Pass(fmt.Sprintf("gitleaks: No secrets detected (%s)", configMsg)), nil
+}
+
+// countGitleaksFindings counts leaks from gitleaks output.
+func (c *SecretsCheck) countGitleaksFindings(output string) int {
+	// gitleaks outputs "RuleID:" for each finding
+	count := strings.Count(output, "RuleID:")
+	if count == 0 {
+		// Fallback: count "Secret:" occurrences
+		count = strings.Count(output, "Secret:")
+	}
+	return count
+}
+
+// findConfiguredScanners returns names of configured secret scanners.
+func (c *SecretsCheck) findConfiguredScanners(path string) []string {
+	var found []string
+
 	scannerConfigs := []struct {
 		name string
 		file string
@@ -45,39 +124,35 @@ func (c *SecretsCheck) Run(path string) (checker.Result, error) {
 		{"detect-secrets", ".secrets.baseline"},
 	}
 
-	var foundScanners []string
 	for _, scanner := range scannerConfigs {
 		if safepath.Exists(path, scanner.file) {
-			foundScanners = append(foundScanners, scanner.name)
+			found = append(found, scanner.name)
 		}
 	}
 
-	// Check for pre-commit hooks that might include secret scanning
 	if c.hasSecretScanningInPreCommit(path) {
-		foundScanners = append(foundScanners, "pre-commit hook")
+		found = append(found, "pre-commit hook")
 	}
 
-	// If secret scanning is configured, that's a pass
-	if len(foundScanners) > 0 {
-		// Deduplicate scanner names
-		unique := uniqueStrings(foundScanners)
-		return rb.Pass("Secret scanning configured: " + strings.Join(unique, ", ")), nil
+	return found
+}
+
+// formatFindingsResult formats regex findings into a result.
+func (c *SecretsCheck) formatFindingsResult(findings []string, rb *checkutil.ResultBuilder) checker.Result {
+	if len(findings) == 1 {
+		return rb.Warn(fmt.Sprintf("Potential secret found: %s", findings[0]))
+	} else if len(findings) <= 3 {
+		return rb.Warn(fmt.Sprintf("Potential secrets found: %s", strings.Join(findings, ", ")))
 	}
+	return rb.Warn(fmt.Sprintf("%d potential secrets found (e.g., %s)", len(findings), strings.Join(findings[:3], ", ")))
+}
 
-	// No scanner configured - scan for potential secrets
-	findings := c.scanForSecrets(path)
-
-	if len(findings) > 0 {
-		if len(findings) == 1 {
-			return rb.Warn(fmt.Sprintf("Potential secret found: %s", findings[0])), nil
-		} else if len(findings) <= 3 {
-			return rb.Warn(fmt.Sprintf("Potential secrets found: %s", strings.Join(findings, ", "))), nil
-		}
-		return rb.Warn(fmt.Sprintf("%d potential secrets found (e.g., %s)", len(findings), strings.Join(findings[:3], ", "))), nil
+// pluralize returns singular or plural form based on count.
+func pluralize(count int, singular, plural string) string {
+	if count == 1 {
+		return singular
 	}
-
-	// No secrets found but no scanner configured
-	return rb.Warn("No secret scanning configured (consider adding gitleaks or similar)"), nil
+	return plural
 }
 
 // hasSecretScanningInPreCommit checks if pre-commit config includes secret scanning.

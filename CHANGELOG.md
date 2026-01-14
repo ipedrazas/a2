@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added progress feedback to a2 check that shows "Running checks... (X/Y completed)" during execution.
+  - Pretty format: Shows progress on stderr, e.g., "Running checks... (5/25 completed)"
+  - JSON/TOON formats: No progress output (stdout remains clean for piping)
+  - Progress updates as each check completes (works with both parallel and sequential modes)
+
+## [0.5.0] - 2026-01-13
+
+### Added
 - **Doctor command** (`a2 doctor`) to check system for required external tools:
   - Detects OS, architecture, and available package managers
   - Shows installed vs missing tools for detected languages

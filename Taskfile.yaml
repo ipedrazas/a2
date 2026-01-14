@@ -136,7 +136,7 @@ tasks:
       - task: lint
       - task: test
       - task: build
-      - ./dist/{{.BINARY}} check --format toon
+      - ./dist/{{.BINARY}} check
 
   all:
     desc: Build, test, and run checks

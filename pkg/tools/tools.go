@@ -280,3 +280,13 @@ func ForLanguages(langs []checker.Language) []Tool {
 	}
 	return result
 }
+
+// ByName returns a tool by its name, or nil if not found.
+func ByName(name string) *Tool {
+	for _, t := range Registry() {
+		if t.Name == name {
+			return &t
+		}
+	}
+	return nil
+}

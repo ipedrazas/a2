@@ -1288,7 +1288,7 @@ func (suite *RunnerTestSuite) TestFormatPanicMessage() {
 // TestProgressCallback_Parallel tests that progress callback is called for each check in parallel mode.
 func (suite *RunnerTestSuite) TestProgressCallback_Parallel() {
 	var callCount int32
-	var lastTotal int
+	var lastTotal int32
 
 	checks := []checker.Checker{
 		&mockChecker{
@@ -1327,7 +1327,7 @@ func (suite *RunnerTestSuite) TestProgressCallback_Parallel() {
 		Parallel: true,
 		OnProgress: func(completed, total int) {
 			atomic.AddInt32(&callCount, 1)
-			lastTotal = total
+			atomic.StoreInt32(&lastTotal, int32(total))
 		},
 	}
 
@@ -1335,7 +1335,7 @@ func (suite *RunnerTestSuite) TestProgressCallback_Parallel() {
 
 	suite.Equal(3, result.TotalChecks())
 	suite.Equal(int32(3), callCount, "Progress callback should be called once per check")
-	suite.Equal(3, lastTotal, "Total should match number of checks")
+	suite.Equal(int32(3), atomic.LoadInt32(&lastTotal), "Total should match number of checks")
 }
 
 // TestProgressCallback_Sequential tests that progress callback is called in order for sequential mode.
