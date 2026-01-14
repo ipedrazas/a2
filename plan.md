@@ -1,6 +1,6 @@
 # Plan
 
-This document tracks proposed new languages for a2.
+This document tracks proposed new changes for a2.
 
 ### Priority Levels
 - **P0 (High)**: Critical for a2 adoption
@@ -19,5 +19,18 @@ This document tracks proposed new languages for a2.
 
 ## Tasks
 
-1. implement Format `toon` (Token-Oriented Object Notation) to use from coding agents. Spec: https://github.com/toon-format/spec/blob/main/SPEC.md
-3. Validation command: a2 profiles validate / a2 targets validate to check user definitions
+
+-  Sometimes we have the tools installed, but because there're no files like gitleaks, etc, we don't run the check. I don't think this is right. We should run the check with defaults if the tools are installed. I guess we should keep an entry somewhere of the locally installed tools (or the result of `a2 doctor` so we can run default checks: gitleaks)
+- New command `run` to run a particular check. For example, when we do `a2 check` we might get this result: 
+```
+! WARN Go Race Detection (2.4s)
+    Race condition detected
+```
+    Good because it tells us what's wrong, but not enough details.
+- New command `explain` to provide details on what a particular check does. something like`a2 explain CHECK`. We could also add a flag to `a2 list checks --explain` to list all the checks with a more detailed explanation of what it does. 
+- Add DevOps checks: ansible, helm, terraform, pulumi...
+- Does it make sense to categorise the checks? for example, pre-commit hooks, editorconfig is local dev, k8s, retry, telemtery, signals is prod-ready... 
+- Validation command: a2 profiles validate / a2 targets validate to check user definitions
+- Add the check name next to ` PASS Go Build (1.4s)` as ` PASS Go Build (1.4s) - go:build` so we know the name of the check.
+- Add a `--verbose` flag to add for info to the output
+

@@ -174,12 +174,27 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	// Get the list of checks to run
 	checkList := checks.GetChecks(cfg, detected)
 
+	// Set up progress callback for Pretty format only
+	var progress *output.ProgressReporter
+	var progressFunc runner.ProgressFunc
+
+	if format == "pretty" && len(checkList) > 0 {
+		progress = output.NewProgressReporter()
+		progressFunc = progress.Update
+	}
+
 	// Run the suite with configured execution options
 	opts := runner.RunSuiteOptions{
-		Parallel: cfg.Execution.Parallel,
-		Timeout:  timeout,
+		Parallel:   cfg.Execution.Parallel,
+		Timeout:    timeout,
+		OnProgress: progressFunc,
 	}
 	result := runner.RunSuiteWithOptions(path, checkList, opts)
+
+	// Clear progress display before showing results
+	if progress != nil {
+		progress.Done()
+	}
 
 	// Output results and handle exit code
 	var success bool

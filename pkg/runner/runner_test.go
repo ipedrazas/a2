@@ -2,6 +2,7 @@ package runner
 
 import (
 	"errors"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -1282,6 +1283,180 @@ func (suite *RunnerTestSuite) TestFormatPanicMessage() {
 	suite.Equal("Check panicked unexpectedly", formatPanicMessage(123))
 	suite.Equal("Check panicked unexpectedly", formatPanicMessage(nil))
 	suite.Equal("Check panicked unexpectedly", formatPanicMessage(struct{}{}))
+}
+
+// TestProgressCallback_Parallel tests that progress callback is called for each check in parallel mode.
+func (suite *RunnerTestSuite) TestProgressCallback_Parallel() {
+	var callCount int32
+	var lastTotal int
+
+	checks := []checker.Checker{
+		&mockChecker{
+			id:   "check1",
+			name: "Check 1",
+			result: checker.Result{
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+			},
+		},
+		&mockChecker{
+			id:   "check2",
+			name: "Check 2",
+			result: checker.Result{
+				Name:   "Check 2",
+				ID:     "check2",
+				Passed: true,
+				Status: checker.Pass,
+			},
+		},
+		&mockChecker{
+			id:   "check3",
+			name: "Check 3",
+			result: checker.Result{
+				Name:   "Check 3",
+				ID:     "check3",
+				Passed: true,
+				Status: checker.Pass,
+			},
+		},
+	}
+
+	opts := RunSuiteOptions{
+		Parallel: true,
+		OnProgress: func(completed, total int) {
+			atomic.AddInt32(&callCount, 1)
+			lastTotal = total
+		},
+	}
+
+	result := RunSuiteWithOptions("/test/path", checks, opts)
+
+	suite.Equal(3, result.TotalChecks())
+	suite.Equal(int32(3), callCount, "Progress callback should be called once per check")
+	suite.Equal(3, lastTotal, "Total should match number of checks")
+}
+
+// TestProgressCallback_Sequential tests that progress callback is called in order for sequential mode.
+func (suite *RunnerTestSuite) TestProgressCallback_Sequential() {
+	var progressUpdates []int
+
+	checks := []checker.Checker{
+		&mockChecker{
+			id:   "check1",
+			name: "Check 1",
+			result: checker.Result{
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+			},
+		},
+		&mockChecker{
+			id:   "check2",
+			name: "Check 2",
+			result: checker.Result{
+				Name:   "Check 2",
+				ID:     "check2",
+				Passed: true,
+				Status: checker.Pass,
+			},
+		},
+	}
+
+	opts := RunSuiteOptions{
+		Parallel: false,
+		OnProgress: func(completed, total int) {
+			progressUpdates = append(progressUpdates, completed)
+		},
+	}
+
+	result := RunSuiteWithOptions("/test/path", checks, opts)
+
+	suite.Equal(2, result.TotalChecks())
+	suite.Equal([]int{1, 2}, progressUpdates, "Progress should be called in sequence")
+}
+
+// TestProgressCallback_Nil tests that nil progress callback doesn't panic.
+func (suite *RunnerTestSuite) TestProgressCallback_Nil() {
+	checks := []checker.Checker{
+		&mockChecker{
+			id:   "check1",
+			name: "Check 1",
+			result: checker.Result{
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+			},
+		},
+	}
+
+	// Should not panic when OnProgress is nil
+	opts := RunSuiteOptions{
+		Parallel:   true,
+		OnProgress: nil,
+	}
+
+	result := RunSuiteWithOptions("/test/path", checks, opts)
+
+	suite.Equal(1, result.TotalChecks())
+	suite.Equal(1, result.Passed)
+}
+
+// TestProgressCallback_EmptyChecks tests progress callback with empty check list.
+func (suite *RunnerTestSuite) TestProgressCallback_EmptyChecks() {
+	var callCount int32
+
+	checks := []checker.Checker{}
+
+	opts := RunSuiteOptions{
+		Parallel: true,
+		OnProgress: func(completed, total int) {
+			atomic.AddInt32(&callCount, 1)
+		},
+	}
+
+	result := RunSuiteWithOptions("/test/path", checks, opts)
+
+	suite.Equal(0, result.TotalChecks())
+	suite.Equal(int32(0), callCount, "Progress callback should not be called with empty checks")
+}
+
+// TestProgressCallback_WithPanic tests progress callback is called even when a check panics.
+func (suite *RunnerTestSuite) TestProgressCallback_WithPanic() {
+	var callCount int32
+
+	checks := []checker.Checker{
+		&mockChecker{
+			id:   "check1",
+			name: "Check 1",
+			result: checker.Result{
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+			},
+		},
+		&panicMockChecker{
+			id:         "check2",
+			name:       "Panicking Check",
+			panicValue: "test panic",
+		},
+	}
+
+	opts := RunSuiteOptions{
+		Parallel: true,
+		OnProgress: func(completed, total int) {
+			atomic.AddInt32(&callCount, 1)
+		},
+	}
+
+	result := RunSuiteWithOptions("/test/path", checks, opts)
+
+	suite.Equal(2, result.TotalChecks())
+	suite.Equal(int32(2), callCount, "Progress callback should be called even for panicking checks")
 }
 
 // TestRunnerTestSuite runs all the tests in the suite.

@@ -42,7 +42,7 @@ This tool does not replace your coding agent, it complements it. What you do wit
 ## Features
 
 - **8 Languages Supported**: Go, Python, Node.js, TypeScript, Java, Rust, Swift (auto-detected or explicit)
-- **70+ Built-in Checks**: Build, tests, coverage, formatting, linting, type checking, vulnerabilities, and more
+- **80+ Built-in Checks**: Build, tests, coverage, formatting, linting, type checking, vulnerabilities, and more
 - **Application Profiles**: CLI, API, Library, Desktop - tailor checks to your app type
 - **Maturity Targets**: PoC or Production - control check strictness
 - **Maturity Assessment**: Automatic scoring with Production-Ready, Mature, Development, or PoC levels

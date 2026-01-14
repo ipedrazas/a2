@@ -3,10 +3,15 @@ package runner
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/ipedrazas/a2/pkg/checker"
 )
+
+// ProgressFunc is called when a check completes.
+// completed is the number of checks finished so far, total is the total number of checks.
+type ProgressFunc func(completed, total int)
 
 // SuiteResult holds the results of running a suite of checks.
 type SuiteResult struct {
@@ -21,8 +26,9 @@ type SuiteResult struct {
 
 // RunSuiteOptions configures how the suite is executed.
 type RunSuiteOptions struct {
-	Parallel bool          // Run checks in parallel (default: true)
-	Timeout  time.Duration // Timeout for each individual check (0 = no timeout)
+	Parallel   bool          // Run checks in parallel (default: true)
+	Timeout    time.Duration // Timeout for each individual check (0 = no timeout)
+	OnProgress ProgressFunc  // Optional callback for progress updates
 }
 
 // RunSuite executes a suite of checks against the given path.
@@ -43,13 +49,13 @@ func RunSuiteSequential(path string, checks []checker.Checker) SuiteResult {
 // In sequential mode: stops immediately on first critical failure (veto power).
 func RunSuiteWithOptions(path string, checks []checker.Checker, opts RunSuiteOptions) SuiteResult {
 	if opts.Parallel {
-		return runParallel(path, checks, opts.Timeout)
+		return runParallel(path, checks, opts)
 	}
-	return runSequential(path, checks, opts.Timeout)
+	return runSequential(path, checks, opts)
 }
 
 // runParallel executes all checks concurrently.
-func runParallel(path string, checks []checker.Checker, timeout time.Duration) SuiteResult {
+func runParallel(path string, checks []checker.Checker, opts RunSuiteOptions) SuiteResult {
 	result := SuiteResult{
 		Results: make([]checker.Result, len(checks)),
 	}
@@ -59,6 +65,8 @@ func runParallel(path string, checks []checker.Checker, timeout time.Duration) S
 	}
 
 	suiteStart := time.Now()
+	total := len(checks)
+	var completed int32
 
 	var wg sync.WaitGroup
 	wg.Add(len(checks))
@@ -76,8 +84,13 @@ func runParallel(path string, checks []checker.Checker, timeout time.Duration) S
 						Message: formatPanicMessage(r),
 					}
 				}
+				// Update progress after check completes
+				if opts.OnProgress != nil {
+					done := int(atomic.AddInt32(&completed, 1))
+					opts.OnProgress(done, total)
+				}
 			}()
-			res := runCheckWithTimeout(path, c, timeout)
+			res := runCheckWithTimeout(path, c, opts.Timeout)
 			result.Results[idx] = res
 		}(i, check)
 	}
@@ -106,16 +119,24 @@ func runParallel(path string, checks []checker.Checker, timeout time.Duration) S
 }
 
 // runSequential executes checks one by one, stopping on first critical failure.
-func runSequential(path string, checks []checker.Checker, timeout time.Duration) SuiteResult {
+func runSequential(path string, checks []checker.Checker, opts RunSuiteOptions) SuiteResult {
 	result := SuiteResult{
 		Results: make([]checker.Result, 0, len(checks)),
 	}
 
 	suiteStart := time.Now()
+	total := len(checks)
+	completed := 0
 
 	for _, check := range checks {
-		res := runCheckWithTimeout(path, check, timeout)
+		res := runCheckWithTimeout(path, check, opts.Timeout)
 		result.Results = append(result.Results, res)
+		completed++
+
+		// Call progress callback
+		if opts.OnProgress != nil {
+			opts.OnProgress(completed, total)
+		}
 
 		switch res.Status {
 		case checker.Pass:
