@@ -102,10 +102,10 @@ func (c *FormatCheck) runPrettier(path string, rb *checkutil.ResultBuilder) *che
 
 	if err != nil {
 		if unformattedCount > 0 {
-			result := rb.Warn(fmt.Sprintf("%d %s need formatting. Run: npx prettier --write .", unformattedCount, checkutil.Pluralize(unformattedCount, "file", "files")))
+			result := rb.WarnWithOutput(fmt.Sprintf("%d %s need formatting. Run: npx prettier --write .", unformattedCount, checkutil.Pluralize(unformattedCount, "file", "files")), output)
 			return &result
 		}
-		result := rb.Warn("Files need formatting. Run: npx prettier --write .")
+		result := rb.WarnWithOutput("Files need formatting. Run: npx prettier --write .", output)
 		return &result
 	}
 
@@ -127,9 +127,10 @@ func (c *FormatCheck) runBiome(path string, rb *checkutil.ResultBuilder) *checke
 	cmd.Stderr = &stderr
 
 	err := cmd.Run()
+	output := stdout.String() + stderr.String()
 
 	if err != nil {
-		result := rb.Warn("Files need formatting. Run: npx @biomejs/biome format --write .")
+		result := rb.WarnWithOutput("Files need formatting. Run: npx @biomejs/biome format --write .", output)
 		return &result
 	}
 

@@ -26,6 +26,7 @@ var (
 	profile       string        // Application type profile (cli, api, library, desktop)
 	target        string        // Maturity target (poc, production)
 	timeout       time.Duration // Timeout for each individual check
+	verbosity     int           // Verbosity level (0=normal, 1=failures, 2=all)
 )
 
 var rootCmd = &cobra.Command{
@@ -111,6 +112,7 @@ func init() {
 	checkCmd.Flags().StringVar(&profile, "profile", "", "Application profile (cli, api, library, desktop)")
 	checkCmd.Flags().StringVar(&target, "target", "", "Maturity target (poc, production)")
 	checkCmd.Flags().DurationVar(&timeout, "timeout", 0, "Timeout for each individual check (e.g., 30s, 1m). 0 means no timeout")
+	checkCmd.Flags().CountVarP(&verbosity, "verbose", "v", "Increase verbosity (-v for failures, -vv for all)")
 	rootCmd.AddCommand(checkCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(profilesCmd)
@@ -227,14 +229,15 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	// Output results and handle exit code
 	var success bool
 	var outputErr error
+	verbosityLevel := output.VerbosityLevel(verbosity)
 
 	switch format {
 	case "json":
-		success, outputErr = output.JSON(result, detected)
+		success, outputErr = output.JSON(result, detected, verbosityLevel)
 	case "toon":
-		success, outputErr = output.TOON(result, detected)
+		success, outputErr = output.TOON(result, detected, verbosityLevel)
 	default:
-		success, outputErr = output.Pretty(result, path, detected)
+		success, outputErr = output.Pretty(result, path, detected, verbosityLevel)
 	}
 
 	if outputErr != nil {

@@ -132,11 +132,13 @@ func (c *TestsCheck) runJest(path, pm string, rb *checkutil.ResultBuilder) (chec
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	if err := cmd.Run(); err != nil {
-		return rb.Fail("Jest tests failed"), nil
+	err := cmd.Run()
+	output := stdout.String() + stderr.String()
+	if err != nil {
+		return rb.FailWithOutput("Jest tests failed", output), nil
 	}
 
-	return rb.Pass("Jest tests passed"), nil
+	return rb.PassWithOutput("Jest tests passed", output), nil
 }
 
 // runVitest runs Vitest tests.
@@ -158,11 +160,13 @@ func (c *TestsCheck) runVitest(path, pm string, rb *checkutil.ResultBuilder) (ch
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	if err := cmd.Run(); err != nil {
-		return rb.Fail("Vitest tests failed"), nil
+	err := cmd.Run()
+	output := stdout.String() + stderr.String()
+	if err != nil {
+		return rb.FailWithOutput("Vitest tests failed", output), nil
 	}
 
-	return rb.Pass("Vitest tests passed"), nil
+	return rb.PassWithOutput("Vitest tests passed", output), nil
 }
 
 // runMocha runs Mocha tests.
@@ -184,11 +188,13 @@ func (c *TestsCheck) runMocha(path, pm string, rb *checkutil.ResultBuilder) (che
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	if err := cmd.Run(); err != nil {
-		return rb.Fail("Mocha tests failed"), nil
+	err := cmd.Run()
+	output := stdout.String() + stderr.String()
+	if err != nil {
+		return rb.FailWithOutput("Mocha tests failed", output), nil
 	}
 
-	return rb.Pass("Mocha tests passed"), nil
+	return rb.PassWithOutput("Mocha tests passed", output), nil
 }
 
 // runNpmTest runs npm test script.
@@ -210,14 +216,15 @@ func (c *TestsCheck) runNpmTest(path, pm string, rb *checkutil.ResultBuilder) (c
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	if err := cmd.Run(); err != nil {
-		output := strings.TrimSpace(stderr.String())
+	err := cmd.Run()
+	combinedOutput := stdout.String() + stderr.String()
+	if err != nil {
 		// Check if it's just "no tests found" type message
-		if strings.Contains(output, "no test") || strings.Contains(stdout.String(), "no test") {
+		if strings.Contains(combinedOutput, "no test") {
 			return rb.Pass("No tests found"), nil
 		}
-		return rb.Fail("Tests failed"), nil
+		return rb.FailWithOutput("Tests failed", combinedOutput), nil
 	}
 
-	return rb.Pass("Tests passed"), nil
+	return rb.PassWithOutput("Tests passed", combinedOutput), nil
 }

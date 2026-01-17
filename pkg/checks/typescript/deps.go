@@ -51,7 +51,7 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run audit command
-	auditResult := c.runAudit(path, pm)
+	auditResult, auditOutput := c.runAudit(path, pm)
 	if auditResult != "" {
 		if len(tools) > 0 {
 			return rb.Pass(auditResult + "; configured: " + strings.Join(tools, ", ")), nil
@@ -64,6 +64,9 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 		return rb.Pass("Vulnerability scanning configured: " + strings.Join(tools, ", ")), nil
 	}
 
+	if auditOutput != "" {
+		return rb.WarnWithOutput("No vulnerability scanning configured (consider npm audit or Snyk)", auditOutput), nil
+	}
 	return rb.Warn("No vulnerability scanning configured (consider npm audit or Snyk)"), nil
 }
 
@@ -108,7 +111,7 @@ func (c *DepsCheck) hasSnyk(path string) bool {
 }
 
 // runAudit runs the package manager's audit command.
-func (c *DepsCheck) runAudit(path, pm string) string {
+func (c *DepsCheck) runAudit(path, pm string) (string, string) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
@@ -118,7 +121,7 @@ func (c *DepsCheck) runAudit(path, pm string) string {
 		cmd = exec.Command("pnpm", "audit")
 	case "bun":
 		// bun doesn't have audit yet, skip
-		return ""
+		return "", ""
 	default:
 		cmd = exec.Command("npm", "audit", "--audit-level=high")
 	}
@@ -129,22 +132,22 @@ func (c *DepsCheck) runAudit(path, pm string) string {
 	cmd.Stderr = &stderr
 
 	err := cmd.Run()
-	output := stdout.String()
+	combinedOutput := stdout.String() + stderr.String()
 
 	// Parse output for vulnerability info
 	if err == nil {
-		return "No known vulnerabilities found"
+		return "No known vulnerabilities found", combinedOutput
 	}
 
 	// Check if there are actual vulnerabilities or just an error
-	outputLower := strings.ToLower(output + stderr.String())
+	outputLower := strings.ToLower(combinedOutput)
 	if strings.Contains(outputLower, "vulnerabilit") {
 		if strings.Contains(outputLower, "critical") || strings.Contains(outputLower, "high") {
-			return ""
+			return "", combinedOutput
 		}
-		return "Low/moderate vulnerabilities found (run audit for details)"
+		return "Low/moderate vulnerabilities found (run audit for details)", combinedOutput
 	}
 
 	// Audit command failed (possibly no lock file)
-	return ""
+	return "", combinedOutput
 }

@@ -28,16 +28,17 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 	cmd := exec.Command("swift", "build")
 	cmd.Dir = path
 	output, err := cmd.CombinedOutput()
+	outputStr := string(output)
 
 	if err != nil {
 		// Extract first line of error for message
-		errOutput := strings.TrimSpace(string(output))
+		errOutput := strings.TrimSpace(outputStr)
 		lines := strings.Split(errOutput, "\n")
 		if len(lines) > 0 && lines[0] != "" {
-			return rb.Fail("Build failed: " + lines[0]), nil
+			return rb.FailWithOutput("Build failed: "+lines[0], outputStr), nil
 		}
-		return rb.Fail("Build failed: " + err.Error()), nil
+		return rb.FailWithOutput("Build failed: "+err.Error(), outputStr), nil
 	}
 
-	return rb.Pass("Build successful"), nil
+	return rb.PassWithOutput("Build successful", outputStr), nil
 }

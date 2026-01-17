@@ -82,11 +82,20 @@ var (
 
 	durationStyle = lipgloss.NewStyle().
 			Foreground(gray)
+
+	rawOutputStyle = lipgloss.NewStyle().
+			Foreground(gray).
+			PaddingLeft(4)
+
+	rawOutputHeaderStyle = lipgloss.NewStyle().
+				Foreground(gray).
+				Italic(true).
+				PaddingLeft(4)
 )
 
 // Pretty outputs the results in a formatted, colorful way.
 // Returns true if all checks passed, false otherwise, along with any output error.
-func Pretty(result runner.SuiteResult, path string, detected language.DetectionResult) (bool, error) {
+func Pretty(result runner.SuiteResult, path string, detected language.DetectionResult, verbosity VerbosityLevel) (bool, error) {
 	// Get project name from path
 	projectName := filepath.Base(path)
 	if path == "." {
@@ -111,7 +120,7 @@ func Pretty(result runner.SuiteResult, path string, detected language.DetectionR
 
 	// Results
 	for _, r := range result.Results {
-		printResult(r)
+		printResult(r, verbosity)
 	}
 
 	fmt.Println()
@@ -132,7 +141,7 @@ func Pretty(result runner.SuiteResult, path string, detected language.DetectionR
 	return result.Success(), nil
 }
 
-func printResult(r checker.Result) {
+func printResult(r checker.Result, verbosity VerbosityLevel) {
 	var symbol, status string
 	var style lipgloss.Style
 
@@ -170,6 +179,19 @@ func printResult(r checker.Result) {
 	// Print message if present
 	if r.Message != "" {
 		fmt.Println(messageStyle.Render(r.Message))
+	}
+
+	// Print raw output based on verbosity level
+	if r.RawOutput != "" {
+		shouldShowOutput := verbosity == VerbosityAll ||
+			(verbosity == VerbosityFailures && (r.Status == checker.Fail || r.Status == checker.Warn))
+		if shouldShowOutput {
+			fmt.Println(rawOutputHeaderStyle.Render("--- Output ---"))
+			// Indent each line of raw output
+			for _, line := range strings.Split(strings.TrimSpace(r.RawOutput), "\n") {
+				fmt.Println(rawOutputStyle.Render(line))
+			}
+		}
 	}
 }
 

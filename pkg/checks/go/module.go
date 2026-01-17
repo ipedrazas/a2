@@ -36,7 +36,7 @@ func (c *ModuleCheck) Run(path string) (checker.Result, error) {
 
 	// Check for Go version
 	if modFile.Go == nil || modFile.Go.Version == "" {
-		return rb.Warn("go.mod does not specify a Go version."), nil
+		return rb.WarnWithOutput("go.mod does not specify a Go version.", string(data)), nil
 	}
 
 	return rb.Pass("Module: " + modFile.Module.Mod.Path + " (Go " + modFile.Go.Version + ")"), nil

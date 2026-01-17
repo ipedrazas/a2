@@ -52,7 +52,7 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 			return rb.Pass("Security audit configured in CI"), nil
 		}
 
-		return rb.Warn("No security audit tool found (consider cargo-audit or cargo-deny)"), nil
+		return rb.WarnWithOutput("No security audit tool found (consider cargo-audit or cargo-deny)", outputStr), nil
 	}
 
 	if err != nil {
@@ -60,9 +60,9 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 		vulnRe := regexp.MustCompile(`(\d+) vulnerabilit`)
 		matches := vulnRe.FindStringSubmatch(outputStr)
 		if len(matches) > 1 {
-			return rb.Warn(matches[1] + " vulnerabilities found"), nil
+			return rb.WarnWithOutput(matches[1]+" vulnerabilities found", outputStr), nil
 		}
-		return rb.Warn("Vulnerabilities found in dependencies"), nil
+		return rb.WarnWithOutput("Vulnerabilities found in dependencies", outputStr), nil
 	}
 
 	return rb.Pass("No known vulnerabilities found"), nil

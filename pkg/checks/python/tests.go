@@ -58,11 +58,12 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 		testResult = checkutil.RunCommand(path, "pytest", "-v", "--tb=short")
 	}
 
+	testOutput := testResult.CombinedOutput()
 	if !testResult.Success() {
-		return rb.Fail("Tests failed: " + checkutil.TruncateMessage(testResult.Output(), 200)), nil
+		return rb.FailWithOutput("Tests failed: "+checkutil.TruncateMessage(testResult.Output(), 200), testOutput), nil
 	}
 
-	return rb.Pass("All tests passed"), nil
+	return rb.PassWithOutput("All tests passed", testOutput), nil
 }
 
 func (c *TestsCheck) detectTestRunner(path string) string {

@@ -125,15 +125,16 @@ func (c *LintCheck) runESLint(path, pm string, rb *checkutil.ResultBuilder) (che
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	if err := cmd.Run(); err != nil {
-		output := stdout.String() + stderr.String()
+	err := cmd.Run()
+	output := stdout.String() + stderr.String()
+	if err != nil {
 		errors, warnings := parseESLintOutput(output)
 		if errors > 0 || warnings > 0 {
-			return rb.Warn(fmt.Sprintf("ESLint: %d %s, %d %s",
+			return rb.WarnWithOutput(fmt.Sprintf("ESLint: %d %s, %d %s",
 				errors, checkutil.Pluralize(errors, "error", "errors"),
-				warnings, checkutil.Pluralize(warnings, "warning", "warnings"))), nil
+				warnings, checkutil.Pluralize(warnings, "warning", "warnings")), output), nil
 		}
-		return rb.Warn("ESLint found issues"), nil
+		return rb.WarnWithOutput("ESLint found issues", output), nil
 	}
 
 	return rb.Pass("ESLint: No issues found"), nil
@@ -158,8 +159,10 @@ func (c *LintCheck) runBiomeLint(path, pm string, rb *checkutil.ResultBuilder) (
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	if err := cmd.Run(); err != nil {
-		return rb.Warn("Biome lint found issues"), nil
+	err := cmd.Run()
+	output := stdout.String() + stderr.String()
+	if err != nil {
+		return rb.WarnWithOutput("Biome lint found issues", output), nil
 	}
 
 	return rb.Pass("Biome lint: No issues found"), nil
@@ -184,8 +187,10 @@ func (c *LintCheck) runOxlint(path, pm string, rb *checkutil.ResultBuilder) (che
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	if err := cmd.Run(); err != nil {
-		return rb.Warn("oxlint found issues"), nil
+	err := cmd.Run()
+	output := stdout.String() + stderr.String()
+	if err != nil {
+		return rb.WarnWithOutput("oxlint found issues", output), nil
 	}
 
 	return rb.Pass("oxlint: No issues found"), nil

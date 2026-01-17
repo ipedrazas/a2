@@ -113,7 +113,7 @@ func (c *SASTCheck) runSemgrep(path, configPath string, rb *checkutil.ResultBuil
 	findingCount := c.countSemgrepFindings(output)
 
 	if findingCount > 0 {
-		return rb.Warn(fmt.Sprintf("semgrep: %d %s found (%s)", findingCount, pluralize(findingCount, "issue", "issues"), configMsg)), nil
+		return rb.WarnWithOutput(fmt.Sprintf("semgrep: %d %s found (%s)", findingCount, pluralize(findingCount, "issue", "issues"), configMsg), output), nil
 	}
 
 	// Check for common errors

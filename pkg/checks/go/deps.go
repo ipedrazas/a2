@@ -23,19 +23,19 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 	}
 
 	result := checkutil.RunCommand(path, "govulncheck", "./...")
+	output := result.CombinedOutput()
 
 	if !result.Success() {
 		// govulncheck exits with non-zero when vulnerabilities are found
-		output := strings.TrimSpace(result.Stdout)
-		vulnCount := countVulnerabilities(output)
+		vulnCount := countVulnerabilities(result.Stdout)
 
 		if vulnCount > 0 {
-			return rb.Warn(formatVulnMessage(vulnCount)), nil
+			return rb.WarnWithOutput(formatVulnMessage(vulnCount), output), nil
 		}
 
 		// Some other error
 		if result.Stderr != "" {
-			return rb.Warn("govulncheck error: " + checkutil.TruncateMessage(strings.TrimSpace(result.Stderr), 150)), nil
+			return rb.WarnWithOutput("govulncheck error: "+checkutil.TruncateMessage(strings.TrimSpace(result.Stderr), 150), output), nil
 		}
 	}
 

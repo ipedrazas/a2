@@ -30,7 +30,7 @@ func newToonEncoder() *toonEncoder {
 // TOON outputs the results in TOON format (Token-Oriented Object Notation).
 // TOON is optimized for consumption by coding agents.
 // Returns true if all checks passed, false otherwise, along with any output error.
-func TOON(result runner.SuiteResult, detected language.DetectionResult) (bool, error) {
+func TOON(result runner.SuiteResult, detected language.DetectionResult, verbosity VerbosityLevel) (bool, error) {
 	enc := newToonEncoder()
 
 	// Convert languages to strings
@@ -47,7 +47,7 @@ func TOON(result runner.SuiteResult, detected language.DetectionResult) (bool, e
 	enc.writeStringArray("languages", langs)
 
 	// results array (tabular format for uniform objects)
-	enc.writeResultsArray(result.Results)
+	enc.writeResultsArray(result.Results, verbosity)
 
 	// summary object
 	enc.writeKey("summary")
@@ -118,14 +118,19 @@ func (e *toonEncoder) writeStringArray(key string, values []string) {
 }
 
 // writeResultsArray writes the results array in tabular format.
-func (e *toonEncoder) writeResultsArray(results []checker.Result) {
+func (e *toonEncoder) writeResultsArray(results []checker.Result, verbosity VerbosityLevel) {
 	e.writeIndent()
 	// Use tabular format: results[N]{fields}:
-	e.builder.WriteString(fmt.Sprintf("results[%d]{name,id,passed,status,message,language,duration_ms}:\n", len(results)))
+	// Include raw_output field when verbosity > 0
+	if verbosity > VerbosityNormal {
+		e.builder.WriteString(fmt.Sprintf("results[%d]{name,id,passed,status,message,language,duration_ms,raw_output}:\n", len(results)))
+	} else {
+		e.builder.WriteString(fmt.Sprintf("results[%d]{name,id,passed,status,message,language,duration_ms}:\n", len(results)))
+	}
 	e.indent++
 	for _, r := range results {
 		e.writeIndent()
-		// Each row: name,id,passed,status,message,language,duration_ms
+		// Each row: name,id,passed,status,message,language,duration_ms[,raw_output]
 		row := []string{
 			e.encodeStringForArray(r.Name, ','),
 			e.encodeStringForArray(r.ID, ','),
@@ -135,6 +140,20 @@ func (e *toonEncoder) writeResultsArray(results []checker.Result) {
 			e.encodeStringForArray(string(r.Language), ','),
 			e.formatNumber(float64(r.Duration.Milliseconds())),
 		}
+
+		// Include raw output based on verbosity level
+		if verbosity > VerbosityNormal {
+			rawOutput := ""
+			if r.RawOutput != "" {
+				shouldInclude := verbosity == VerbosityAll ||
+					(verbosity == VerbosityFailures && (r.Status == checker.Fail || r.Status == checker.Warn))
+				if shouldInclude {
+					rawOutput = r.RawOutput
+				}
+			}
+			row = append(row, e.encodeStringForArray(rawOutput, ','))
+		}
+
 		e.builder.WriteString(strings.Join(row, ","))
 		e.builder.WriteByte('\n')
 	}

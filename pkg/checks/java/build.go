@@ -42,6 +42,7 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 	cmd.Stderr = &stderr
 
 	err := cmd.Run()
+	combinedOutput := stdout.String() + stderr.String()
 	output := strings.TrimSpace(stdout.String())
 	errOutput := strings.TrimSpace(stderr.String())
 
@@ -59,10 +60,10 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 			}
 			msg += ": " + output
 		}
-		return rb.Fail(msg), nil
+		return rb.FailWithOutput(msg, combinedOutput), nil
 	}
 
-	return rb.Pass("Build successful (" + buildTool + ")"), nil
+	return rb.PassWithOutput("Build successful ("+buildTool+")", combinedOutput), nil
 }
 
 func (c *BuildCheck) detectBuildTool(path string) string {

@@ -34,11 +34,12 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 		cmdDesc = "pip --version"
 	}
 
+	output := result.CombinedOutput()
 	if !result.Success() {
 		if checkutil.ToolNotFoundError(result.Err) {
 			return rb.ToolNotInstalled(pm, ""), nil
 		}
-		return rb.Fail(cmdDesc + " failed: " + checkutil.TruncateMessage(result.Output(), 200)), nil
+		return rb.FailWithOutput(cmdDesc+" failed: "+checkutil.TruncateMessage(result.Output(), 200), output), nil
 	}
 
 	return rb.Pass("Build check passed (" + pm + ")"), nil

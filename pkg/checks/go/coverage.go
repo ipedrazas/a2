@@ -27,25 +27,26 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 	}
 
 	result := checkutil.RunCommand(path, "go", "test", "-cover", "./...")
+	output := result.CombinedOutput()
 
 	// Check for no test files
 	if strings.Contains(result.Stdout, "no test files") && !strings.Contains(result.Stdout, "coverage:") {
-		return rb.Warn("No test files found - coverage is 0%"), nil
+		return rb.WarnWithOutput("No test files found - coverage is 0%", output), nil
 	}
 
 	// If tests failed, report that
 	if !result.Success() {
-		return rb.Warn("Could not measure coverage: tests failed"), nil
+		return rb.WarnWithOutput("Could not measure coverage: tests failed", output), nil
 	}
 
 	// Parse coverage from output
 	coverage := parseCoverage(result.Stdout)
 
 	if coverage < threshold {
-		return rb.Warn(fmt.Sprintf("Coverage %.1f%% is below threshold %.1f%%", coverage, threshold)), nil
+		return rb.WarnWithOutput(fmt.Sprintf("Coverage %.1f%% is below threshold %.1f%%", coverage, threshold), output), nil
 	}
 
-	return rb.Pass(fmt.Sprintf("Coverage: %.1f%%", coverage)), nil
+	return rb.PassWithOutput(fmt.Sprintf("Coverage: %.1f%%", coverage), output), nil
 }
 
 // parseCoverage extracts the average coverage percentage from go test -cover output.

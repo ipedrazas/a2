@@ -104,10 +104,10 @@ func (c *LintCheck) runESLint(path string, rb *checkutil.ResultBuilder) *checker
 	if err != nil {
 		issueCount := countLintIssues(output)
 		if issueCount > 0 {
-			result := rb.Warn(fmt.Sprintf("%d linting %s found. Run: npx eslint . --fix", issueCount, checkutil.Pluralize(issueCount, "issue", "issues")))
+			result := rb.WarnWithOutput(fmt.Sprintf("%d linting %s found. Run: npx eslint . --fix", issueCount, checkutil.Pluralize(issueCount, "issue", "issues")), output)
 			return &result
 		}
-		result := rb.Warn("Linting issues found. Run: npx eslint . --fix")
+		result := rb.WarnWithOutput("Linting issues found. Run: npx eslint . --fix", output)
 		return &result
 	}
 
@@ -129,9 +129,10 @@ func (c *LintCheck) runBiome(path string, rb *checkutil.ResultBuilder) *checker.
 	cmd.Stderr = &stderr
 
 	err := cmd.Run()
+	output := stdout.String() + stderr.String()
 
 	if err != nil {
-		result := rb.Warn("Linting issues found. Run: npx @biomejs/biome lint --apply .")
+		result := rb.WarnWithOutput("Linting issues found. Run: npx @biomejs/biome lint --apply .", output)
 		return &result
 	}
 
@@ -153,9 +154,10 @@ func (c *LintCheck) runOxlint(path string, rb *checkutil.ResultBuilder) *checker
 	cmd.Stderr = &stderr
 
 	err := cmd.Run()
+	output := stdout.String() + stderr.String()
 
 	if err != nil {
-		result := rb.Warn("Linting issues found (oxlint)")
+		result := rb.WarnWithOutput("Linting issues found (oxlint)", output)
 		return &result
 	}
 

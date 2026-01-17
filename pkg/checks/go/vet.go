@@ -15,8 +15,9 @@ func (c *VetCheck) Run(path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
 	result := checkutil.RunCommand(path, "go", "vet", "./...")
+	output := result.CombinedOutput()
 	if !result.Success() {
-		return rb.Warn("go vet issues: " + checkutil.TruncateMessage(result.Output(), 200)), nil
+		return rb.WarnWithOutput("go vet issues: "+checkutil.TruncateMessage(result.Output(), 200), output), nil
 	}
 
 	return rb.Pass("No issues found"), nil

@@ -44,15 +44,14 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 		}
 	}
 
+	output := result.CombinedOutput()
 	if !result.Success() {
 		if checkutil.ToolNotFoundError(result.Err) {
 			return rb.ToolNotInstalled(formatter, ""), nil
 		}
 
-		output := result.Output()
-
 		// Count unformatted files
-		lines := strings.Split(output, "\n")
+		lines := strings.Split(result.Output(), "\n")
 		fileCount := 0
 		for _, line := range lines {
 			if strings.Contains(line, "would reformat") || strings.Contains(line, "Would reformat") {
@@ -61,10 +60,10 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 		}
 
 		if fileCount > 0 {
-			return rb.Warn(cmdDesc + ": " + checkutil.PluralizeCount(fileCount, "file", "files") + " need formatting"), nil
+			return rb.WarnWithOutput(cmdDesc+": "+checkutil.PluralizeCount(fileCount, "file", "files")+" need formatting", output), nil
 		}
 
-		return rb.Warn(cmdDesc + " found issues: " + checkutil.TruncateMessage(output, 150)), nil
+		return rb.WarnWithOutput(cmdDesc+" found issues: "+checkutil.TruncateMessage(result.Output(), 150), output), nil
 	}
 
 	return rb.Pass("All Python files are properly formatted"), nil

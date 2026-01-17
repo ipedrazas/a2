@@ -67,15 +67,15 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 		}
 
 		if errors > 0 {
-			return rb.Fail(msg.String()), nil
+			return rb.FailWithOutput(msg.String(), outputStr), nil
 		}
-		return rb.Warn(msg.String()), nil
+		return rb.WarnWithOutput(msg.String(), outputStr), nil
 	}
 
 	if hasConfig {
-		return rb.Pass("SwiftLint passed (custom config)"), nil
+		return rb.PassWithOutput("SwiftLint passed (custom config)", outputStr), nil
 	}
-	return rb.Pass("SwiftLint passed"), nil
+	return rb.PassWithOutput("SwiftLint passed", outputStr), nil
 }
 
 // formatIssueCount converts an int to a string for display.

@@ -48,14 +48,14 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 		}
 	}
 
+	output := result.CombinedOutput()
 	if !result.Success() {
 		if checkutil.ToolNotFoundError(result.Err) {
 			return rb.ToolNotInstalled(linter, ""), nil
 		}
 
 		// Count issues
-		output := result.Output()
-		lines := strings.Split(output, "\n")
+		lines := strings.Split(result.Output(), "\n")
 		issueCount := 0
 		for _, line := range lines {
 			if strings.TrimSpace(line) != "" && !strings.HasPrefix(line, "Found") {
@@ -63,7 +63,7 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 			}
 		}
 
-		return rb.Warn(fmt.Sprintf("%s found %d issues", cmdDesc, issueCount)), nil
+		return rb.WarnWithOutput(fmt.Sprintf("%s found %d issues", cmdDesc, issueCount), output), nil
 	}
 
 	return rb.Pass("No linting issues found"), nil

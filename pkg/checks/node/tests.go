@@ -87,15 +87,16 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	cmd.Stderr = &stderr
 
 	err = cmd.Run()
+	combinedOutput := stdout.String() + stderr.String()
 	if err != nil {
-		output := stderr.String()
-		if output == "" {
-			output = stdout.String()
+		errOutput := stderr.String()
+		if errOutput == "" {
+			errOutput = stdout.String()
 		}
-		return rb.Fail(fmt.Sprintf("Tests failed: %s", checkutil.TruncateMessage(output, 200))), nil
+		return rb.FailWithOutput(fmt.Sprintf("Tests failed: %s", checkutil.TruncateMessage(errOutput, 200)), combinedOutput), nil
 	}
 
-	return rb.Pass("All tests passed"), nil
+	return rb.PassWithOutput("All tests passed", combinedOutput), nil
 }
 
 // createTestCommand creates a test command for the given package manager.

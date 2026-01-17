@@ -52,14 +52,14 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 		if summary != "" {
 			msg += ": " + summary
 		}
-		return rb.Fail(msg), nil
+		return rb.FailWithOutput(msg, output), nil
 	}
 
 	summary := extractTestSummary(output, buildTool)
 	if summary != "" {
-		return rb.Pass(summary), nil
+		return rb.PassWithOutput(summary, output), nil
 	}
-	return rb.Pass("All tests passed"), nil
+	return rb.PassWithOutput("All tests passed", output), nil
 }
 
 func (c *TestsCheck) detectBuildTool(path string) string {

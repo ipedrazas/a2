@@ -56,6 +56,7 @@ func (c *ComplexityCheck) Run(path string) (checker.Result, error) {
 
 	// Run radon cc with show-complexity flag
 	result := checkutil.RunCommand(path, "radon", "cc", "-s", ".")
+	output := result.CombinedOutput()
 
 	if !result.Success() {
 		// radon may fail if no Python files found
@@ -97,7 +98,7 @@ func (c *ComplexityCheck) Run(path string) (checker.Result, error) {
 		msg += fmt.Sprintf("\n  ... and %d more", len(complexFunctions)-showCount)
 	}
 
-	return rb.Warn(msg), nil
+	return rb.WarnWithOutput(msg, output), nil
 }
 
 // parseRadonOutput parses radon cc output and returns functions exceeding threshold.

@@ -88,7 +88,7 @@ func (suite *IntegrationTestSuite) TestJSON_IntegrationOutput() {
 	detected := createTestDetectionResult()
 
 	output := captureStdout(func() {
-		success, err := JSON(result, detected)
+		success, err := JSON(result, detected, VerbosityNormal)
 		suite.NoError(err)
 		suite.False(success) // Has failures
 	})
@@ -134,7 +134,7 @@ func (suite *IntegrationTestSuite) TestTOON_IntegrationOutput() {
 	detected := createTestDetectionResult()
 
 	output := captureStdout(func() {
-		success, err := TOON(result, detected)
+		success, err := TOON(result, detected, VerbosityNormal)
 		suite.NoError(err)
 		suite.False(success) // Has failures
 	})
@@ -164,7 +164,7 @@ func (suite *IntegrationTestSuite) TestPretty_IntegrationOutput() {
 	detected := createTestDetectionResult()
 
 	output := captureStdout(func() {
-		success, err := Pretty(result, path, detected)
+		success, err := Pretty(result, path, detected, VerbosityNormal)
 		suite.NoError(err)
 		suite.False(success) // Has failures
 	})
@@ -194,7 +194,7 @@ func (suite *IntegrationTestSuite) TestJSON_EmptyResults() {
 	detected := language.DetectionResult{Languages: []checker.Language{}}
 
 	output := captureStdout(func() {
-		success, err := JSON(result, detected)
+		success, err := JSON(result, detected, VerbosityNormal)
 		suite.NoError(err)
 		suite.True(success) // No failures
 	})
@@ -218,7 +218,7 @@ func (suite *IntegrationTestSuite) TestTOON_EmptyResults() {
 	detected := language.DetectionResult{Languages: []checker.Language{}}
 
 	output := captureStdout(func() {
-		success, err := TOON(result, detected)
+		success, err := TOON(result, detected, VerbosityNormal)
 		suite.NoError(err)
 		suite.True(success)
 	})
@@ -258,7 +258,7 @@ func (suite *IntegrationTestSuite) TestJSON_AllPass() {
 	detected := createTestDetectionResult()
 
 	output := captureStdout(func() {
-		success, err := JSON(result, detected)
+		success, err := JSON(result, detected, VerbosityNormal)
 		suite.NoError(err)
 		suite.True(success)
 	})
@@ -279,7 +279,7 @@ func (suite *IntegrationTestSuite) TestOutputConsistency_ScoreCalculation() {
 
 	// Get JSON output
 	jsonStr := captureStdout(func() {
-		_, err := JSON(result, detected)
+		_, err := JSON(result, detected, VerbosityNormal)
 		suite.NoError(err)
 	})
 	var jsonOutput JSONOutput
@@ -288,7 +288,7 @@ func (suite *IntegrationTestSuite) TestOutputConsistency_ScoreCalculation() {
 
 	// Get TOON output
 	toonStr := captureStdout(func() {
-		_, err := TOON(result, detected)
+		_, err := TOON(result, detected, VerbosityNormal)
 		suite.NoError(err)
 	})
 
@@ -305,7 +305,7 @@ func (suite *IntegrationTestSuite) TestOutputConsistency_SuccessFlag() {
 	detected := createTestDetectionResult()
 
 	jsonFail := captureStdout(func() {
-		success, err := JSON(resultFail, detected)
+		success, err := JSON(resultFail, detected, VerbosityNormal)
 		suite.NoError(err)
 		suite.False(success)
 	})
@@ -315,7 +315,7 @@ func (suite *IntegrationTestSuite) TestOutputConsistency_SuccessFlag() {
 	suite.False(jsonOutputFail.Success)
 
 	toonFail := captureStdout(func() {
-		success, err := TOON(resultFail, detected)
+		success, err := TOON(resultFail, detected, VerbosityNormal)
 		suite.NoError(err)
 		suite.False(success)
 	})
@@ -330,7 +330,7 @@ func (suite *IntegrationTestSuite) TestOutputConsistency_SuccessFlag() {
 	}
 
 	jsonPass := captureStdout(func() {
-		success, err := JSON(resultPass, detected)
+		success, err := JSON(resultPass, detected, VerbosityNormal)
 		suite.NoError(err)
 		suite.True(success)
 	})
@@ -340,7 +340,7 @@ func (suite *IntegrationTestSuite) TestOutputConsistency_SuccessFlag() {
 	suite.True(jsonOutputPass.Success)
 
 	toonPass := captureStdout(func() {
-		success, err := TOON(resultPass, detected)
+		success, err := TOON(resultPass, detected, VerbosityNormal)
 		suite.NoError(err)
 		suite.True(success)
 	})
@@ -364,7 +364,7 @@ func (suite *IntegrationTestSuite) TestJSON_SpecialCharactersInMessage() {
 	detected := createTestDetectionResult()
 
 	output := captureStdout(func() {
-		_, err := JSON(result, detected)
+		_, err := JSON(result, detected, VerbosityNormal)
 		suite.NoError(err)
 	})
 
@@ -392,7 +392,7 @@ func (suite *IntegrationTestSuite) TestTOON_SpecialCharactersInMessage() {
 	detected := createTestDetectionResult()
 
 	output := captureStdout(func() {
-		_, err := TOON(result, detected)
+		_, err := TOON(result, detected, VerbosityNormal)
 		suite.NoError(err)
 	})
 
@@ -414,7 +414,7 @@ func (suite *IntegrationTestSuite) TestJSON_MultipleLanguages() {
 	}
 
 	output := captureStdout(func() {
-		_, err := JSON(result, detected)
+		_, err := JSON(result, detected, VerbosityNormal)
 		suite.NoError(err)
 	})
 

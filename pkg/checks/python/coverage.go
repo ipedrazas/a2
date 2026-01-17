@@ -28,6 +28,7 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 	}
 
 	result := checkutil.RunCommand(path, "pytest", "--cov=.", "--cov-report=term-missing", "-q")
+	output := result.CombinedOutput()
 
 	// Check if pytest or pytest-cov is not installed
 	if strings.Contains(result.Stderr, "unrecognized arguments: --cov") ||
@@ -41,17 +42,17 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 
 	// Check for no tests
 	if strings.Contains(result.Stdout, "no tests ran") || strings.Contains(result.Stdout, "collected 0 items") {
-		return rb.Warn("No tests found - coverage is 0%"), nil
+		return rb.WarnWithOutput("No tests found - coverage is 0%", output), nil
 	}
 
 	// Parse coverage from output
 	coverage := parsePythonCoverage(result.Stdout)
 
 	if coverage < threshold {
-		return rb.Warn(fmt.Sprintf("Coverage %.1f%% is below threshold %.1f%%", coverage, threshold)), nil
+		return rb.WarnWithOutput(fmt.Sprintf("Coverage %.1f%% is below threshold %.1f%%", coverage, threshold), output), nil
 	}
 
-	return rb.Pass(fmt.Sprintf("Coverage: %.1f%%", coverage)), nil
+	return rb.PassWithOutput(fmt.Sprintf("Coverage: %.1f%%", coverage), output), nil
 }
 
 // parsePythonCoverage extracts the total coverage percentage from pytest-cov output.

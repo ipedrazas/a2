@@ -57,11 +57,12 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 		}
 	}
 
+	output := result.CombinedOutput()
 	if !result.Success() {
-		return rb.Fail(fmt.Sprintf("Dependency validation failed (%s): %s", pm, checkutil.TruncateMessage(result.Output(), 200))), nil
+		return rb.FailWithOutput(fmt.Sprintf("Dependency validation failed (%s): %s", pm, checkutil.TruncateMessage(result.Output(), 200)), output), nil
 	}
 
-	return rb.Pass(fmt.Sprintf("Dependencies valid (%s)", pm)), nil
+	return rb.PassWithOutput(fmt.Sprintf("Dependencies valid (%s)", pm), output), nil
 }
 
 // detectPackageManager determines which package manager to use.

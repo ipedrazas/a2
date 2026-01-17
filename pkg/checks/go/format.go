@@ -21,14 +21,14 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 
 	// gofmt returns non-zero if there's an error (not just unformatted files)
 	if result.Err != nil && result.Stderr != "" {
-		return rb.Warn("gofmt error: " + checkutil.TruncateMessage(result.Stderr, 150)), nil
+		return rb.WarnWithOutput("gofmt error: "+checkutil.TruncateMessage(result.Stderr, 150), result.Stderr), nil
 	}
 
 	output := strings.TrimSpace(result.Stdout)
 	if output != "" {
 		// Count unformatted files
 		files := strings.Split(output, "\n")
-		return rb.Warn(checkutil.TruncateMessage("Unformatted files: "+strings.Join(files, ", ")+". Run 'gofmt -w .' to fix.", 200)), nil
+		return rb.WarnWithOutput(checkutil.TruncateMessage("Unformatted files: "+strings.Join(files, ", ")+". Run 'gofmt -w .' to fix.", 200), output), nil
 	}
 
 	return rb.Pass("All Go files are properly formatted"), nil

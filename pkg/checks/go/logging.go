@@ -111,13 +111,24 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 		return rb.Warn("Error scanning files: " + err.Error()), nil
 	}
 
+	// Build raw output listing files with print statements
+	var rawOutput string
+	if len(filesWithPrints) > 0 {
+		var sb strings.Builder
+		sb.WriteString("Files with fmt.Print statements:\n")
+		for _, f := range filesWithPrints {
+			sb.WriteString("  " + f + "\n")
+		}
+		rawOutput = sb.String()
+	}
+
 	// Determine result based on findings
 	if hasStructuredLogger && printCount == 0 {
 		return rb.Pass("Uses structured logging, no fmt.Print statements"), nil
 	}
 
 	if hasStructuredLogger && printCount > 0 {
-		return rb.Warn("Uses structured logging but found " + checkutil.PluralizeCount(printCount, "fmt.Print statement", "fmt.Print statements")), nil
+		return rb.WarnWithOutput("Uses structured logging but found "+checkutil.PluralizeCount(printCount, "fmt.Print statement", "fmt.Print statements"), rawOutput), nil
 	}
 
 	if !hasStructuredLogger && printCount == 0 {
@@ -125,5 +136,5 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// !hasStructuredLogger && printCount > 0
-	return rb.Warn("No structured logging and found " + checkutil.PluralizeCount(printCount, "fmt.Print statement", "fmt.Print statements")), nil
+	return rb.WarnWithOutput("No structured logging and found "+checkutil.PluralizeCount(printCount, "fmt.Print statement", "fmt.Print statements"), rawOutput), nil
 }

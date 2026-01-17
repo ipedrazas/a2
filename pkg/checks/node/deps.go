@@ -44,13 +44,13 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run security audit
-	vulnCount, err := c.runAudit(path, pm)
+	vulnCount, output, err := c.runAudit(path, pm)
 	if err != nil {
-		return rb.Warn(fmt.Sprintf("Security audit failed: %v", err)), nil
+		return rb.WarnWithOutput(fmt.Sprintf("Security audit failed: %v", err), output), nil
 	}
 
 	if vulnCount > 0 {
-		return rb.Warn(fmt.Sprintf("%d %s found. Run: %s audit for details", vulnCount, checkutil.Pluralize(vulnCount, "vulnerability", "vulnerabilities"), pm)), nil
+		return rb.WarnWithOutput(fmt.Sprintf("%d %s found. Run: %s audit for details", vulnCount, checkutil.Pluralize(vulnCount, "vulnerability", "vulnerabilities"), pm), output), nil
 	}
 
 	return rb.Pass(fmt.Sprintf("No known vulnerabilities found (%s audit)", pm)), nil
@@ -77,8 +77,8 @@ func (c *DepsCheck) detectPackageManager(path string) string {
 	return "npm"
 }
 
-// runAudit runs the security audit and returns the vulnerability count.
-func (c *DepsCheck) runAudit(path, pm string) (int, error) {
+// runAudit runs the security audit and returns the vulnerability count and output.
+func (c *DepsCheck) runAudit(path, pm string) (int, string, error) {
 	var cmd *exec.Cmd
 
 	switch pm {
@@ -102,12 +102,14 @@ func (c *DepsCheck) runAudit(path, pm string) (int, error) {
 	// so we ignore the error and parse the output
 	_ = cmd.Run()
 
+	combinedOutput := stdout.String() + stderr.String()
 	output := stdout.String()
 	if output == "" {
 		output = stderr.String()
 	}
 
-	return parseAuditOutput(output, pm)
+	count, err := parseAuditOutput(output, pm)
+	return count, combinedOutput, err
 }
 
 // AuditResult represents the npm audit JSON output.

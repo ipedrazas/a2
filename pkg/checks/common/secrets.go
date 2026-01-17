@@ -87,7 +87,7 @@ func (c *SecretsCheck) runGitleaks(path, configFile string, rb *checkutil.Result
 	leakCount := c.countGitleaksFindings(output)
 
 	if leakCount > 0 {
-		return rb.Warn(fmt.Sprintf("gitleaks: %d %s found", leakCount, pluralize(leakCount, "leak", "leaks"))), nil
+		return rb.WarnWithOutput(fmt.Sprintf("gitleaks: %d %s found", leakCount, pluralize(leakCount, "leak", "leaks")), output), nil
 	}
 
 	// Some other error (e.g., bad config) - but still passed (no leaks detected)

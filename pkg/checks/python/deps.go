@@ -31,18 +31,18 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 		return rb.Pass("No vulnerability scanner installed (install pip-audit or safety)"), nil
 	}
 
+	output := result.CombinedOutput()
 	if !result.Success() {
 		// pip-audit and safety exit with non-zero when vulnerabilities are found
-		output := strings.TrimSpace(result.Stdout)
-		vulnCount := countPythonVulnerabilities(output, cmdDesc)
+		vulnCount := countPythonVulnerabilities(strings.TrimSpace(result.Stdout), cmdDesc)
 
 		if vulnCount > 0 {
-			return rb.Warn(fmt.Sprintf("%d vulnerabilities found. Run '%s' for details.", vulnCount, cmdDesc)), nil
+			return rb.WarnWithOutput(fmt.Sprintf("%d vulnerabilities found. Run '%s' for details.", vulnCount, cmdDesc), output), nil
 		}
 
 		// Some other error
 		if result.Stderr != "" {
-			return rb.Warn(cmdDesc + " error: " + checkutil.TruncateMessage(strings.TrimSpace(result.Stderr), 150)), nil
+			return rb.WarnWithOutput(cmdDesc+" error: "+checkutil.TruncateMessage(strings.TrimSpace(result.Stderr), 150), output), nil
 		}
 	}
 

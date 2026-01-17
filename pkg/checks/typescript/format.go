@@ -128,13 +128,14 @@ func (c *FormatCheck) runPrettier(path, pm string, rb *checkutil.ResultBuilder) 
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	if err := cmd.Run(); err != nil {
-		output := stdout.String() + stderr.String()
+	err := cmd.Run()
+	output := stdout.String() + stderr.String()
+	if err != nil {
 		unformatted := countUnformattedFiles(output)
 		if unformatted > 0 {
-			return rb.Warn("Formatting issues found. Run: npx prettier --write ."), nil
+			return rb.WarnWithOutput("Formatting issues found. Run: npx prettier --write .", output), nil
 		}
-		return rb.Warn("Prettier check failed"), nil
+		return rb.WarnWithOutput("Prettier check failed", output), nil
 	}
 
 	return rb.Pass("All files formatted correctly (Prettier)"), nil
@@ -159,8 +160,10 @@ func (c *FormatCheck) runBiome(path, pm string, rb *checkutil.ResultBuilder) (ch
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	if err := cmd.Run(); err != nil {
-		return rb.Warn("Formatting issues found. Run: npx @biomejs/biome format --write ."), nil
+	err := cmd.Run()
+	output := stdout.String() + stderr.String()
+	if err != nil {
+		return rb.WarnWithOutput("Formatting issues found. Run: npx @biomejs/biome format --write .", output), nil
 	}
 
 	return rb.Pass("All files formatted correctly (Biome)"), nil
@@ -185,8 +188,10 @@ func (c *FormatCheck) runDprint(path, pm string, rb *checkutil.ResultBuilder) (c
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	if err := cmd.Run(); err != nil {
-		return rb.Warn("Formatting issues found. Run: npx dprint fmt"), nil
+	err := cmd.Run()
+	output := stdout.String() + stderr.String()
+	if err != nil {
+		return rb.WarnWithOutput("Formatting issues found. Run: npx dprint fmt", output), nil
 	}
 
 	return rb.Pass("All files formatted correctly (dprint)"), nil

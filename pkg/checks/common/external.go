@@ -72,6 +72,7 @@ func (c *ExternalCheck) Run(path string) (checker.Result, error) {
 	err = cmd.Run()
 
 	// Parse output
+	combinedOutput := stdout.String() + stderr.String()
 	output := strings.TrimSpace(stdout.String())
 	if output == "" {
 		output = strings.TrimSpace(stderr.String())
@@ -81,11 +82,11 @@ func (c *ExternalCheck) Run(path string) (checker.Result, error) {
 	var extOutput ExternalOutput
 	if jsonErr := json.Unmarshal([]byte(output), &extOutput); jsonErr == nil {
 		// Successfully parsed JSON
-		return c.resultFromJSON(extOutput)
+		return c.resultFromJSON(extOutput, combinedOutput)
 	}
 
 	// Plain text output - determine status from exit code
-	return c.resultFromExitCode(output, err)
+	return c.resultFromExitCode(output, err, combinedOutput)
 }
 
 // validateCommand checks that the command is safe to execute.
@@ -122,25 +123,25 @@ func (c *ExternalCheck) sanitizeArgs() []string {
 	return c.Args
 }
 
-func (c *ExternalCheck) resultFromJSON(out ExternalOutput) (checker.Result, error) {
+func (c *ExternalCheck) resultFromJSON(out ExternalOutput, rawOutput string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	switch strings.ToLower(out.Status) {
 	case "warn", "warning":
-		return rb.Warn(out.Message), nil
+		return rb.WarnWithOutput(out.Message, rawOutput), nil
 	case "fail", "error":
-		return rb.Fail(out.Message), nil
+		return rb.FailWithOutput(out.Message, rawOutput), nil
 	default:
-		return rb.Pass(out.Message), nil
+		return rb.PassWithOutput(out.Message, rawOutput), nil
 	}
 }
 
-func (c *ExternalCheck) resultFromExitCode(output string, err error) (checker.Result, error) {
+func (c *ExternalCheck) resultFromExitCode(output string, err error, rawOutput string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	if err == nil {
 		// Exit code 0 = pass
-		return rb.Pass(output), nil
+		return rb.PassWithOutput(output, rawOutput), nil
 	}
 
 	// Get exit code
@@ -156,7 +157,7 @@ func (c *ExternalCheck) resultFromExitCode(output string, err error) (checker.Re
 
 	// Determine severity
 	if exitCode >= 2 || c.Severity == "fail" {
-		return rb.Fail(message), nil
+		return rb.FailWithOutput(message, rawOutput), nil
 	}
-	return rb.Warn(message), nil
+	return rb.WarnWithOutput(message, rawOutput), nil
 }

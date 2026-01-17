@@ -37,11 +37,11 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 			// Count failures
 			failRe := regexp.MustCompile(`(\d+) failed`)
 			if matches := failRe.FindStringSubmatch(outputStr); len(matches) > 1 {
-				return rb.Fail("Tests failed: " + matches[1] + " test(s) failed"), nil
+				return rb.FailWithOutput("Tests failed: "+matches[1]+" test(s) failed", outputStr), nil
 			}
-			return rb.Fail("Tests failed"), nil
+			return rb.FailWithOutput("Tests failed", outputStr), nil
 		}
-		return rb.Fail("Tests failed: " + err.Error()), nil
+		return rb.FailWithOutput("Tests failed: "+err.Error(), outputStr), nil
 	}
 
 	// Parse test results - cargo test output format:
@@ -50,10 +50,10 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	passedRe := regexp.MustCompile(`(\d+) passed`)
 	matches := passedRe.FindStringSubmatch(outputStr)
 	if len(matches) > 1 {
-		return rb.Pass(matches[1] + " test(s) passed"), nil
+		return rb.PassWithOutput(matches[1]+" test(s) passed", outputStr), nil
 	}
 	if strings.Contains(outputStr, "running 0 tests") || strings.Contains(outputStr, "0 passed") {
 		return rb.Pass("No tests found"), nil
 	}
-	return rb.Pass("Tests passed"), nil
+	return rb.PassWithOutput("Tests passed", outputStr), nil
 }

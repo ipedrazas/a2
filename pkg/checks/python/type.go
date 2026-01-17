@@ -41,9 +41,9 @@ func (c *TypeCheck) Run(path string) (checker.Result, error) {
 		// Parse error count
 		errorCount := c.countTypeErrors(output)
 		if errorCount > 0 {
-			return rb.Warn(fmt.Sprintf("%s found. Run: mypy .", checkutil.PluralizeCount(errorCount, "type error", "type errors"))), nil
+			return rb.WarnWithOutput(fmt.Sprintf("%s found. Run: mypy .", checkutil.PluralizeCount(errorCount, "type error", "type errors")), output), nil
 		}
-		return rb.Warn("Type errors found. Run: mypy ."), nil
+		return rb.WarnWithOutput("Type errors found. Run: mypy .", output), nil
 	}
 
 	return rb.Pass("No type errors found"), nil

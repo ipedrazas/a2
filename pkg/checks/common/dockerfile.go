@@ -70,11 +70,11 @@ func (c *DockerfileCheck) runTrivy(path, dockerfile string, rb *checkutil.Result
 
 	if issueCount > 0 {
 		if hasIgnore {
-			return rb.Warn(fmt.Sprintf("trivy: %d %s in %s (with .dockerignore)",
-				issueCount, pluralize(issueCount, "issue", "issues"), dockerfile)), nil
+			return rb.WarnWithOutput(fmt.Sprintf("trivy: %d %s in %s (with .dockerignore)",
+				issueCount, pluralize(issueCount, "issue", "issues"), dockerfile), output), nil
 		}
-		return rb.Warn(fmt.Sprintf("trivy: %d %s in %s, consider adding .dockerignore",
-			issueCount, pluralize(issueCount, "issue", "issues"), dockerfile)), nil
+		return rb.WarnWithOutput(fmt.Sprintf("trivy: %d %s in %s, consider adding .dockerignore",
+			issueCount, pluralize(issueCount, "issue", "issues"), dockerfile), output), nil
 	}
 
 	// No issues found

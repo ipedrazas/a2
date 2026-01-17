@@ -18,7 +18,8 @@ type JSONResult struct {
 	Status     string `json:"status"`
 	Message    string `json:"message,omitempty"`
 	Language   string `json:"language,omitempty"`
-	DurationMs int64  `json:"duration_ms"` // Duration in milliseconds
+	DurationMs int64  `json:"duration_ms"`          // Duration in milliseconds
+	RawOutput  string `json:"raw_output,omitempty"` // Full command output (with -v or -vv)
 }
 
 // JSONOutput is the complete JSON output structure.
@@ -51,7 +52,7 @@ type JSONMaturity struct {
 
 // JSON outputs the results as formatted JSON.
 // Returns true if all checks passed, false otherwise, along with any output error.
-func JSON(result runner.SuiteResult, detected language.DetectionResult) (bool, error) {
+func JSON(result runner.SuiteResult, detected language.DetectionResult, verbosity VerbosityLevel) (bool, error) {
 	// Convert languages to strings
 	langs := make([]string, len(detected.Languages))
 	for i, l := range detected.Languages {
@@ -83,7 +84,7 @@ func JSON(result runner.SuiteResult, detected language.DetectionResult) (bool, e
 	}
 
 	for _, r := range result.Results {
-		output.Results = append(output.Results, JSONResult{
+		jsonResult := JSONResult{
 			Name:       r.Name,
 			ID:         r.ID,
 			Passed:     r.Passed,
@@ -91,7 +92,18 @@ func JSON(result runner.SuiteResult, detected language.DetectionResult) (bool, e
 			Message:    r.Message,
 			Language:   string(r.Language),
 			DurationMs: r.Duration.Milliseconds(),
-		})
+		}
+
+		// Include raw output based on verbosity level
+		if r.RawOutput != "" {
+			shouldInclude := verbosity == VerbosityAll ||
+				(verbosity == VerbosityFailures && (r.Status == checker.Fail || r.Status == checker.Warn))
+			if shouldInclude {
+				jsonResult.RawOutput = r.RawOutput
+			}
+		}
+
+		output.Results = append(output.Results, jsonResult)
 	}
 
 	enc := json.NewEncoder(os.Stdout)

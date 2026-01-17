@@ -32,12 +32,13 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 	cmd.Dir = path
 	output, err := cmd.CombinedOutput()
 
+	outputStr := string(output)
 	if err != nil {
 		// Exit code 1 means unformatted code found
-		outputStr := strings.TrimSpace(string(output))
-		if strings.Contains(outputStr, "Diff in") || strings.Contains(outputStr, "would be reformatted") {
+		trimmedOutput := strings.TrimSpace(outputStr)
+		if strings.Contains(trimmedOutput, "Diff in") || strings.Contains(trimmedOutput, "would be reformatted") {
 			// Count files that need formatting
-			lines := strings.Split(outputStr, "\n")
+			lines := strings.Split(trimmedOutput, "\n")
 			count := 0
 			for _, line := range lines {
 				if strings.Contains(line, "Diff in") || strings.HasSuffix(line, ".rs") {
@@ -45,12 +46,12 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 				}
 			}
 			if count > 0 {
-				return rb.Warn("Code not formatted: " + string(rune(count)) + " file(s) need formatting"), nil
+				return rb.WarnWithOutput("Code not formatted: "+string(rune(count))+" file(s) need formatting", outputStr), nil
 			}
-			return rb.Warn("Code not formatted (run 'cargo fmt')"), nil
+			return rb.WarnWithOutput("Code not formatted (run 'cargo fmt')", outputStr), nil
 		}
 		// Some other error (rustfmt not installed, etc.)
-		return rb.Warn("Cannot check format: " + err.Error()), nil
+		return rb.WarnWithOutput("Cannot check format: "+err.Error(), outputStr), nil
 	}
 
 	if hasConfig {

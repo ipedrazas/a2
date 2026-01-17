@@ -43,7 +43,7 @@ func (suite *PrettyTestSuite) TestPrintResult_Pass() {
 	}
 
 	output := captureStdout(func() {
-		printResult(result)
+		printResult(result, VerbosityNormal)
 	})
 
 	suite.Contains(output, "PASS")
@@ -62,7 +62,7 @@ func (suite *PrettyTestSuite) TestPrintResult_Warn() {
 	}
 
 	output := captureStdout(func() {
-		printResult(result)
+		printResult(result, VerbosityNormal)
 	})
 
 	suite.Contains(output, "WARN")
@@ -81,7 +81,7 @@ func (suite *PrettyTestSuite) TestPrintResult_Fail() {
 	}
 
 	output := captureStdout(func() {
-		printResult(result)
+		printResult(result, VerbosityNormal)
 	})
 
 	suite.Contains(output, "FAIL")
@@ -99,7 +99,7 @@ func (suite *PrettyTestSuite) TestPrintResult_NoMessage() {
 	}
 
 	output := captureStdout(func() {
-		printResult(result)
+		printResult(result, VerbosityNormal)
 	})
 
 	suite.Contains(output, "PASS")

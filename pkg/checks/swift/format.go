@@ -49,11 +49,12 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 
 	cmd.Dir = path
 	output, err := cmd.CombinedOutput()
+	outputStr := string(output)
 
 	if err != nil {
-		outputStr := strings.TrimSpace(string(output))
+		trimmedOutput := strings.TrimSpace(outputStr)
 		// Count issues
-		lines := strings.Split(outputStr, "\n")
+		lines := strings.Split(trimmedOutput, "\n")
 		issueCount := 0
 		for _, line := range lines {
 			if strings.Contains(line, "warning:") || strings.Contains(line, "error:") {
@@ -61,15 +62,15 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 			}
 		}
 		if issueCount > 0 {
-			return rb.Warn("Code not formatted: " + formatCount(issueCount) + " issue(s) found"), nil
+			return rb.WarnWithOutput("Code not formatted: "+formatCount(issueCount)+" issue(s) found", outputStr), nil
 		}
-		return rb.Warn("Code not formatted (run '" + formatter + "')"), nil
+		return rb.WarnWithOutput("Code not formatted (run '"+formatter+"')", outputStr), nil
 	}
 
 	if hasConfig {
-		return rb.Pass("Code formatted (" + formatter + ", custom config)"), nil
+		return rb.PassWithOutput("Code formatted ("+formatter+", custom config)", outputStr), nil
 	}
-	return rb.Pass("Code formatted (" + formatter + ")"), nil
+	return rb.PassWithOutput("Code formatted ("+formatter+")", outputStr), nil
 }
 
 // detectFormatter determines which formatter is available.

@@ -119,7 +119,7 @@ func (c *CyclomaticCheck) Run(path string) (checker.Result, error) {
 	msg := checkutil.PluralizeCount(len(complexFunctions), "function exceeds", "functions exceed") +
 		fmt.Sprintf(" complexity threshold (%d)", threshold)
 
-	// Show top 3 offenders
+	// Show top 3 offenders in message
 	showCount := 3
 	if len(complexFunctions) < showCount {
 		showCount = len(complexFunctions)
@@ -134,7 +134,14 @@ func (c *CyclomaticCheck) Run(path string) (checker.Result, error) {
 		msg += fmt.Sprintf("\n  ... and %d more", len(complexFunctions)-showCount)
 	}
 
-	return rb.Warn(msg), nil
+	// Build raw output with all complex functions
+	var rawOutput strings.Builder
+	rawOutput.WriteString(fmt.Sprintf("Functions exceeding complexity threshold (%d):\n", threshold))
+	for _, f := range complexFunctions {
+		rawOutput.WriteString(fmt.Sprintf("  %s:%d %s (complexity: %d)\n", f.File, f.Line, f.Name, f.Complexity))
+	}
+
+	return rb.WarnWithOutput(msg, rawOutput.String()), nil
 }
 
 // functionName returns the name of a function, including receiver if present.

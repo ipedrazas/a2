@@ -51,10 +51,10 @@ func (c *TypeCheck) Run(path string) (checker.Result, error) {
 		// Parse error count from output
 		errorCount := countTypeErrors(output)
 		if errorCount > 0 {
-			return rb.Fail(fmt.Sprintf("%d type %s found. Run: npx tsc --noEmit",
-				errorCount, checkutil.Pluralize(errorCount, "error", "errors"))), nil
+			return rb.FailWithOutput(fmt.Sprintf("%d type %s found. Run: npx tsc --noEmit",
+				errorCount, checkutil.Pluralize(errorCount, "error", "errors")), output), nil
 		}
-		return rb.Fail("Type errors found. Run: npx tsc --noEmit"), nil
+		return rb.FailWithOutput("Type errors found. Run: npx tsc --noEmit", output), nil
 	}
 
 	return rb.Pass("No type errors found"), nil

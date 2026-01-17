@@ -77,18 +77,21 @@ func (c *BuildCheck) runBuildScript(path, pm string, rb *checkutil.ResultBuilder
 	}
 	cmd.Dir = path
 
-	var stderr bytes.Buffer
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	if err := cmd.Run(); err != nil {
+	err := cmd.Run()
+	output := stdout.String() + stderr.String()
+	if err != nil {
 		errMsg := strings.TrimSpace(stderr.String())
 		if errMsg != "" {
-			return rb.Fail("Build failed: " + checkutil.TruncateMessage(errMsg, 200)), nil
+			return rb.FailWithOutput("Build failed: "+checkutil.TruncateMessage(errMsg, 200), output), nil
 		}
-		return rb.Fail("Build failed"), nil
+		return rb.FailWithOutput("Build failed", output), nil
 	}
 
-	return rb.Pass("Build successful"), nil
+	return rb.PassWithOutput("Build successful", output), nil
 }
 
 // runTscNoEmit runs tsc --noEmit for type checking.
@@ -101,12 +104,15 @@ func (c *BuildCheck) runTscNoEmit(path string, rb *checkutil.ResultBuilder) (che
 	cmd := exec.Command("npx", "tsc", "--noEmit")
 	cmd.Dir = path
 
-	var stderr bytes.Buffer
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	if err := cmd.Run(); err != nil {
-		return rb.Fail("TypeScript compilation failed"), nil
+	err := cmd.Run()
+	output := stdout.String() + stderr.String()
+	if err != nil {
+		return rb.FailWithOutput("TypeScript compilation failed", output), nil
 	}
 
-	return rb.Pass("TypeScript compiles successfully"), nil
+	return rb.PassWithOutput("TypeScript compiles successfully", output), nil
 }

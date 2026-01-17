@@ -36,7 +36,7 @@ func (suite *ExternalTestSuite) TestResultFromJSON_Pass() {
 		Status:  "pass",
 	}
 
-	result, err := check.resultFromJSON(out)
+	result, err := check.resultFromJSON(out, "")
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -58,7 +58,7 @@ func (suite *ExternalTestSuite) TestResultFromJSON_Warn() {
 		Status:  "warn",
 	}
 
-	result, err := check.resultFromJSON(out)
+	result, err := check.resultFromJSON(out, "")
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -78,7 +78,7 @@ func (suite *ExternalTestSuite) TestResultFromJSON_Warning() {
 		Status:  "WARNING",
 	}
 
-	result, err := check.resultFromJSON(out)
+	result, err := check.resultFromJSON(out, "")
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -97,7 +97,7 @@ func (suite *ExternalTestSuite) TestResultFromJSON_Fail() {
 		Status:  "fail",
 	}
 
-	result, err := check.resultFromJSON(out)
+	result, err := check.resultFromJSON(out, "")
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -117,7 +117,7 @@ func (suite *ExternalTestSuite) TestResultFromJSON_Error() {
 		Status:  "error",
 	}
 
-	result, err := check.resultFromJSON(out)
+	result, err := check.resultFromJSON(out, "")
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -131,7 +131,7 @@ func (suite *ExternalTestSuite) TestResultFromExitCode_ExitCode0() {
 		CheckName: "Test Check",
 	}
 
-	result, err := check.resultFromExitCode("Success message", nil)
+	result, err := check.resultFromExitCode("Success message", nil, "")
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -149,7 +149,7 @@ func (suite *ExternalTestSuite) TestResultFromExitCode_ExitCode1() {
 	exitErr := &exec.ExitError{}
 	// We can't easily create a real ExitError with code 1, so we'll test the logic
 	// The actual exit code handling is tested in integration tests below
-	result, err := check.resultFromExitCode("Warning message", exitErr)
+	result, err := check.resultFromExitCode("Warning message", exitErr, "")
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -166,7 +166,7 @@ func (suite *ExternalTestSuite) TestResultFromExitCode_ExitCode2() {
 
 	// For exit code >= 2, should return Fail regardless of Severity
 	// This is tested in integration tests below
-	result, err := check.resultFromExitCode("Error message", exec.ErrNotFound)
+	result, err := check.resultFromExitCode("Error message", exec.ErrNotFound, "")
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -186,7 +186,7 @@ func (suite *ExternalTestSuite) TestResultFromExitCode_SeverityFail() {
 	// But with severity="fail", it should return Fail
 	// However, the code checks: exitCode >= 2 || c.Severity == "fail"
 	// So severity="fail" should force Fail status
-	result, err := check.resultFromExitCode("Failed", exec.ErrNotFound)
+	result, err := check.resultFromExitCode("Failed", exec.ErrNotFound, "")
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -204,7 +204,7 @@ func (suite *ExternalTestSuite) TestResultFromExitCode_EmptyOutput() {
 		CheckName: "Test Check",
 	}
 
-	result, err := check.resultFromExitCode("", exec.ErrNotFound)
+	result, err := check.resultFromExitCode("", exec.ErrNotFound, "")
 
 	suite.NoError(err)
 	suite.False(result.Passed)

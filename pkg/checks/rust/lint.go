@@ -59,9 +59,9 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 		}
 
 		if errors > 0 {
-			return rb.Fail(msg.String()), nil
+			return rb.FailWithOutput(msg.String(), outputStr), nil
 		}
-		return rb.Warn(msg.String()), nil
+		return rb.WarnWithOutput(msg.String(), outputStr), nil
 	}
 
 	if hasConfig {
