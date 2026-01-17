@@ -48,6 +48,7 @@ This tool does not replace your coding agent, it complements it. What you do wit
 - **Maturity Assessment**: Automatic scoring with Production-Ready, Mature, Development, or PoC levels
 - **Veto System**: Critical checks (build, tests) stop execution on failure
 - **Pretty Output**: Colored terminal output with recommendations
+- **Verbose Mode**: `-v` shows output for failures, `-vv` shows output for all checks
 - **JSON & TOON Output**: Machine-readable formats for CI/CD and coding agents
 - **Configurable**: `.a2.yaml` for thresholds, disabled checks, and custom checks
 - **Config Generator**: Interactive or CLI-based `.a2.yaml` generation with `a2 add`
@@ -93,6 +94,12 @@ a2 check --format json
 
 # TOON output for coding agents (minimal token usage)
 a2 check --format toon
+
+# Verbose output - show command output for failed/warning checks
+a2 check -v
+
+# Very verbose - show command output for ALL checks
+a2 check -vv
 
 # Skip specific checks
 a2 check --skip=license,k8s

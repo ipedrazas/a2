@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Verbose output flag** (`-v`, `-vv`) for `a2 check` command:
+  - `-v` shows command output for failed and warning checks only
+  - `-vv` shows command output for ALL checks (including passed)
+  - Works with all output formats (pretty, JSON, TOON)
+  - Useful for debugging why checks failed without needing `a2 run`
+  - Example: `a2 check -v` or `a2 check -vv --format json`
+
 ## [0.5.1] - 2026-01-14
 
 ### Added
