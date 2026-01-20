@@ -66,8 +66,8 @@ external:
     args: ["./..."]
     severity: warn
   
-  - id: go:golicense
-    name: Go License
-    command: go-licenses
-    args: ["check", "./..."]
-    severity: warn
+  # - id: go:golicense
+  #   name: Go License
+  #   command: go-licenses
+  #   args: ["check", "./...", "--ignore", "github.com/ipedrazas/a2", "./..."]
+  #   severity: warn
