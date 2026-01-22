@@ -188,7 +188,7 @@ func printResult(r checker.Result, verbosity VerbosityLevel) {
 		if shouldShowOutput {
 			fmt.Println(rawOutputHeaderStyle.Render("--- Output ---"))
 			// Indent each line of raw output
-			for _, line := range strings.Split(strings.TrimSpace(r.RawOutput), "\n") {
+			for line := range strings.SplitSeq(strings.TrimSpace(r.RawOutput), "\n") {
 				fmt.Println(rawOutputStyle.Render(line))
 			}
 		}

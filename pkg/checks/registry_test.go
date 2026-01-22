@@ -9,6 +9,11 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+// testDefaultChecks is a test helper for DefaultChecks.
+func testDefaultChecks() []checker.CheckRegistration {
+	return defaultChecks()
+}
+
 // RegistryTestSuite is the test suite for the registry package.
 type RegistryTestSuite struct {
 	suite.Suite
@@ -239,7 +244,7 @@ func (suite *RegistryTestSuite) TestGetChecks_AllDisabled() {
 // When run from a directory without language indicator files (like go.mod),
 // only common checks are returned.
 func (suite *RegistryTestSuite) TestDefaultChecks() {
-	checks := DefaultChecks()
+	checks := testDefaultChecks()
 
 	// Should at least have common checks
 	suite.NotEmpty(checks)

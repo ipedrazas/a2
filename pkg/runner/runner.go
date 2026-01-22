@@ -31,16 +31,16 @@ type RunSuiteOptions struct {
 	OnProgress ProgressFunc  // Optional callback for progress updates
 }
 
-// RunSuite executes a suite of checks against the given path.
+// runSuite executes a suite of checks against the given path.
 // Uses parallel execution by default for better performance.
 // If a check returns Fail status, Aborted is set to true.
-func RunSuite(path string, registrations []checker.CheckRegistration) SuiteResult {
+func runSuite(path string, registrations []checker.CheckRegistration) SuiteResult {
 	return RunSuiteWithOptions(path, registrations, RunSuiteOptions{Parallel: true})
 }
 
-// RunSuiteSequential executes checks sequentially, stopping on first critical failure.
+// runSuiteSequential executes checks sequentially, stopping on first critical failure.
 // Use this when you need veto power behavior or have limited CPU resources.
-func RunSuiteSequential(path string, registrations []checker.CheckRegistration) SuiteResult {
+func runSuiteSequential(path string, registrations []checker.CheckRegistration) SuiteResult {
 	return RunSuiteWithOptions(path, registrations, RunSuiteOptions{Parallel: false})
 }
 
@@ -267,7 +267,7 @@ func (s *SuiteResult) Success() bool {
 }
 
 // formatPanicMessage creates a user-friendly message from a panic value.
-func formatPanicMessage(r interface{}) string {
+func formatPanicMessage(r any) string {
 	switch v := r.(type) {
 	case error:
 		return "Check panicked: " + v.Error()

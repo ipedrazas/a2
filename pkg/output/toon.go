@@ -105,7 +105,7 @@ func (e *toonEncoder) writeKeyValue(key, value string) {
 func (e *toonEncoder) writeStringArray(key string, values []string) {
 	e.writeIndent()
 	e.builder.WriteString(e.encodeKey(key))
-	e.builder.WriteString(fmt.Sprintf("[%d]:", len(values)))
+	fmt.Fprintf(&e.builder, "[%d]:", len(values))
 	if len(values) > 0 {
 		e.builder.WriteByte(' ')
 		encoded := make([]string, len(values))
@@ -123,9 +123,9 @@ func (e *toonEncoder) writeResultsArray(results []checker.Result, verbosity Verb
 	// Use tabular format: results[N]{fields}:
 	// Include raw_output field when verbosity > 0
 	if verbosity > VerbosityNormal {
-		e.builder.WriteString(fmt.Sprintf("results[%d]{name,id,passed,status,message,language,duration_ms,raw_output}:\n", len(results)))
+		fmt.Fprintf(&e.builder, "results[%d]{name,id,passed,status,message,language,duration_ms,raw_output}:\n", len(results))
 	} else {
-		e.builder.WriteString(fmt.Sprintf("results[%d]{name,id,passed,status,message,language,duration_ms}:\n", len(results)))
+		fmt.Fprintf(&e.builder, "results[%d]{name,id,passed,status,message,language,duration_ms}:\n", len(results))
 	}
 	e.indent++
 	for _, r := range results {

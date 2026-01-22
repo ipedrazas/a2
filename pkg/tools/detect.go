@@ -173,11 +173,6 @@ func GetInstallCommand(tool Tool, env Environment) string {
 	return ""
 }
 
-// HasPackageManager checks if a package manager is available.
-func (e Environment) HasPackageManager(name string) bool {
-	return slices.Contains(e.PackageManagers, name)
-}
-
 // OSName returns a human-friendly OS name.
 func (e Environment) OSName() string {
 	switch e.OS {
