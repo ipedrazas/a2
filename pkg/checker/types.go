@@ -65,6 +65,7 @@ type CheckMeta struct {
 	Description string     // Detailed explanation of what this check does
 	Languages   []Language // Which languages this check applies to
 	Critical    bool       // If true, failure = veto/abort
+	Optional    bool       // If true, Warn results are converted to Info (excluded from score)
 	Order       int        // Execution priority (lower = first)
 	Suggestion  string     // Recommendation shown when check fails (e.g., "Run 'go fmt' to fix")
 }
