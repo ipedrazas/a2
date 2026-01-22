@@ -8,7 +8,6 @@ import (
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checks"
 	"github.com/ipedrazas/a2/pkg/config"
-	"github.com/ipedrazas/a2/pkg/runner"
 	"github.com/spf13/cobra"
 )
 
@@ -136,41 +135,4 @@ func outputRunResultJSON(result checker.Result) {
 		fmt.Printf(",\n  \"raw_output\": %q", result.RawOutput)
 	}
 	fmt.Printf("\n}\n")
-}
-
-// RunCheckByID runs a check by its ID and returns the result.
-// This is exported for use by other packages.
-func RunCheckByID(checkID, path string) (*checker.Result, *checker.CheckMeta, error) {
-	cfg, err := config.Load(path)
-	if err != nil {
-		return nil, nil, fmt.Errorf("error loading config: %w", err)
-	}
-
-	allRegs := checks.GetAllCheckRegistrations(cfg)
-
-	var found *checker.CheckRegistration
-	for i := range allRegs {
-		if allRegs[i].Meta.ID == checkID {
-			found = &allRegs[i]
-			break
-		}
-	}
-
-	if found == nil {
-		return nil, nil, fmt.Errorf("unknown check ID: %s", checkID)
-	}
-
-	// Run with timeout using runner package
-	opts := runner.RunSuiteOptions{
-		Parallel: false,
-		Timeout:  0,
-	}
-	suiteResult := runner.RunSuiteWithOptions(path, []checker.CheckRegistration{*found}, opts)
-
-	if len(suiteResult.Results) == 0 {
-		return nil, nil, fmt.Errorf("no result from check")
-	}
-
-	result := suiteResult.Results[0]
-	return &result, &found.Meta, nil
 }

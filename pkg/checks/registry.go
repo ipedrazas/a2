@@ -105,9 +105,9 @@ func getChecksForLanguage(lang checker.Language, cfg *config.Config) []checker.C
 	}
 }
 
-// DefaultChecks returns checks for auto-detected languages.
+// defaultChecks returns checks for auto-detected languages.
 // Returns empty slice if no language is detected.
-func DefaultChecks() []checker.CheckRegistration {
+func defaultChecks() []checker.CheckRegistration {
 	cfg := config.DefaultConfig()
 	detected := language.Detect(".")
 	return GetChecks(cfg, detected)

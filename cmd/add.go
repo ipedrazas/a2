@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/huh"
-	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/language"
 	"github.com/ipedrazas/a2/pkg/profiles"
@@ -310,16 +309,4 @@ func stringSliceEqual(a, b []string) bool {
 		}
 	}
 	return true
-}
-
-// AllLanguages returns all supported language strings.
-func AllLanguages() []checker.Language {
-	return []checker.Language{
-		checker.LangGo,
-		checker.LangPython,
-		checker.LangNode,
-		checker.LangJava,
-		checker.LangRust,
-		checker.LangTypeScript,
-	}
 }
