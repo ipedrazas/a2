@@ -43,7 +43,7 @@ func (p *pathResolvingChecker) Run(path string) (checker.Result, error) {
 // GetChecks returns checks for detected languages based on configuration.
 // Checks are ordered with critical checks first.
 // Language-specific checks are wrapped to use the configured source_dir.
-func GetChecks(cfg *config.Config, detected language.DetectionResult) []checker.Checker {
+func GetChecks(cfg *config.Config, detected language.DetectionResult) []checker.CheckRegistration {
 	var registrations []checker.CheckRegistration
 
 	// Get checks for each detected language
@@ -71,12 +71,12 @@ func GetChecks(cfg *config.Config, detected language.DetectionResult) []checker.
 		return registrations[i].Meta.Order < registrations[j].Meta.Order
 	})
 
-	// Filter disabled and extract checkers
-	var enabled []checker.Checker
+	// Filter disabled checks
+	var enabled []checker.CheckRegistration
 	for _, reg := range registrations {
 		checkID := reg.Meta.ID
 		if !cfg.IsCheckDisabled(checkID) {
-			enabled = append(enabled, reg.Checker)
+			enabled = append(enabled, reg)
 		}
 	}
 
@@ -107,7 +107,7 @@ func getChecksForLanguage(lang checker.Language, cfg *config.Config) []checker.C
 
 // DefaultChecks returns checks for auto-detected languages.
 // Returns empty slice if no language is detected.
-func DefaultChecks() []checker.Checker {
+func DefaultChecks() []checker.CheckRegistration {
 	cfg := config.DefaultConfig()
 	detected := language.Detect(".")
 	return GetChecks(cfg, detected)
@@ -115,7 +115,7 @@ func DefaultChecks() []checker.Checker {
 
 // GetChecksForPath returns checks for a specific path with auto-detection.
 // Returns empty checks slice if no language is detected.
-func GetChecksForPath(path string, cfg *config.Config) ([]checker.Checker, language.DetectionResult) {
+func GetChecksForPath(path string, cfg *config.Config) ([]checker.CheckRegistration, language.DetectionResult) {
 	// Detect languages or use explicit config
 	var detected language.DetectionResult
 	if len(cfg.Language.Explicit) > 0 {

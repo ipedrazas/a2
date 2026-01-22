@@ -165,7 +165,7 @@ func RunCheckByID(checkID, path string) (*checker.Result, *checker.CheckMeta, er
 		Parallel: false,
 		Timeout:  0,
 	}
-	suiteResult := runner.RunSuiteWithOptions(path, []checker.Checker{found.Checker}, opts)
+	suiteResult := runner.RunSuiteWithOptions(path, []checker.CheckRegistration{*found}, opts)
 
 	if len(suiteResult.Results) == 0 {
 		return nil, nil, fmt.Errorf("no result from check")

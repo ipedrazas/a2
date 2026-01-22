@@ -35,7 +35,7 @@ func (suite *RegistryTestSuite) TestGetChecks_AllEnabled() {
 	// Verify critical checks are present
 	checkIDs := make(map[string]bool)
 	for _, check := range checks {
-		checkIDs[check.ID()] = true
+		checkIDs[check.Meta.ID] = true
 	}
 
 	suite.True(checkIDs["go:module"], "go:module check should be present")
@@ -68,7 +68,7 @@ func (suite *RegistryTestSuite) TestGetChecks_FiltersDisabled() {
 
 	checkIDs := make(map[string]bool)
 	for _, check := range checks {
-		checkIDs[check.ID()] = true
+		checkIDs[check.Meta.ID] = true
 	}
 
 	suite.False(checkIDs["go:format"], "go:format should be disabled")
@@ -104,7 +104,7 @@ func (suite *RegistryTestSuite) TestGetChecks_BackwardCompatibility() {
 
 	checkIDs := make(map[string]bool)
 	for _, check := range checks {
-		checkIDs[check.ID()] = true
+		checkIDs[check.Meta.ID] = true
 	}
 
 	// Old IDs should disable new checks
@@ -152,8 +152,8 @@ func (suite *RegistryTestSuite) TestGetChecks_IncludesExternal() {
 	checkIDs := make(map[string]bool)
 	checkNames := make(map[string]string)
 	for _, check := range checks {
-		checkIDs[check.ID()] = true
-		checkNames[check.ID()] = check.Name()
+		checkIDs[check.Meta.ID] = true
+		checkNames[check.Meta.ID] = check.Meta.Name
 	}
 
 	suite.True(checkIDs["custom-1"], "custom-1 should be included")
@@ -193,7 +193,7 @@ func (suite *RegistryTestSuite) TestGetChecks_Ordering() {
 	criticalIDs := []string{"go:module", "go:build", "go:tests"}
 	for i, expectedID := range criticalIDs {
 		if i < len(checks) {
-			suite.Equal(expectedID, checks[i].ID(), "Critical check %s should be at position %d", expectedID, i)
+			suite.Equal(expectedID, checks[i].Meta.ID, "Critical check %s should be at position %d", expectedID, i)
 		}
 	}
 }
@@ -227,7 +227,7 @@ func (suite *RegistryTestSuite) TestGetChecks_AllDisabled() {
 	// Should return empty or only external checks
 	checkIDs := make(map[string]bool)
 	for _, check := range checks {
-		checkIDs[check.ID()] = true
+		checkIDs[check.Meta.ID] = true
 	}
 
 	suite.False(checkIDs["go:module"])
@@ -247,7 +247,7 @@ func (suite *RegistryTestSuite) TestDefaultChecks() {
 	// Verify common checks are present
 	checkIDs := make(map[string]bool)
 	for _, check := range checks {
-		checkIDs[check.ID()] = true
+		checkIDs[check.Meta.ID] = true
 	}
 
 	// Common checks should always be present
@@ -288,7 +288,7 @@ func (suite *RegistryTestSuite) TestGetChecks_ExternalWithDisabled() {
 
 	checkIDs := make(map[string]bool)
 	for _, check := range checks {
-		checkIDs[check.ID()] = true
+		checkIDs[check.Meta.ID] = true
 	}
 
 	suite.False(checkIDs["external-1"], "external-1 should be disabled")
@@ -307,7 +307,7 @@ func (suite *RegistryTestSuite) TestGetChecks_NoLanguageDetected() {
 	// Should only have common checks (file_exists)
 	checkIDs := make(map[string]bool)
 	for _, check := range checks {
-		checkIDs[check.ID()] = true
+		checkIDs[check.Meta.ID] = true
 	}
 
 	suite.True(checkIDs["file_exists"], "file_exists should be present as common check")

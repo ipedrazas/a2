@@ -54,6 +54,34 @@ func (m *panicMockChecker) Run(path string) (checker.Result, error) {
 	panic(m.panicValue)
 }
 
+// Helper functions to convert mock checkers to registrations for testing
+func toRegistration(c checker.Checker, optional bool) checker.CheckRegistration {
+	return checker.CheckRegistration{
+		Checker: c,
+		Meta: checker.CheckMeta{
+			ID:       c.ID(),
+			Name:     c.Name(),
+			Optional: optional,
+		},
+	}
+}
+
+func toRegistrations(checks []checker.Checker) []checker.CheckRegistration {
+	regs := make([]checker.CheckRegistration, len(checks))
+	for i, c := range checks {
+		regs[i] = toRegistration(c, false)
+	}
+	return regs
+}
+
+func toRegistrationsWithOptions(checks []checker.Checker, optional []bool) []checker.CheckRegistration {
+	regs := make([]checker.CheckRegistration, len(checks))
+	for i, c := range checks {
+		regs[i] = toRegistration(c, optional[i])
+	}
+	return regs
+}
+
 // RunnerTestSuite is the test suite for the runner package.
 type RunnerTestSuite struct {
 	suite.Suite
@@ -91,7 +119,7 @@ func (suite *RunnerTestSuite) TestRunSuite_AllPass() {
 		},
 	}
 
-	result := RunSuite("/test/path", checks)
+	result := RunSuite("/test/path", toRegistrations(checks))
 
 	suite.Equal(2, result.TotalChecks())
 	suite.Equal(2, result.Passed)
@@ -140,7 +168,7 @@ func (suite *RunnerTestSuite) TestRunSuite_WithWarnings() {
 		},
 	}
 
-	result := RunSuite("/test/path", checks)
+	result := RunSuite("/test/path", toRegistrations(checks))
 
 	suite.Equal(3, result.TotalChecks())
 	suite.Equal(2, result.Passed)
@@ -190,7 +218,7 @@ func (suite *RunnerTestSuite) TestRunSuite_WithFailure() {
 	}
 
 	// Use sequential mode to test abort behavior
-	result := RunSuiteSequential("/test/path", checks)
+	result := RunSuiteSequential("/test/path", toRegistrations(checks))
 
 	suite.Equal(2, result.TotalChecks()) // Only 2 checks ran (aborted after check2)
 	suite.Equal(1, result.Passed)
@@ -238,7 +266,7 @@ func (suite *RunnerTestSuite) TestRunSuite_InternalError() {
 	}
 
 	// Use sequential mode to test abort behavior
-	result := RunSuiteSequential("/test/path", checks)
+	result := RunSuiteSequential("/test/path", toRegistrations(checks))
 
 	suite.Equal(2, result.TotalChecks()) // Only 2 checks ran (aborted after check2 error)
 	suite.Equal(1, result.Passed)
@@ -259,7 +287,7 @@ func (suite *RunnerTestSuite) TestRunSuite_InternalError() {
 // TestRunSuite_EmptyChecks tests with an empty check list.
 func (suite *RunnerTestSuite) TestRunSuite_EmptyChecks() {
 	checks := []checker.Checker{}
-	result := RunSuite("/test/path", checks)
+	result := RunSuite("/test/path", toRegistrations(checks))
 
 	suite.Equal(0, result.TotalChecks())
 	suite.Equal(0, result.Passed)
@@ -320,7 +348,7 @@ func (suite *RunnerTestSuite) TestRunSuite_MixedResults() {
 	}
 
 	// Use sequential mode to test abort behavior
-	result := RunSuiteSequential("/test/path", checks)
+	result := RunSuiteSequential("/test/path", toRegistrations(checks))
 
 	suite.Equal(3, result.TotalChecks()) // Aborted after check3
 	suite.Equal(1, result.Passed)
@@ -368,7 +396,7 @@ func (suite *RunnerTestSuite) TestRunSuite_WarnDoesNotAbort() {
 		},
 	}
 
-	result := RunSuite("/test/path", checks)
+	result := RunSuite("/test/path", toRegistrations(checks))
 
 	suite.Equal(3, result.TotalChecks()) // All checks should run
 	suite.Equal(1, result.Passed)
@@ -452,7 +480,7 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelRunsAllChecks() {
 	}
 
 	// Parallel mode should run all checks
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	suite.Equal(3, result.TotalChecks()) // All 3 checks ran
 	suite.Equal(2, result.Passed)
@@ -506,7 +534,7 @@ func (suite *RunnerTestSuite) TestRunSuite_SequentialStopsOnFailure() {
 	}
 
 	// Sequential mode should stop on failure
-	result := RunSuiteSequential("/test/path", checks)
+	result := RunSuiteSequential("/test/path", toRegistrations(checks))
 
 	suite.Equal(2, result.TotalChecks()) // Only 2 checks ran (aborted after check2)
 	suite.Equal(1, result.Passed)
@@ -548,7 +576,7 @@ func (suite *RunnerTestSuite) TestRunSuiteWithOptions_Parallel() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	suite.Equal(2, result.TotalChecks())
 	suite.Equal(1, result.Passed)
@@ -584,7 +612,7 @@ func (suite *RunnerTestSuite) TestRunSuiteWithOptions_Sequential() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{Parallel: false})
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: false})
 
 	suite.Equal(2, result.TotalChecks())
 	suite.Equal(1, result.Passed)
@@ -596,7 +624,7 @@ func (suite *RunnerTestSuite) TestRunSuiteWithOptions_Sequential() {
 // TestRunSuite_ParallelEmptyChecks tests parallel mode with empty check list.
 func (suite *RunnerTestSuite) TestRunSuite_ParallelEmptyChecks() {
 	checks := []checker.Checker{}
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	suite.Equal(0, result.TotalChecks())
 	suite.Equal(0, result.Passed)
@@ -636,7 +664,7 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelWithError() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	suite.Equal(3, result.TotalChecks()) // All 3 checks ran in parallel
 	suite.Equal(2, result.Passed)
@@ -689,7 +717,7 @@ func (suite *RunnerTestSuite) TestRunSuite_WithInfo() {
 		},
 	}
 
-	result := RunSuite("/test/path", checks)
+	result := RunSuite("/test/path", toRegistrations(checks))
 
 	suite.Equal(3, result.TotalChecks())  // All checks ran
 	suite.Equal(2, result.ScoredChecks()) // Only 2 count toward score (excluding Info)
@@ -739,7 +767,7 @@ func (suite *RunnerTestSuite) TestRunSuite_InfoDoesNotAbort() {
 		},
 	}
 
-	result := RunSuiteSequential("/test/path", checks)
+	result := RunSuiteSequential("/test/path", toRegistrations(checks))
 
 	suite.Equal(3, result.TotalChecks())  // All checks should run
 	suite.Equal(1, result.ScoredChecks()) // Only 1 counts toward score
@@ -804,7 +832,7 @@ func (suite *RunnerTestSuite) TestRunSuite_DurationIsSet() {
 		},
 	}
 
-	result := RunSuite("/test/path", checks)
+	result := RunSuite("/test/path", toRegistrations(checks))
 
 	suite.Equal(2, result.TotalChecks())
 	// Verify Duration is set on each result
@@ -835,7 +863,7 @@ func (suite *RunnerTestSuite) TestRunSuite_TotalDurationIsSet() {
 		},
 	}
 
-	result := RunSuite("/test/path", checks)
+	result := RunSuite("/test/path", toRegistrations(checks))
 
 	// Verify TotalDuration is set and reasonable
 	suite.Greater(result.TotalDuration.Nanoseconds(), int64(0), "TotalDuration should be non-zero")
@@ -875,7 +903,7 @@ func (suite *RunnerTestSuite) TestRunSuite_SequentialTiming() {
 		},
 	}
 
-	result := RunSuiteSequential("/test/path", checks)
+	result := RunSuiteSequential("/test/path", toRegistrations(checks))
 
 	// In sequential mode, TotalDuration should be at least the sum of delays
 	suite.GreaterOrEqual(result.TotalDuration, 20*time.Millisecond)
@@ -917,7 +945,7 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelTiming() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	// In parallel mode, TotalDuration should be less than the sum of delays
 	// (since checks run concurrently) but at least as long as the longest check
@@ -933,7 +961,7 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelTiming() {
 func (suite *RunnerTestSuite) TestRunSuite_EmptyChecksTiming() {
 	checks := []checker.Checker{}
 
-	result := RunSuite("/test/path", checks)
+	result := RunSuite("/test/path", toRegistrations(checks))
 
 	// TotalDuration should be very small but not negative
 	suite.GreaterOrEqual(result.TotalDuration.Nanoseconds(), int64(0))
@@ -959,7 +987,7 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutNotExceeded() {
 	}
 
 	// Timeout is 100ms, check takes 10ms - should succeed
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{
 		Parallel: true,
 		Timeout:  100 * time.Millisecond,
 	})
@@ -991,7 +1019,7 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutExceeded() {
 	}
 
 	// Timeout is 20ms, check takes 100ms - should timeout
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{
 		Parallel: true,
 		Timeout:  20 * time.Millisecond,
 	})
@@ -1053,7 +1081,7 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutSequential() {
 	}
 
 	// Timeout is 20ms per check
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{
 		Parallel: false,
 		Timeout:  20 * time.Millisecond,
 	})
@@ -1086,7 +1114,7 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutZeroMeansNoTimeout() {
 	}
 
 	// Timeout is 0 (no timeout)
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{
 		Parallel: true,
 		Timeout:  0,
 	})
@@ -1130,7 +1158,7 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryParallel() {
 	}
 
 	// Parallel mode should recover from panic and continue
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	suite.Equal(3, result.TotalChecks()) // All 3 checks should have results
 	suite.Equal(2, result.Passed)
@@ -1161,7 +1189,7 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithError() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	suite.Equal(1, result.TotalChecks())
 	suite.Equal(0, result.Passed)
@@ -1180,7 +1208,7 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithUnknownValue() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	suite.Equal(1, result.TotalChecks())
 	suite.Equal(0, result.Passed)
@@ -1210,7 +1238,7 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithTimeout() {
 	}
 
 	// Panic recovery should work with timeout enabled
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{
 		Parallel: true,
 		Timeout:  1 * time.Second,
 	})
@@ -1257,7 +1285,7 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoverySequential() {
 	}
 
 	// Sequential mode should recover from panic but abort
-	result := RunSuiteWithOptions("/test/path", checks, RunSuiteOptions{
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{
 		Parallel: false,
 		Timeout:  1 * time.Second,
 	})
@@ -1331,7 +1359,7 @@ func (suite *RunnerTestSuite) TestProgressCallback_Parallel() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", checks, opts)
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), opts)
 
 	suite.Equal(3, result.TotalChecks())
 	suite.Equal(int32(3), callCount, "Progress callback should be called once per check")
@@ -1372,7 +1400,7 @@ func (suite *RunnerTestSuite) TestProgressCallback_Sequential() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", checks, opts)
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), opts)
 
 	suite.Equal(2, result.TotalChecks())
 	suite.Equal([]int{1, 2}, progressUpdates, "Progress should be called in sequence")
@@ -1399,7 +1427,7 @@ func (suite *RunnerTestSuite) TestProgressCallback_Nil() {
 		OnProgress: nil,
 	}
 
-	result := RunSuiteWithOptions("/test/path", checks, opts)
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), opts)
 
 	suite.Equal(1, result.TotalChecks())
 	suite.Equal(1, result.Passed)
@@ -1418,7 +1446,7 @@ func (suite *RunnerTestSuite) TestProgressCallback_EmptyChecks() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", checks, opts)
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), opts)
 
 	suite.Equal(0, result.TotalChecks())
 	suite.Equal(int32(0), callCount, "Progress callback should not be called with empty checks")
@@ -1453,10 +1481,100 @@ func (suite *RunnerTestSuite) TestProgressCallback_WithPanic() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", checks, opts)
+	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), opts)
 
 	suite.Equal(2, result.TotalChecks())
 	suite.Equal(int32(2), callCount, "Progress callback should be called even for panicking checks")
+}
+
+// TestRunSuite_OptionalCheck_WarnBecomesInfo tests that optional checks convert Warn to Info.
+func (suite *RunnerTestSuite) TestRunSuite_OptionalCheck_WarnBecomesInfo() {
+	checks := []checker.Checker{
+		&mockChecker{
+			id:   "check1",
+			name: "Check 1",
+			result: checker.Result{
+				Name:    "Check 1",
+				ID:      "check1",
+				Passed:  true,
+				Status:  checker.Pass,
+				Message: "Passed",
+			},
+		},
+		&mockChecker{
+			id:   "check2",
+			name: "Optional Check",
+			result: checker.Result{
+				Name:    "Optional Check",
+				ID:      "check2",
+				Passed:  false,
+				Status:  checker.Warn,
+				Message: "Warning but optional",
+			},
+		},
+		&mockChecker{
+			id:   "check3",
+			name: "Check 3",
+			result: checker.Result{
+				Name:    "Check 3",
+				ID:      "check3",
+				Passed:  true,
+				Status:  checker.Pass,
+				Message: "Passed",
+			},
+		},
+	}
+
+	// Create registrations with check2 marked as optional
+	registrations := toRegistrationsWithOptions(checks, []bool{false, true, false})
+
+	result := RunSuite("/test/path", registrations)
+
+	suite.Equal(3, result.TotalChecks())
+	suite.Equal(2, result.Passed)
+	suite.Equal(0, result.Warnings, "Optional check should convert Warn to Info")
+	suite.Equal(1, result.Info, "Optional check with Warn should become Info")
+	suite.Equal(0, result.Failed)
+	suite.False(result.Aborted)
+	suite.True(result.Success())
+
+	// Verify the optional check was converted to Info
+	suite.Equal(checker.Info, result.Results[1].Status)
+	suite.True(result.Results[1].Passed, "Info status should set Passed=true")
+}
+
+// TestRunSuite_OptionalCheck_FailStaysFail tests that optional checks don't convert Fail to Info.
+func (suite *RunnerTestSuite) TestRunSuite_OptionalCheck_FailStaysFail() {
+	checks := []checker.Checker{
+		&mockChecker{
+			id:   "check1",
+			name: "Optional Check",
+			result: checker.Result{
+				Name:    "Optional Check",
+				ID:      "check1",
+				Passed:  false,
+				Status:  checker.Fail,
+				Message: "Critical failure",
+			},
+		},
+	}
+
+	// Create registration with optional=true
+	registrations := toRegistrationsWithOptions(checks, []bool{true})
+
+	result := RunSuite("/test/path", registrations)
+
+	suite.Equal(1, result.TotalChecks())
+	suite.Equal(0, result.Passed)
+	suite.Equal(0, result.Warnings)
+	suite.Equal(1, result.Failed, "Optional check should NOT convert Fail to Info")
+	suite.Equal(0, result.Info)
+	suite.True(result.Aborted)
+	suite.False(result.Success())
+
+	// Verify Fail status is preserved
+	suite.Equal(checker.Fail, result.Results[0].Status)
+	suite.False(result.Results[0].Passed)
 }
 
 // TestRunnerTestSuite runs all the tests in the suite.

@@ -202,13 +202,13 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get the list of checks to run
-	checkList := checks.GetChecks(cfg, detected)
+	registrations := checks.GetChecks(cfg, detected)
 
 	// Set up progress callback for Pretty format only
 	var progress *output.ProgressReporter
 	var progressFunc runner.ProgressFunc
 
-	if format == "pretty" && len(checkList) > 0 {
+	if format == "pretty" && len(registrations) > 0 {
 		progress = output.NewProgressReporter()
 		progressFunc = progress.Update
 	}
@@ -219,7 +219,7 @@ func runCheck(cmd *cobra.Command, args []string) error {
 		Timeout:    timeout,
 		OnProgress: progressFunc,
 	}
-	result := runner.RunSuiteWithOptions(path, checkList, opts)
+	result := runner.RunSuiteWithOptions(path, registrations, opts)
 
 	// Clear progress display before showing results
 	if progress != nil {
