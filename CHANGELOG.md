@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-01-24
+
+### Added
+- **Server command** (`a2 server`) - Run a2 as a web server with HTTP API and React UI:
+  - Accepts GitHub URLs, clones repositories, runs checks, and returns results
+  - Includes web UI built with React + TypeScript + TailwindCSS
+  - Job queue with configurable worker pool (default: 5 concurrent jobs)
+  - Automatic workspace cleanup after job completion
+  - Background cleanup of old jobs and workspaces
+  - Graceful shutdown on SIGINT/SIGTERM
+  - Docker support with multi-stage build (Go + UI)
+  - docker-compose configuration for easy deployment
+  - API endpoints:
+    - `POST /api/check` - Submit a GitHub URL for checking
+    - `GET /api/check/{id}` - Get job status and results
+    - `GET /health` - Health check endpoint
+    - `GET /` - Serve React UI
+- **Task commands** for server development:
+  - `task server:ui:build` - Build React UI for production
+  - `task server:build` - Build Docker image with UI
+  - `task server:run` - Run a2 server in Docker
+  - `task server:dev` - Run a2 server locally (requires Go)
+  - `task server:dev:ui` - Run React UI dev server
+
+## [0.5.3] - 2026-01-22
+
 ### Added
 - **Verbose output flag** (`-v`, `-vv`) for `a2 check` command:
   - `-v` shows command output for failed and warning checks only
