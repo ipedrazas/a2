@@ -147,3 +147,41 @@ tasks:
       - task: build
       - task: test
       - task: run
+
+  # Server tasks
+  server:ui:build:
+    desc: Build the React UI for production
+    dir: ui
+    cmds:
+      - npm ci
+      - npm run build
+    sources:
+      - ui/src/**/*
+      - ui/package.json
+      - ui/vite.config.ts
+      - ui/tailwind.config.js
+      - ui/tsconfig.json
+    generates:
+      - ui/dist/**
+
+  server:build:
+    desc: Build Docker image with UI (server mode)
+    deps: [server:ui:build]
+    cmds:
+      - docker build --build-arg VERSION={{.VERSION}} --build-arg GITSHA={{.GITSHA}} --build-arg BUILDDATE={{.BUILDDATE}} -t {{.BINARY}}-server:{{.VERSION}} -t {{.BINARY}}-server:latest .
+
+  server:run:
+    desc: Run a2 server in Docker
+    cmds:
+      - docker run -p 8080:8080 -v a2-cache:/workspace/a2-cache {{.BINARY}}-server:latest server --port 8080
+
+  server:dev:
+    desc: Run a2 server locally (requires Go)
+    cmds:
+      - go run . server --port 8080 --workspace-dir ./a2-cache {{.CLI_ARGS}}
+
+  server:dev:ui:
+    desc: Run React UI dev server (for development)
+    dir: ui
+    cmds:
+      - npm run dev

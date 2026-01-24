@@ -33,3 +33,5 @@ go.work.sum
 /a2
 /dist/
 .task/
+node_modules/
+a2-cache/
