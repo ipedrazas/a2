@@ -1,0 +1,18 @@
+services:
+  a2-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./a2-cache:/workspace/a2-cache
+    command: ["server", "--port", "8080", "--host", "0.0.0.0", "--workspace-dir", "/workspace/a2-cache"]
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}  # Optional: for private repos
+    restart: unless-stopped
+    working_dir: /workspace
+    
+
+volumes:
+  a2-cache:
