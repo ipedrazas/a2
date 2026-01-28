@@ -14,6 +14,7 @@ type CheckRequest struct {
 	Target      string   `json:"target,omitempty"`       // Maturity target (poc, production)
 	SkipChecks  []string `json:"skip_checks,omitempty"`  // Checks to skip
 	TimeoutSecs int      `json:"timeout_secs,omitempty"` // Per-check timeout (0 = no timeout)
+	Verbose     bool     `json:"verbose,omitempty"`      // Show command output for failed/warning checks
 }
 
 // CheckResponse is the response when a check is submitted.

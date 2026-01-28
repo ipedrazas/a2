@@ -11,12 +11,14 @@ export function CheckForm({ onSubmit, loading }: CheckFormProps) {
   const [profile, setProfile] = useState('');
   const [target, setTarget] = useState('');
   const [skipChecks, setSkipChecks] = useState('');
+  const [verbose, setVerbose] = useState(false);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
     const request: CheckRequest = {
       url: url.trim(),
+      verbose: verbose,
     };
 
     if (profile) request.profile = profile;
@@ -109,6 +111,20 @@ export function CheckForm({ onSubmit, loading }: CheckFormProps) {
         <p className="mt-1 text-xs text-gray-500">
           Comma-separated check IDs to skip
         </p>
+      </div>
+
+      <div className="flex items-center">
+        <input
+          id="verbose"
+          type="checkbox"
+          checked={verbose}
+          onChange={(e) => setVerbose(e.target.checked)}
+          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          disabled={loading}
+        />
+        <label htmlFor="verbose" className="ml-2 text-sm text-gray-700">
+          Verbose output (show command output for failed/warning checks)
+        </label>
       </div>
 
       <button

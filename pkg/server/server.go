@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -53,6 +54,7 @@ func (s *Server) setupRoutes() {
 	// API endpoints
 	api.HandleFunc("/check", s.handleSubmitCheck).Methods("POST")
 	api.HandleFunc("/check/{id}", s.handleGetCheck).Methods("GET")
+	api.HandleFunc("/jobs", s.handleListJobs).Methods("GET")
 	api.HandleFunc("/health", s.handleHealth).Methods("GET")
 
 	// Serve static files (UI) at root
@@ -199,6 +201,36 @@ func (s *Server) handleGetCheck(w http.ResponseWriter, r *http.Request) {
 	// Return job response
 	w.WriteHeader(http.StatusOK)
 	err := json.NewEncoder(w).Encode(job.ToJobResponse())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+// handleListJobs handles GET /api/jobs.
+func (s *Server) handleListJobs(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// Get all jobs from store
+	jobs := s.jobStore.List()
+
+	// Convert to responses
+	responses := make([]JobResponse, 0, len(jobs))
+	for _, job := range jobs {
+		responses = append(responses, job.ToJobResponse())
+	}
+
+	// Sort by submitted time (newest first)
+	sort.Slice(responses, func(i, j int) bool {
+		return responses[i].SubmittedAt.After(responses[j].SubmittedAt)
+	})
+
+	// Limit to last 100 jobs for performance
+	if len(responses) > 100 {
+		responses = responses[:100]
+	}
+
+	w.WriteHeader(http.StatusOK)
+	err := json.NewEncoder(w).Encode(responses)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

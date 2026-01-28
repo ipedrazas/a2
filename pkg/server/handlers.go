@@ -121,12 +121,21 @@ func ProcessJob(ctx context.Context, job *Job, wm *WorkspaceManager) error {
 
 	result := runner.RunSuiteWithOptions(workspaceDir, registrations, opts)
 
-	// Convert result to JSON format
-	jsonOutput := toJSONOutput(result, detected, output.VerbosityLevel(0))
+	// Determine verbosity level based on request
+	var verbosity output.VerbosityLevel
+	if job.Request.Verbose {
+		verbosity = output.VerbosityFailures // Show output for failures and warnings
+	} else {
+		verbosity = output.VerbosityLevel(0) // No raw output
+	}
 
-	// Store result in job
+	// Convert result to JSON format
+	jsonOutput := toJSONOutput(result, detected, verbosity)
+
+	// Store result in job (this updates the in-memory job struct)
 	job.Result = jsonOutput
 
+	// Note: The job status will be marked as completed by the queue when this returns nil
 	return nil
 }
 

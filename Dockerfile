@@ -41,8 +41,9 @@ COPY ui/ .
 RUN npm run build
 
 # Final stage - minimal image
-FROM alpine:3.23
+# FROM golang:1.25-alpine
 
+FROM alpine:3.23
 # Install git (needed for cloning repos), ca-certificates
 RUN apk add --no-cache git ca-certificates
 
@@ -58,6 +59,16 @@ RUN mkdir -p /workspace/a2-cache
 # Create a non-root user
 RUN adduser -D -u 1000 -g 1000 a2 && \
     chown -R a2:a2 /workspace
+
+
+# RUN <<EOF
+# go install github.com/securego/gosec/v2/cmd/gosec@latest
+# go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+# go install golang.org/x/vuln/cmd/govulncheck@latest
+# go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
+# go install github.com/kisielk/errcheck@latest
+# go install github.com/google/go-licenses/v2@latest
+# EOF
 
 # Set working directory
 WORKDIR /workspace
