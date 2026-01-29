@@ -7,6 +7,7 @@ export interface CheckRequest {
   target?: string;
   skip_checks?: string[];
   timeout_secs?: number;
+  verbose?: boolean;
 }
 
 export interface CheckResponse {

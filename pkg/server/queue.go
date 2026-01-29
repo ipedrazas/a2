@@ -129,6 +129,8 @@ func (q *JobQueue) worker(ctx context.Context, processor JobProcessor, workerNum
 				q.store.SetError(job.ID, err)
 				log.Printf("Worker %d: job %s failed: %v", workerNum, job.ID, err)
 			} else {
+				// Job completed successfully, store the result
+				q.store.SetResult(job.ID, job.Result)
 				log.Printf("Worker %d: job %s completed successfully", workerNum, job.ID)
 			}
 		}
