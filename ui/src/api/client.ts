@@ -43,6 +43,20 @@ export const api = {
   },
 
   /**
+   * List all jobs
+   */
+  async listJobs(): Promise<JobResponse[]> {
+    const response = await fetch(`${API_BASE_URL}/api/jobs`);
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to list jobs');
+    }
+
+    return response.json();
+  },
+
+  /**
    * Health check
    */
   async health(): Promise<HealthResponse> {
