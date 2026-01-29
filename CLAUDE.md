@@ -85,6 +85,24 @@ external:
     severity: warn  # or fail
 ```
 
+### Wildcard Support for Skip List
+
+Skip patterns support wildcards for flexible check filtering:
+- `*:tests` - skips all test checks (go:tests, python:tests, etc.)
+- `node:*` - skips all Node.js checks
+- `common:*` - skips all common checks
+- `*:*` - skips ALL checks (use with caution)
+
+Examples:
+```yaml
+checks:
+  disabled:
+    - "*:tests"      # Skip all test checks across all languages
+    - "node:*"       # Skip all Node.js checks
+    - "*:logging"    # Skip logging checks for all languages
+    - "go:deps"      # Skip specific Go vulnerability check (exact match)
+```
+
 Exit codes: 0=Pass, 1=Warn, 2+=Fail
 
 ### Testing Patterns

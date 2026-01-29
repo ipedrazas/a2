@@ -104,6 +104,11 @@ a2 check -vv
 # Skip specific checks
 a2 check --skip=license,k8s
 
+# Skip with wildcard patterns
+a2 check --skip="*:tests"     # Skip all test checks
+a2 check --skip="node:*"      # Skip all Node.js checks
+a2 check --skip="*:license"   # Skip license checks for all languages
+
 # List available options
 a2 list checks           # List all available checks with IDs
 a2 list checks --explain # List checks with detailed descriptions
@@ -535,6 +540,9 @@ files:
 checks:
   disabled:
     - go:deps  # Skip vulnerability check
+    - "*:tests"  # Skip all test checks across all languages
+    - "node:*"   # Skip all Node.js checks
+    - "*:logging"  # Skip logging checks for all languages
 
 # Execution options
 execution:
@@ -646,6 +654,72 @@ Output can be plain text or JSON:
   "status": "warn"
 }
 ```
+
+## Wildcard Patterns
+
+Skip patterns support wildcards for flexible check filtering. Use wildcards in `.a2.yaml` or with the `--skip` CLI flag.
+
+### Pattern Syntax
+
+| Pattern | Description | Example Matches |
+|---------|-------------|-----------------|
+| `*:suffix` | Match any check ending with `:suffix` | `*:tests` matches `go:tests`, `python:tests`, `node:tests` |
+| `prefix:*` | Match any check starting with `prefix:` | `node:*` matches `node:deps`, `node:logging`, `node:tests` |
+| `*:*` | Match any check with a colon (all checks) | `*:*` matches all `lang:check` format checks |
+| `*` | Match everything | `*` matches all check IDs |
+| Exact | Exact string match | `go:tests` matches only `go:tests` |
+
+### Examples
+
+**Skip all test checks:**
+```yaml
+checks:
+  disabled:
+    - "*:tests"  # Skips go:tests, python:tests, node:tests, etc.
+```
+
+**Skip all Node.js checks:**
+```yaml
+checks:
+  disabled:
+    - "node:*"  # Skips node:deps, node:logging, node:tests, etc.
+```
+
+**Skip specific check types across all languages:**
+```yaml
+checks:
+  disabled:
+    - "*:logging"    # Skip logging checks
+    - "*:tests"      # Skip test checks
+    - "*:deps"       # Skip dependency vulnerability checks
+```
+
+**Combine wildcards with exact matches:**
+```yaml
+checks:
+  disabled:
+    - "common:*"     # Skip all common checks
+    - "node:*"       # Skip all Node.js checks
+    - "go:race"      # Also skip specific Go race detection
+```
+
+**CLI flag examples:**
+```bash
+# Skip all test checks
+a2 check --skip="*:tests"
+
+# Skip all Node.js checks
+a2 check --skip="node:*"
+
+# Skip multiple patterns
+a2 check --skip="*:tests" --skip="*:license"
+```
+
+### Notes
+
+- Wildcards work with both `.a2.yaml` configuration and `--skip` CLI flags
+- Aliases (e.g., `tests` → `go:tests`) continue to work alongside wildcards
+- Invalid patterns with multiple wildcards (e.g., `*:*:*`) are treated as non-matching
 
 ## GitHub Action
 

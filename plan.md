@@ -22,5 +22,7 @@ This document tracks proposed new changes for a2.
 
 - Add DevOps checks: ansible, helm, terraform, pulumi...
 - Does it make sense to categorise the checks? for example, pre-commit hooks, editorconfig is local dev, k8s, retry, telemtery, signals is prod-ready... 
+- Add glob option to skip `*:logging`
+- If there's no CHANGELOG.md, check if there's a Changelog section in the README
 
 

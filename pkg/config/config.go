@@ -291,8 +291,8 @@ func (c *Config) GetSourceDirs() map[string]string {
 // IsCheckDisabled returns true if the given check ID is disabled.
 func (c *Config) IsCheckDisabled(checkID string) bool {
 	for _, disabled := range c.Checks.Disabled {
-		// Direct match
-		if disabled == checkID {
+		// Wildcard pattern match
+		if matchesPattern(checkID, disabled) {
 			return true
 		}
 		// Check if disabled ID is an alias for the check ID
