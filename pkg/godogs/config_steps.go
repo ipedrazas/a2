@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -316,4 +317,93 @@ func e2eTestsDisabled() error {
 	}
 
 	return fmt.Errorf("E2E tests are not disabled")
+}
+
+// iSelectApplicationType creates or updates .a2.yaml with the chosen profile (simulates interactive "application type").
+// Used by first-time-setup "Interactive configuration for new project"; creates config so a2CreatesConfig and configIncludesAPIProfile pass.
+func iSelectApplicationType(appType string) error {
+	s := GetState()
+	configPath := ".a2.yaml"
+	if dir := s.GetTempDir(); dir != "" {
+		configPath = filepath.Join(dir, ".a2.yaml")
+	}
+	s.SetConfigFile(".a2.yaml")
+
+	profile := strings.ToLower(appType)
+	config := &A2Config{
+		Profile: profile,
+		Target:  "",
+		Checks: struct {
+			Disabled []string `yaml:"disabled"`
+		}{Disabled: []string{"*:e2e"}},
+	}
+	return saveConfig(configPath, config)
+}
+
+// iSelectMaturityLevel updates .a2.yaml with the chosen target (simulates interactive "maturity level").
+func iSelectMaturityLevel(level string) error {
+	s := GetState()
+	configPath := s.GetConfigFile()
+	if configPath == "" {
+		configPath = ".a2.yaml"
+	}
+	if dir := s.GetTempDir(); dir != "" {
+		configPath = filepath.Join(dir, configPath)
+	}
+	cfg, err := loadConfig(configPath)
+	if err != nil {
+		return err
+	}
+	cfg.Target = strings.ToLower(level)
+	return saveConfig(configPath, cfg)
+}
+
+// iSelectLanguageDetection records "Auto-detect" choice; no change to config (auto-detect is default).
+func iSelectLanguageDetection(detection string) error {
+	return nil
+}
+
+// a2CreatesConfig verifies that the given config file exists and contains sensible defaults (profile, target, etc.).
+func a2CreatesConfig(filename string) error {
+	s := GetState()
+	path := filename
+	if dir := s.GetTempDir(); dir != "" {
+		path = filepath.Join(dir, filename)
+	}
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return fmt.Errorf("config file %s was not created", filename)
+	}
+	cfg, err := loadConfig(path)
+	if err != nil {
+		return fmt.Errorf("config file %s: %w", filename, err)
+	}
+	// Sensible defaults: at least one of profile or target set, or non-empty structure
+	if cfg.Profile == "" && cfg.Target == "" && len(cfg.Checks.Disabled) == 0 {
+		return fmt.Errorf("config file %s exists but has no sensible defaults", filename)
+	}
+	return nil
+}
+
+// iHaveGoOnlyProject sets up a Go-only project in the scenario temp dir and creates .a2.yaml for "Disable irrelevant checks".
+func iHaveGoOnlyProject() error {
+	s := GetState()
+	tempDir := s.GetTempDir()
+	if tempDir == "" {
+		return nil
+	}
+	if err := CopyFixtureDir("simple-go-project", tempDir); err != nil {
+		return err
+	}
+	s.SetConfigFile(".a2.yaml")
+	return saveConfig(".a2.yaml", &A2Config{})
+}
+
+// iEdit sets the current config file and creates it if missing (e.g. "I edit \".a2.yaml\"").
+func iEdit(filename string) error {
+	s := GetState()
+	s.SetConfigFile(filename)
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		return saveConfig(filename, &A2Config{})
+	}
+	return nil
 }

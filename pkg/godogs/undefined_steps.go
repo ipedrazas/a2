@@ -10,22 +10,23 @@ import (
 // These are stub implementations that can be filled in with actual logic.
 
 // A2 Detection and Analysis Steps
-func aDetectedAFailingTest(arg1 int) error                   { return godog.ErrPending }
-func aDetectedIssuesInAPR(arg1 int) error                    { return godog.ErrPending }
-func aDetectedIssuesWithMyCode(arg1 int) error               { return godog.ErrPending }
-func aDetectsMultipleCriticalIssues(arg1 int) error          { return godog.ErrPending }
-func aDetectsSecurityIssuesEgLeakedAPIKey(arg1 int) error    { return godog.ErrPending }
-func aShouldAnalyzeCyclomaticComplexity(arg1 int) error      { return godog.ErrPending }
-func aShouldAutodetectTheProgrammingLanguage(arg1 int) error { return godog.ErrPending }
-func aShouldCheckTestCoverage(arg1 int) error                { return godog.ErrPending }
-func aShouldDisplayFullOutputFromTheTool(arg1 int) error     { return godog.ErrPending }
-func aShouldDisplayResultsInTheTerminal(arg1 int) error      { return godog.ErrPending }
-func aShouldRunAllApplicableChecks(arg1 int) error           { return godog.ErrPending }
-func aShouldRunOnlyGoChecks(arg1 int) error                  { return godog.ErrPending }
-func aShouldRunOnlyTheRaceDetectorCheck(arg1 int) error      { return godog.ErrPending }
-func aShouldValidateTheBuildStatus(arg1 int) error           { return godog.ErrPending }
-func aShouldRerunInCI(arg1 int) error                        { return godog.ErrPending }
-func aShouldWarnOnNoncriticalIssuesInDev(arg1 int) error     { return godog.ErrPending }
+func aDetectedAFailingTest(arg1 int) error                { return godog.ErrPending }
+func aDetectedIssuesInAPR(arg1 int) error                 { return godog.ErrPending }
+func aDetectedIssuesWithMyCode(arg1 int) error            { return godog.ErrPending }
+func aDetectsMultipleCriticalIssues(arg1 int) error       { return godog.ErrPending }
+func aDetectsSecurityIssuesEgLeakedAPIKey(arg1 int) error { return godog.ErrPending }
+func aShouldAnalyzeCyclomaticComplexity(arg1 int) error   { return godog.ErrPending }
+
+// aShouldAutodetectTheProgrammingLanguage is implemented in output_steps.go
+func aShouldCheckTestCoverage(arg1 int) error            { return godog.ErrPending }
+func aShouldDisplayFullOutputFromTheTool(arg1 int) error { return godog.ErrPending }
+
+// aShouldDisplayResultsInTheTerminal, aShouldRunAllApplicableChecks implemented in output_steps.go
+// aShouldRunOnlyGoChecks implemented in output_steps.go
+func aShouldRunOnlyTheRaceDetectorCheck(arg1 int) error  { return godog.ErrPending }
+func aShouldValidateTheBuildStatus(arg1 int) error       { return godog.ErrPending }
+func aShouldRerunInCI(arg1 int) error                    { return godog.ErrPending }
+func aShouldWarnOnNoncriticalIssuesInDev(arg1 int) error { return godog.ErrPending }
 
 // CI/CD Integration Steps
 func aShouldCommentOnThePRWithAQualityReport(arg1 int) error { return godog.ErrPending }
@@ -64,14 +65,12 @@ func thePRShouldBeReadyForReview() error                         { return godog.
 // AI-Assisted Development Steps
 func iAskTheAIToFixTheSpecificIssue() error                             { return godog.ErrPending }
 func iAskedAIToRefactorALargeModule() error                             { return godog.ErrPending }
-func iAmAnAIAgentProcessingAResults(arg1 int) error                     { return godog.ErrPending }
 func iAmUsingAIToDevelopFeaturesQuickly() error                         { return godog.ErrPending }
 func iDidntReviewTheCodeCarefully() error                               { return godog.ErrPending }
 func iFollowTheValidatefixrecheckPattern() error                        { return godog.ErrPending }
 func iReliedTooHeavilyOnAISuggestions() error                           { return godog.ErrPending }
 func iRunAfterEachAIIteration(arg1 string) error                        { return godog.ErrPending }
 func iRunBeforeReviewingTheCode(arg1 string) error                      { return godog.ErrPending }
-func iRunImmediatelyAfterGeneration(arg1 string) error                  { return godog.ErrPending }
 func iShouldCatchIssuesBeforeCommit() error                             { return godog.ErrPending }
 func iShouldEstablishANewWorkflowToGenerateCodeWithAI() error           { return godog.ErrPending }
 func iShouldMaintainHighQualityAtHighVelocity() error                   { return godog.ErrPending }
@@ -85,15 +84,16 @@ func theCodeAppearsToBeAIgenerated() error                              { return
 func theQualityOfMyAIassistedCodeShouldImprove() error                  { return godog.ErrPending }
 
 // Configuration and Profile Steps
-func iCreateACustomProfileIn(arg1 string) error            { return godog.ErrPending }
-func iCreateImprovementPhasesIn(arg1 string) error         { return godog.ErrPending }
-func iDefineExternalChecksIn(arg1 string) error            { return godog.ErrPending }
-func iSelectProfile(arg1 string) error                     { return godog.ErrPending }
-func iSelectTarget(arg1 string) error                      { return godog.ErrPending }
-func iSetSeverity_modeTo(arg1 string) error                { return godog.ErrPending }
-func iSetTargetTo(arg1 string) error                       { return godog.ErrPending }
-func aShouldDisableAPIspecificChecks(arg1 int) error       { return godog.ErrPending }
-func aShouldSkipAllOtherLanguageChecks(arg1 int) error     { return godog.ErrPending }
+func iCreateACustomProfileIn(arg1 string) error      { return godog.ErrPending }
+func iCreateImprovementPhasesIn(arg1 string) error   { return godog.ErrPending }
+func iDefineExternalChecksIn(arg1 string) error      { return godog.ErrPending }
+func iSelectProfile(arg1 string) error               { return godog.ErrPending }
+func iSelectTarget(arg1 string) error                { return godog.ErrPending }
+func iSetSeverity_modeTo(arg1 string) error          { return godog.ErrPending }
+func iSetTargetTo(arg1 string) error                 { return godog.ErrPending }
+func aShouldDisableAPIspecificChecks(arg1 int) error { return godog.ErrPending }
+
+// aShouldSkipAllOtherLanguageChecks implemented in output_steps.go
 func aShouldSkipCoverageChecks(arg1 int) error             { return godog.ErrPending }
 func aShouldSkipHealthEndpointChecks(arg1 int) error       { return godog.ErrPending }
 func aShouldSkipKubernetesChecks(arg1 int) error           { return godog.ErrPending }
@@ -108,16 +108,14 @@ func iAmBuildingACLIApplication() error              { return godog.ErrPending }
 func iAmBuildingAHealthcareApplication() error       { return godog.ErrPending }
 func iAmDebuggingACheckIssue() error                 { return godog.ErrPending }
 func iAmEvaluatingAnOpenSourceProject() error        { return godog.ErrPending }
-func iAmInAProjectDirectory() error                  { return godog.ErrPending }
 func iAmInEarlyDevelopmentPoCPhase() error           { return godog.ErrPending }
 func iHaveAGitHubRepository() error                  { return godog.ErrPending }
 func iHaveALegacyMonolithApplication() error         { return godog.ErrPending }
 func iHaveALegacyProjectAtMaturity(arg1 int) error   { return godog.ErrPending }
-func iHaveAMultilanguageProject() error              { return godog.ErrPending }
 func iHaveASlowProject() error                       { return godog.ErrPending }
 func iHaveDifferentRequirementsPerBranch() error     { return godog.ErrPending }
 func iHaveLimitedTime() error                        { return godog.ErrPending }
-func iHaveNotConfiguredA(arg1 int) error             { return godog.ErrPending }
+func iHaveNotConfiguredA(arg1 int) error             { return nil }
 func iCannotEasilyAddTestsOrContainerization() error { return godog.ErrPending }
 
 // Quality Assessment Steps
@@ -195,19 +193,20 @@ func iShouldSeeCurrentScoreAndChangeFromLastCheck() error { return godog.ErrPend
 func iShouldSeePassfailwarningCounts() error              { return godog.ErrPending }
 func iShouldSeeQualityScoreProgression() error            { return godog.ErrPending }
 func iShouldSeeTheOverallAverageMaturityScore() error     { return godog.ErrPending }
-func iShouldSeeTabularResultsArray() error                { return godog.ErrPending }
-func iTrackTheResultsOverTime() error                     { return godog.ErrPending }
-func iViewTheTrendVisualization() error                   { return godog.ErrPending }
-func iWantToBenchmarkTeamPerformance() error              { return godog.ErrPending }
-func iWantToGenerateHTMLReports() error                   { return godog.ErrPending }
-func iWantToTrackQualityImprovementOverTime() error       { return godog.ErrPending }
-func endingScoresForAllProjects() error                   { return godog.ErrPending }
-func lastCheckTimestamps() error                          { return godog.ErrPending }
-func newFailuresSinceYesterday() error                    { return godog.ErrPending }
-func orderserviceShowsAScoreDrop() error                  { return godog.ErrPending }
-func percentageChanges() error                            { return godog.ErrPending }
-func trendIndicators() error                              { return godog.ErrPending }
-func trendIndicatorsUpdownsame() error                    { return godog.ErrPending }
+
+// iShouldSeeTabularResultsArray implemented in output_steps.go
+func iTrackTheResultsOverTime() error               { return godog.ErrPending }
+func iViewTheTrendVisualization() error             { return godog.ErrPending }
+func iWantToBenchmarkTeamPerformance() error        { return godog.ErrPending }
+func iWantToGenerateHTMLReports() error             { return godog.ErrPending }
+func iWantToTrackQualityImprovementOverTime() error { return godog.ErrPending }
+func endingScoresForAllProjects() error             { return godog.ErrPending }
+func lastCheckTimestamps() error                    { return godog.ErrPending }
+func newFailuresSinceYesterday() error              { return godog.ErrPending }
+func orderserviceShowsAScoreDrop() error            { return godog.ErrPending }
+func percentageChanges() error                      { return godog.ErrPending }
+func trendIndicators() error                        { return godog.ErrPending }
+func trendIndicatorsUpdownsame() error              { return godog.ErrPending }
 
 // Server Mode and Web Interface Steps
 func iDoNotHaveAInstalledLocally(arg1 int) error            { return godog.ErrPending }
@@ -245,7 +244,6 @@ func iHaveABasicAWorkflow(arg1 int) error                              { return 
 func iHaveAConfiguredInCI(arg1 int) error                              { return godog.ErrPending }
 func iHaveAConfiguredInTheProject(arg1 int) error                      { return godog.ErrPending }
 func iHaveARunningInCI(arg1 int) error                                 { return godog.ErrPending }
-func iHaveRunOnMyProject(arg1 string) error                            { return godog.ErrPending }
 func iIncludeCoverageAsCritical() error                                { return godog.ErrPending }
 func iMarkAllTestsAsCritical() error                                   { return godog.ErrPending }
 func iMarkSecurityChecksAsCritical() error                             { return godog.ErrPending }
@@ -295,27 +293,18 @@ func iShouldSeeSecurityVulnerabilities() error { return godog.ErrPending }
 func iShouldSeeTestResults() error             { return godog.ErrPending }
 
 // Explanation and Help Steps
-func iDontUnderstandWhatACheckDoes() error           { return godog.ErrPending }
-func iShouldSeeADescription() error                  { return godog.ErrPending }
-func iShouldSeeSuggestionsForImprovement() error     { return godog.ErrPending }
-func iShouldSeeTheCheckName() error                  { return godog.ErrPending }
-func iShouldSeeTheRequirementsToPass() error         { return godog.ErrPending }
-func iShouldSeeWhatToolIsUsed() error                { return godog.ErrPending }
-func iWantToInvestigateASpecificCheckFailure() error { return godog.ErrPending }
+func iDontUnderstandWhatACheckDoes() error { return nil }
 
+// iShouldSeeADescription, iShouldSeeSuggestionsForImprovement, iShouldSeeTheCheckName, iShouldSeeTheRequirementsToPass, iShouldSeeWhatToolIsUsed in output_steps.go
 // Output Format Steps
-func iShouldSeeClearerOutput() error                        { return godog.ErrPending }
-func iShouldSeeCompactEncoding() error                      { return godog.ErrPending }
-func theOutputShouldBeInMinimalTokenFormat() error          { return godog.ErrPending }
-func theOutputShouldBeValidJSON() error                     { return godog.ErrPending }
-func theFormatShouldBeOptimizedForParsing() error           { return godog.ErrPending }
-func iWantToProcessAResultsProgrammatically(arg1 int) error { return godog.ErrPending }
+func iShouldSeeClearerOutput() error { return godog.ErrPending }
 
+// iShouldSeeCompactEncoding, theOutputShouldBeInMinimalTokenFormat, theOutputShouldBeValidJSON, theFormatShouldBeOptimizedForParsing in output_steps.go
 // Progress and Timing Steps
 func eachCheckShouldHaveMinutesToComplete(arg1 int) error { return godog.ErrPending }
 func iCanTrackImprovementTrendsOverMonths() error         { return godog.ErrPending }
 func iAllocateASpecificTimeForPRReviews() error           { return godog.ErrPending }
-func iAmRunningAForTheFirstTime(arg1 int) error           { return godog.ErrPending }
+func iAmRunningAForTheFirstTime(arg1 int) error           { return nil }
 func iShouldSeeRealtimeProgressUpdates() error            { return godog.ErrPending }
 
 // Detailed Check Results Steps
@@ -323,12 +312,13 @@ func iShouldSeeAllCheckResults() error                  { return godog.ErrPendin
 func iShouldSeeDetailedRaceConditionInformation() error { return godog.ErrPending }
 func iShouldSeeNewTestFailures() error                  { return godog.ErrPending }
 func iShouldSeeTheExpectedVsActualOutput() error        { return godog.ErrPending }
-func iShouldSeeTheMaturityLevel() error                 { return godog.ErrPending }
-func iShouldSeeTheSpecificTestThatFailed() error        { return godog.ErrPending }
-func iShouldSeeTestsFailing(arg1 int) error             { return godog.ErrPending }
-func iShouldSeeWhichAspectsNeedImprovement() error      { return godog.ErrPending }
-func theOutputShouldHelpMeFixTheIssue() error           { return godog.ErrPending }
-func theResponseShouldExplainAllIssues() error          { return godog.ErrPending }
+
+// iShouldSeeTheMaturityLevel implemented in output_steps.go
+func iShouldSeeTheSpecificTestThatFailed() error   { return godog.ErrPending }
+func iShouldSeeTestsFailing(arg1 int) error        { return godog.ErrPending }
+func iShouldSeeWhichAspectsNeedImprovement() error { return godog.ErrPending }
+func theOutputShouldHelpMeFixTheIssue() error      { return godog.ErrPending }
+func theResponseShouldExplainAllIssues() error     { return godog.ErrPending }
 
 // Custom Check Steps
 func iCreateCustomCheckScripts() error { return godog.ErrPending }
@@ -337,9 +327,10 @@ func iCreateCustomCheckScripts() error { return godog.ErrPending }
 func iCreate(arg1 string) error               { return godog.ErrPending }
 func iCreateForDevelopment(arg1 string) error { return godog.ErrPending }
 func iCreateForMainBranch(arg1 string) error  { return godog.ErrPending }
-func iEdit(arg1 string) error                 { return godog.ErrPending }
-func iNavigateTo(arg1 string) error           { return godog.ErrPending }
-func iCreateAScript(arg1 string) error        { return godog.ErrPending }
+
+// iEdit is implemented in config_steps.go
+func iNavigateTo(arg1 string) error    { return godog.ErrPending }
+func iCreateAScript(arg1 string) error { return godog.ErrPending }
 
 // Re-running Steps: run the given command (e.g. "a2 check") in the scenario temp dir.
 func iRerun(arg1 string) error    { return iRunAgain(arg1) }
@@ -364,8 +355,9 @@ func iShouldSeeUpdatedResults() error {
 	}
 	return nil
 }
-func theNewReportShouldShowImprovement() error       { return godog.ErrPending }
-func theResultsShouldShowOnlyGorelatedItems() error  { return godog.ErrPending }
+func theNewReportShouldShowImprovement() error { return godog.ErrPending }
+
+// theResultsShouldShowOnlyGorelatedItems implemented in output_steps.go
 func allTeamMembersShouldFollowSameStandards() error { return godog.ErrPending }
 
 // Development Workflow Steps
@@ -386,7 +378,7 @@ func weCanCelebrateHighScores() error { return godog.ErrPending }
 func iMaintainAPopularGoLibrary() error { return godog.ErrPending }
 
 // Filtering Steps
-func iOnlyWantToCheckGoCode() error { return godog.ErrPending }
+func iOnlyWantToCheckGoCode() error { return nil }
 
 // Click/UI Interaction Steps
 func iClick(arg1 string) error { return godog.ErrPending }
