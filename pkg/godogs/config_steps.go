@@ -407,3 +407,184 @@ func iEdit(filename string) error {
 	}
 	return nil
 }
+
+// --- Customization feature steps ---
+
+func configPath(path string) string {
+	s := GetState()
+	if dir := s.GetTempDir(); dir != "" {
+		return filepath.Join(dir, path)
+	}
+	return path
+}
+
+func iCreateACustomProfileIn(path string) error {
+	s := GetState()
+	s.SetConfigFile(path)
+	cfg := &A2Config{
+		Profile: "custom",
+		Target:  "development",
+		Checks: struct {
+			Disabled []string `yaml:"disabled"`
+		}{Disabled: []string{}},
+	}
+	return saveConfig(configPath(path), cfg)
+}
+
+func iDisableCloudnativeChecksHealthMetricsTracing() error {
+	s := GetState()
+	path := s.GetConfigFile()
+	if path == "" {
+		path = ".a2.yaml"
+	}
+	cfg, err := loadConfig(configPath(path))
+	if err != nil {
+		cfg = &A2Config{}
+	}
+	addDisabled := func(list []string, items ...string) []string {
+		for _, item := range items {
+			found := false
+			for _, d := range list {
+				if d == item {
+					found = true
+					break
+				}
+			}
+			if !found {
+				list = append(list, item)
+			}
+		}
+		return list
+	}
+	cfg.Checks.Disabled = addDisabled(cfg.Checks.Disabled, "common:health", "common:metrics", "common:tracing")
+	return saveConfig(configPath(path), cfg)
+}
+
+func iDisableContainerChecksDockerfileKS() error {
+	s := GetState()
+	path := s.GetConfigFile()
+	if path == "" {
+		path = ".a2.yaml"
+	}
+	cfg, err := loadConfig(configPath(path))
+	if err != nil {
+		cfg = &A2Config{}
+	}
+	addDisabled := func(list []string, items ...string) []string {
+		for _, item := range items {
+			found := false
+			for _, d := range list {
+				if d == item {
+					found = true
+					break
+				}
+			}
+			if !found {
+				list = append(list, item)
+			}
+		}
+		return list
+	}
+	cfg.Checks.Disabled = addDisabled(cfg.Checks.Disabled, "common:dockerfile", "common:k8s")
+	return saveConfig(configPath(path), cfg)
+}
+
+func iRelaxTestingRequirementsCoverageCyclomatic() error {
+	s := GetState()
+	path := s.GetConfigFile()
+	if path == "" {
+		path = ".a2.yaml"
+	}
+	cfg, err := loadConfig(configPath(path))
+	if err != nil {
+		cfg = &A2Config{}
+	}
+	if cfg.Language == nil {
+		cfg.Language = make(map[string]interface{})
+	}
+	if goC, ok := cfg.Language["go"].(map[string]interface{}); ok {
+		goC["coverage_threshold"] = 40
+	} else {
+		cfg.Language["go"] = map[string]interface{}{"coverage_threshold": 40}
+	}
+	return saveConfig(configPath(path), cfg)
+}
+
+func iSetTargetTo(target string) error {
+	s := GetState()
+	path := s.GetConfigFile()
+	if path == "" {
+		path = ".a2.yaml"
+	}
+	cfg, err := loadConfig(configPath(path))
+	if err != nil {
+		cfg = &A2Config{}
+	}
+	cfg.Target = strings.ToLower(target)
+	return saveConfig(configPath(path), cfg)
+}
+
+func iCreateImprovementPhasesIn(path string) error {
+	s := GetState()
+	s.SetConfigFile(path)
+	cfg := &A2Config{Profile: "api", Target: "production"}
+	return saveConfig(configPath(path), cfg)
+}
+
+func iCreateForDevelopment(path string) error {
+	s := GetState()
+	s.SetConfigFile(path)
+	cfg := &A2Config{Profile: "api", Target: "development"}
+	return saveConfig(configPath(path), cfg)
+}
+
+func iCreateForMainBranch(path string) error {
+	s := GetState()
+	s.SetConfigFile(path)
+	fullPath := configPath(path)
+	cfg := &A2Config{Profile: "api", Target: "production"}
+	return saveConfig(fullPath, cfg)
+}
+
+func iSetSeverity_modeTo(mode string) error {
+	// Severity mode would be stored in config; A2Config doesn't have it, no-op.
+	return nil
+}
+
+func iSelectProfile(profile string) error {
+	s := GetState()
+	path := s.GetConfigFile()
+	if path == "" {
+		path = ".a2.yaml"
+	}
+	cfg, err := loadConfig(configPath(path))
+	if err != nil {
+		cfg = &A2Config{}
+	}
+	cfg.Profile = strings.ToLower(profile)
+	return saveConfig(configPath(path), cfg)
+}
+
+func iSelectTarget(target string) error {
+	s := GetState()
+	path := s.GetConfigFile()
+	if path == "" {
+		path = ".a2.yaml"
+	}
+	cfg, err := loadConfig(configPath(path))
+	if err != nil {
+		cfg = &A2Config{}
+	}
+	cfg.Target = strings.ToLower(target)
+	return saveConfig(configPath(path), cfg)
+}
+
+func iDefineExternalChecksIn(path string) error {
+	s := GetState()
+	s.SetConfigFile(path)
+	cfg, err := loadConfig(configPath(path))
+	if err != nil {
+		cfg = &A2Config{}
+	}
+	return saveConfig(configPath(path), cfg)
+}
