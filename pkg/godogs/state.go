@@ -7,6 +7,8 @@ import (
 // State holds the test state across scenarios
 type State struct {
 	mu              sync.RWMutex
+	tempDir         string // temporary directory for scenario (created in Before, removed in After)
+	originalDir     string // working directory before scenario (restored in After)
 	projectDir      string
 	a2Installed     bool
 	configFile      string
@@ -42,6 +44,8 @@ func ResetState() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	s.tempDir = ""
+	s.originalDir = ""
 	s.projectDir = ""
 	s.a2Installed = false
 	s.configFile = ""
@@ -56,6 +60,18 @@ func ResetState() {
 }
 
 // Setters
+func (s *State) SetTempDir(dir string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.tempDir = dir
+}
+
+func (s *State) SetOriginalDir(dir string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.originalDir = dir
+}
+
 func (s *State) SetProjectDir(dir string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -123,6 +139,18 @@ func (s *State) AddIssue(issue string) {
 }
 
 // Getters
+func (s *State) GetTempDir() string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.tempDir
+}
+
+func (s *State) GetOriginalDir() string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.originalDir
+}
+
 func (s *State) GetProjectDir() string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

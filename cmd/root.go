@@ -21,6 +21,7 @@ import (
 
 var (
 	format        string
+	outputFormat  string        // Alias for format (e.g. --output=toon)
 	languages     []string      // Explicit language selection
 	skippedChecks []string      // Checks to skip via CLI
 	profile       string        // Application type profile (cli, api, library, desktop)
@@ -106,7 +107,9 @@ Checks for:
 }
 
 func init() {
+	rootCmd.Version = version.Version
 	checkCmd.Flags().StringVarP(&format, "format", "f", "pretty", "Output format: pretty, json, or toon")
+	checkCmd.Flags().StringVar(&outputFormat, "output", "", "Output format (alias for --format): pretty, json, or toon")
 	checkCmd.Flags().StringSliceVarP(&languages, "lang", "l", nil, "Languages to check (go, python). Auto-detects if not specified.")
 	checkCmd.Flags().StringSliceVar(&skippedChecks, "skip", nil, "Checks to skip (e.g., --skip=license,k8s)")
 	checkCmd.Flags().StringVar(&profile, "profile", "", "Application profile (cli, api, library, desktop)")
@@ -140,6 +143,9 @@ func Execute() {
 }
 
 func runCheck(cmd *cobra.Command, args []string) error {
+	if outputFormat != "" {
+		format = outputFormat
+	}
 	path := "."
 	if len(args) > 0 {
 		path = args[0]

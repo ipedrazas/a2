@@ -1,0 +1,18 @@
+language:
+    go:
+        coverage_threshold: 85
+        cyclomatic_threshold: 10
+profile: api
+target: production
+checks:
+    disabled: []
+files:
+    required:
+        - README.md
+        - LICENSE
+        - CONTRIBUTING.md
+        - docs/api.md
+        - .env.example
+execution:
+    parallel: false
+    timeout: 0
