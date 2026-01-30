@@ -66,17 +66,13 @@ Feature: Customization Journey
     Given I have a legacy project at 40% maturity
     And I want to reach production-ready over 12 months
     When I create improvement phases in ".a2.yaml"
-    Then Phase 1 (current) should enforce:
-      - Build passes
-      - Critical tests pass
-      - Security scan
-    And Phase 2 (3 months) should enforce:
-      - 40% coverage threshold
-    And Phase 3 (6 months) should enforce:
-      - Cyclomatic complexity check
-      - 60% coverage threshold
-    And Phase 4 (12 months) should enforce:
-      - 80% coverage threshold
-      - Metrics instrumentation
-      - Health check endpoints
+    Then Phase 1 (current) should enforce that build passes
+    And Phase 1 should enforce that critical tests pass
+    And Phase 1 should enforce security scan
+    And Phase 2 (3 months) should enforce 40% coverage threshold
+    And Phase 3 (6 months) should enforce cyclomatic complexity check
+    And Phase 3 should enforce 60% coverage threshold
+    And Phase 4 (12 months) should enforce 80% coverage threshold
+    And Phase 4 should enforce metrics instrumentation
+    And Phase 4 should enforce health check endpoints
     And the team can track progress through phases

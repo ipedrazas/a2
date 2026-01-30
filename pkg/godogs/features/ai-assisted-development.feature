@@ -39,12 +39,11 @@ Feature: AI-Assisted Development Journey
     When I run "a2 check"
     And A2 detects multiple critical issues
     Then I should understand that AI lacks project context
-    And I should establish a new workflow:
-      - Generate code with AI
-      - Run "a2 check" immediately
-      - Review and fix issues
-      - Iterate with AI if needed
-      - Re-check before commit
+    And I should establish a new workflow to generate code with AI
+    And I should run "a2 check" immediately after generation
+    And I should review and fix issues
+    And I should iterate with AI if needed
+    And I should re-check before commit
     And the quality of my AI-assisted code should improve
 
   Scenario: Rapid iteration cycle

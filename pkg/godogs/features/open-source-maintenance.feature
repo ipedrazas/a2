@@ -30,10 +30,9 @@ Feature: Open Source Maintenance Journey
     Given I have 15 PRs to review
     And I have limited time
     When I check the CI results for all PRs
-    Then I can categorize PRs by maturity score:
-      - Green (90%+): Review first
-      - Yellow (70-89%): Review second
-      - Red (<70%): Request fixes
+    Then I can categorize green PRs (90%+) to review first
+    And I can categorize yellow PRs (70-89%) to review second
+    And I can categorize red PRs (<70%) to request fixes
     And I can focus my time on high-quality PRs
     And I should save 4.5 hours per week
 

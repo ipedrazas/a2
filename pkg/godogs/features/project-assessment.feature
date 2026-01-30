@@ -20,19 +20,17 @@ Feature: Project Assessment Journey
     And I need to understand the specific issues
     When I examine the detailed results
     And I filter for failed checks
-    Then I should see specific failures:
-      - 12 tests failing
-      - 35% coverage (threshold: 80%)
+    Then I should see 12 tests failing
+    And I should see 35% coverage (threshold: 80%)
     And I can create an actionable improvement plan
     And I can assign resources to the most critical issues
 
   Scenario: Create data-driven improvement plan
     Given a project scores 58% with multiple failures
     When I create a 6-week improvement plan
-    Then I can break down the work:
-      - Week 1-2: Fix failing tests
-      - Week 3-4: Improve coverage to 60%
-      - Week 5-6: Reach 80% coverage
+    Then I can break down the work for Week 1-2 to fix failing tests
+    And I can break down the work for Week 3-4 to improve coverage to 60%
+    And I can break down the work for Week 5-6 to reach 80% coverage
     And I can set clear milestones
     And I can assign senior developers to critical tasks
     And I can track progress weekly
@@ -41,12 +39,11 @@ Feature: Project Assessment Journey
     Given my company acquired a startup
     And I need to assess their code quality
     When I run "a2 check" on their codebase
-    Then I should see:
-      - Detected languages
-      - Build status
-      - Test results
-      - Coverage levels
-      - Security vulnerabilities
+    Then I should see detected languages
+    And I should see build status
+    And I should see test results
+    And I should see coverage levels
+    And I should see security vulnerabilities
     And I can create an executive summary
     And I can estimate remediation investment
     And I can assess technical debt risk

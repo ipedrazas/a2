@@ -20,11 +20,10 @@ Feature: Server Mode Journey
     Given I am a DevOps engineer
     And I have set up monitoring for multiple repositories
     When I access the team dashboard
-    Then I should see:
-      - Overall average maturity score
-      - Individual repository scores
-      - Trend indicators (up/down/same)
-      - Last check timestamps
+    Then I should see the overall average maturity score
+    And Individual repository scores
+    And Trend indicators (up/down/same)
+    And Last check timestamps
     And I should see alerts for score drops
     And I should see new test failures
     And I can identify projects needing attention
@@ -33,11 +32,10 @@ Feature: Server Mode Journey
     Given I am viewing the team dashboard
     And order-service shows a score drop
     When I click on the order-service project
-    Then I should see:
-      - Current score and change from last check
-      - New failures since yesterday
-      - Coverage regressions
-      - Specific recommendations
+    Then I should see Current score and change from last check
+    And New failures since yesterday
+    And Coverage regressions
+    And Specific recommendations
     And I can create GitHub issues directly from the dashboard
     And I can assign work to team members
 
@@ -45,10 +43,9 @@ Feature: Server Mode Journey
     Given I want to track quality improvement over time
     When I select a date range (last 90 days)
     And I view the trend visualization
-    Then I should see:
-      - Quality score progression
-      - Key events and milestones
-      - Impact of improvements
+    Then I should see Quality score progression
+    And Key events and milestones
+    And Impact of improvements
     And I can correlate changes with initiatives
     And I can demonstrate ROI of quality efforts
 
@@ -56,11 +53,10 @@ Feature: Server Mode Journey
     Given I want to benchmark team performance
     When I select "Team Comparison" view
     And I choose the last 30 days
-    Then I should see:
-      - Starting scores for all projects
-      - Ending scores for all projects
-      - Percentage changes
-      - Trend indicators
+    Then I should see Starting scores for all projects
+    And Ending scores for all projects
+    And Percentage changes
+    And Trend indicators
     And I can identify best performers
     And I can spread successful practices
     And I can see if all teams are improving
