@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/ipedrazas/a2/pkg/safepath"
 	"gopkg.in/yaml.v3"
 )
@@ -122,6 +125,9 @@ type FilesConfig struct {
 
 // ChecksConfig configures which checks to run.
 type ChecksConfig struct {
+	// Disabled is a list of check IDs or wildcard patterns to skip.
+	// Wildcard patterns (*:logging, node:*, *:*) must be quoted in YAML
+	// (e.g. "*:logging") because unquoted * is YAML's alias character.
 	Disabled []string `yaml:"disabled"`
 }
 
@@ -202,6 +208,10 @@ func Load(path string) (*Config, error) {
 	}
 
 	if err := yaml.Unmarshal(data, cfg); err != nil {
+		errStr := err.Error()
+		if strings.Contains(errStr, "alphabetic or numeric") || strings.Contains(errStr, "alias") {
+			return nil, fmt.Errorf("%w (wildcard patterns in checks.disabled must be quoted, e.g. \"*:logging\")", err)
+		}
 		return nil, err
 	}
 

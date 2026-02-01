@@ -21,6 +21,14 @@ func (c *HealthCheck) Name() string { return "Health Endpoint" }
 func (c *HealthCheck) Run(path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
+	// Resolve to absolute path so Walk and OpenPath use the same root (avoids
+	// failures when path is relative or when running a2 from another directory).
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return rb.Fail(err.Error()), err
+	}
+	path = absPath
+
 	// Health endpoint patterns to search for
 	patterns := []string{
 		"/health",
@@ -57,8 +65,8 @@ func (c *HealthCheck) Run(path string) (checker.Result, error) {
 	found := false
 	var foundPattern string
 
-	err := filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
-		if err != nil {
+	err = filepath.Walk(path, func(filePath string, info os.FileInfo, walkErr error) error {
+		if walkErr != nil {
 			return nil // Skip files we can't access
 		}
 

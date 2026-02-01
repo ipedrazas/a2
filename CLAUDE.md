@@ -93,13 +93,15 @@ Skip patterns support wildcards for flexible check filtering:
 - `common:*` - skips all common checks
 - `*:*` - skips ALL checks (use with caution)
 
+**Important:** In `.a2.yaml`, patterns that contain `*` must be quoted (e.g. `"*:logging"` or `'*:logging'`). Unquoted `*` is interpreted by YAML as an alias and will cause a parse error.
+
 Examples:
 ```yaml
 checks:
   disabled:
-    - "*:tests"      # Skip all test checks across all languages
+    - "*:tests"      # Skip all test checks across all languages (quotes required)
     - "node:*"       # Skip all Node.js checks
-    - "*:logging"    # Skip logging checks for all languages
+    - "*:logging"     # Skip logging checks for all languages
     - "go:deps"      # Skip specific Go vulnerability check (exact match)
 ```
 
