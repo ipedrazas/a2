@@ -28,6 +28,7 @@ tasks:
       - go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
       - go install github.com/kisielk/errcheck@latest
       - go install github.com/google/go-licenses/v2@latest
+      - go get github.com/cucumber/godog/cmd/godog@latest
       
 
   build:
