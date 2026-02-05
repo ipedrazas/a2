@@ -1,6 +1,8 @@
 package checks
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -317,6 +319,46 @@ func (suite *RegistryTestSuite) TestGetChecks_NoLanguageDetected() {
 
 	suite.True(checkIDs["file_exists"], "file_exists should be present as common check")
 	suite.False(checkIDs["go:module"], "go:module should not be present without language detection")
+}
+
+// TestGetChecks_CommonShutdownUsesSourceDir tests that common:shutdown runs on root and
+// each configured source_dir so monorepos pass when Go (or other) code lives in a subdir.
+func (suite *RegistryTestSuite) TestGetChecks_CommonShutdownUsesSourceDir() {
+	root, err := os.MkdirTemp("", "a2-shutdown-multipath-*")
+	suite.Require().NoError(err)
+	defer os.RemoveAll(root)
+
+	// Go code with signal handling in backend/ (no go.mod at root)
+	backend := filepath.Join(root, "backend")
+	suite.Require().NoError(os.MkdirAll(backend, 0755))
+	suite.Require().NoError(os.WriteFile(filepath.Join(backend, "go.mod"), []byte("module app\ngo 1.21\n"), 0644))
+	suite.Require().NoError(os.WriteFile(filepath.Join(backend, "main.go"), []byte(`package main
+import ("os"; "os/signal"; "syscall")
+func main() { signal.Notify(make(chan os.Signal, 1), syscall.SIGTERM) }
+`), 0644))
+
+	cfg := config.DefaultConfig()
+	cfg.Language.Go.SourceDir = "backend"
+	detected := language.DetectionResult{
+		Languages: []checker.Language{checker.LangGo},
+		Primary:   checker.LangGo,
+	}
+	checks := GetChecks(cfg, detected)
+
+	var shutdownCheck *checker.CheckRegistration
+	for i := range checks {
+		if checks[i].Meta.ID == "common:shutdown" {
+			shutdownCheck = &checks[i]
+			break
+		}
+	}
+	suite.Require().NotNil(shutdownCheck, "common:shutdown should be present")
+
+	// Run from repo root: should pass because wrapper runs check on root and backend/
+	result, err := shutdownCheck.Checker.Run(root)
+	suite.NoError(err)
+	suite.True(result.Passed, "common:shutdown should pass when Go signal handling is in source_dir")
+	suite.Contains(result.Message, "Go signal handling")
 }
 
 // TestRegistryTestSuite runs all the tests in the suite.

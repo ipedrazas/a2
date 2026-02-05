@@ -1,6 +1,7 @@
 package checks
 
 import (
+	"os"
 	"path/filepath"
 	"sort"
 
@@ -40,6 +41,75 @@ func (p *pathResolvingChecker) Run(path string) (checker.Result, error) {
 	return p.checker.Run(actualPath)
 }
 
+// multiPathChecker runs a common check on the repo root and each configured
+// source_dir so monorepos pass when language-specific code lives in subdirs
+// (e.g. common:shutdown finding Go signal handling in backend/).
+type multiPathChecker struct {
+	checker checker.Checker
+	cfg     *config.Config
+}
+
+func (m *multiPathChecker) ID() string   { return m.checker.ID() }
+func (m *multiPathChecker) Name() string { return m.checker.Name() }
+
+func (m *multiPathChecker) Run(path string) (checker.Result, error) {
+	paths := m.pathsToCheck(path)
+	var lastResult checker.Result
+	var lastErr error
+	for _, p := range paths {
+		res, err := m.checker.Run(p)
+		if err != nil {
+			lastErr = err
+			lastResult = res
+			continue
+		}
+		if res.Passed {
+			return res, nil
+		}
+		lastResult = res
+	}
+	if lastErr != nil {
+		return lastResult, lastErr
+	}
+	return lastResult, nil
+}
+
+// pathsToCheck returns the repo root and each configured source_dir that
+// exists as a directory (deduplicated).
+func (m *multiPathChecker) pathsToCheck(path string) []string {
+	seen := map[string]bool{path: true}
+	paths := []string{path}
+	for _, dir := range m.cfg.GetSourceDirs() {
+		full := filepath.Join(path, dir)
+		if seen[full] {
+			continue
+		}
+		info, err := os.Stat(full)
+		if err != nil || !info.IsDir() {
+			continue
+		}
+		seen[full] = true
+		paths = append(paths, full)
+	}
+	return paths
+}
+
+// commonChecksUsingSourceDirs are common check IDs that look at language-specific
+// code and should run on root and each configured source_dir in monorepos.
+var commonChecksUsingSourceDirs = map[string]bool{
+	"common:shutdown": true,
+}
+
+// wrapCommonRegistrations wraps common checks that use source_dir with multiPathChecker.
+func wrapCommonRegistrations(regs []checker.CheckRegistration, cfg *config.Config) []checker.CheckRegistration {
+	for i := range regs {
+		if commonChecksUsingSourceDirs[regs[i].Meta.ID] {
+			regs[i].Checker = &multiPathChecker{checker: regs[i].Checker, cfg: cfg}
+		}
+	}
+	return regs
+}
+
 // GetChecks returns checks for detected languages based on configuration.
 // Checks are ordered with critical checks first.
 // Language-specific checks are wrapped to use the configured source_dir.
@@ -63,8 +133,8 @@ func GetChecks(cfg *config.Config, detected language.DetectionResult) []checker.
 		registrations = append(registrations, regs...)
 	}
 
-	// Add common checks (language-agnostic, always use root path)
-	registrations = append(registrations, common.Register(cfg)...)
+	// Add common checks (language-agnostic, root path; some run on source_dirs too)
+	registrations = append(registrations, wrapCommonRegistrations(common.Register(cfg), cfg)...)
 
 	// Sort by order (critical checks first)
 	sort.Slice(registrations, func(i, j int) bool {
@@ -150,7 +220,8 @@ func GetSuggestions(cfg *config.Config) map[string]string {
 }
 
 // GetAllCheckRegistrations returns all check registrations from all languages.
-// This is useful for listing available checks.
+// This is useful for listing available checks. Common checks that use source_dir
+// are wrapped so single-check runs (e.g. a2 run common:shutdown) also use multi-path.
 func GetAllCheckRegistrations(cfg *config.Config) []checker.CheckRegistration {
 	allRegs := []checker.CheckRegistration{}
 	allRegs = append(allRegs, gocheck.Register(cfg)...)
@@ -160,7 +231,7 @@ func GetAllCheckRegistrations(cfg *config.Config) []checker.CheckRegistration {
 	allRegs = append(allRegs, rustcheck.Register(cfg)...)
 	allRegs = append(allRegs, typescriptcheck.Register(cfg)...)
 	allRegs = append(allRegs, swiftcheck.Register(cfg)...)
-	allRegs = append(allRegs, common.Register(cfg)...)
+	allRegs = append(allRegs, wrapCommonRegistrations(common.Register(cfg), cfg)...)
 
 	// Sort by order
 	sort.Slice(allRegs, func(i, j int) bool {
