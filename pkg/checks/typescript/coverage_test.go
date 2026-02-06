@@ -77,6 +77,13 @@ func (s *CoverageTestSuite) TestHasVitestCoverage_WithConfig() {
 	s.True(s.check.hasVitestCoverage(s.tempDir))
 }
 
+func (s *CoverageTestSuite) TestHasVitestCoverage_ViteConfig() {
+	// Vitest often configured in vite.config.ts via vitest/config
+	s.writeFile("vite.config.ts", `import { defineConfig } from "vitest/config";
+export default defineConfig({ test: { environment: "jsdom" } });`)
+	s.True(s.check.hasVitestCoverage(s.tempDir))
+}
+
 func (s *CoverageTestSuite) TestHasC8_WithDep() {
 	s.writeFile("package.json", `{"devDependencies": {"c8": "^7.0.0"}}`)
 	s.True(s.check.hasC8(s.tempDir))

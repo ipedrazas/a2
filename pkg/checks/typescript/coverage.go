@@ -114,10 +114,28 @@ func (c *CoverageCheck) hasVitestCoverage(path string) bool {
 		}
 	}
 
-	// Check for @vitest/coverage-* packages
+	// Check vite.config files: Vitest is often configured via vitest/config and a test block
+	viteConfigs := []string{"vite.config.ts", "vite.config.js", "vite.config.mts", "vite.config.cjs"}
+	for _, cfg := range viteConfigs {
+		if content, err := safepath.ReadFile(path, cfg); err == nil {
+			s := string(content)
+			if strings.Contains(s, "coverage") {
+				return true
+			}
+			// Vitest via Vite: import from "vitest/config" means Vitest is in use (coverage is built-in)
+			if strings.Contains(s, "vitest/config") {
+				return true
+			}
+		}
+	}
+
+	// Check for @vitest/coverage-* or vitest package (coverage is built-in)
 	if pkg, err := ParsePackageJSON(path); err == nil {
 		for dep := range pkg.DevDependencies {
 			if strings.HasPrefix(dep, "@vitest/coverage") {
+				return true
+			}
+			if dep == "vitest" {
 				return true
 			}
 		}

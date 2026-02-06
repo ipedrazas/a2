@@ -97,7 +97,8 @@ func (m *multiPathChecker) pathsToCheck(path string) []string {
 // commonChecksUsingSourceDirs are common check IDs that look at language-specific
 // code and should run on root and each configured source_dir in monorepos.
 var commonChecksUsingSourceDirs = map[string]bool{
-	"common:shutdown": true,
+	"common:migrations": true,
+	"common:shutdown":   true,
 }
 
 // wrapCommonRegistrations wraps common checks that use source_dir with multiPathChecker.
