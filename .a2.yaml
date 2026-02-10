@@ -20,7 +20,6 @@ checks:
     - common:integration  # Skip integration check
     - common:metrics  # Skip metrics check
     - common:errors  # Skip errors check
-    - common:shutdown  # Skip shutdown check
     - common:license  # Skip license check
     - common:tracing  # Skip tracing check
     - common:migrations  # Skip migrations check

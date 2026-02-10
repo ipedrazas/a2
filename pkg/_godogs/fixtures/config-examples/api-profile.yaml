@@ -1,8 +1,0 @@
-# Sample .a2.yaml for API profile
-profile: api
-target: production
-language: {}
-checks:
-  disabled: []
-files:
-  required: []

@@ -99,6 +99,7 @@ func (m *multiPathChecker) pathsToCheck(path string) []string {
 var commonChecksUsingSourceDirs = map[string]bool{
 	"common:migrations": true,
 	"common:shutdown":   true,
+	"common:dockerfile": true,
 }
 
 // wrapCommonRegistrations wraps common checks that use source_dir with multiPathChecker.
