@@ -154,6 +154,74 @@ func main() {
 	suite.Contains(result.Message, "Path traversal")
 }
 
+// TestFileSystemCheck_Run_AllowlistByLine tests allowlist rule by file:line.
+func (suite *SecurityTestSuite) TestFileSystemCheck_Run_AllowlistByLine() {
+	suite.createTempFile("main.go", `package main
+
+import "os"
+
+func main() {
+	path := "some"
+	os.ReadDir(path)
+}
+`)
+
+	check := &FileSystemCheck{
+		Allowlist: []string{"main.go:7"},
+	}
+	result, err := check.Run(suite.tempDir)
+
+	suite.NoError(err)
+	suite.True(result.Passed)
+	suite.Equal(checker.Pass, result.Status)
+}
+
+// TestFileSystemCheck_Run_AllowlistByMatch tests allowlist rule by file:match.
+func (suite *SecurityTestSuite) TestFileSystemCheck_Run_AllowlistByMatch() {
+	suite.createTempFile("main.go", `package main
+
+import "os"
+
+func main() {
+	path := "some"
+	os.ReadDir(path)
+}
+`)
+
+	check := &FileSystemCheck{
+		Allowlist: []string{"main.go:os.ReadDir(path)"},
+	}
+	result, err := check.Run(suite.tempDir)
+
+	suite.NoError(err)
+	suite.True(result.Passed)
+	suite.Equal(checker.Pass, result.Status)
+}
+
+// TestFileSystemCheck_Run_SafeJoinIgnored tests SafeJoin-derived paths are ignored.
+func (suite *SecurityTestSuite) TestFileSystemCheck_Run_SafeJoinIgnored() {
+	suite.createTempFile("main.go", `package main
+
+import (
+	"os"
+	"github.com/ipedrazas/a2/pkg/safepath"
+)
+
+func main() {
+	root := "repo"
+	safePath, _ := safepath.SafeJoin(root, "charts")
+	os.ReadDir(safePath)
+}
+`)
+
+	check := &FileSystemCheck{}
+	result, err := check.Run(suite.tempDir)
+
+	suite.NoError(err)
+	suite.True(result.Passed)
+	suite.Equal(checker.Pass, result.Status)
+}
+
 // TestNetworkCheck_ID tests that NetworkCheck returns correct ID.
 func (suite *SecurityTestSuite) TestNetworkCheck_ID() {
 	check := &NetworkCheck{}

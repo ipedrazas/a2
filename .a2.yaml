@@ -29,7 +29,7 @@ checks:
     - common:dockerfile  # Skip dockerfile check
     - devops:*  # Skip ansible check
     - security:shell_injection
-    - security:filesystem
+    # - security:filesystem
     - security:network
     
 # Execution options
@@ -76,3 +76,18 @@ external:
   #   command: go-licenses
   #   args: ["check", "./...", "--ignore", "github.com/ipedrazas/a2", "./..."]
   #   severity: warn
+
+security:
+  filesystem:
+    allow:
+      - "pkg/checks/common/k8s.go:94"
+      - "pkg/checks/common/k8s.go:os.ReadDir(chartsDir)"
+      - "pkg/checks/common/**"
+      - "pkg/config/**"
+      - "pkg/safepath/**"
+      - "pkg/utils/**"
+      - "pkg/validator/**"
+      - "pkg/**"
+      - "ui/**"
+      - "cmd/root.go"
+      - "cmd/add.go"

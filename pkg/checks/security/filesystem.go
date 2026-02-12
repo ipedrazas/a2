@@ -13,9 +13,38 @@ import (
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
+type allowRule struct {
+	filePattern string
+	line        int
+	matchText   string
+}
+
+var (
+	goSafeJoinRE        = regexp.MustCompile(`^\s*([a-zA-Z_]\w*)\s*,\s*[a-zA-Z_]\w*\s*(?:=|:=)\s*safepath\.SafeJoin\s*\(`)
+	goSafeJoinSingleRE  = regexp.MustCompile(`^\s*([a-zA-Z_]\w*)\s*(?:=|:=)\s*safepath\.SafeJoin\s*\(`)
+	goJoinAssignRE      = regexp.MustCompile(`^\s*([a-zA-Z_]\w*)\s*(?:=|:=)\s*filepath\.Join\s*\(\s*([a-zA-Z_]\w*)\s*,`)
+	goFileOpVarRE       = regexp.MustCompile(`\b(?:ioutil|os)\.(?:Open|OpenFile|ReadFile|WriteFile|ReadDir)\s*\(\s*([a-zA-Z_]\w*)`)
+	goRootVarCandidates = map[string]struct{}{
+		"root":        {},
+		"rootDir":     {},
+		"rootPath":    {},
+		"repoRoot":    {},
+		"repoDir":     {},
+		"projectRoot": {},
+		"projectDir":  {},
+		"baseDir":     {},
+		"basePath":    {},
+		"workspace":   {},
+		"workDir":     {},
+	}
+)
+
 // FileSystemCheck detects path traversal and unsafe file operations.
 type FileSystemCheck struct {
 	Patterns map[string][]*regexp.Regexp
+	// Allowlist contains rules to suppress known-safe findings.
+	Allowlist  []string
+	allowRules []allowRule
 }
 
 // ID returns the unique identifier for this check.
@@ -35,6 +64,9 @@ func (c *FileSystemCheck) Run(path string) (checker.Result, error) {
 	// Initialize patterns if not already done
 	if c.Patterns == nil {
 		c.Patterns = c.getPatterns()
+	}
+	if c.allowRules == nil {
+		c.allowRules = c.compileAllowRules()
 	}
 
 	// Scan all source files
@@ -234,11 +266,6 @@ func (c *FileSystemCheck) scanDirectory(path string) []Finding {
 		fileFindings := c.scanFile(path, filePath, language, patterns)
 		findings = append(findings, fileFindings...)
 
-		// Limit findings to avoid excessive output
-		if len(findings) >= 50 {
-			return filepath.SkipAll
-		}
-
 		return nil
 	})
 
@@ -265,12 +292,19 @@ func (c *FileSystemCheck) scanFile(root, filePath string, language string, patte
 	if err != nil {
 		relPath = filepath.Base(filePath)
 	}
+	relPath = filepath.ToSlash(relPath)
+
+	safeVars := make(map[string]struct{})
 
 	scanner := bufio.NewScanner(file)
 	lineNum := 0
 	for scanner.Scan() {
 		lineNum++
 		line := scanner.Text()
+
+		if language == "go" {
+			c.updateGoSafeVars(line, safeVars)
+		}
 
 		// Skip comment lines
 		if isCommentLine(line, language) {
@@ -282,13 +316,19 @@ func (c *FileSystemCheck) scanFile(root, filePath string, language string, patte
 			if pattern.MatchString(line) {
 				// Extract matched pattern for better reporting
 				match := pattern.FindString(line)
-				findings = append(findings, Finding{
+				if language == "go" && c.isGoSafeUsage(line, safeVars) {
+					break // Skip safe usage
+				}
+				finding := Finding{
 					Type:        "filesystem",
 					File:        relPath,
 					Line:        lineNum,
 					Description: fmt.Sprintf("unsafe file operation: %s", c.sanitizeMatch(match)),
 					Severity:    "high",
-				})
+				}
+				if !c.isAllowedFinding(finding, line) {
+					findings = append(findings, finding)
+				}
 				break // One finding per line
 			}
 		}
@@ -306,25 +346,183 @@ func (c *FileSystemCheck) sanitizeMatch(match string) string {
 	return match
 }
 
+func (c *FileSystemCheck) updateGoSafeVars(line string, safeVars map[string]struct{}) {
+	if m := goSafeJoinRE.FindStringSubmatch(line); len(m) == 2 {
+		safeVars[m[1]] = struct{}{}
+		return
+	}
+	if m := goSafeJoinSingleRE.FindStringSubmatch(line); len(m) == 2 {
+		safeVars[m[1]] = struct{}{}
+		return
+	}
+	if m := goJoinAssignRE.FindStringSubmatch(line); len(m) == 3 {
+		target := m[1]
+		base := m[2]
+		if _, ok := safeVars[base]; ok {
+			safeVars[target] = struct{}{}
+			return
+		}
+		if _, ok := goRootVarCandidates[base]; ok {
+			safeVars[target] = struct{}{}
+			return
+		}
+	}
+}
+
+func (c *FileSystemCheck) isGoSafeUsage(line string, safeVars map[string]struct{}) bool {
+	m := goFileOpVarRE.FindStringSubmatch(line)
+	if len(m) != 2 {
+		return false
+	}
+	_, ok := safeVars[m[1]]
+	return ok
+}
+
+func (c *FileSystemCheck) compileAllowRules() []allowRule {
+	if len(c.Allowlist) == 0 {
+		return nil
+	}
+	var rules []allowRule
+	for _, raw := range c.Allowlist {
+		trimmed := strings.TrimSpace(raw)
+		if trimmed == "" {
+			continue
+		}
+		parts := strings.SplitN(trimmed, ":", 2)
+		if len(parts) == 1 {
+			rules = append(rules, allowRule{
+				filePattern: filepath.ToSlash(strings.TrimSpace(parts[0])),
+			})
+			continue
+		}
+		filePattern := filepath.ToSlash(strings.TrimSpace(parts[0]))
+		matchPart := strings.TrimSpace(parts[1])
+		if filePattern == "" {
+			filePattern = "*"
+		}
+		if matchPart == "" {
+			rules = append(rules, allowRule{filePattern: filePattern})
+			continue
+		}
+		if isAllDigits(matchPart) {
+			rules = append(rules, allowRule{
+				filePattern: filePattern,
+				line:        atoiSafe(matchPart),
+			})
+			continue
+		}
+		rules = append(rules, allowRule{
+			filePattern: filePattern,
+			matchText:   matchPart,
+		})
+	}
+	return rules
+}
+
+func (c *FileSystemCheck) isAllowedFinding(f Finding, line string) bool {
+	if len(c.allowRules) == 0 {
+		return false
+	}
+	for _, rule := range c.allowRules {
+		filePattern := rule.filePattern
+		if filePattern == "" {
+			filePattern = "*"
+		}
+		if !wildcardMatch(f.File, filePattern) {
+			continue
+		}
+		if rule.line > 0 {
+			if f.Line == rule.line {
+				return true
+			}
+			continue
+		}
+		if rule.matchText == "" {
+			return true
+		}
+		if matchText(line, f, rule.matchText) {
+			return true
+		}
+	}
+	return false
+}
+
+func matchText(line string, f Finding, pattern string) bool {
+	if strings.Contains(pattern, "*") || strings.Contains(pattern, "?") {
+		return wildcardMatch(line, pattern) || wildcardMatch(f.Description, pattern) || wildcardMatch(f.String(), pattern)
+	}
+	return strings.Contains(line, pattern) || strings.Contains(f.Description, pattern) || strings.Contains(f.String(), pattern)
+}
+
+func wildcardMatch(value, pattern string) bool {
+	if pattern == "" {
+		return value == ""
+	}
+	if pattern == "*" {
+		return true
+	}
+	var b strings.Builder
+	b.WriteString("^")
+	for _, r := range pattern {
+		switch r {
+		case '*':
+			b.WriteString(".*")
+		case '?':
+			b.WriteString(".")
+		case '.', '+', '(', ')', '[', ']', '{', '}', '^', '$', '|', '\\':
+			b.WriteString("\\")
+			b.WriteRune(r)
+		default:
+			b.WriteRune(r)
+		}
+	}
+	b.WriteString("$")
+	re, err := regexp.Compile(b.String())
+	if err != nil {
+		return false
+	}
+	return re.MatchString(value)
+}
+
+func isAllDigits(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
+}
+
+func atoiSafe(s string) int {
+	n := 0
+	for _, r := range s {
+		n = n*10 + int(r-'0')
+	}
+	return n
+}
+
 // formatFindings formats findings into a readable message.
 func (c *FileSystemCheck) formatFindings(findings []Finding) string {
 	if len(findings) == 1 {
-		return fmt.Sprintf("Path traversal/unsafe file operation detected: %s", findings[0].String())
+		return fmt.Sprintf("Path traversal/unsafe file operation detected:\n- %s", findings[0].String())
 	}
 
-	if len(findings) <= 3 {
-		return fmt.Sprintf("Path traversal/unsafe file operations detected: %s", c.joinFindings(findings))
-	}
-
-	return fmt.Sprintf("%d path traversal/unsafe file operations detected (e.g., %s)", len(findings),
-		c.joinFindings(findings[:3]))
+	return fmt.Sprintf("%d path traversal/unsafe file operations detected:\n%s", len(findings),
+		c.joinFindingsLines(findings))
 }
 
-// joinFindings joins findings for display.
-func (c *FileSystemCheck) joinFindings(findings []Finding) string {
-	var strs []string
-	for _, f := range findings {
-		strs = append(strs, f.String())
+// joinFindingsLines joins findings with one entry per line.
+func (c *FileSystemCheck) joinFindingsLines(findings []Finding) string {
+	var b strings.Builder
+	for i, f := range findings {
+		if i > 0 {
+			b.WriteString("\n")
+		}
+		b.WriteString("- ")
+		b.WriteString(f.String())
 	}
-	return strings.Join(strs, ", ")
+	return b.String()
 }

@@ -13,6 +13,7 @@ type Config struct {
 	Coverage  CoverageConfig        `yaml:"coverage"`
 	Files     FilesConfig           `yaml:"files"`
 	Checks    ChecksConfig          `yaml:"checks"`
+	Security  SecurityConfig        `yaml:"security,omitempty"`
 	External  []ExternalCheck       `yaml:"external"`
 	Execution ExecutionConfig       `yaml:"execution"`
 	Language  LanguageConfig        `yaml:"language"`
@@ -124,6 +125,21 @@ type FilesConfig struct {
 	Required []string `yaml:"required"`
 }
 
+// SecurityConfig configures security-related checks.
+type SecurityConfig struct {
+	Filesystem FileSystemConfig `yaml:"filesystem,omitempty"`
+}
+
+// FileSystemConfig configures the filesystem security check.
+type FileSystemConfig struct {
+	// Allow is a list of allowlist rules for filesystem findings.
+	// Examples:
+	// - "pkg/checks/common/k8s.go:94"
+	// - "pkg/checks/common/k8s.go:os.ReadDir(chartsDir)"
+	// - "pkg/checks/common/**"
+	Allow []string `yaml:"allow,omitempty"`
+}
+
 // ChecksConfig configures which checks to run.
 type ChecksConfig struct {
 	// Disabled is a list of check IDs or wildcard patterns to skip.
@@ -146,6 +162,11 @@ func DefaultConfig() *Config {
 		},
 		Execution: ExecutionConfig{
 			Parallel: true, // Run checks in parallel by default
+		},
+		Security: SecurityConfig{
+			Filesystem: FileSystemConfig{
+				Allow: []string{},
+			},
 		},
 		Language: LanguageConfig{
 			AutoDetect: true,

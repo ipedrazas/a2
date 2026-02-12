@@ -9,6 +9,9 @@ import (
 
 // Register returns all security check registrations.
 func Register(cfg *config.Config) []checker.CheckRegistration {
+	if cfg == nil {
+		cfg = config.DefaultConfig()
+	}
 	registrations := []checker.CheckRegistration{
 		{
 			Checker: &ObfuscationCheck{},
@@ -35,7 +38,9 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
-			Checker: &FileSystemCheck{},
+			Checker: &FileSystemCheck{
+				Allowlist: cfg.Security.Filesystem.Allow,
+			},
 			Meta: checker.CheckMeta{
 				ID:          "security:filesystem",
 				Name:        "File System Safety",
