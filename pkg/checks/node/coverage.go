@@ -125,7 +125,7 @@ func (c *CoverageCheck) runCoverage(path, runner string) (float64, error) {
 	case "jest":
 		cmd = exec.Command("npx", "jest", "--coverage", "--coverageReporters=text-summary", "--passWithNoTests")
 	case "vitest":
-		cmd = exec.Command("npx", "vitest", "run", "--coverage", "--reporter=text")
+		cmd = exec.Command("npx", "vitest", "run", "--coverage")
 	case "c8":
 		cmd = exec.Command("npx", "c8", "npm", "test")
 	case "nyc":
