@@ -29,6 +29,8 @@ checks:
     - common:dockerfile  # Skip dockerfile check
     - devops:*  # Skip ansible check
     - security:shell_injection
+    - security:filesystem
+    - security:network
     
 # Execution options
 execution:

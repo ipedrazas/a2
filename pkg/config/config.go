@@ -110,7 +110,7 @@ type ExternalCheck struct {
 	Name      string   `yaml:"name"`
 	Command   string   `yaml:"command"`
 	Args      []string `yaml:"args"`
-	Severity  string   `yaml:"severity"` // "warn" or "fail"
+	Severity  string   `yaml:"severity"`             // "warn" or "fail"
 	SourceDir string   `yaml:"source_dir,omitempty"` // Subdirectory to run the command in (like language source_dir)
 }
 
