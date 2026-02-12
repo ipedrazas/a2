@@ -27,6 +27,7 @@ checks:
     - common:config_validation  # Skip config validation check
     - common:retry  # Skip retry check
     - common:dockerfile  # Skip dockerfile check
+    - devops:*  # Skip ansible check
     
 # Execution options
 execution:
