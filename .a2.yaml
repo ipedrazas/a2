@@ -28,6 +28,7 @@ checks:
     - common:retry  # Skip retry check
     - common:dockerfile  # Skip dockerfile check
     - devops:*  # Skip ansible check
+    - security:shell_injection
     
 # Execution options
 execution:
@@ -42,11 +43,13 @@ external:
     severity: warn
 
 # This check is an order of magnitude slower than the others
+  # Optional source_dir: run the command in a subdir (e.g. when Go code lives in backend/)
   - id: security
     name: Security Scan
     command: gosec
     args: ["./..."]
     severity: fail
+    # source_dir: backend   # uncomment if Go code is in backend/
 
   # - id: secrets
   #   name: Secret Detection

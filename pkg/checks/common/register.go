@@ -297,6 +297,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Command:   ext.Command,
 				Args:      ext.Args,
 				Severity:  ext.Severity,
+				SourceDir: ext.SourceDir,
 			},
 			Meta: checker.CheckMeta{
 				ID:        ext.ID,

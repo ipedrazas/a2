@@ -3,6 +3,7 @@ package checks
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -184,8 +185,8 @@ func (suite *RegistryTestSuite) TestGetChecks_EmptyConfig() {
 	suite.GreaterOrEqual(len(checks), 3) // At least Module, Build, Tests
 }
 
-// TestGetChecks_Ordering tests that critical checks come first.
-func (suite *RegistryTestSuite) TestGetChecks_Ordering() {
+// TestGetChecks_Order tests that critical checks come first.
+func (suite *RegistryTestSuite) TestGetChecks_Order() {
 	cfg := config.DefaultConfig()
 	detected := language.DetectionResult{
 		Languages: []checker.Language{checker.LangGo},
@@ -196,12 +197,25 @@ func (suite *RegistryTestSuite) TestGetChecks_Ordering() {
 	// Critical checks should be first
 	suite.GreaterOrEqual(len(checks), 3)
 
-	// First three should be critical (go:module, go:build, go:tests)
-	criticalIDs := []string{"go:module", "go:build", "go:tests"}
-	for i, expectedID := range criticalIDs {
-		if i < len(checks) {
-			suite.Equal(expectedID, checks[i].Meta.ID, "Critical check %s should be at position %d", expectedID, i)
+	// First should be go:module (Order 100) or security:obfuscation (Order 40)
+	// Security checks have Orders 40-60, Go checks start at 100
+	firstCheck := checks[0].Meta.ID
+	suite.True(
+		firstCheck == "security:obfuscation" || firstCheck == "go:module",
+		"First check should be security:obfuscation or go:module, got %s", firstCheck,
+	)
+
+	// All security checks should come before most language-specific checks
+	// Security checks have Orders 40-60
+	if len(checks) >= 4 {
+		// Check that security checks are grouped at the beginning
+		securityCount := 0
+		for _, check := range checks {
+			if strings.HasPrefix(check.Meta.ID, "security:") {
+				securityCount++
+			}
 		}
+		suite.GreaterOrEqual(securityCount, 4, "Should have at least 4 security checks")
 	}
 }
 

@@ -1,7 +1,9 @@
 package common
 
 import (
+	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -348,6 +350,47 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_StderrFallback() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Contains(result.Message, "stderr message")
+}
+
+// TestExternalCheck_Run_InvalidSourceDir tests that invalid source_dir (e.g. traversal) returns Warn.
+func (suite *ExternalTestSuite) TestExternalCheck_Run_InvalidSourceDir() {
+	check := &ExternalCheck{
+		CheckID:   "test",
+		CheckName: "Test Check",
+		Command:   "echo",
+		Args:      []string{"ok"},
+		SourceDir: "../elsewhere",
+	}
+
+	result, err := check.Run(".")
+
+	suite.NoError(err)
+	suite.False(result.Passed)
+	suite.Equal(checker.Warn, result.Status)
+	suite.Contains(result.Message, "invalid source_dir")
+}
+
+// TestExternalCheck_Run_WithSourceDir tests that the command runs in the given source_dir.
+func (suite *ExternalTestSuite) TestExternalCheck_Run_WithSourceDir() {
+	root, err := os.MkdirTemp("", "a2-external-source-dir-")
+	suite.Require().NoError(err)
+	defer os.RemoveAll(root)
+	subDir := filepath.Join(root, "mydir")
+	suite.Require().NoError(os.Mkdir(subDir, 0755))
+
+	check := &ExternalCheck{
+		CheckID:   "test",
+		CheckName: "Test Check",
+		Command:   "sh",
+		Args:      []string{"-c", "pwd"},
+		SourceDir: "mydir",
+	}
+
+	result, err := check.Run(root)
+
+	suite.NoError(err)
+	suite.True(result.Passed)
+	suite.Contains(result.Message, "mydir")
 }
 
 // TestExternalTestSuite runs all the tests in the suite.

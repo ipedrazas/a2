@@ -13,6 +13,7 @@ import (
 	nodecheck "github.com/ipedrazas/a2/pkg/checks/node"
 	pythoncheck "github.com/ipedrazas/a2/pkg/checks/python"
 	rustcheck "github.com/ipedrazas/a2/pkg/checks/rust"
+	securitycheck "github.com/ipedrazas/a2/pkg/checks/security"
 	swiftcheck "github.com/ipedrazas/a2/pkg/checks/swift"
 	typescriptcheck "github.com/ipedrazas/a2/pkg/checks/typescript"
 	"github.com/ipedrazas/a2/pkg/config"
@@ -138,6 +139,8 @@ func GetChecks(cfg *config.Config, detected language.DetectionResult) []checker.
 
 	// Add devops checks (language-agnostic, root path)
 	registrations = append(registrations, devopscheck.Register(cfg)...)
+	// Add security checks (language-agnostic, root path)
+	registrations = append(registrations, securitycheck.Register(cfg)...)
 	// Add common checks (language-agnostic, root path; some run on source_dirs too)
 	registrations = append(registrations, wrapCommonRegistrations(common.Register(cfg), cfg)...)
 
@@ -237,6 +240,7 @@ func GetAllCheckRegistrations(cfg *config.Config) []checker.CheckRegistration {
 	allRegs = append(allRegs, typescriptcheck.Register(cfg)...)
 	allRegs = append(allRegs, swiftcheck.Register(cfg)...)
 	allRegs = append(allRegs, devopscheck.Register(cfg)...)
+	allRegs = append(allRegs, securitycheck.Register(cfg)...)
 	allRegs = append(allRegs, wrapCommonRegistrations(common.Register(cfg), cfg)...)
 
 	// Sort by order

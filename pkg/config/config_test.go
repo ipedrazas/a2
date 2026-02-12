@@ -79,6 +79,12 @@ external:
     command: echo
     args: ["test"]
     severity: warn
+  - id: security
+    name: Security Scan
+    command: gosec
+    args: ["./..."]
+    severity: fail
+    source_dir: backend
 `
 	suite.createTempFile(".a2.yaml", configContent)
 
@@ -89,12 +95,15 @@ external:
 	suite.Equal(90.0, cfg.Coverage.Threshold)
 	suite.Equal([]string{"README.md", "LICENSE", "CONTRIBUTING.md"}, cfg.Files.Required)
 	suite.Equal([]string{"gofmt", "govet"}, cfg.Checks.Disabled)
-	suite.Len(cfg.External, 1)
+	suite.Len(cfg.External, 2)
 	suite.Equal("custom-check", cfg.External[0].ID)
 	suite.Equal("Custom Check", cfg.External[0].Name)
 	suite.Equal("echo", cfg.External[0].Command)
 	suite.Equal([]string{"test"}, cfg.External[0].Args)
 	suite.Equal("warn", cfg.External[0].Severity)
+	suite.Equal("", cfg.External[0].SourceDir)
+	suite.Equal("security", cfg.External[1].ID)
+	suite.Equal("backend", cfg.External[1].SourceDir)
 }
 
 // TestLoad_InvalidYAML tests that Load handles invalid YAML gracefully.

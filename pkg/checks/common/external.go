@@ -10,6 +10,7 @@ import (
 
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checkutil"
+	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
 // ExternalCheck runs an external binary as a check.
@@ -27,6 +28,7 @@ type ExternalCheck struct {
 	Command   string   // Command to run (must exist in PATH)
 	Args      []string // Arguments to pass
 	Severity  string   // Default severity on failure: "warn" or "fail"
+	SourceDir string   // Optional subdirectory to run the command in (like language source_dir)
 }
 
 // ExternalOutput is the optional JSON output format for external checks.
@@ -55,6 +57,15 @@ func (c *ExternalCheck) Run(path string) (checker.Result, error) {
 	// Sanitize arguments - remove any that contain shell metacharacters
 	sanitizedArgs := c.sanitizeArgs()
 
+	workDir := path
+	if c.SourceDir != "" {
+		dir, err := safepath.SafeJoin(path, c.SourceDir)
+		if err != nil {
+			return rb.Warn(fmt.Sprintf("invalid source_dir %q: %v", c.SourceDir, err)), nil
+		}
+		workDir = dir
+	}
+
 	// Execute the command with resolved path
 	// #nosec G204 -- Command is validated via LookPath and args are sanitized.
 	// External checks are an intentional feature configured by project owners in .a2.yaml.
@@ -63,7 +74,7 @@ func (c *ExternalCheck) Run(path string) (checker.Result, error) {
 	// directly to exec without shell interpretation.
 	// nosemgrep: go.lang.security.audit.dangerous-exec-command.dangerous-exec-command
 	cmd := exec.Command(cmdPath, sanitizedArgs...)
-	cmd.Dir = path
+	cmd.Dir = workDir
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
