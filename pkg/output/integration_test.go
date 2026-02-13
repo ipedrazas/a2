@@ -25,7 +25,7 @@ func createTestSuiteResult() runner.SuiteResult {
 				ID:       "go:build",
 				Passed:   true,
 				Status:   checker.Pass,
-				Message:  "Check passed",
+				Message:  "Build successful",
 				Reason:   "Build successful",
 				Language: checker.LangGo,
 				Duration: 150 * time.Millisecond,
@@ -35,7 +35,7 @@ func createTestSuiteResult() runner.SuiteResult {
 				ID:       "go:tests",
 				Passed:   true,
 				Status:   checker.Pass,
-				Message:  "Check passed",
+				Message:  "All tests passed",
 				Reason:   "All tests passed",
 				Language: checker.LangGo,
 				Duration: 2500 * time.Millisecond,
@@ -45,7 +45,7 @@ func createTestSuiteResult() runner.SuiteResult {
 				ID:       "go:format",
 				Passed:   false,
 				Status:   checker.Warn,
-				Message:  "Needs attention",
+				Message:  "3 files need formatting",
 				Reason:   "3 files need formatting",
 				Language: checker.LangGo,
 				Duration: 50 * time.Millisecond,
@@ -55,7 +55,7 @@ func createTestSuiteResult() runner.SuiteResult {
 				ID:       "go:coverage",
 				Passed:   false,
 				Status:   checker.Fail,
-				Message:  "Check failed",
+				Message:  "Coverage 45% below threshold 80%",
 				Reason:   "Coverage 45% below threshold 80%",
 				Language: checker.LangGo,
 				Duration: 3000 * time.Millisecond,
@@ -65,7 +65,7 @@ func createTestSuiteResult() runner.SuiteResult {
 				ID:       "common:version",
 				Passed:   true,
 				Status:   checker.Info,
-				Message:  "Informational",
+				Message:  "v1.0.0",
 				Reason:   "v1.0.0",
 				Language: checker.LangCommon,
 				Duration: 5 * time.Millisecond,
@@ -159,8 +159,8 @@ func (suite *IntegrationTestSuite) TestTOON_IntegrationOutput() {
 	suite.Contains(output, "success: false")
 
 	// Verify result rows (note: IDs with colons are quoted in TOON format)
-	suite.Contains(output, "Go Build,\"go:build\",true,pass,Check passed,Build successful,go,150")
-	suite.Contains(output, "Go Tests,\"go:tests\",true,pass,Check passed,All tests passed,go,2500")
+	suite.Contains(output, "Go Build,\"go:build\",true,pass,Build successful,Build successful,go,150")
+	suite.Contains(output, "Go Tests,\"go:tests\",true,pass,All tests passed,All tests passed,go,2500")
 }
 
 // TestPretty_IntegrationOutput tests the Pretty formatter produces readable output.

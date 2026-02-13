@@ -211,6 +211,7 @@ func (suite *ExternalTestSuite) TestResultFromExitCode_EmptyOutput() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal("Check failed", result.Reason)
+	suite.Equal("Check failed", result.Message)
 }
 
 // TestExternalCheck_Run_ExitCode0 tests ExternalCheck with exit code 0 (using true command).

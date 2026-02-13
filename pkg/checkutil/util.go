@@ -18,13 +18,6 @@ type ResultBuilder struct {
 	language checker.Language
 }
 
-const (
-	messagePass = "Check passed"
-	messageWarn = "Needs attention"
-	messageFail = "Check failed"
-	messageInfo = "Informational"
-)
-
 // NewResultBuilder creates a new ResultBuilder for a checker.
 // The builder captures the checker's Name() and ID() so they don't need
 // to be repeated in every result construction.
@@ -43,7 +36,7 @@ func (b *ResultBuilder) Pass(reason string) checker.Result {
 		ID:       b.id,
 		Passed:   true,
 		Status:   checker.Pass,
-		Message:  messagePass,
+		Message:  reason,
 		Reason:   reason,
 		Language: b.language,
 	}
@@ -57,7 +50,7 @@ func (b *ResultBuilder) Fail(reason string) checker.Result {
 		ID:       b.id,
 		Passed:   false,
 		Status:   checker.Fail,
-		Message:  messageFail,
+		Message:  reason,
 		Reason:   reason,
 		Language: b.language,
 	}
@@ -71,7 +64,7 @@ func (b *ResultBuilder) Warn(reason string) checker.Result {
 		ID:       b.id,
 		Passed:   false,
 		Status:   checker.Warn,
-		Message:  messageWarn,
+		Message:  reason,
 		Reason:   reason,
 		Language: b.language,
 	}
@@ -85,7 +78,7 @@ func (b *ResultBuilder) Info(reason string) checker.Result {
 		ID:       b.id,
 		Passed:   true,
 		Status:   checker.Info,
-		Message:  messageInfo,
+		Message:  reason,
 		Reason:   reason,
 		Language: b.language,
 	}
@@ -105,7 +98,7 @@ func (b *ResultBuilder) ToolNotInstalled(toolName, installHint string) checker.R
 		ID:       b.id,
 		Passed:   true,
 		Status:   checker.Info,
-		Message:  "Tool not installed",
+		Message:  message,
 		Reason:   message,
 		Language: b.language,
 	}
@@ -118,7 +111,7 @@ func (b *ResultBuilder) PassWithOutput(reason, rawOutput string) checker.Result 
 		ID:        b.id,
 		Passed:    true,
 		Status:    checker.Pass,
-		Message:   messagePass,
+		Message:   reason,
 		Reason:    reason,
 		Language:  b.language,
 		RawOutput: rawOutput,
@@ -132,7 +125,7 @@ func (b *ResultBuilder) FailWithOutput(reason, rawOutput string) checker.Result 
 		ID:        b.id,
 		Passed:    false,
 		Status:    checker.Fail,
-		Message:   messageFail,
+		Message:   reason,
 		Reason:    reason,
 		Language:  b.language,
 		RawOutput: rawOutput,
@@ -146,7 +139,7 @@ func (b *ResultBuilder) WarnWithOutput(reason, rawOutput string) checker.Result 
 		ID:        b.id,
 		Passed:    false,
 		Status:    checker.Warn,
-		Message:   messageWarn,
+		Message:   reason,
 		Reason:    reason,
 		Language:  b.language,
 		RawOutput: rawOutput,
