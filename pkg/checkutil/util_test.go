@@ -242,7 +242,7 @@ func (s *UtilTestSuite) TestResultBuilder_ToolNotInstalled_WithHint() {
 	assert.Equal(s.T(), "go:deps", result.ID)
 	assert.True(s.T(), result.Passed) // Info doesn't affect pass/fail
 	assert.Equal(s.T(), checker.Info, result.Status)
-	assert.Equal(s.T(), "govulncheck not installed (go install golang.org/x/vuln/cmd/govulncheck@latest)", result.Message)
+	assert.Equal(s.T(), "govulncheck not installed", result.Message)
 	assert.Equal(s.T(), "govulncheck not installed (go install golang.org/x/vuln/cmd/govulncheck@latest)", result.Reason)
 	assert.Equal(s.T(), checker.LangGo, result.Language)
 }

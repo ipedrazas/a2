@@ -29,6 +29,32 @@ func NewResultBuilder(c checker.Checker, lang checker.Language) *ResultBuilder {
 	}
 }
 
+// ShortMessage derives a concise "what happened" summary from a longer reason.
+func ShortMessage(reason string) string {
+	msg := strings.TrimSpace(reason)
+	if msg == "" {
+		return ""
+	}
+	// Drop parenthetical guidance or detail.
+	if idx := strings.Index(msg, " ("); idx != -1 {
+		msg = strings.TrimSpace(msg[:idx])
+	}
+	// Drop trailing clause after a dash when it's likely extra detail.
+	if idx := strings.Index(msg, " - "); idx != -1 {
+		msg = strings.TrimSpace(msg[:idx])
+	}
+	// Drop trailing clause after a semicolon when it's likely extra detail.
+	if idx := strings.Index(msg, "; "); idx != -1 && idx < 80 {
+		msg = strings.TrimSpace(msg[:idx])
+	}
+	// Truncate very long messages.
+	const maxLen = 80
+	if len(msg) > maxLen {
+		return msg[:maxLen] + "..."
+	}
+	return msg
+}
+
 // Pass creates a passing result with the given reason.
 func (b *ResultBuilder) Pass(reason string) checker.Result {
 	return checker.Result{
@@ -36,7 +62,7 @@ func (b *ResultBuilder) Pass(reason string) checker.Result {
 		ID:       b.id,
 		Passed:   true,
 		Status:   checker.Pass,
-		Message:  reason,
+		Message:  ShortMessage(reason),
 		Reason:   reason,
 		Language: b.language,
 	}
@@ -50,7 +76,7 @@ func (b *ResultBuilder) Fail(reason string) checker.Result {
 		ID:       b.id,
 		Passed:   false,
 		Status:   checker.Fail,
-		Message:  reason,
+		Message:  ShortMessage(reason),
 		Reason:   reason,
 		Language: b.language,
 	}
@@ -64,7 +90,7 @@ func (b *ResultBuilder) Warn(reason string) checker.Result {
 		ID:       b.id,
 		Passed:   false,
 		Status:   checker.Warn,
-		Message:  reason,
+		Message:  ShortMessage(reason),
 		Reason:   reason,
 		Language: b.language,
 	}
@@ -78,7 +104,7 @@ func (b *ResultBuilder) Info(reason string) checker.Result {
 		ID:       b.id,
 		Passed:   true,
 		Status:   checker.Info,
-		Message:  reason,
+		Message:  ShortMessage(reason),
 		Reason:   reason,
 		Language: b.language,
 	}
@@ -98,7 +124,7 @@ func (b *ResultBuilder) ToolNotInstalled(toolName, installHint string) checker.R
 		ID:       b.id,
 		Passed:   true,
 		Status:   checker.Info,
-		Message:  message,
+		Message:  ShortMessage(message),
 		Reason:   message,
 		Language: b.language,
 	}
@@ -111,7 +137,7 @@ func (b *ResultBuilder) PassWithOutput(reason, rawOutput string) checker.Result 
 		ID:        b.id,
 		Passed:    true,
 		Status:    checker.Pass,
-		Message:   reason,
+		Message:   ShortMessage(reason),
 		Reason:    reason,
 		Language:  b.language,
 		RawOutput: rawOutput,
@@ -125,7 +151,7 @@ func (b *ResultBuilder) FailWithOutput(reason, rawOutput string) checker.Result 
 		ID:        b.id,
 		Passed:    false,
 		Status:    checker.Fail,
-		Message:   reason,
+		Message:   ShortMessage(reason),
 		Reason:    reason,
 		Language:  b.language,
 		RawOutput: rawOutput,
@@ -139,7 +165,7 @@ func (b *ResultBuilder) WarnWithOutput(reason, rawOutput string) checker.Result 
 		ID:        b.id,
 		Passed:    false,
 		Status:    checker.Warn,
-		Message:   reason,
+		Message:   ShortMessage(reason),
 		Reason:    reason,
 		Language:  b.language,
 		RawOutput: rawOutput,
