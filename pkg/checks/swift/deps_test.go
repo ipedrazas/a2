@@ -191,7 +191,7 @@ func (s *DepsTestSuite) TestFormatDepsMessage() {
 	s.Contains(formatDepsMessage(0), "0 dependencies")
 	s.Contains(formatDepsMessage(1), "1 dependency")
 	s.Contains(formatDepsMessage(5), "5 dependencies")
-	s.Contains(formatDepsMessage(15), "multiple dependencies")
+	s.Contains(formatDepsMessage(15), "15 dependencies")
 }
 
 func TestDepsTestSuite(t *testing.T) {

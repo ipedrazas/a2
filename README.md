@@ -511,6 +511,7 @@ These checks apply to all projects regardless of language:
 | Editor Config | `common:editorconfig` | Warn | .editorconfig present |
 
 > **See [docs/CHECKS.md](docs/CHECKS.md) for detailed documentation** on all checks, including configuration options, auto-detection logic, and pass/warn/fail conditions.
+> The docs also include examples for suppressing known-safe filesystem findings via `security.filesystem.allow`.
 
 **Severity Levels:**
 - **Fail**: Critical check - stops execution immediately (veto power)
@@ -800,4 +801,3 @@ docker-compose up
 ## License
 
 MIT License - see [LICENSE](LICENSE)
-

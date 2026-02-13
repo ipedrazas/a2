@@ -200,7 +200,7 @@ func (r *CommandResult) Success() bool {
 // RunCommand executes a command in the specified directory and captures output.
 // It returns a CommandResult with stdout, stderr, and exit information.
 func RunCommand(dir, name string, args ...string) *CommandResult {
-	cmd := exec.Command(name, args...)
+	cmd := exec.Command(name, args...) // #nosec G204 -- command execution is by design
 	cmd.Dir = dir
 
 	var stdout, stderr bytes.Buffer

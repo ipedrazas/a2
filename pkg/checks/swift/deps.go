@@ -2,6 +2,7 @@ package swiftcheck
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -101,11 +102,7 @@ func formatDepsMessage(count int) string {
 	if count == 1 {
 		sb.WriteString("1 dependency")
 	} else {
-		if count < 10 {
-			sb.WriteByte('0' + byte(count))
-		} else {
-			sb.WriteString("multiple")
-		}
+		sb.WriteString(strconv.Itoa(count))
 		sb.WriteString(" dependencies")
 	}
 	sb.WriteString(" (no vulnerability database available)")

@@ -7,6 +7,7 @@ This document describes all checks available in A2, organized by category.
 - [Check Statuses](#check-statuses)
 - [Language Checks](#language-checks)
 - [Common Checks](#common-checks)
+- [Security Checks](#security-checks)
 - [External Checks](#external-checks)
 - [Configuration Reference](#configuration-reference)
 
@@ -559,6 +560,38 @@ Detects editor configuration files.
 **Status:**
 - **Pass**: Editor configuration found
 - **Warn**: No editor configuration found
+
+---
+
+## Security Checks
+
+### security:filesystem
+
+Detects path traversal and unsafe file operations.
+
+**Status:**
+- **Pass**: No path traversal or unsafe file operations detected
+- **Fail**: Path traversal/unsafe file operations detected
+
+**Allowlist (suppress known-safe findings):**
+```yaml
+security:
+  filesystem:
+    allow:
+      - "pkg/checks/common/k8s.go:94"
+      - "pkg/checks/common/k8s.go:os.ReadDir(chartsDir)"
+      - "pkg/checks/common/**"
+```
+
+**Allowlist formats:**
+- `file:line` — suppress a specific line in a file
+- `file:match` — suppress lines containing the match text (supports `*` and `?` wildcards)
+- `file` — suppress all findings for matching files
+
+**Examples:**
+- `pkg/checks/common/k8s.go:94`
+- `pkg/checks/common/k8s.go:os.ReadDir(chartsDir)`
+- `pkg/checks/common/**`
 
 ---
 

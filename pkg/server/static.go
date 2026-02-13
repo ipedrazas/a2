@@ -43,11 +43,18 @@ func (h *spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Build the full filesystem path
-	fullPath := filepath.Join(h.uiPath, r.URL.Path)
+	// Clean the path to prevent path traversal
+	cleanPath := filepath.Clean(r.URL.Path)
+	fullPath := filepath.Join(h.uiPath, cleanPath)
+
+	// Ensure the resolved path is within the UI directory
+	if !strings.HasPrefix(fullPath, h.uiPath) {
+		http.NotFound(w, r)
+		return
+	}
 
 	// Check if the requested path exists and is a file
-	info, err := os.Stat(fullPath)
+	info, err := os.Stat(fullPath) // #nosec G703 -- path is sanitized above
 	if err == nil && !info.IsDir() {
 		// File exists, serve it
 		h.fileServer.ServeHTTP(w, r)

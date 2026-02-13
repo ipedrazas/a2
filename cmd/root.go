@@ -157,23 +157,28 @@ func runCheck(cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(os.Stderr, "Error loading config: %v\n", err)
 		os.Exit(1)
 	}
+	baseDisabled := append([]string{}, cfg.Checks.Disabled...)
 
 	// Apply target if specified (maturity level)
+	var targetDisabled []string
 	if target != "" {
 		t, ok := targets.Get(target)
 		if !ok {
 			return fmt.Errorf("unknown target: %s (available: %s)", target, strings.Join(targets.Names(), ", "))
 		}
-		cfg.Checks.Disabled = append(cfg.Checks.Disabled, t.Disabled...)
+		targetDisabled = append(targetDisabled, t.Disabled...)
+		cfg.Checks.Disabled = append(cfg.Checks.Disabled, targetDisabled...)
 	}
 
 	// Apply profile if specified (application type)
+	var profileDisabled []string
 	if profile != "" {
 		p, ok := profiles.Get(profile)
 		if !ok {
 			return fmt.Errorf("unknown profile: %s (available: %s)", profile, strings.Join(profiles.Names(), ", "))
 		}
-		cfg.Checks.Disabled = append(cfg.Checks.Disabled, p.Disabled...)
+		profileDisabled = append(profileDisabled, p.Disabled...)
+		cfg.Checks.Disabled = append(cfg.Checks.Disabled, profileDisabled...)
 	}
 
 	// Apply CLI skip flags
@@ -209,6 +214,7 @@ func runCheck(cmd *cobra.Command, args []string) error {
 
 	// Get the list of checks to run
 	registrations := checks.GetChecks(cfg, detected)
+	skipped := buildSkippedChecks(cfg, detected, registrations, baseDisabled, targetDisabled, profileDisabled, skippedChecks, target, profile)
 
 	// Set up progress callback for Pretty format only
 	var progress *output.ProgressReporter
@@ -243,7 +249,7 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	case "toon":
 		success, outputErr = output.TOON(result, detected, verbosityLevel)
 	default:
-		success, outputErr = output.Pretty(result, path, detected, verbosityLevel)
+		success, outputErr = output.Pretty(result, path, detected, verbosityLevel, skipped)
 	}
 
 	if outputErr != nil {
@@ -256,6 +262,84 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+type disabledSource struct {
+	pattern string
+	reason  string
+}
+
+func buildSkippedChecks(cfg *config.Config, detected language.DetectionResult, enabled []checker.CheckRegistration, baseDisabled, targetDisabled, profileDisabled, cliDisabled []string, targetName, profileName string) []output.SkipInfo {
+	enabledIDs := make(map[string]struct{}, len(enabled))
+	for _, reg := range enabled {
+		enabledIDs[reg.Meta.ID] = struct{}{}
+	}
+
+	allRegs := checks.GetAllCheckRegistrations(cfg)
+	var sources []disabledSource
+	for _, p := range cliDisabled {
+		sources = append(sources, disabledSource{pattern: p, reason: "cli --skip"})
+	}
+	if profileName != "" {
+		for _, p := range profileDisabled {
+			sources = append(sources, disabledSource{pattern: p, reason: "profile: " + profileName})
+		}
+	}
+	if targetName != "" {
+		for _, p := range targetDisabled {
+			sources = append(sources, disabledSource{pattern: p, reason: "target: " + targetName})
+		}
+	}
+	for _, p := range baseDisabled {
+		sources = append(sources, disabledSource{pattern: p, reason: "config"})
+	}
+
+	var skipped []output.SkipInfo
+	for _, reg := range allRegs {
+		if !isApplicableForDetected(reg.Meta.Languages, detected.Languages) {
+			continue
+		}
+		if _, ok := enabledIDs[reg.Meta.ID]; ok {
+			continue
+		}
+		if !cfg.IsCheckDisabled(reg.Meta.ID) {
+			continue
+		}
+		reason := "disabled"
+		pattern := ""
+		for _, src := range sources {
+			if config.MatchDisabled(reg.Meta.ID, src.pattern) {
+				reason = src.reason
+				pattern = src.pattern
+				break
+			}
+		}
+		skipped = append(skipped, output.SkipInfo{
+			ID:      reg.Meta.ID,
+			Name:    reg.Meta.Name,
+			Reason:  reason,
+			Pattern: pattern,
+		})
+	}
+
+	return skipped
+}
+
+func isApplicableForDetected(checkLangs []checker.Language, detected []checker.Language) bool {
+	if len(checkLangs) == 0 {
+		return true
+	}
+	for _, lang := range checkLangs {
+		if lang == checker.LangCommon {
+			return true
+		}
+		for _, d := range detected {
+			if lang == d {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func runVersion(cmd *cobra.Command, args []string) {

@@ -2,6 +2,7 @@ package swiftcheck
 
 import (
 	"os/exec"
+	"strconv"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -114,7 +115,7 @@ func (c *FormatCheck) hasFormatterConfig(path string, formatter string) bool {
 // formatCount converts an int to a string for display.
 func formatCount(n int) string {
 	if n < 10 {
-		return string(rune('0' + n))
+		return strconv.Itoa(n)
 	}
 	return "multiple"
 }

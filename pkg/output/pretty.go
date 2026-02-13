@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -93,9 +94,17 @@ var (
 				PaddingLeft(4)
 )
 
+// SkipInfo captures a skipped check and the reason.
+type SkipInfo struct {
+	ID      string
+	Name    string
+	Reason  string
+	Pattern string
+}
+
 // Pretty outputs the results in a formatted, colorful way.
 // Returns true if all checks passed, false otherwise, along with any output error.
-func Pretty(result runner.SuiteResult, path string, detected language.DetectionResult, verbosity VerbosityLevel) (bool, error) {
+func Pretty(result runner.SuiteResult, path string, detected language.DetectionResult, verbosity VerbosityLevel, skipped []SkipInfo) (bool, error) {
 	// Get project name from path
 	projectName := filepath.Base(path)
 	if path == "." {
@@ -118,9 +127,25 @@ func Pretty(result runner.SuiteResult, path string, detected language.DetectionR
 	}
 	fmt.Println()
 
+	// Top issues summary
+	printTopIssues(result)
+
 	// Results
 	for _, r := range result.Results {
 		printResult(r, verbosity)
+	}
+
+	// Skipped checks (verbose only)
+	if verbosity >= VerbosityFailures && len(skipped) > 0 {
+		fmt.Println()
+		fmt.Println(recommendStyle.Render("Skipped checks:"))
+		for _, s := range skipped {
+			reason := s.Reason
+			if s.Pattern != "" {
+				reason = fmt.Sprintf("%s (%s)", s.Reason, s.Pattern)
+			}
+			fmt.Println(recommendStyle.Render(fmt.Sprintf("- %s - %s", s.Name, reason)))
+		}
 	}
 
 	fmt.Println()
@@ -285,4 +310,109 @@ func printRecommendations(result runner.SuiteResult) {
 			fmt.Println(recommendStyle.Render(rec))
 		}
 	}
+}
+
+type topIssue struct {
+	result     checker.Result
+	name       string
+	suggestion string
+	critical   bool
+	order      int
+}
+
+func printTopIssues(result runner.SuiteResult) {
+	meta := buildCheckMeta()
+	var issues []topIssue
+
+	for _, r := range result.Results {
+		if r.Status != checker.Fail && r.Status != checker.Warn {
+			continue
+		}
+		m := meta[r.ID]
+		issue := topIssue{
+			result:     r,
+			name:       r.Name,
+			suggestion: m.suggestion,
+			critical:   m.critical,
+			order:      m.order,
+		}
+		if issue.suggestion == "" {
+			issue.suggestion = r.Message
+		}
+		issues = append(issues, issue)
+	}
+
+	if len(issues) == 0 {
+		return
+	}
+
+	sortIssues(issues)
+	max := 3
+	if len(issues) < max {
+		max = len(issues)
+	}
+
+	fmt.Println(recommendStyle.Render("Top Issues:"))
+	for i := 0; i < max; i++ {
+		issue := issues[i]
+		symbol := "!"
+		style := warnStyle
+		if issue.result.Status == checker.Fail {
+			symbol = "✗"
+			style = failStyle
+		}
+		detail := issue.suggestion
+		if detail == "" {
+			detail = issue.result.Message
+		}
+		if detail != "" {
+			detail = " - " + detail
+		}
+		fmt.Printf("%s %s%s %s\n",
+			style.Render(symbol),
+			issue.name,
+			detail,
+			durationStyle.Render("("+issue.result.ID+")"),
+		)
+	}
+	fmt.Println()
+}
+
+type checkMeta struct {
+	critical   bool
+	order      int
+	suggestion string
+}
+
+func buildCheckMeta() map[string]checkMeta {
+	cfg := config.DefaultConfig()
+	all := checks.GetAllCheckRegistrations(cfg)
+	meta := make(map[string]checkMeta, len(all))
+	for _, reg := range all {
+		meta[reg.Meta.ID] = checkMeta{
+			critical:   reg.Meta.Critical,
+			order:      reg.Meta.Order,
+			suggestion: reg.Meta.Suggestion,
+		}
+	}
+	return meta
+}
+
+func sortIssues(issues []topIssue) {
+	sort.SliceStable(issues, func(i, j int) bool {
+		a, b := issues[i], issues[j]
+		// Fail before Warn
+		if a.result.Status != b.result.Status {
+			return a.result.Status == checker.Fail
+		}
+		// Critical before non-critical
+		if a.critical != b.critical {
+			return a.critical
+		}
+		// Lower order first
+		if a.order != b.order {
+			return a.order < b.order
+		}
+		return a.result.ID < b.result.ID
+	})
 }

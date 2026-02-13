@@ -3,6 +3,7 @@ package swiftcheck
 import (
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -81,7 +82,7 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 // formatIssueCount converts an int to a string for display.
 func formatIssueCount(n int) string {
 	if n < 10 {
-		return string(rune('0' + n))
+		return strconv.Itoa(n)
 	}
 	return "multiple"
 }

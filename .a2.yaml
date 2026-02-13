@@ -46,8 +46,8 @@ external:
 
 # This check is an order of magnitude slower than the others
   # Optional source_dir: run the command in a subdir (e.g. when Go code lives in backend/)
-  - id: security
-    name: Security Scan
+  - id: gosec
+    name: Gosec
     command: gosec
     args: ["./..."]
     severity: fail

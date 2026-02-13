@@ -3,6 +3,7 @@ package rustcheck
 import (
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -46,13 +47,13 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 		var msg strings.Builder
 		msg.WriteString("Clippy issues found: ")
 		if errors > 0 {
-			msg.WriteString(string(rune('0'+errors)) + " error(s)")
+			msg.WriteString(strconv.Itoa(errors) + " error(s)")
 			if warnings > 0 {
 				msg.WriteString(", ")
 			}
 		}
 		if warnings > 0 {
-			msg.WriteString(string(rune('0'+warnings)) + " warning(s)")
+			msg.WriteString(strconv.Itoa(warnings) + " warning(s)")
 		}
 		if errors == 0 && warnings == 0 {
 			msg.WriteString(err.Error())

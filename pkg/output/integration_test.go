@@ -164,7 +164,7 @@ func (suite *IntegrationTestSuite) TestPretty_IntegrationOutput() {
 	detected := createTestDetectionResult()
 
 	output := captureStdout(func() {
-		success, err := Pretty(result, path, detected, VerbosityNormal)
+		success, err := Pretty(result, path, detected, VerbosityNormal, nil)
 		suite.NoError(err)
 		suite.False(success) // Has failures
 	})
