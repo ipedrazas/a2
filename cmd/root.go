@@ -28,6 +28,7 @@ var (
 	target        string        // Maturity target (poc, production)
 	timeout       time.Duration // Timeout for each individual check
 	verbosity     int           // Verbosity level (0=normal, 1=failures, 2=all)
+	failFast      bool          // Cancel remaining checks on first critical failure (parallel mode)
 )
 
 var rootCmd = &cobra.Command{
@@ -116,6 +117,7 @@ func init() {
 	checkCmd.Flags().StringVar(&target, "target", "", "Maturity target (poc, production)")
 	checkCmd.Flags().DurationVar(&timeout, "timeout", 0, "Timeout for each individual check (e.g., 30s, 1m). 0 means no timeout")
 	checkCmd.Flags().CountVarP(&verbosity, "verbose", "v", "Increase verbosity (-v for failures, -vv for all)")
+	checkCmd.Flags().BoolVar(&failFast, "fail-fast", false, "Cancel remaining checks on first critical failure (parallel mode only)")
 	rootCmd.AddCommand(checkCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(profilesCmd)
@@ -228,6 +230,7 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	// Run the suite with configured execution options
 	opts := runner.RunSuiteOptions{
 		Parallel:   cfg.Execution.Parallel,
+		FailFast:   failFast,
 		Timeout:    timeout,
 		OnProgress: progressFunc,
 	}

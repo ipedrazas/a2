@@ -2,6 +2,7 @@ package runner
 
 import (
 	"errors"
+	"runtime"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -503,6 +504,78 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelRunsAllChecks() {
 	suite.Equal("check1", result.Results[0].ID)
 	suite.Equal("check2", result.Results[1].ID)
 	suite.Equal("check3", result.Results[2].ID)
+}
+
+// TestRunSuite_ParallelFailFastCancelsRemaining tests that fail-fast cancels remaining checks in parallel mode.
+func (suite *RunnerTestSuite) TestRunSuite_ParallelFailFastCancelsRemaining() {
+	prev := runtime.GOMAXPROCS(2)
+	defer runtime.GOMAXPROCS(prev)
+
+	checks := []checker.Checker{
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check1",
+				name: "Check 1",
+				result: checker.Result{
+					Name:    "Check 1",
+					ID:      "check1",
+					Passed:  false,
+					Status:  checker.Fail,
+					Message: "Critical failure",
+					Reason:  "Critical failure",
+				},
+			},
+			delay: 1 * time.Millisecond,
+		},
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check2",
+				name: "Check 2",
+				result: checker.Result{
+					Name:    "Check 2",
+					ID:      "check2",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "Should be cancelled",
+					Reason:  "Should be cancelled",
+				},
+			},
+			delay: 50 * time.Millisecond,
+		},
+		&slowMockChecker{
+			mockChecker: mockChecker{
+				id:   "check3",
+				name: "Check 3",
+				result: checker.Result{
+					Name:    "Check 3",
+					ID:      "check3",
+					Passed:  true,
+					Status:  checker.Pass,
+					Message: "Should be cancelled",
+					Reason:  "Should be cancelled",
+				},
+			},
+			delay: 50 * time.Millisecond,
+		},
+	}
+
+	registrations := toRegistrations(checks)
+	registrations[0].Meta.Critical = true
+
+	result := RunSuiteWithOptions("/test/path", registrations, RunSuiteOptions{
+		Parallel: true,
+		FailFast: true,
+	})
+
+	cancelled := 0
+	for _, res := range result.Results {
+		if res.Status == checker.Info && res.Message == "Cancelled" {
+			cancelled++
+		}
+	}
+
+	suite.True(result.Aborted)
+	suite.GreaterOrEqual(cancelled, 1)
 }
 
 // TestRunSuite_SequentialStopsOnFailure tests that sequential mode stops on first failure.
