@@ -66,7 +66,7 @@ func main() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "No dangerous")
+	suite.Contains(result.Reason, "No dangerous")
 }
 
 // TestShellInjectionCheck_Run_ShellInjection tests detection of shell injection.
@@ -91,7 +91,7 @@ func main() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "pattern")
+	suite.Contains(result.Reason, "pattern")
 }
 
 // TestFileSystemCheck_ID tests that FileSystemCheck returns correct ID.
@@ -127,7 +127,7 @@ func main() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "No path traversal")
+	suite.Contains(result.Reason, "No path traversal")
 }
 
 // TestFileSystemCheck_Run_PathTraversal tests detection of path traversal.
@@ -151,7 +151,7 @@ func main() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "Path traversal")
+	suite.Contains(result.Reason, "Path traversal")
 }
 
 // TestFileSystemCheck_Run_AllowlistByLine tests allowlist rule by file:line.
@@ -251,7 +251,7 @@ func main() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "No suspicious")
+	suite.Contains(result.Reason, "No suspicious")
 }
 
 // TestNetworkCheck_Run_SuspiciousNetwork tests detection of suspicious network operations.
@@ -276,7 +276,7 @@ func main() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status) // Network check is Warn by default
-	suite.Contains(result.Message, "network operation")
+	suite.Contains(result.Reason, "network operation")
 }
 
 // TestObfuscationCheck_ID tests that ObfuscationCheck returns correct ID.
@@ -309,7 +309,7 @@ func main() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "No obfuscated")
+	suite.Contains(result.Reason, "No obfuscated")
 }
 
 // TestObfuscationCheck_Run_EncodedString tests detection of encoded strings.
@@ -332,7 +332,7 @@ func main() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "obfuscation")
+	suite.Contains(result.Reason, "obfuscation")
 }
 
 // TestRegister tests that Register returns all expected checks.

@@ -40,7 +40,7 @@ func (s *K8sCheckTestSuite) TestRun_NoK8sConfig() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No Kubernetes manifests")
+	s.Contains(result.Reason, "No Kubernetes manifests")
 }
 
 func (s *K8sCheckTestSuite) TestRun_HelmChartInRoot() {
@@ -53,7 +53,7 @@ func (s *K8sCheckTestSuite) TestRun_HelmChartInRoot() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Helm chart")
+	s.Contains(result.Reason, "Helm chart")
 }
 
 func (s *K8sCheckTestSuite) TestRun_HelmChartInChartsDir() {
@@ -69,7 +69,7 @@ func (s *K8sCheckTestSuite) TestRun_HelmChartInChartsDir() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Helm chart")
+	s.Contains(result.Reason, "Helm chart")
 }
 
 func (s *K8sCheckTestSuite) TestRun_HelmChartInHelmDir() {
@@ -85,7 +85,7 @@ func (s *K8sCheckTestSuite) TestRun_HelmChartInHelmDir() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Helm chart")
+	s.Contains(result.Reason, "Helm chart")
 }
 
 func (s *K8sCheckTestSuite) TestRun_KustomizeInRoot() {
@@ -97,7 +97,7 @@ func (s *K8sCheckTestSuite) TestRun_KustomizeInRoot() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Kustomize")
+	s.Contains(result.Reason, "Kustomize")
 }
 
 func (s *K8sCheckTestSuite) TestRun_KustomizeInK8sDir() {
@@ -113,7 +113,7 @@ func (s *K8sCheckTestSuite) TestRun_KustomizeInK8sDir() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Kustomize")
+	s.Contains(result.Reason, "Kustomize")
 }
 
 func (s *K8sCheckTestSuite) TestRun_KustomizeInBaseDir() {
@@ -129,7 +129,7 @@ func (s *K8sCheckTestSuite) TestRun_KustomizeInBaseDir() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Kustomize")
+	s.Contains(result.Reason, "Kustomize")
 }
 
 func (s *K8sCheckTestSuite) TestRun_K8sManifestsDir() {
@@ -149,7 +149,7 @@ metadata:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "k8s/ directory")
+	s.Contains(result.Reason, "k8s/ directory")
 }
 
 func (s *K8sCheckTestSuite) TestRun_KubernetesDir() {
@@ -169,7 +169,7 @@ metadata:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "kubernetes/ directory")
+	s.Contains(result.Reason, "kubernetes/ directory")
 }
 
 func (s *K8sCheckTestSuite) TestRun_DeployDir() {
@@ -189,7 +189,7 @@ metadata:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "deploy/ directory")
+	s.Contains(result.Reason, "deploy/ directory")
 }
 
 func (s *K8sCheckTestSuite) TestRun_ManifestsInRoot() {
@@ -201,7 +201,7 @@ func (s *K8sCheckTestSuite) TestRun_ManifestsInRoot() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "K8s manifests")
+	s.Contains(result.Reason, "K8s manifests")
 }
 
 func (s *K8sCheckTestSuite) TestRun_ServiceInRoot() {
@@ -213,7 +213,7 @@ func (s *K8sCheckTestSuite) TestRun_ServiceInRoot() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "K8s manifests")
+	s.Contains(result.Reason, "K8s manifests")
 }
 
 func (s *K8sCheckTestSuite) TestRun_DockerCompose() {
@@ -225,7 +225,7 @@ func (s *K8sCheckTestSuite) TestRun_DockerCompose() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Docker Compose")
+	s.Contains(result.Reason, "Docker Compose")
 }
 
 func (s *K8sCheckTestSuite) TestRun_ComposeYml() {
@@ -237,7 +237,7 @@ func (s *K8sCheckTestSuite) TestRun_ComposeYml() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Docker Compose")
+	s.Contains(result.Reason, "Docker Compose")
 }
 
 func (s *K8sCheckTestSuite) TestRun_Skaffold() {
@@ -249,7 +249,7 @@ func (s *K8sCheckTestSuite) TestRun_Skaffold() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Skaffold")
+	s.Contains(result.Reason, "Skaffold")
 }
 
 func (s *K8sCheckTestSuite) TestRun_Tilt() {
@@ -261,7 +261,7 @@ func (s *K8sCheckTestSuite) TestRun_Tilt() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Tilt")
+	s.Contains(result.Reason, "Tilt")
 }
 
 func (s *K8sCheckTestSuite) TestRun_MultipleConfigs() {
@@ -279,8 +279,8 @@ func (s *K8sCheckTestSuite) TestRun_MultipleConfigs() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Helm chart")
-	s.Contains(result.Message, "Docker Compose")
+	s.Contains(result.Reason, "Helm chart")
+	s.Contains(result.Reason, "Docker Compose")
 }
 
 func (s *K8sCheckTestSuite) TestRun_NestedK8sManifests() {
@@ -301,7 +301,7 @@ metadata:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "k8s/ directory")
+	s.Contains(result.Reason, "k8s/ directory")
 }
 
 func (s *K8sCheckTestSuite) TestRun_NonK8sYamlIgnored() {

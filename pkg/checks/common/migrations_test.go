@@ -41,7 +41,7 @@ func (s *MigrationsCheckTestSuite) TestMigrationsDirectory() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "migrations")
+	s.Contains(result.Reason, "migrations")
 }
 
 func (s *MigrationsCheckTestSuite) TestDbMigrationsDirectory() {
@@ -55,7 +55,7 @@ func (s *MigrationsCheckTestSuite) TestDbMigrationsDirectory() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "db/migrations")
+	s.Contains(result.Reason, "db/migrations")
 }
 
 func (s *MigrationsCheckTestSuite) TestAlembicConfig() {
@@ -71,7 +71,7 @@ script_location = alembic
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Alembic")
+	s.Contains(result.Reason, "Alembic")
 }
 
 func (s *MigrationsCheckTestSuite) TestFlywayConfig() {
@@ -86,7 +86,7 @@ flyway.url=jdbc:postgresql://localhost/mydb
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Flyway")
+	s.Contains(result.Reason, "Flyway")
 }
 
 func (s *MigrationsCheckTestSuite) TestLiquibaseConfig() {
@@ -101,7 +101,7 @@ changeLogFile=changelog.xml
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Liquibase")
+	s.Contains(result.Reason, "Liquibase")
 }
 
 func (s *MigrationsCheckTestSuite) TestPrismaSchema() {
@@ -122,7 +122,7 @@ model User {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Prisma")
+	s.Contains(result.Reason, "Prisma")
 }
 
 func (s *MigrationsCheckTestSuite) TestDrizzleConfig() {
@@ -137,7 +137,7 @@ export default defineConfig({});
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Drizzle")
+	s.Contains(result.Reason, "Drizzle")
 }
 
 func (s *MigrationsCheckTestSuite) TestKnexConfig() {
@@ -154,7 +154,7 @@ module.exports = {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Knex")
+	s.Contains(result.Reason, "Knex")
 }
 
 func (s *MigrationsCheckTestSuite) TestSequelizeConfig() {
@@ -169,7 +169,7 @@ module.exports = {};
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Sequelize")
+	s.Contains(result.Reason, "Sequelize")
 }
 
 func (s *MigrationsCheckTestSuite) TestDieselConfig() {
@@ -185,7 +185,7 @@ file = "src/schema.rs"
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Diesel")
+	s.Contains(result.Reason, "Diesel")
 }
 
 func (s *MigrationsCheckTestSuite) TestGoMigrate() {
@@ -205,7 +205,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "golang-migrate")
+	s.Contains(result.Reason, "golang-migrate")
 }
 
 func (s *MigrationsCheckTestSuite) TestGoose() {
@@ -225,7 +225,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Goose")
+	s.Contains(result.Reason, "Goose")
 }
 
 func (s *MigrationsCheckTestSuite) TestGORM() {
@@ -245,7 +245,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "GORM")
+	s.Contains(result.Reason, "GORM")
 }
 
 func (s *MigrationsCheckTestSuite) TestAtlas() {
@@ -260,7 +260,7 @@ schema "public" {}
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Atlas")
+	s.Contains(result.Reason, "Atlas")
 }
 
 func (s *MigrationsCheckTestSuite) TestPythonAlembic() {
@@ -275,7 +275,7 @@ sqlalchemy==2.0.0`
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Alembic")
+	s.Contains(result.Reason, "Alembic")
 }
 
 func (s *MigrationsCheckTestSuite) TestPythonDjango() {
@@ -289,7 +289,7 @@ func (s *MigrationsCheckTestSuite) TestPythonDjango() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Django")
+	s.Contains(result.Reason, "Django")
 }
 
 func (s *MigrationsCheckTestSuite) TestNodePrisma() {
@@ -308,7 +308,7 @@ func (s *MigrationsCheckTestSuite) TestNodePrisma() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Prisma")
+	s.Contains(result.Reason, "Prisma")
 }
 
 func (s *MigrationsCheckTestSuite) TestNodeDrizzle() {
@@ -327,7 +327,7 @@ func (s *MigrationsCheckTestSuite) TestNodeDrizzle() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Drizzle")
+	s.Contains(result.Reason, "Drizzle")
 }
 
 func (s *MigrationsCheckTestSuite) TestNodeTypeORM() {
@@ -346,7 +346,7 @@ func (s *MigrationsCheckTestSuite) TestNodeTypeORM() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "TypeORM")
+	s.Contains(result.Reason, "TypeORM")
 }
 
 func (s *MigrationsCheckTestSuite) TestJavaFlyway() {
@@ -363,7 +363,7 @@ func (s *MigrationsCheckTestSuite) TestJavaFlyway() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Flyway")
+	s.Contains(result.Reason, "Flyway")
 }
 
 func (s *MigrationsCheckTestSuite) TestRustSqlx() {
@@ -381,7 +381,7 @@ sqlx = "0.7"`
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "SQLx")
+	s.Contains(result.Reason, "SQLx")
 }
 
 func (s *MigrationsCheckTestSuite) TestRustSeaORM() {
@@ -399,7 +399,7 @@ sea-orm = "0.12"`
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "SeaORM")
+	s.Contains(result.Reason, "SeaORM")
 }
 
 func (s *MigrationsCheckTestSuite) TestNoMigrationsFound() {
@@ -419,7 +419,7 @@ require (
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No database migrations found")
+	s.Contains(result.Reason, "No database migrations found")
 }
 
 func (s *MigrationsCheckTestSuite) TestEmptyDirectory() {
@@ -429,7 +429,7 @@ func (s *MigrationsCheckTestSuite) TestEmptyDirectory() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No database migrations found")
+	s.Contains(result.Reason, "No database migrations found")
 }
 
 func TestMigrationsCheckTestSuite(t *testing.T) {

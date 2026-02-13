@@ -40,7 +40,7 @@ func (s *PulumiCheckTestSuite) TestRun_NoPulumiFiles() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Pulumi files found")
+	s.Contains(result.Reason, "No Pulumi files found")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_PulumiYaml() {
@@ -55,8 +55,8 @@ description: A minimal Pulumi program`), 0644)
 	s.NoError(err)
 	// Without pulumi: Info (tool not installed). With pulumi (e.g. in CI): Pass, Info, or Warn.
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "pulumi")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "pulumi")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_PulumiYml() {
@@ -69,8 +69,8 @@ runtime: python`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "pulumi")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "pulumi")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_PulumiGoYaml() {
@@ -83,8 +83,8 @@ runtime: go`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "pulumi")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "pulumi")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_PulumiPythonYaml() {
@@ -97,8 +97,8 @@ runtime: python`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "pulumi")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "pulumi")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_PulumiTsYaml() {
@@ -111,8 +111,8 @@ runtime: nodejs`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "pulumi")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "pulumi")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_PulumiJavaScriptYaml() {
@@ -125,8 +125,8 @@ runtime: nodejs`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "pulumi")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "pulumi")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_PulumiCsYaml() {
@@ -139,8 +139,8 @@ runtime: dotnet`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "pulumi")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "pulumi")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_PulumiJavaYaml() {
@@ -153,8 +153,8 @@ runtime: java`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "pulumi")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "pulumi")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_PulumiYamlYaml() {
@@ -167,8 +167,8 @@ runtime: yaml`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "pulumi")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "pulumi")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_PulumiDirectory() {
@@ -180,8 +180,8 @@ func (s *PulumiCheckTestSuite) TestRun_PulumiDirectory() {
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "pulumi")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "pulumi")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_DotPulumiDirectory() {
@@ -193,8 +193,8 @@ func (s *PulumiCheckTestSuite) TestRun_DotPulumiDirectory() {
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "pulumi")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "pulumi")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_PulumiInSubdirectory() {
@@ -211,8 +211,8 @@ runtime: nodejs`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "pulumi")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "pulumi")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_MultiplePulumiFiles() {
@@ -231,8 +231,8 @@ runtime: nodejs`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "pulumi")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "pulumi")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_ResultLanguage() {
@@ -257,7 +257,7 @@ runtime: nodejs`), 0644)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Pulumi files found")
+	s.Contains(result.Reason, "No Pulumi files found")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_IgnoresVendorDirs() {
@@ -275,7 +275,7 @@ runtime: nodejs`), 0644)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Pulumi files found")
+	s.Contains(result.Reason, "No Pulumi files found")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_DoesNotConfuseWithK8sManifests() {
@@ -296,7 +296,7 @@ metadata:
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Pulumi files found")
+	s.Contains(result.Reason, "No Pulumi files found")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_DoesNotConfuseWithHelmCharts() {
@@ -314,7 +314,7 @@ name: mychart`), 0644)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Pulumi files found")
+	s.Contains(result.Reason, "No Pulumi files found")
 }
 
 func (s *PulumiCheckTestSuite) TestRun_DetectsNestedPulumiFile() {
@@ -332,8 +332,8 @@ runtime: go`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "pulumi")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "pulumi")
 }
 
 func TestPulumiCheckTestSuite(t *testing.T) {

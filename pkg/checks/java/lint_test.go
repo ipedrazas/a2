@@ -37,7 +37,7 @@ func (s *LintCheckTestSuite) TestRun_NoLinters() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No static analysis tools configured")
+	s.Contains(result.Reason, "No static analysis tools configured")
 }
 
 func (s *LintCheckTestSuite) TestRun_ResultLanguage() {
@@ -58,7 +58,7 @@ func (s *LintCheckTestSuite) TestRun_Checkstyle_ConfigFile() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Checkstyle")
+	s.Contains(result.Reason, "Checkstyle")
 }
 
 func (s *LintCheckTestSuite) TestRun_Checkstyle_ConfigSubdirectory() {
@@ -74,7 +74,7 @@ func (s *LintCheckTestSuite) TestRun_Checkstyle_ConfigSubdirectory() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Checkstyle")
+	s.Contains(result.Reason, "Checkstyle")
 }
 
 func (s *LintCheckTestSuite) TestRun_Checkstyle_Maven() {
@@ -96,7 +96,7 @@ func (s *LintCheckTestSuite) TestRun_Checkstyle_Maven() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Checkstyle")
+	s.Contains(result.Reason, "Checkstyle")
 }
 
 func (s *LintCheckTestSuite) TestRun_Checkstyle_Gradle() {
@@ -112,7 +112,7 @@ func (s *LintCheckTestSuite) TestRun_Checkstyle_Gradle() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Checkstyle")
+	s.Contains(result.Reason, "Checkstyle")
 }
 
 func (s *LintCheckTestSuite) TestRun_SpotBugs_ConfigFile() {
@@ -124,7 +124,7 @@ func (s *LintCheckTestSuite) TestRun_SpotBugs_ConfigFile() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SpotBugs")
+	s.Contains(result.Reason, "SpotBugs")
 }
 
 func (s *LintCheckTestSuite) TestRun_SpotBugs_ExcludeFile() {
@@ -136,7 +136,7 @@ func (s *LintCheckTestSuite) TestRun_SpotBugs_ExcludeFile() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SpotBugs")
+	s.Contains(result.Reason, "SpotBugs")
 }
 
 func (s *LintCheckTestSuite) TestRun_SpotBugs_Maven() {
@@ -158,7 +158,7 @@ func (s *LintCheckTestSuite) TestRun_SpotBugs_Maven() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SpotBugs")
+	s.Contains(result.Reason, "SpotBugs")
 }
 
 func (s *LintCheckTestSuite) TestRun_SpotBugs_Gradle() {
@@ -174,7 +174,7 @@ func (s *LintCheckTestSuite) TestRun_SpotBugs_Gradle() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SpotBugs")
+	s.Contains(result.Reason, "SpotBugs")
 }
 
 func (s *LintCheckTestSuite) TestRun_FindBugs_Legacy() {
@@ -196,7 +196,7 @@ func (s *LintCheckTestSuite) TestRun_FindBugs_Legacy() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SpotBugs")
+	s.Contains(result.Reason, "SpotBugs")
 }
 
 func (s *LintCheckTestSuite) TestRun_PMD_ConfigFile() {
@@ -208,7 +208,7 @@ func (s *LintCheckTestSuite) TestRun_PMD_ConfigFile() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "PMD")
+	s.Contains(result.Reason, "PMD")
 }
 
 func (s *LintCheckTestSuite) TestRun_PMD_RulesetFile() {
@@ -220,7 +220,7 @@ func (s *LintCheckTestSuite) TestRun_PMD_RulesetFile() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "PMD")
+	s.Contains(result.Reason, "PMD")
 }
 
 func (s *LintCheckTestSuite) TestRun_PMD_Maven() {
@@ -242,7 +242,7 @@ func (s *LintCheckTestSuite) TestRun_PMD_Maven() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "PMD")
+	s.Contains(result.Reason, "PMD")
 }
 
 func (s *LintCheckTestSuite) TestRun_PMD_Gradle() {
@@ -262,7 +262,7 @@ pmd {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "PMD")
+	s.Contains(result.Reason, "PMD")
 }
 
 func (s *LintCheckTestSuite) TestRun_ErrorProne_Maven() {
@@ -292,7 +292,7 @@ func (s *LintCheckTestSuite) TestRun_ErrorProne_Maven() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Error Prone")
+	s.Contains(result.Reason, "Error Prone")
 }
 
 func (s *LintCheckTestSuite) TestRun_ErrorProne_Gradle() {
@@ -308,7 +308,7 @@ func (s *LintCheckTestSuite) TestRun_ErrorProne_Gradle() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Error Prone")
+	s.Contains(result.Reason, "Error Prone")
 }
 
 func (s *LintCheckTestSuite) TestRun_SonarQube_PropertiesFile() {
@@ -320,7 +320,7 @@ func (s *LintCheckTestSuite) TestRun_SonarQube_PropertiesFile() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SonarQube")
+	s.Contains(result.Reason, "SonarQube")
 }
 
 func (s *LintCheckTestSuite) TestRun_SonarQube_Maven() {
@@ -342,7 +342,7 @@ func (s *LintCheckTestSuite) TestRun_SonarQube_Maven() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SonarQube")
+	s.Contains(result.Reason, "SonarQube")
 }
 
 func (s *LintCheckTestSuite) TestRun_SonarQube_Gradle() {
@@ -358,7 +358,7 @@ func (s *LintCheckTestSuite) TestRun_SonarQube_Gradle() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SonarQube")
+	s.Contains(result.Reason, "SonarQube")
 }
 
 func (s *LintCheckTestSuite) TestRun_MultipleLinters() {
@@ -384,8 +384,8 @@ func (s *LintCheckTestSuite) TestRun_MultipleLinters() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Checkstyle")
-	s.Contains(result.Message, "PMD")
+	s.Contains(result.Reason, "Checkstyle")
+	s.Contains(result.Reason, "PMD")
 }
 
 func (s *LintCheckTestSuite) TestRun_GradleKts() {
@@ -401,7 +401,7 @@ func (s *LintCheckTestSuite) TestRun_GradleKts() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Checkstyle")
+	s.Contains(result.Reason, "Checkstyle")
 }
 
 func TestLintCheckTestSuite(t *testing.T) {

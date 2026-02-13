@@ -52,9 +52,9 @@ regex = "AKIA[0-9A-Z]{16}"
 	s.Equal(checker.Pass, result.Status)
 	// If gitleaks is installed, it runs the tool; otherwise it reports config found
 	if checkutil.ToolAvailable("gitleaks") {
-		s.Contains(result.Message, "gitleaks")
+		s.Contains(result.Reason, "gitleaks")
 	} else {
-		s.Contains(result.Message, "Gitleaks")
+		s.Contains(result.Reason, "Gitleaks")
 	}
 }
 
@@ -76,7 +76,7 @@ detectors:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "TruffleHog")
+	s.Contains(result.Reason, "TruffleHog")
 }
 
 func (s *SecretsCheckTestSuite) TestDetectSecretsConfigured() {
@@ -97,7 +97,7 @@ func (s *SecretsCheckTestSuite) TestDetectSecretsConfigured() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "detect-secrets")
+	s.Contains(result.Reason, "detect-secrets")
 }
 
 func (s *SecretsCheckTestSuite) TestPreCommitWithGitleaks() {
@@ -121,7 +121,7 @@ repos:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "pre-commit")
+	s.Contains(result.Reason, "pre-commit")
 }
 
 func (s *SecretsCheckTestSuite) TestNoScannerNoSecrets() {
@@ -143,11 +143,11 @@ func main() {
 	if checkutil.ToolAvailable("gitleaks") {
 		s.True(result.Passed)
 		s.Equal(checker.Pass, result.Status)
-		s.Contains(result.Message, "gitleaks")
+		s.Contains(result.Reason, "gitleaks")
 	} else {
 		s.False(result.Passed)
 		s.Equal(checker.Warn, result.Status)
-		s.Contains(result.Message, "No secret scanning configured")
+		s.Contains(result.Reason, "No secret scanning configured")
 	}
 }
 
@@ -170,7 +170,7 @@ const awsKey = "AKIAIOSFODNN7EXAMPLE"
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "AWS Access Key")
+	s.Contains(result.Reason, "AWS Access Key")
 }
 
 func (s *SecretsCheckTestSuite) TestDetectsPrivateKey() {
@@ -201,7 +201,7 @@ MIIEpAIBAAKCAQEA...
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "Private Key")
+	s.Contains(result.Reason, "Private Key")
 }
 
 func (s *SecretsCheckTestSuite) TestDetectsAPIKey() {
@@ -227,7 +227,7 @@ api_key = "%s"
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "Stripe Key")
+	s.Contains(result.Reason, "Stripe Key")
 }
 
 func (s *SecretsCheckTestSuite) TestDetectsGitHubToken() {
@@ -247,7 +247,7 @@ func (s *SecretsCheckTestSuite) TestDetectsGitHubToken() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "GitHub Token")
+	s.Contains(result.Reason, "GitHub Token")
 }
 
 func (s *SecretsCheckTestSuite) TestDetectsDatabaseURL() {
@@ -267,7 +267,7 @@ func (s *SecretsCheckTestSuite) TestDetectsDatabaseURL() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "Database URL")
+	s.Contains(result.Reason, "Database URL")
 }
 
 func (s *SecretsCheckTestSuite) TestSkipsEnvExample() {
@@ -288,7 +288,7 @@ SECRET="your_secret_key_here_abcdefghij1234"
 
 	s.NoError(err)
 	// Should warn about no scanner, not about the secrets
-	s.Contains(result.Message, "No secret scanning configured")
+	s.Contains(result.Reason, "No secret scanning configured")
 }
 
 func (s *SecretsCheckTestSuite) TestSkipsNodeModules() {
@@ -316,7 +316,7 @@ func (s *SecretsCheckTestSuite) TestSkipsNodeModules() {
 
 	s.NoError(err)
 	// Should only warn about no scanner, not about secrets in node_modules
-	s.Contains(result.Message, "No secret scanning configured")
+	s.Contains(result.Reason, "No secret scanning configured")
 }
 
 func (s *SecretsCheckTestSuite) TestSkipsVendorDirectory() {
@@ -343,7 +343,7 @@ func (s *SecretsCheckTestSuite) TestSkipsVendorDirectory() {
 	result, err := check.Run(s.tempDir)
 
 	s.NoError(err)
-	s.Contains(result.Message, "No secret scanning configured")
+	s.Contains(result.Reason, "No secret scanning configured")
 }
 
 func (s *SecretsCheckTestSuite) TestMultipleSecrets() {
@@ -369,7 +369,7 @@ const (
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
 	// Should mention multiple secrets found
-	s.Contains(result.Message, "secrets found")
+	s.Contains(result.Reason, "secrets found")
 }
 
 func (s *SecretsCheckTestSuite) TestEmptyDirectory() {
@@ -381,11 +381,11 @@ func (s *SecretsCheckTestSuite) TestEmptyDirectory() {
 	if checkutil.ToolAvailable("gitleaks") {
 		s.True(result.Passed)
 		s.Equal(checker.Pass, result.Status)
-		s.Contains(result.Message, "gitleaks")
+		s.Contains(result.Reason, "gitleaks")
 	} else {
 		s.False(result.Passed)
 		s.Equal(checker.Warn, result.Status)
-		s.Contains(result.Message, "No secret scanning configured")
+		s.Contains(result.Reason, "No secret scanning configured")
 	}
 }
 
@@ -406,7 +406,7 @@ func (s *SecretsCheckTestSuite) TestJWTToken() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "JWT Token")
+	s.Contains(result.Reason, "JWT Token")
 }
 
 // Gitleaks-specific tests (skip if gitleaks not installed)
@@ -428,8 +428,8 @@ func main() {}
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "gitleaks")
-	s.Contains(result.Message, "default rules")
+	s.Contains(result.Reason, "gitleaks")
+	s.Contains(result.Reason, "default rules")
 }
 
 func (s *SecretsCheckTestSuite) TestGitleaksRunsWithConfig() {
@@ -457,8 +457,8 @@ func main() {}
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "gitleaks")
-	s.Contains(result.Message, ".gitleaks.toml")
+	s.Contains(result.Reason, "gitleaks")
+	s.Contains(result.Reason, ".gitleaks.toml")
 }
 
 func (s *SecretsCheckTestSuite) TestGitleaksFindsSecrets() {
@@ -480,7 +480,7 @@ const apiKey = "api_key_secret_abcdefghijklmnop1234567890abcdefghijklmnop"
 	s.NoError(err)
 	// gitleaks may or may not find this depending on its rules
 	// The test verifies gitleaks runs successfully
-	s.Contains(result.Message, "gitleaks")
+	s.Contains(result.Reason, "gitleaks")
 }
 
 func (s *SecretsCheckTestSuite) TestPluralize() {

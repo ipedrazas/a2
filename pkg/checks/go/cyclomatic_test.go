@@ -41,7 +41,7 @@ func (s *CyclomaticCheckTestSuite) TestNoGoMod() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "go.mod not found")
+	s.Contains(result.Reason, "go.mod not found")
 }
 
 func (s *CyclomaticCheckTestSuite) TestSimpleFunction() {
@@ -61,7 +61,7 @@ func simple() int {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "No functions exceed complexity threshold")
+	s.Contains(result.Reason, "No functions exceed complexity threshold")
 }
 
 func (s *CyclomaticCheckTestSuite) TestComplexFunction() {
@@ -107,8 +107,8 @@ func complex(x, y, z int) int {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "exceeds complexity threshold")
-	s.Contains(result.Message, "complex")
+	s.Contains(result.Reason, "exceeds complexity threshold")
+	s.Contains(result.Reason, "complex")
 }
 
 func (s *CyclomaticCheckTestSuite) TestSkipsTestFiles() {
@@ -206,7 +206,7 @@ func (h *Handler) Handle(x, y int) int {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "(Handler).Handle")
+	s.Contains(result.Reason, "(Handler).Handle")
 }
 
 func (s *CyclomaticCheckTestSuite) TestDefaultThreshold() {
@@ -226,7 +226,7 @@ func simple() int {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "15") // Default threshold
+	s.Contains(result.Reason, "15") // Default threshold
 }
 
 func TestCyclomaticCheckTestSuite(t *testing.T) {

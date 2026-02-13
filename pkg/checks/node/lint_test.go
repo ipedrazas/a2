@@ -47,7 +47,7 @@ func (suite *LintTestSuite) TestLintCheck_Run_NoPackageJSON() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 	suite.Equal("node:lint", result.ID)
 	suite.Equal("Node Lint", result.Name)
 }
@@ -250,7 +250,7 @@ func (suite *LintTestSuite) TestLintCheck_Run_NonExistentPath() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 }
 
 // TestLintTestSuite runs all the tests in the suite.

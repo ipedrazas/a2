@@ -121,7 +121,8 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 	if err != nil {
 		result.Passed = false
 		result.Status = checker.Warn
-		result.Message = "Error scanning files: " + err.Error()
+		result.Message = "Needs attention"
+		result.Reason = "Error scanning files: " + err.Error()
 		return result, nil
 	}
 
@@ -129,27 +130,31 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 	if hasLoggingImport && printCount == 0 {
 		result.Passed = true
 		result.Status = checker.Pass
-		result.Message = "Uses logging module, no print() statements"
+		result.Message = "Check passed"
+		result.Reason = "Uses logging module, no print() statements"
 		return result, nil
 	}
 
 	if hasLoggingImport && printCount > 0 {
 		result.Passed = false
 		result.Status = checker.Warn
-		result.Message = fmt.Sprintf("Uses logging but found %d print() statement(s)", printCount)
+		result.Message = "Needs attention"
+		result.Reason = fmt.Sprintf("Uses logging but found %d print() statement(s)", printCount)
 		return result, nil
 	}
 
 	if !hasLoggingImport && printCount == 0 {
 		result.Passed = false
 		result.Status = checker.Warn
-		result.Message = "No logging module detected (consider using logging or structlog)"
+		result.Message = "Needs attention"
+		result.Reason = "No logging module detected (consider using logging or structlog)"
 		return result, nil
 	}
 
 	// !hasLoggingImport && printCount > 0
 	result.Passed = false
 	result.Status = checker.Warn
-	result.Message = fmt.Sprintf("No logging module and found %d print() statement(s)", printCount)
+	result.Message = "Needs attention"
+	result.Reason = fmt.Sprintf("No logging module and found %d print() statement(s)", printCount)
 	return result, nil
 }

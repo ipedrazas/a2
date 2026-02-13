@@ -53,7 +53,7 @@ func (s *DepsTestSuite) TestRun_NoPackageJson() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "No package.json found")
+	s.Contains(result.Reason, "No package.json found")
 }
 
 func (s *DepsTestSuite) TestRun_ResultLanguage() {
@@ -111,7 +111,7 @@ updates:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Dependabot")
+	s.Contains(result.Reason, "Dependabot")
 }
 
 func (s *DepsTestSuite) TestRun_WithRenovate() {
@@ -121,7 +121,7 @@ func (s *DepsTestSuite) TestRun_WithRenovate() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Renovate")
+	s.Contains(result.Reason, "Renovate")
 }
 
 func TestDepsTestSuite(t *testing.T) {

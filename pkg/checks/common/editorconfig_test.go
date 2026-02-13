@@ -46,8 +46,8 @@ indent_size = 2
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, ".editorconfig")
-	s.Contains(result.Message, "indent")
+	s.Contains(result.Reason, ".editorconfig")
+	s.Contains(result.Reason, "indent")
 }
 
 func (s *EditorconfigCheckTestSuite) TestEditorconfigWithEndOfLine() {
@@ -65,7 +65,7 @@ end_of_line = lf
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "line endings")
+	s.Contains(result.Reason, "line endings")
 }
 
 func (s *EditorconfigCheckTestSuite) TestEditorconfigWithCharset() {
@@ -83,7 +83,7 @@ charset = utf-8
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "charset")
+	s.Contains(result.Reason, "charset")
 }
 
 func (s *EditorconfigCheckTestSuite) TestEditorconfigWithTrimWhitespace() {
@@ -101,7 +101,7 @@ trim_trailing_whitespace = true
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "whitespace")
+	s.Contains(result.Reason, "whitespace")
 }
 
 func (s *EditorconfigCheckTestSuite) TestEditorconfigComplete() {
@@ -124,10 +124,10 @@ insert_final_newline = true
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "indent")
-	s.Contains(result.Message, "line endings")
-	s.Contains(result.Message, "charset")
-	s.Contains(result.Message, "whitespace")
+	s.Contains(result.Reason, "indent")
+	s.Contains(result.Reason, "line endings")
+	s.Contains(result.Reason, "charset")
+	s.Contains(result.Reason, "whitespace")
 }
 
 func (s *EditorconfigCheckTestSuite) TestVSCodeSettings() {
@@ -148,7 +148,7 @@ func (s *EditorconfigCheckTestSuite) TestVSCodeSettings() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "VS Code settings")
+	s.Contains(result.Reason, "VS Code settings")
 }
 
 func (s *EditorconfigCheckTestSuite) TestVSCodeExtensions() {
@@ -168,7 +168,7 @@ func (s *EditorconfigCheckTestSuite) TestVSCodeExtensions() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "VS Code extensions")
+	s.Contains(result.Reason, "VS Code extensions")
 }
 
 func (s *EditorconfigCheckTestSuite) TestJetBrainsIDE() {
@@ -186,7 +186,7 @@ func (s *EditorconfigCheckTestSuite) TestJetBrainsIDE() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "JetBrains IDE")
+	s.Contains(result.Reason, "JetBrains IDE")
 }
 
 func (s *EditorconfigCheckTestSuite) TestJetBrainsCodeStyles() {
@@ -203,7 +203,7 @@ func (s *EditorconfigCheckTestSuite) TestJetBrainsCodeStyles() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "JetBrains code styles")
+	s.Contains(result.Reason, "JetBrains code styles")
 }
 
 func (s *EditorconfigCheckTestSuite) TestVimConfig() {
@@ -219,7 +219,7 @@ set shiftwidth=4
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Vim/Neovim")
+	s.Contains(result.Reason, "Vim/Neovim")
 }
 
 func (s *EditorconfigCheckTestSuite) TestNvimConfig() {
@@ -234,7 +234,7 @@ vim.opt.tabstop = 4
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Vim/Neovim")
+	s.Contains(result.Reason, "Vim/Neovim")
 }
 
 func (s *EditorconfigCheckTestSuite) TestDevContainer() {
@@ -255,7 +255,7 @@ func (s *EditorconfigCheckTestSuite) TestDevContainer() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Dev Container")
+	s.Contains(result.Reason, "Dev Container")
 }
 
 func (s *EditorconfigCheckTestSuite) TestDevContainerAtRoot() {
@@ -272,7 +272,7 @@ func (s *EditorconfigCheckTestSuite) TestDevContainerAtRoot() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Dev Container")
+	s.Contains(result.Reason, "Dev Container")
 }
 
 func (s *EditorconfigCheckTestSuite) TestMultipleConfigs() {
@@ -300,8 +300,8 @@ indent_style = space
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, ".editorconfig")
-	s.Contains(result.Message, "VS Code settings")
+	s.Contains(result.Reason, ".editorconfig")
+	s.Contains(result.Reason, "VS Code settings")
 }
 
 func (s *EditorconfigCheckTestSuite) TestNoEditorConfigFound() {
@@ -315,7 +315,7 @@ func (s *EditorconfigCheckTestSuite) TestNoEditorConfigFound() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No editor config found")
+	s.Contains(result.Reason, "No editor config found")
 }
 
 func (s *EditorconfigCheckTestSuite) TestEmptyDirectory() {
@@ -325,7 +325,7 @@ func (s *EditorconfigCheckTestSuite) TestEmptyDirectory() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No editor config found")
+	s.Contains(result.Reason, "No editor config found")
 }
 
 func TestEditorconfigCheckTestSuite(t *testing.T) {

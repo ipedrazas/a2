@@ -53,7 +53,7 @@ func (s *ProjectTestSuite) TestRun_NoPackageSwift() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "No Package.swift found")
+	s.Contains(result.Reason, "No Package.swift found")
 }
 
 func (s *ProjectTestSuite) TestRun_BasicPackageSwift() {
@@ -73,7 +73,7 @@ let package = Package(
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "MyApp")
+	s.Contains(result.Reason, "MyApp")
 }
 
 func (s *ProjectTestSuite) TestRun_WithResolved() {
@@ -94,7 +94,7 @@ let package = Package(
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "dependencies resolved")
+	s.Contains(result.Reason, "dependencies resolved")
 }
 
 func (s *ProjectTestSuite) TestRun_MinimalPackageSwift() {

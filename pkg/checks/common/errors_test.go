@@ -46,7 +46,7 @@ require github.com/getsentry/sentry-go v0.25.0
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Sentry")
+	s.Contains(result.Reason, "Sentry")
 }
 
 func (s *ErrorsCheckTestSuite) TestGoRollbar() {
@@ -65,7 +65,7 @@ require github.com/rollbar/rollbar-go v1.4.5
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Rollbar")
+	s.Contains(result.Reason, "Rollbar")
 }
 
 func (s *ErrorsCheckTestSuite) TestGoBugsnag() {
@@ -84,7 +84,7 @@ require github.com/bugsnag/bugsnag-go v2.2.0
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Bugsnag")
+	s.Contains(result.Reason, "Bugsnag")
 }
 
 func (s *ErrorsCheckTestSuite) TestPythonSentrySDK() {
@@ -103,7 +103,7 @@ dependencies = [
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Sentry")
+	s.Contains(result.Reason, "Sentry")
 }
 
 func (s *ErrorsCheckTestSuite) TestPythonRollbar() {
@@ -119,7 +119,7 @@ rollbar>=0.16.0
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Rollbar")
+	s.Contains(result.Reason, "Rollbar")
 }
 
 func (s *ErrorsCheckTestSuite) TestNodeSentryNode() {
@@ -139,7 +139,7 @@ func (s *ErrorsCheckTestSuite) TestNodeSentryNode() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Sentry")
+	s.Contains(result.Reason, "Sentry")
 }
 
 func (s *ErrorsCheckTestSuite) TestNodeBugsnag() {
@@ -158,7 +158,7 @@ func (s *ErrorsCheckTestSuite) TestNodeBugsnag() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Bugsnag")
+	s.Contains(result.Reason, "Bugsnag")
 }
 
 func (s *ErrorsCheckTestSuite) TestNodeHoneybadger() {
@@ -177,7 +177,7 @@ func (s *ErrorsCheckTestSuite) TestNodeHoneybadger() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Honeybadger")
+	s.Contains(result.Reason, "Honeybadger")
 }
 
 func (s *ErrorsCheckTestSuite) TestJavaSentry() {
@@ -200,7 +200,7 @@ func (s *ErrorsCheckTestSuite) TestJavaSentry() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Sentry")
+	s.Contains(result.Reason, "Sentry")
 }
 
 func (s *ErrorsCheckTestSuite) TestJavaRollbar() {
@@ -221,7 +221,7 @@ dependencies {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Rollbar")
+	s.Contains(result.Reason, "Rollbar")
 }
 
 func (s *ErrorsCheckTestSuite) TestSentryCLIConfig() {
@@ -238,7 +238,7 @@ project=my-project
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Sentry CLI")
+	s.Contains(result.Reason, "Sentry CLI")
 }
 
 func (s *ErrorsCheckTestSuite) TestSentryProperties() {
@@ -255,7 +255,7 @@ defaults.project=my-project
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Sentry")
+	s.Contains(result.Reason, "Sentry")
 }
 
 func (s *ErrorsCheckTestSuite) TestEnvExampleWithSentryDSN() {
@@ -275,7 +275,7 @@ SENTRY_DSN=
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "error tracking env vars")
+	s.Contains(result.Reason, "error tracking env vars")
 }
 
 func (s *ErrorsCheckTestSuite) TestEnvExampleWithRollbarToken() {
@@ -291,7 +291,7 @@ ROLLBAR_TOKEN=
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "error tracking env vars")
+	s.Contains(result.Reason, "error tracking env vars")
 }
 
 func (s *ErrorsCheckTestSuite) TestMultipleErrorTrackers() {
@@ -314,8 +314,8 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Sentry")
-	s.Contains(result.Message, "Rollbar")
+	s.Contains(result.Reason, "Sentry")
+	s.Contains(result.Reason, "Rollbar")
 }
 
 func (s *ErrorsCheckTestSuite) TestNoErrorTracking() {
@@ -335,7 +335,7 @@ require github.com/gin-gonic/gin v1.9.0
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No error tracking found")
+	s.Contains(result.Reason, "No error tracking found")
 }
 
 func (s *ErrorsCheckTestSuite) TestEmptyDirectory() {
@@ -345,7 +345,7 @@ func (s *ErrorsCheckTestSuite) TestEmptyDirectory() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No error tracking found")
+	s.Contains(result.Reason, "No error tracking found")
 }
 
 func TestErrorsCheckTestSuite(t *testing.T) {

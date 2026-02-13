@@ -45,7 +45,7 @@ API_KEY=
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, ".env.example")
+	s.Contains(result.Reason, ".env.example")
 }
 
 func (s *EnvCheckTestSuite) TestEnvSample() {
@@ -61,7 +61,7 @@ PORT=8080
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, ".env.sample")
+	s.Contains(result.Reason, ".env.sample")
 }
 
 func (s *EnvCheckTestSuite) TestEnvTemplate() {
@@ -73,7 +73,7 @@ func (s *EnvCheckTestSuite) TestEnvTemplate() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, ".env.template")
+	s.Contains(result.Reason, ".env.template")
 }
 
 func (s *EnvCheckTestSuite) TestExampleEnv() {
@@ -85,7 +85,7 @@ func (s *EnvCheckTestSuite) TestExampleEnv() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "example.env")
+	s.Contains(result.Reason, "example.env")
 }
 
 func (s *EnvCheckTestSuite) TestEnvInGitignore() {
@@ -101,7 +101,7 @@ node_modules/
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, ".env in .gitignore")
+	s.Contains(result.Reason, ".env in .gitignore")
 }
 
 func (s *EnvCheckTestSuite) TestEnvInGitignore_Wildcard() {
@@ -116,7 +116,7 @@ node_modules/
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, ".env in .gitignore")
+	s.Contains(result.Reason, ".env in .gitignore")
 }
 
 func (s *EnvCheckTestSuite) TestEnvExistsNotIgnored() {
@@ -130,7 +130,7 @@ func (s *EnvCheckTestSuite) TestEnvExistsNotIgnored() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, ".env file exists but not in .gitignore")
+	s.Contains(result.Reason, ".env file exists but not in .gitignore")
 }
 
 func (s *EnvCheckTestSuite) TestEnvExistsButIgnored() {
@@ -148,7 +148,7 @@ func (s *EnvCheckTestSuite) TestEnvExistsButIgnored() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, ".env in .gitignore")
+	s.Contains(result.Reason, ".env in .gitignore")
 }
 
 func (s *EnvCheckTestSuite) TestGoDotenv() {
@@ -166,7 +166,7 @@ require github.com/joho/godotenv v1.5.1
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Go dotenv")
+	s.Contains(result.Reason, "Go dotenv")
 }
 
 func (s *EnvCheckTestSuite) TestGoEnvconfig() {
@@ -184,7 +184,7 @@ require github.com/kelseyhightower/envconfig v1.4.0
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Go dotenv")
+	s.Contains(result.Reason, "Go dotenv")
 }
 
 func (s *EnvCheckTestSuite) TestGoViper() {
@@ -202,7 +202,7 @@ require github.com/spf13/viper v1.18.0
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Go dotenv")
+	s.Contains(result.Reason, "Go dotenv")
 }
 
 func (s *EnvCheckTestSuite) TestPythonDotenv() {
@@ -220,7 +220,7 @@ dependencies = [
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Python dotenv")
+	s.Contains(result.Reason, "Python dotenv")
 }
 
 func (s *EnvCheckTestSuite) TestPythonDotenv_Requirements() {
@@ -235,7 +235,7 @@ python-dotenv>=1.0.0
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Python dotenv")
+	s.Contains(result.Reason, "Python dotenv")
 }
 
 func (s *EnvCheckTestSuite) TestPythonPydanticSettings() {
@@ -253,7 +253,7 @@ dependencies = [
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Python dotenv")
+	s.Contains(result.Reason, "Python dotenv")
 }
 
 func (s *EnvCheckTestSuite) TestPythonDjangoEnviron() {
@@ -267,7 +267,7 @@ func (s *EnvCheckTestSuite) TestPythonDjangoEnviron() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Python dotenv")
+	s.Contains(result.Reason, "Python dotenv")
 }
 
 func (s *EnvCheckTestSuite) TestNodeDotenv() {
@@ -286,7 +286,7 @@ func (s *EnvCheckTestSuite) TestNodeDotenv() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Node.js dotenv")
+	s.Contains(result.Reason, "Node.js dotenv")
 }
 
 func (s *EnvCheckTestSuite) TestNodeDotenvSafe() {
@@ -304,7 +304,7 @@ func (s *EnvCheckTestSuite) TestNodeDotenvSafe() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Node.js dotenv")
+	s.Contains(result.Reason, "Node.js dotenv")
 }
 
 func (s *EnvCheckTestSuite) TestNodeCrossEnv() {
@@ -322,7 +322,7 @@ func (s *EnvCheckTestSuite) TestNodeCrossEnv() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Node.js dotenv")
+	s.Contains(result.Reason, "Node.js dotenv")
 }
 
 func (s *EnvCheckTestSuite) TestSpringBootConfig() {
@@ -342,7 +342,7 @@ server.port=${PORT:8080}
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Spring Boot config")
+	s.Contains(result.Reason, "Spring Boot config")
 }
 
 func (s *EnvCheckTestSuite) TestSpringBootYaml() {
@@ -365,7 +365,7 @@ server:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Spring Boot config")
+	s.Contains(result.Reason, "Spring Boot config")
 }
 
 func (s *EnvCheckTestSuite) TestJavaDotenv() {
@@ -385,7 +385,7 @@ dependencies {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Java config")
+	s.Contains(result.Reason, "Java config")
 }
 
 func (s *EnvCheckTestSuite) TestMultipleFindings() {
@@ -413,9 +413,9 @@ require github.com/joho/godotenv v1.5.1
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, ".env.example")
-	s.Contains(result.Message, "Go dotenv")
-	s.Contains(result.Message, ".env in .gitignore")
+	s.Contains(result.Reason, ".env.example")
+	s.Contains(result.Reason, "Go dotenv")
+	s.Contains(result.Reason, ".env in .gitignore")
 }
 
 func (s *EnvCheckTestSuite) TestEnvExampleWithIssue() {
@@ -433,8 +433,8 @@ func (s *EnvCheckTestSuite) TestEnvExampleWithIssue() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, ".env.example")
-	s.Contains(result.Message, ".env file exists but not in .gitignore")
+	s.Contains(result.Reason, ".env.example")
+	s.Contains(result.Reason, ".env file exists but not in .gitignore")
 }
 
 func (s *EnvCheckTestSuite) TestNoEnvConfig() {
@@ -444,7 +444,7 @@ func (s *EnvCheckTestSuite) TestNoEnvConfig() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No environment configuration found")
+	s.Contains(result.Reason, "No environment configuration found")
 }
 
 func (s *EnvCheckTestSuite) TestResultLanguage() {
@@ -469,7 +469,7 @@ func (s *EnvCheckTestSuite) TestGitignoreWithComments() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, ".env in .gitignore")
+	s.Contains(result.Reason, ".env in .gitignore")
 }
 
 func TestEnvCheckTestSuite(t *testing.T) {

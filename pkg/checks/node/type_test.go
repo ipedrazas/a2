@@ -63,7 +63,7 @@ func (suite *TypeTestSuite) TestTypeCheck_Run_NoPackageJSON() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 	suite.Equal("node:type", result.ID)
 	suite.Equal("TypeScript Type Check", result.Name)
 	suite.Equal(checker.LangNode, result.Language)
@@ -85,7 +85,7 @@ func (suite *TypeTestSuite) TestTypeCheck_Run_NotTypeScriptProject() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "Not a TypeScript project")
+	suite.Contains(result.Reason, "Not a TypeScript project")
 }
 
 // TestTypeCheck_Run_TypeScriptInDevDependencies tests TypeScript detection via devDependencies.
@@ -109,7 +109,7 @@ func (suite *TypeTestSuite) TestTypeCheck_Run_TypeScriptInDevDependencies() {
 	// The result depends on whether tsc is available
 	// If npx is not available, it should pass with "npx not available" message
 	// If TypeScript project but tsc fails, it should warn
-	suite.NotEmpty(result.Message)
+	suite.NotEmpty(result.Reason)
 }
 
 // TestTypeCheck_Run_TsconfigExists tests TypeScript detection via tsconfig.json.
@@ -135,7 +135,7 @@ func (suite *TypeTestSuite) TestTypeCheck_Run_TsconfigExists() {
 
 	suite.NoError(err)
 	// The result depends on whether npx/tsc is available
-	suite.NotEmpty(result.Message)
+	suite.NotEmpty(result.Reason)
 	suite.Equal(checker.LangNode, result.Language)
 }
 

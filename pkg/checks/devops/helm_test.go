@@ -40,7 +40,7 @@ func (s *HelmCheckTestSuite) TestRun_NoHelmCharts() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Helm charts found")
+	s.Contains(result.Reason, "No Helm charts found")
 }
 
 func (s *HelmCheckTestSuite) TestRun_ChartYamlInRoot() {
@@ -55,8 +55,8 @@ version: 1.0.0`), 0644)
 	s.NoError(err)
 	// Without helm: Info (tool not installed). With helm (e.g. in CI): Pass or Warn after helm lint.
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "helm")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "helm")
 }
 
 func (s *HelmCheckTestSuite) TestRun_ChartYmlInRoot() {
@@ -69,8 +69,8 @@ name: myapp`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "helm")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "helm")
 }
 
 func (s *HelmCheckTestSuite) TestRun_ChartInChartsDir() {
@@ -87,8 +87,8 @@ name: mychart`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "helm")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "helm")
 }
 
 func (s *HelmCheckTestSuite) TestRun_ChartInHelmDir() {
@@ -105,8 +105,8 @@ name: mychart`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "helm")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "helm")
 }
 
 func (s *HelmCheckTestSuite) TestRun_ChartInHelmSubdir() {
@@ -123,8 +123,8 @@ name: subchart`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "helm")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "helm")
 }
 
 func (s *HelmCheckTestSuite) TestRun_ValuesYaml() {
@@ -140,7 +140,7 @@ image:
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Helm charts found")
+	s.Contains(result.Reason, "No Helm charts found")
 }
 
 func (s *HelmCheckTestSuite) TestRun_ChartWithValues() {
@@ -157,8 +157,8 @@ name: myapp`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "helm")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "helm")
 }
 
 func (s *HelmCheckTestSuite) TestRun_MultipleChartsInDifferentDirs() {
@@ -182,8 +182,8 @@ name: chart2`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "helm")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "helm")
 }
 
 func (s *HelmCheckTestSuite) TestRun_NestedChart() {
@@ -201,8 +201,8 @@ name: nested`), 0644)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
-		"status: %s message: %s", result.Status, result.Message)
-	s.Contains(result.Message, "helm")
+		"status: %s message: %s", result.Status, result.Reason)
+	s.Contains(result.Reason, "helm")
 }
 
 func (s *HelmCheckTestSuite) TestRun_ResultLanguage() {
@@ -227,7 +227,7 @@ name: hidden`), 0644)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Helm charts found")
+	s.Contains(result.Reason, "No Helm charts found")
 }
 
 func (s *HelmCheckTestSuite) TestRun_IgnoresVendorDirs() {
@@ -245,7 +245,7 @@ name: vendor`), 0644)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Helm charts found")
+	s.Contains(result.Reason, "No Helm charts found")
 }
 
 func (s *HelmCheckTestSuite) TestRun_DoesNotConfuseWithK8sManifests() {
@@ -266,7 +266,7 @@ metadata:
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Helm charts found")
+	s.Contains(result.Reason, "No Helm charts found")
 }
 
 func TestHelmCheckTestSuite(t *testing.T) {

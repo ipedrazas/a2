@@ -63,7 +63,7 @@ func main() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Go signal handling")
+	s.Contains(result.Reason, "Go signal handling")
 }
 
 func (s *ShutdownCheckTestSuite) TestGoServerShutdown() {
@@ -103,7 +103,7 @@ func main() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Go signal handling")
+	s.Contains(result.Reason, "Go signal handling")
 }
 
 func (s *ShutdownCheckTestSuite) TestGoOklogRun() {
@@ -122,7 +122,7 @@ require github.com/oklog/run v1.1.0
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Go signal handling")
+	s.Contains(result.Reason, "Go signal handling")
 }
 
 func (s *ShutdownCheckTestSuite) TestPythonSignalHandler() {
@@ -157,7 +157,7 @@ if __name__ == '__main__':
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Python signal handling")
+	s.Contains(result.Reason, "Python signal handling")
 }
 
 func (s *ShutdownCheckTestSuite) TestPythonAtexit() {
@@ -186,7 +186,7 @@ if __name__ == '__main__':
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Python signal handling")
+	s.Contains(result.Reason, "Python signal handling")
 }
 
 func (s *ShutdownCheckTestSuite) TestNodeProcessOnSIGTERM() {
@@ -224,7 +224,7 @@ server.listen(3000);
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Node.js signal handling")
+	s.Contains(result.Reason, "Node.js signal handling")
 }
 
 func (s *ShutdownCheckTestSuite) TestNodeHttpTerminator() {
@@ -243,7 +243,7 @@ func (s *ShutdownCheckTestSuite) TestNodeHttpTerminator() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Node.js signal handling")
+	s.Contains(result.Reason, "Node.js signal handling")
 }
 
 func (s *ShutdownCheckTestSuite) TestNodeTerminus() {
@@ -262,7 +262,7 @@ func (s *ShutdownCheckTestSuite) TestNodeTerminus() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Node.js signal handling")
+	s.Contains(result.Reason, "Node.js signal handling")
 }
 
 func (s *ShutdownCheckTestSuite) TestJavaShutdownHook() {
@@ -298,7 +298,7 @@ public class Application {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Java shutdown hook")
+	s.Contains(result.Reason, "Java shutdown hook")
 }
 
 func (s *ShutdownCheckTestSuite) TestJavaPreDestroy() {
@@ -333,7 +333,7 @@ public class MyService {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Java shutdown hook")
+	s.Contains(result.Reason, "Java shutdown hook")
 }
 
 func (s *ShutdownCheckTestSuite) TestK8sTerminationGracePeriod() {
@@ -362,7 +362,7 @@ spec:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "K8s terminationGracePeriodSeconds")
+	s.Contains(result.Reason, "K8s terminationGracePeriodSeconds")
 }
 
 func (s *ShutdownCheckTestSuite) TestK8sPreStopHook() {
@@ -394,7 +394,7 @@ spec:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "K8s preStop hook")
+	s.Contains(result.Reason, "K8s preStop hook")
 }
 
 func (s *ShutdownCheckTestSuite) TestK8sInRootDirectory() {
@@ -419,7 +419,7 @@ spec:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "K8s terminationGracePeriodSeconds")
+	s.Contains(result.Reason, "K8s terminationGracePeriodSeconds")
 }
 
 func (s *ShutdownCheckTestSuite) TestMultipleShutdownMechanisms() {
@@ -466,8 +466,8 @@ spec:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Go signal handling")
-	s.Contains(result.Message, "K8s terminationGracePeriodSeconds")
+	s.Contains(result.Reason, "Go signal handling")
+	s.Contains(result.Reason, "K8s terminationGracePeriodSeconds")
 }
 
 func (s *ShutdownCheckTestSuite) TestNoShutdownHandling() {
@@ -496,7 +496,7 @@ func main() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No graceful shutdown handling found")
+	s.Contains(result.Reason, "No graceful shutdown handling found")
 }
 
 func (s *ShutdownCheckTestSuite) TestEmptyDirectory() {
@@ -506,7 +506,7 @@ func (s *ShutdownCheckTestSuite) TestEmptyDirectory() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No graceful shutdown handling found")
+	s.Contains(result.Reason, "No graceful shutdown handling found")
 }
 
 func TestShutdownCheckTestSuite(t *testing.T) {

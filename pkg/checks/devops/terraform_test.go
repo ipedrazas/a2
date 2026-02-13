@@ -40,7 +40,7 @@ func (s *TerraformCheckTestSuite) TestRun_NoTerraformFiles() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Terraform files found")
+	s.Contains(result.Reason, "No Terraform files found")
 }
 
 func (s *TerraformCheckTestSuite) TestRun_MainTfFile() {
@@ -58,7 +58,7 @@ resource "aws_instance" "example" {
 	s.NoError(err)
 	// Without terraform installed, should pass with Info
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "terraform")
+	s.Contains(result.Reason, "terraform")
 }
 
 func (s *TerraformCheckTestSuite) TestRun_VariablesTfFile() {
@@ -76,7 +76,7 @@ variable "instance_type" {
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "terraform")
+	s.Contains(result.Reason, "terraform")
 }
 
 func (s *TerraformCheckTestSuite) TestRun_OutputTfFile() {
@@ -93,7 +93,7 @@ output "instance_id" {
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "terraform")
+	s.Contains(result.Reason, "terraform")
 }
 
 func (s *TerraformCheckTestSuite) TestRun_TerraformTfvars() {
@@ -108,7 +108,7 @@ environment  = "prod"
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "terraform")
+	s.Contains(result.Reason, "terraform")
 }
 
 func (s *TerraformCheckTestSuite) TestRun_VersionsTfFile() {
@@ -130,7 +130,7 @@ terraform {
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "terraform")
+	s.Contains(result.Reason, "terraform")
 }
 
 func (s *TerraformCheckTestSuite) TestRun_MultipleTfFiles() {
@@ -147,7 +147,7 @@ func (s *TerraformCheckTestSuite) TestRun_MultipleTfFiles() {
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "terraform")
+	s.Contains(result.Reason, "terraform")
 }
 
 func (s *TerraformCheckTestSuite) TestRun_NestedTfFiles() {
@@ -164,7 +164,7 @@ func (s *TerraformCheckTestSuite) TestRun_NestedTfFiles() {
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "terraform")
+	s.Contains(result.Reason, "terraform")
 }
 
 func (s *TerraformCheckTestSuite) TestRun_AutoTfvars() {
@@ -178,7 +178,7 @@ region = "us-west-2"
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "terraform")
+	s.Contains(result.Reason, "terraform")
 }
 
 func (s *TerraformCheckTestSuite) TestRun_ResultLanguage() {
@@ -207,7 +207,7 @@ func (s *TerraformCheckTestSuite) TestRun_IgnoresHiddenDirs() {
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Terraform files found")
+	s.Contains(result.Reason, "No Terraform files found")
 }
 
 func (s *TerraformCheckTestSuite) TestRun_IgnoresVendorDirs() {
@@ -224,7 +224,7 @@ func (s *TerraformCheckTestSuite) TestRun_IgnoresVendorDirs() {
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Terraform files found")
+	s.Contains(result.Reason, "No Terraform files found")
 }
 
 func TestTerraformCheckTestSuite(t *testing.T) {

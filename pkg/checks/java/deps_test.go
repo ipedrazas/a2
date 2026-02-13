@@ -37,7 +37,7 @@ func (s *DepsCheckTestSuite) TestRun_NoDependencyScanning() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No dependency scanning configured")
+	s.Contains(result.Reason, "No dependency scanning configured")
 }
 
 func (s *DepsCheckTestSuite) TestRun_ResultLanguage() {
@@ -68,7 +68,7 @@ func (s *DepsCheckTestSuite) TestRun_OWASPDependencyCheck_Maven() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "OWASP Dependency-Check")
+	s.Contains(result.Reason, "OWASP Dependency-Check")
 }
 
 func (s *DepsCheckTestSuite) TestRun_OWASPDependencyCheck_Gradle() {
@@ -84,7 +84,7 @@ func (s *DepsCheckTestSuite) TestRun_OWASPDependencyCheck_Gradle() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "OWASP Dependency-Check")
+	s.Contains(result.Reason, "OWASP Dependency-Check")
 }
 
 func (s *DepsCheckTestSuite) TestRun_OWASPDependencyCheck_GradleKts() {
@@ -100,7 +100,7 @@ func (s *DepsCheckTestSuite) TestRun_OWASPDependencyCheck_GradleKts() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "OWASP Dependency-Check")
+	s.Contains(result.Reason, "OWASP Dependency-Check")
 }
 
 func (s *DepsCheckTestSuite) TestRun_Snyk_ConfigFile() {
@@ -112,7 +112,7 @@ func (s *DepsCheckTestSuite) TestRun_Snyk_ConfigFile() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Snyk")
+	s.Contains(result.Reason, "Snyk")
 }
 
 func (s *DepsCheckTestSuite) TestRun_Snyk_Maven() {
@@ -134,7 +134,7 @@ func (s *DepsCheckTestSuite) TestRun_Snyk_Maven() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Snyk")
+	s.Contains(result.Reason, "Snyk")
 }
 
 func (s *DepsCheckTestSuite) TestRun_Dependabot_Yml() {
@@ -156,7 +156,7 @@ updates:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Dependabot")
+	s.Contains(result.Reason, "Dependabot")
 }
 
 func (s *DepsCheckTestSuite) TestRun_Dependabot_Yaml() {
@@ -178,7 +178,7 @@ updates:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Dependabot")
+	s.Contains(result.Reason, "Dependabot")
 }
 
 func (s *DepsCheckTestSuite) TestRun_Renovate_Json() {
@@ -198,7 +198,7 @@ func (s *DepsCheckTestSuite) TestRun_Renovate_Json() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Renovate")
+	s.Contains(result.Reason, "Renovate")
 }
 
 func (s *DepsCheckTestSuite) TestRun_Renovate_Json5() {
@@ -214,7 +214,7 @@ func (s *DepsCheckTestSuite) TestRun_Renovate_Json5() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Renovate")
+	s.Contains(result.Reason, "Renovate")
 }
 
 func (s *DepsCheckTestSuite) TestRun_Renovate_Rc() {
@@ -226,7 +226,7 @@ func (s *DepsCheckTestSuite) TestRun_Renovate_Rc() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Renovate")
+	s.Contains(result.Reason, "Renovate")
 }
 
 func (s *DepsCheckTestSuite) TestRun_Renovate_RcJson() {
@@ -238,7 +238,7 @@ func (s *DepsCheckTestSuite) TestRun_Renovate_RcJson() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Renovate")
+	s.Contains(result.Reason, "Renovate")
 }
 
 func (s *DepsCheckTestSuite) TestRun_MavenDependencyPlugin() {
@@ -267,7 +267,7 @@ func (s *DepsCheckTestSuite) TestRun_MavenDependencyPlugin() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Maven Dependency Plugin")
+	s.Contains(result.Reason, "Maven Dependency Plugin")
 }
 
 func (s *DepsCheckTestSuite) TestRun_GradleDependencyVerification() {
@@ -287,7 +287,7 @@ func (s *DepsCheckTestSuite) TestRun_GradleDependencyVerification() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Gradle Dependency Verification")
+	s.Contains(result.Reason, "Gradle Dependency Verification")
 }
 
 func (s *DepsCheckTestSuite) TestRun_GradleDependencyVerification_LegacyFile() {
@@ -303,7 +303,7 @@ func (s *DepsCheckTestSuite) TestRun_GradleDependencyVerification_LegacyFile() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Gradle Dependency Verification")
+	s.Contains(result.Reason, "Gradle Dependency Verification")
 }
 
 func (s *DepsCheckTestSuite) TestRun_MultipleTools() {
@@ -332,8 +332,8 @@ func (s *DepsCheckTestSuite) TestRun_MultipleTools() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "OWASP Dependency-Check")
-	s.Contains(result.Message, "Dependabot")
+	s.Contains(result.Reason, "OWASP Dependency-Check")
+	s.Contains(result.Reason, "Dependabot")
 }
 
 func TestDepsCheckTestSuite(t *testing.T) {

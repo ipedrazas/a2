@@ -37,7 +37,7 @@ func (s *LoggingCheckTestSuite) TestRun_NoLogging() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No structured logging detected")
+	s.Contains(result.Reason, "No structured logging detected")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_ResultLanguage() {
@@ -67,7 +67,7 @@ func (s *LoggingCheckTestSuite) TestRun_SLF4J_Maven() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "SLF4J")
+	s.Contains(result.Reason, "SLF4J")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_SLF4J_Gradle() {
@@ -86,7 +86,7 @@ dependencies {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SLF4J")
+	s.Contains(result.Reason, "SLF4J")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_SLF4J_GradleKts() {
@@ -105,7 +105,7 @@ dependencies {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SLF4J")
+	s.Contains(result.Reason, "SLF4J")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_Logback_ConfigFile() {
@@ -133,7 +133,7 @@ func (s *LoggingCheckTestSuite) TestRun_Logback_ConfigFile() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Logback")
+	s.Contains(result.Reason, "Logback")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_Logback_SpringConfig() {
@@ -149,7 +149,7 @@ func (s *LoggingCheckTestSuite) TestRun_Logback_SpringConfig() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Logback")
+	s.Contains(result.Reason, "Logback")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_Logback_RootConfig() {
@@ -161,7 +161,7 @@ func (s *LoggingCheckTestSuite) TestRun_Logback_RootConfig() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Logback")
+	s.Contains(result.Reason, "Logback")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_Logback_Maven() {
@@ -182,7 +182,7 @@ func (s *LoggingCheckTestSuite) TestRun_Logback_Maven() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Logback")
+	s.Contains(result.Reason, "Logback")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_Log4j2_ConfigFile() {
@@ -211,7 +211,7 @@ func (s *LoggingCheckTestSuite) TestRun_Log4j2_ConfigFile() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Log4j2")
+	s.Contains(result.Reason, "Log4j2")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_Log4j2_YamlConfig() {
@@ -227,7 +227,7 @@ func (s *LoggingCheckTestSuite) TestRun_Log4j2_YamlConfig() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Log4j2")
+	s.Contains(result.Reason, "Log4j2")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_Log4j2_PropertiesConfig() {
@@ -243,7 +243,7 @@ func (s *LoggingCheckTestSuite) TestRun_Log4j2_PropertiesConfig() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Log4j2")
+	s.Contains(result.Reason, "Log4j2")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_Log4j2_RootConfig() {
@@ -255,7 +255,7 @@ func (s *LoggingCheckTestSuite) TestRun_Log4j2_RootConfig() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Log4j2")
+	s.Contains(result.Reason, "Log4j2")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_Log4j2_Maven() {
@@ -276,7 +276,7 @@ func (s *LoggingCheckTestSuite) TestRun_Log4j2_Maven() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Log4j2")
+	s.Contains(result.Reason, "Log4j2")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_SystemOutPrintln_Warning() {
@@ -303,7 +303,7 @@ public class App {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "System.out.println")
+	s.Contains(result.Reason, "System.out.println")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_StructuredLogging_WithPrintln() {
@@ -340,8 +340,8 @@ public class App {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "SLF4J")
-	s.Contains(result.Message, "System.out.println")
+	s.Contains(result.Reason, "SLF4J")
+	s.Contains(result.Reason, "System.out.println")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_MultipleLoggingFrameworks() {
@@ -365,8 +365,8 @@ func (s *LoggingCheckTestSuite) TestRun_MultipleLoggingFrameworks() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SLF4J")
-	s.Contains(result.Message, "Logback")
+	s.Contains(result.Reason, "SLF4J")
+	s.Contains(result.Reason, "Logback")
 }
 
 func (s *LoggingCheckTestSuite) TestRun_CommentedPrintln_NotCounted() {
@@ -392,7 +392,7 @@ public class App {
 
 	s.NoError(err)
 	// Should not find println issues because they're in comments
-	s.NotContains(result.Message, "System.out.println")
+	s.NotContains(result.Reason, "System.out.println")
 }
 
 func TestLoggingCheckTestSuite(t *testing.T) {

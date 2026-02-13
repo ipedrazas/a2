@@ -179,6 +179,7 @@ func toJSONOutput(result runner.SuiteResult, detected language.DetectionResult, 
 			Passed:     r.Passed,
 			Status:     statusToString(r.Status),
 			Message:    r.Message,
+			Reason:     r.Reason,
 			Language:   string(r.Language),
 			DurationMs: r.Duration.Milliseconds(),
 		}

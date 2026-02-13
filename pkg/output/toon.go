@@ -123,9 +123,9 @@ func (e *toonEncoder) writeResultsArray(results []checker.Result, verbosity Verb
 	// Use tabular format: results[N]{fields}:
 	// Include raw_output field when verbosity > 0
 	if verbosity > VerbosityNormal {
-		fmt.Fprintf(&e.builder, "results[%d]{name,id,passed,status,message,language,duration_ms,raw_output}:\n", len(results))
+		fmt.Fprintf(&e.builder, "results[%d]{name,id,passed,status,message,reason,language,duration_ms,raw_output}:\n", len(results))
 	} else {
-		fmt.Fprintf(&e.builder, "results[%d]{name,id,passed,status,message,language,duration_ms}:\n", len(results))
+		fmt.Fprintf(&e.builder, "results[%d]{name,id,passed,status,message,reason,language,duration_ms}:\n", len(results))
 	}
 	e.indent++
 	for _, r := range results {
@@ -137,6 +137,7 @@ func (e *toonEncoder) writeResultsArray(results []checker.Result, verbosity Verb
 			e.formatBool(r.Passed),
 			e.encodeStringForArray(statusToString(r.Status), ','),
 			e.encodeStringForArray(r.Message, ','),
+			e.encodeStringForArray(r.Reason, ','),
 			e.encodeStringForArray(string(r.Language), ','),
 			e.formatNumber(float64(r.Duration.Milliseconds())),
 		}

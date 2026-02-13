@@ -47,8 +47,8 @@ def main():
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Uses logging module")
-	s.Contains(result.Message, "no print()")
+	s.Contains(result.Reason, "Uses logging module")
+	s.Contains(result.Reason, "no print()")
 }
 
 func (s *LoggingCheckTestSuite) TestUsesStructlog() {
@@ -105,8 +105,8 @@ def main():
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "Uses logging but found")
-	s.Contains(result.Message, "print()")
+	s.Contains(result.Reason, "Uses logging but found")
+	s.Contains(result.Reason, "print()")
 }
 
 func (s *LoggingCheckTestSuite) TestNoLoggingNoPrint() {
@@ -123,7 +123,7 @@ func (s *LoggingCheckTestSuite) TestNoLoggingNoPrint() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No logging module detected")
+	s.Contains(result.Reason, "No logging module detected")
 }
 
 func (s *LoggingCheckTestSuite) TestNoLoggingWithPrint() {
@@ -139,8 +139,8 @@ func (s *LoggingCheckTestSuite) TestNoLoggingWithPrint() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No logging module")
-	s.Contains(result.Message, "print()")
+	s.Contains(result.Reason, "No logging module")
+	s.Contains(result.Reason, "print()")
 }
 
 func (s *LoggingCheckTestSuite) TestPrintInTestFileIgnored() {
@@ -235,7 +235,7 @@ func (s *LoggingCheckTestSuite) TestMultiplePrintStatements() {
 
 	s.NoError(err)
 	s.False(result.Passed)
-	s.Contains(result.Message, "3 print()")
+	s.Contains(result.Reason, "3 print()")
 }
 
 func (s *LoggingCheckTestSuite) TestFromLoggingImport() {
@@ -263,7 +263,7 @@ func (s *LoggingCheckTestSuite) TestEmptyDirectory() {
 	// Empty directory means no logging, no prints
 	s.NoError(err)
 	s.False(result.Passed)
-	s.Contains(result.Message, "No logging module detected")
+	s.Contains(result.Reason, "No logging module detected")
 }
 
 func TestLoggingCheckTestSuite(t *testing.T) {

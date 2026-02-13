@@ -47,7 +47,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "validator")
+	s.Contains(result.Reason, "validator")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestGoViper() {
@@ -67,7 +67,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Viper")
+	s.Contains(result.Reason, "Viper")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestGoEnvconfig() {
@@ -87,7 +87,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "envconfig")
+	s.Contains(result.Reason, "envconfig")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestGoKoanf() {
@@ -107,7 +107,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Koanf")
+	s.Contains(result.Reason, "Koanf")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestGoGodotenv() {
@@ -127,7 +127,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "godotenv")
+	s.Contains(result.Reason, "godotenv")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestNodeZod() {
@@ -146,7 +146,7 @@ func (s *ConfigValidationCheckTestSuite) TestNodeZod() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Zod")
+	s.Contains(result.Reason, "Zod")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestNodeJoi() {
@@ -165,7 +165,7 @@ func (s *ConfigValidationCheckTestSuite) TestNodeJoi() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Joi")
+	s.Contains(result.Reason, "Joi")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestNodeYup() {
@@ -184,7 +184,7 @@ func (s *ConfigValidationCheckTestSuite) TestNodeYup() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Yup")
+	s.Contains(result.Reason, "Yup")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestNodeAjv() {
@@ -203,7 +203,7 @@ func (s *ConfigValidationCheckTestSuite) TestNodeAjv() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "AJV")
+	s.Contains(result.Reason, "AJV")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestNodeEnvalid() {
@@ -222,7 +222,7 @@ func (s *ConfigValidationCheckTestSuite) TestNodeEnvalid() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Envalid")
+	s.Contains(result.Reason, "Envalid")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestNodeDotenv() {
@@ -241,7 +241,7 @@ func (s *ConfigValidationCheckTestSuite) TestNodeDotenv() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "dotenv")
+	s.Contains(result.Reason, "dotenv")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestNestJSConfig() {
@@ -260,7 +260,7 @@ func (s *ConfigValidationCheckTestSuite) TestNestJSConfig() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "NestJS Config")
+	s.Contains(result.Reason, "NestJS Config")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestPythonPydantic() {
@@ -274,7 +274,7 @@ func (s *ConfigValidationCheckTestSuite) TestPythonPydantic() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Pydantic")
+	s.Contains(result.Reason, "Pydantic")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestPythonPydanticSettings() {
@@ -288,7 +288,7 @@ func (s *ConfigValidationCheckTestSuite) TestPythonPydanticSettings() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Pydantic Settings")
+	s.Contains(result.Reason, "Pydantic Settings")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestPythonDynaconf() {
@@ -302,7 +302,7 @@ func (s *ConfigValidationCheckTestSuite) TestPythonDynaconf() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Dynaconf")
+	s.Contains(result.Reason, "Dynaconf")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestPythonMarshmallow() {
@@ -316,7 +316,7 @@ func (s *ConfigValidationCheckTestSuite) TestPythonMarshmallow() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Marshmallow")
+	s.Contains(result.Reason, "Marshmallow")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestJavaHibernateValidator() {
@@ -333,7 +333,7 @@ func (s *ConfigValidationCheckTestSuite) TestJavaHibernateValidator() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Hibernate Validator")
+	s.Contains(result.Reason, "Hibernate Validator")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestJavaSpringBootConfig() {
@@ -347,7 +347,7 @@ func (s *ConfigValidationCheckTestSuite) TestJavaSpringBootConfig() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Spring Boot Config")
+	s.Contains(result.Reason, "Spring Boot Config")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestRustSerde() {
@@ -365,7 +365,7 @@ serde = "1.0"`
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Serde")
+	s.Contains(result.Reason, "Serde")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestRustFigment() {
@@ -383,7 +383,7 @@ figment = "0.10"`
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Figment")
+	s.Contains(result.Reason, "Figment")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestRustClap() {
@@ -401,7 +401,7 @@ clap = "4.0"`
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Clap")
+	s.Contains(result.Reason, "Clap")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestTypeScriptStrict() {
@@ -420,7 +420,7 @@ func (s *ConfigValidationCheckTestSuite) TestTypeScriptStrict() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "TypeScript strict")
+	s.Contains(result.Reason, "TypeScript strict")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestMultipleLibraries() {
@@ -442,8 +442,8 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Viper")
-	s.Contains(result.Message, "validator")
+	s.Contains(result.Reason, "Viper")
+	s.Contains(result.Reason, "validator")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestNoConfigValidationFound() {
@@ -463,7 +463,7 @@ require (
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No config validation found")
+	s.Contains(result.Reason, "No config validation found")
 }
 
 func (s *ConfigValidationCheckTestSuite) TestEmptyDirectory() {
@@ -473,7 +473,7 @@ func (s *ConfigValidationCheckTestSuite) TestEmptyDirectory() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No config validation found")
+	s.Contains(result.Reason, "No config validation found")
 }
 
 func TestConfigValidationCheckTestSuite(t *testing.T) {

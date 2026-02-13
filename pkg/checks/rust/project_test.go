@@ -53,7 +53,7 @@ func (s *ProjectTestSuite) TestRun_NoCargoToml() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "No Cargo.toml found")
+	s.Contains(result.Reason, "No Cargo.toml found")
 }
 
 func (s *ProjectTestSuite) TestRun_BasicCargoToml() {
@@ -68,8 +68,8 @@ version = "1.0.0"
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "myapp")
-	s.Contains(result.Message, "v1.0.0")
+	s.Contains(result.Reason, "myapp")
+	s.Contains(result.Reason, "v1.0.0")
 }
 
 func (s *ProjectTestSuite) TestRun_Workspace() {
@@ -83,7 +83,7 @@ members = ["crate1", "crate2"]
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "workspace")
+	s.Contains(result.Reason, "workspace")
 }
 
 func (s *ProjectTestSuite) TestRun_MinimalCargoToml() {

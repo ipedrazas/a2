@@ -44,7 +44,7 @@ Thank you for contributing!
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "CONTRIBUTING.md")
+	s.Contains(result.Reason, "CONTRIBUTING.md")
 }
 
 func (s *ContributingCheckTestSuite) TestContributingTxt() {
@@ -59,7 +59,7 @@ Contributing guidelines here.
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "CONTRIBUTING.txt")
+	s.Contains(result.Reason, "CONTRIBUTING.txt")
 }
 
 func (s *ContributingCheckTestSuite) TestContributingInGithub() {
@@ -78,7 +78,7 @@ func (s *ContributingCheckTestSuite) TestContributingInGithub() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, ".github/CONTRIBUTING.md")
+	s.Contains(result.Reason, ".github/CONTRIBUTING.md")
 }
 
 func (s *ContributingCheckTestSuite) TestPRTemplate() {
@@ -97,7 +97,7 @@ func (s *ContributingCheckTestSuite) TestPRTemplate() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "PR template")
+	s.Contains(result.Reason, "PR template")
 }
 
 func (s *ContributingCheckTestSuite) TestPRTemplateLowercase() {
@@ -116,7 +116,7 @@ func (s *ContributingCheckTestSuite) TestPRTemplateLowercase() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "PR template")
+	s.Contains(result.Reason, "PR template")
 }
 
 func (s *ContributingCheckTestSuite) TestIssueTemplateFile() {
@@ -135,7 +135,7 @@ func (s *ContributingCheckTestSuite) TestIssueTemplateFile() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "issue templates")
+	s.Contains(result.Reason, "issue templates")
 }
 
 func (s *ContributingCheckTestSuite) TestIssueTemplateDirectory() {
@@ -154,7 +154,7 @@ name: Bug Report
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "issue templates")
+	s.Contains(result.Reason, "issue templates")
 }
 
 func (s *ContributingCheckTestSuite) TestCodeowners() {
@@ -169,7 +169,7 @@ func (s *ContributingCheckTestSuite) TestCodeowners() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "CODEOWNERS")
+	s.Contains(result.Reason, "CODEOWNERS")
 }
 
 func (s *ContributingCheckTestSuite) TestCodeownersInGithub() {
@@ -188,7 +188,7 @@ func (s *ContributingCheckTestSuite) TestCodeownersInGithub() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "CODEOWNERS")
+	s.Contains(result.Reason, "CODEOWNERS")
 }
 
 func (s *ContributingCheckTestSuite) TestMultipleFound() {
@@ -214,9 +214,9 @@ func (s *ContributingCheckTestSuite) TestMultipleFound() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "CONTRIBUTING.md")
-	s.Contains(result.Message, "CODEOWNERS")
-	s.Contains(result.Message, "PR template")
+	s.Contains(result.Reason, "CONTRIBUTING.md")
+	s.Contains(result.Reason, "CODEOWNERS")
+	s.Contains(result.Reason, "PR template")
 }
 
 func (s *ContributingCheckTestSuite) TestNoContributingFound() {
@@ -230,7 +230,7 @@ func (s *ContributingCheckTestSuite) TestNoContributingFound() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No contribution guidelines found")
+	s.Contains(result.Reason, "No contribution guidelines found")
 }
 
 func (s *ContributingCheckTestSuite) TestEmptyDirectory() {
@@ -240,7 +240,7 @@ func (s *ContributingCheckTestSuite) TestEmptyDirectory() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No contribution guidelines found")
+	s.Contains(result.Reason, "No contribution guidelines found")
 }
 
 func TestContributingCheckTestSuite(t *testing.T) {

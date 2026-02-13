@@ -48,7 +48,7 @@ func (suite *FormatTestSuite) TestFormatCheck_Run_NoPackageJSON() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 	suite.Equal("node:format", result.ID)
 	suite.Equal("Node Format", result.Name)
 }
@@ -218,7 +218,7 @@ func (suite *FormatTestSuite) TestFormatCheck_Run_NonExistentPath() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 }
 
 // TestFormatTestSuite runs all the tests in the suite.

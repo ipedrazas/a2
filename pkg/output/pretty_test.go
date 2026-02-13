@@ -35,11 +35,11 @@ func captureStdout(f func()) string {
 // TestPrintResult_Pass tests printResult with a passing check.
 func (suite *PrettyTestSuite) TestPrintResult_Pass() {
 	result := checker.Result{
-		Name:    "Test Check",
-		ID:      "test",
-		Passed:  true,
-		Status:  checker.Pass,
-		Message: "All good",
+		Name:   "Test Check",
+		ID:     "test",
+		Passed: true,
+		Status: checker.Pass,
+		Reason: "All good",
 	}
 
 	output := captureStdout(func() {
@@ -54,11 +54,11 @@ func (suite *PrettyTestSuite) TestPrintResult_Pass() {
 // TestPrintResult_Warn tests printResult with a warning check.
 func (suite *PrettyTestSuite) TestPrintResult_Warn() {
 	result := checker.Result{
-		Name:    "Warning Check",
-		ID:      "warn",
-		Passed:  false,
-		Status:  checker.Warn,
-		Message: "Something needs attention",
+		Name:   "Warning Check",
+		ID:     "warn",
+		Passed: false,
+		Status: checker.Warn,
+		Reason: "Something needs attention",
 	}
 
 	output := captureStdout(func() {
@@ -73,11 +73,11 @@ func (suite *PrettyTestSuite) TestPrintResult_Warn() {
 // TestPrintResult_Fail tests printResult with a failing check.
 func (suite *PrettyTestSuite) TestPrintResult_Fail() {
 	result := checker.Result{
-		Name:    "Failed Check",
-		ID:      "fail",
-		Passed:  false,
-		Status:  checker.Fail,
-		Message: "Critical error",
+		Name:   "Failed Check",
+		ID:     "fail",
+		Passed: false,
+		Status: checker.Fail,
+		Reason: "Critical error",
 	}
 
 	output := captureStdout(func() {

@@ -37,7 +37,7 @@ func (s *CICheckTestSuite) TestNoCIConfig() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No CI/CD configuration found")
+	s.Contains(result.Reason, "No CI/CD configuration found")
 }
 
 func (s *CICheckTestSuite) TestGitHubActions() {
@@ -55,7 +55,7 @@ func (s *CICheckTestSuite) TestGitHubActions() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "GitHub Actions")
+	s.Contains(result.Reason, "GitHub Actions")
 }
 
 func (s *CICheckTestSuite) TestGitLabCI() {
@@ -68,7 +68,7 @@ func (s *CICheckTestSuite) TestGitLabCI() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "GitLab CI")
+	s.Contains(result.Reason, "GitLab CI")
 }
 
 func (s *CICheckTestSuite) TestJenkinsfile() {
@@ -81,7 +81,7 @@ func (s *CICheckTestSuite) TestJenkinsfile() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Jenkins")
+	s.Contains(result.Reason, "Jenkins")
 }
 
 func (s *CICheckTestSuite) TestCircleCI() {
@@ -98,7 +98,7 @@ func (s *CICheckTestSuite) TestCircleCI() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "CircleCI")
+	s.Contains(result.Reason, "CircleCI")
 }
 
 func (s *CICheckTestSuite) TestTravisCI() {
@@ -111,7 +111,7 @@ func (s *CICheckTestSuite) TestTravisCI() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Travis CI")
+	s.Contains(result.Reason, "Travis CI")
 }
 
 func (s *CICheckTestSuite) TestAzurePipelines() {
@@ -124,7 +124,7 @@ func (s *CICheckTestSuite) TestAzurePipelines() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Azure Pipelines")
+	s.Contains(result.Reason, "Azure Pipelines")
 }
 
 func (s *CICheckTestSuite) TestMultipleCIConfigs() {
@@ -142,8 +142,8 @@ func (s *CICheckTestSuite) TestMultipleCIConfigs() {
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
 	// Should list both
-	s.Contains(result.Message, "GitLab CI")
-	s.Contains(result.Message, "Jenkins")
+	s.Contains(result.Reason, "GitLab CI")
+	s.Contains(result.Reason, "Jenkins")
 }
 
 func (s *CICheckTestSuite) TestTaskfile() {
@@ -156,7 +156,7 @@ func (s *CICheckTestSuite) TestTaskfile() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Taskfile")
+	s.Contains(result.Reason, "Taskfile")
 }
 
 func TestCICheckTestSuite(t *testing.T) {

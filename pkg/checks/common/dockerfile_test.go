@@ -43,7 +43,7 @@ func (s *DockerfileCheckTestSuite) TestNoDockerfile() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No Dockerfile or Containerfile found")
+	s.Contains(result.Reason, "No Dockerfile or Containerfile found")
 }
 
 // Tests that run when trivy IS installed
@@ -64,8 +64,8 @@ RUN apk add --no-cache curl
 
 	s.NoError(err)
 	// Result should mention trivy
-	s.Contains(result.Message, "trivy:")
-	s.Contains(result.Message, "Dockerfile")
+	s.Contains(result.Reason, "trivy:")
+	s.Contains(result.Reason, "Dockerfile")
 }
 
 func (s *DockerfileCheckTestSuite) TestTrivyInstalled_WithDockerignore() {
@@ -85,8 +85,8 @@ func (s *DockerfileCheckTestSuite) TestTrivyInstalled_WithDockerignore() {
 	result, err := check.Run(s.tempDir)
 
 	s.NoError(err)
-	s.Contains(result.Message, "trivy:")
-	s.Contains(result.Message, ".dockerignore")
+	s.Contains(result.Reason, "trivy:")
+	s.Contains(result.Reason, ".dockerignore")
 }
 
 func (s *DockerfileCheckTestSuite) TestTrivyInstalled_FindsIssues() {
@@ -105,7 +105,7 @@ RUN apt-get update && apt-get install -y curl
 	result, err := check.Run(s.tempDir)
 
 	s.NoError(err)
-	s.Contains(result.Message, "trivy:")
+	s.Contains(result.Reason, "trivy:")
 	// This Dockerfile should have some issues (e.g., using latest tag, running as root)
 	// But we don't assert on specific issues as trivy rules may change
 }
@@ -125,7 +125,7 @@ func (s *DockerfileCheckTestSuite) TestDockerfileExists() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Dockerfile found")
+	s.Contains(result.Reason, "Dockerfile found")
 }
 
 func (s *DockerfileCheckTestSuite) TestDockerfileLowercase() {
@@ -143,7 +143,7 @@ func (s *DockerfileCheckTestSuite) TestDockerfileLowercase() {
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
 	// On case-insensitive filesystems, may match "Dockerfile" first
-	s.Contains(result.Message, "found")
+	s.Contains(result.Reason, "found")
 }
 
 func (s *DockerfileCheckTestSuite) TestContainerfile() {
@@ -160,7 +160,7 @@ func (s *DockerfileCheckTestSuite) TestContainerfile() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Containerfile found")
+	s.Contains(result.Reason, "Containerfile found")
 }
 
 func (s *DockerfileCheckTestSuite) TestDockerfileWithIgnore() {
@@ -180,7 +180,7 @@ func (s *DockerfileCheckTestSuite) TestDockerfileWithIgnore() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, ".dockerignore")
+	s.Contains(result.Reason, ".dockerignore")
 }
 
 func (s *DockerfileCheckTestSuite) TestDockerfileWithoutIgnore() {
@@ -197,7 +197,7 @@ func (s *DockerfileCheckTestSuite) TestDockerfileWithoutIgnore() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "consider adding .dockerignore")
+	s.Contains(result.Reason, "consider adding .dockerignore")
 }
 
 func TestDockerfileCheckTestSuite(t *testing.T) {

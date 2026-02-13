@@ -53,7 +53,7 @@ func (s *LoggingTestSuite) TestRun_NoPackageJson() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "package.json not found")
+	s.Contains(result.Reason, "package.json not found")
 }
 
 func (s *LoggingTestSuite) TestRun_ResultLanguage() {
@@ -76,7 +76,7 @@ func (s *LoggingTestSuite) TestRun_WithStructuredLogging() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "structured logging")
+	s.Contains(result.Reason, "structured logging")
 }
 
 func (s *LoggingTestSuite) TestRun_WithPino() {
@@ -108,7 +108,7 @@ func (s *LoggingTestSuite) TestRun_WithConsoleStatements() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "console.*")
+	s.Contains(result.Reason, "console.*")
 }
 
 func (s *LoggingTestSuite) TestRun_NoLogging() {
@@ -119,7 +119,7 @@ func (s *LoggingTestSuite) TestRun_NoLogging() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No structured logging")
+	s.Contains(result.Reason, "No structured logging")
 }
 
 func (s *LoggingTestSuite) TestRun_StructuredWithConsole() {
@@ -136,7 +136,7 @@ func (s *LoggingTestSuite) TestRun_StructuredWithConsole() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "structured logging but found")
+	s.Contains(result.Reason, "structured logging but found")
 }
 
 func TestLoggingTestSuite(t *testing.T) {

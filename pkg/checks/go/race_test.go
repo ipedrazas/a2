@@ -95,7 +95,7 @@ func TestSimple(t *testing.T) {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "No race conditions detected")
+	suite.Contains(result.Reason, "No race conditions detected")
 	suite.Equal("go:race", result.ID)
 	suite.Equal("Go Race Detection", result.Name)
 	suite.Equal(checker.LangGo, result.Language)
@@ -122,7 +122,7 @@ func main() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "No test files")
+	suite.Contains(result.Reason, "No test files")
 }
 
 // TestRaceCheck_Run_TestFailure tests that RaceCheck handles test failures gracefully.
@@ -152,7 +152,7 @@ func TestFailing(t *testing.T) {
 	// Test failure (not race) should still warn but not be a critical failure
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
-	suite.Contains(result.Message, "Tests failed during race detection")
+	suite.Contains(result.Reason, "Tests failed during race detection")
 }
 
 // TestRaceTestSuite runs all the tests in the suite.

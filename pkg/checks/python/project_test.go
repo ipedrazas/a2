@@ -53,7 +53,7 @@ func (s *ProjectTestSuite) TestRun_NoProject() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "No Python project configuration found")
+	s.Contains(result.Reason, "No Python project configuration found")
 }
 
 func (s *ProjectTestSuite) TestRun_PyprojectToml() {
@@ -65,7 +65,7 @@ name = "test"`)
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "pyproject.toml")
+	s.Contains(result.Reason, "pyproject.toml")
 }
 
 func (s *ProjectTestSuite) TestRun_SetupPy() {
@@ -77,8 +77,8 @@ setup(name='test')`)
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "setup.py")
-	s.Contains(result.Message, "consider migrating")
+	s.Contains(result.Reason, "setup.py")
+	s.Contains(result.Reason, "consider migrating")
 }
 
 func (s *ProjectTestSuite) TestRun_RequirementsTxt() {
@@ -89,7 +89,7 @@ func (s *ProjectTestSuite) TestRun_RequirementsTxt() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "requirements.txt")
+	s.Contains(result.Reason, "requirements.txt")
 }
 
 func (s *ProjectTestSuite) TestRun_ResultLanguage() {

@@ -40,7 +40,7 @@ func (s *AnsibleCheckTestSuite) TestRun_NoAnsibleFiles() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Ansible files found")
+	s.Contains(result.Reason, "No Ansible files found")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_AnsibleCfg() {
@@ -55,7 +55,7 @@ remote_user = ansible`), 0644)
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "ansible-lint")
+	s.Contains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_PlaybookYml() {
@@ -75,7 +75,7 @@ func (s *AnsibleCheckTestSuite) TestRun_PlaybookYml() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "ansible-lint")
+	s.Contains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_PlaybookYaml() {
@@ -92,7 +92,7 @@ func (s *AnsibleCheckTestSuite) TestRun_PlaybookYaml() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "ansible-lint")
+	s.Contains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_SiteYml() {
@@ -111,7 +111,7 @@ func (s *AnsibleCheckTestSuite) TestRun_SiteYml() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "ansible-lint")
+	s.Contains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_SiteYaml() {
@@ -128,7 +128,7 @@ func (s *AnsibleCheckTestSuite) TestRun_SiteYaml() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "ansible-lint")
+	s.Contains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_MainYml() {
@@ -145,7 +145,7 @@ func (s *AnsibleCheckTestSuite) TestRun_MainYml() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "ansible-lint")
+	s.Contains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_RolesDirectory() {
@@ -158,7 +158,7 @@ func (s *AnsibleCheckTestSuite) TestRun_RolesDirectory() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "ansible-lint")
+	s.Contains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_AnsibleDirectory() {
@@ -171,7 +171,7 @@ func (s *AnsibleCheckTestSuite) TestRun_AnsibleDirectory() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "ansible-lint")
+	s.Contains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_DotAnsibleDirectory() {
@@ -184,7 +184,7 @@ func (s *AnsibleCheckTestSuite) TestRun_DotAnsibleDirectory() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "ansible-lint")
+	s.Contains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_PlaybookInAnsibleDir() {
@@ -207,7 +207,7 @@ func (s *AnsibleCheckTestSuite) TestRun_PlaybookInAnsibleDir() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "ansible-lint")
+	s.Contains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_PlaybookInPlaybooksDir() {
@@ -228,7 +228,7 @@ func (s *AnsibleCheckTestSuite) TestRun_PlaybookInPlaybooksDir() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "ansible-lint")
+	s.Contains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_RoleInRolesDir() {
@@ -249,7 +249,7 @@ func (s *AnsibleCheckTestSuite) TestRun_RoleInRolesDir() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "ansible-lint")
+	s.Contains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_DoesNotConfuseWithNonAnsibleYaml() {
@@ -266,7 +266,7 @@ func (s *AnsibleCheckTestSuite) TestRun_DoesNotConfuseWithNonAnsibleYaml() {
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
 	// Should not find ansible files since config.yaml doesn't have ansible markers
-	s.NotContains(result.Message, "ansible-lint")
+	s.NotContains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_ResultLanguage() {
@@ -294,7 +294,7 @@ func (s *AnsibleCheckTestSuite) TestRun_IgnoresHiddenDirs() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.NotContains(result.Message, "ansible-lint")
+	s.NotContains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_IgnoresVendorDirs() {
@@ -315,7 +315,7 @@ func (s *AnsibleCheckTestSuite) TestRun_IgnoresVendorDirs() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.NotContains(result.Message, "ansible-lint")
+	s.NotContains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_SkipsRequirementsAndGalaxyFiles() {
@@ -335,7 +335,7 @@ func (s *AnsibleCheckTestSuite) TestRun_SkipsRequirementsAndGalaxyFiles() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.NotContains(result.Message, "ansible-lint")
+	s.NotContains(result.Reason, "ansible-lint")
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_MultipleAnsibleIndicators() {
@@ -359,7 +359,7 @@ func (s *AnsibleCheckTestSuite) TestRun_MultipleAnsibleIndicators() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "ansible-lint")
+	s.Contains(result.Reason, "ansible-lint")
 }
 
 func TestAnsibleCheckTestSuite(t *testing.T) {

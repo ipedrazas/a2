@@ -40,7 +40,7 @@ func (s *LicenseCheckTestSuite) TestLicensrcConfig() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "licensrc config")
+	s.Contains(result.Reason, "licensrc config")
 }
 
 func (s *LicenseCheckTestSuite) TestLicensrcJsonConfig() {
@@ -52,7 +52,7 @@ func (s *LicenseCheckTestSuite) TestLicensrcJsonConfig() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "licensrc config")
+	s.Contains(result.Reason, "licensrc config")
 }
 
 func (s *LicenseCheckTestSuite) TestLicenseCheckerConfig() {
@@ -64,7 +64,7 @@ func (s *LicenseCheckTestSuite) TestLicenseCheckerConfig() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "license-checker config")
+	s.Contains(result.Reason, "license-checker config")
 }
 
 func (s *LicenseCheckTestSuite) TestFOSSAConfig() {
@@ -81,7 +81,7 @@ project:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "FOSSA")
+	s.Contains(result.Reason, "FOSSA")
 }
 
 func (s *LicenseCheckTestSuite) TestFOSSAYamlConfig() {
@@ -93,7 +93,7 @@ func (s *LicenseCheckTestSuite) TestFOSSAYamlConfig() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "FOSSA")
+	s.Contains(result.Reason, "FOSSA")
 }
 
 func (s *LicenseCheckTestSuite) TestSPDXFile() {
@@ -105,7 +105,7 @@ func (s *LicenseCheckTestSuite) TestSPDXFile() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SPDX")
+	s.Contains(result.Reason, "SPDX")
 }
 
 func (s *LicenseCheckTestSuite) TestSPDXSBOMFile() {
@@ -117,7 +117,7 @@ func (s *LicenseCheckTestSuite) TestSPDXSBOMFile() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SPDX SBOM")
+	s.Contains(result.Reason, "SPDX SBOM")
 }
 
 func (s *LicenseCheckTestSuite) TestGoLicenses() {
@@ -136,7 +136,7 @@ require github.com/google/go-licenses v1.6.0
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "go-licenses")
+	s.Contains(result.Reason, "go-licenses")
 }
 
 func (s *LicenseCheckTestSuite) TestGoLichen() {
@@ -154,7 +154,7 @@ require github.com/uw-labs/lichen v0.1.7
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "lichen")
+	s.Contains(result.Reason, "lichen")
 }
 
 func (s *LicenseCheckTestSuite) TestGoSyft() {
@@ -172,7 +172,7 @@ require github.com/anchore/syft v0.100.0
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Syft")
+	s.Contains(result.Reason, "Syft")
 }
 
 func (s *LicenseCheckTestSuite) TestGoCycloneDX() {
@@ -190,7 +190,7 @@ require github.com/CycloneDX/cyclonedx-gomod v1.4.0
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "CycloneDX")
+	s.Contains(result.Reason, "CycloneDX")
 }
 
 func (s *LicenseCheckTestSuite) TestPythonPipLicenses() {
@@ -209,7 +209,7 @@ dependencies = [
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "pip-licenses")
+	s.Contains(result.Reason, "pip-licenses")
 }
 
 func (s *LicenseCheckTestSuite) TestPythonLiccheck() {
@@ -224,7 +224,7 @@ liccheck>=0.9.0
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "liccheck")
+	s.Contains(result.Reason, "liccheck")
 }
 
 func (s *LicenseCheckTestSuite) TestPythonLiccheckConfig() {
@@ -236,7 +236,7 @@ func (s *LicenseCheckTestSuite) TestPythonLiccheckConfig() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "liccheck config")
+	s.Contains(result.Reason, "liccheck config")
 }
 
 func (s *LicenseCheckTestSuite) TestPythonCycloneDX() {
@@ -250,7 +250,7 @@ func (s *LicenseCheckTestSuite) TestPythonCycloneDX() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "CycloneDX")
+	s.Contains(result.Reason, "CycloneDX")
 }
 
 func (s *LicenseCheckTestSuite) TestNodeLicenseChecker() {
@@ -269,7 +269,7 @@ func (s *LicenseCheckTestSuite) TestNodeLicenseChecker() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "license-checker")
+	s.Contains(result.Reason, "license-checker")
 }
 
 func (s *LicenseCheckTestSuite) TestNodeLicenseCompliance() {
@@ -287,7 +287,7 @@ func (s *LicenseCheckTestSuite) TestNodeLicenseCompliance() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "license-compliance")
+	s.Contains(result.Reason, "license-compliance")
 }
 
 func (s *LicenseCheckTestSuite) TestNodeCycloneDX() {
@@ -305,7 +305,7 @@ func (s *LicenseCheckTestSuite) TestNodeCycloneDX() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "CycloneDX")
+	s.Contains(result.Reason, "CycloneDX")
 }
 
 func (s *LicenseCheckTestSuite) TestNodeSnyk() {
@@ -323,7 +323,7 @@ func (s *LicenseCheckTestSuite) TestNodeSnyk() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Snyk")
+	s.Contains(result.Reason, "Snyk")
 }
 
 func (s *LicenseCheckTestSuite) TestJavaLicenseMavenPlugin() {
@@ -350,7 +350,7 @@ func (s *LicenseCheckTestSuite) TestJavaLicenseMavenPlugin() {
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
 	// Matches license-maven-plugin pattern
-	s.Contains(result.Message, "license-maven-plugin")
+	s.Contains(result.Reason, "license-maven-plugin")
 }
 
 func (s *LicenseCheckTestSuite) TestJavaCycloneDXMaven() {
@@ -375,7 +375,7 @@ func (s *LicenseCheckTestSuite) TestJavaCycloneDXMaven() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "CycloneDX")
+	s.Contains(result.Reason, "CycloneDX")
 }
 
 func (s *LicenseCheckTestSuite) TestJavaGradleLicensePlugin() {
@@ -392,7 +392,7 @@ func (s *LicenseCheckTestSuite) TestJavaGradleLicensePlugin() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Gradle License Plugin")
+	s.Contains(result.Reason, "Gradle License Plugin")
 }
 
 func (s *LicenseCheckTestSuite) TestCILicenseScanning_GitHubActions() {
@@ -418,7 +418,7 @@ jobs:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "CI license scanning")
+	s.Contains(result.Reason, "CI license scanning")
 }
 
 func (s *LicenseCheckTestSuite) TestCILicenseScanning_GoLicenses() {
@@ -443,7 +443,7 @@ jobs:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "CI license scanning")
+	s.Contains(result.Reason, "CI license scanning")
 }
 
 func (s *LicenseCheckTestSuite) TestCILicenseScanning_SBOM() {
@@ -467,7 +467,7 @@ jobs:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "CI license scanning")
+	s.Contains(result.Reason, "CI license scanning")
 }
 
 func (s *LicenseCheckTestSuite) TestMultipleFindings() {
@@ -490,8 +490,8 @@ require github.com/google/go-licenses v1.6.0
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "FOSSA")
-	s.Contains(result.Message, "go-licenses")
+	s.Contains(result.Reason, "FOSSA")
+	s.Contains(result.Reason, "go-licenses")
 }
 
 func (s *LicenseCheckTestSuite) TestNoLicenseCompliance() {
@@ -501,7 +501,7 @@ func (s *LicenseCheckTestSuite) TestNoLicenseCompliance() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No license compliance tooling found")
+	s.Contains(result.Reason, "No license compliance tooling found")
 }
 
 func (s *LicenseCheckTestSuite) TestResultLanguage() {
@@ -528,7 +528,7 @@ require github.com/gin-gonic/gin v1.9.0
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No license compliance tooling found")
+	s.Contains(result.Reason, "No license compliance tooling found")
 }
 
 func TestLicenseCheckTestSuite(t *testing.T) {

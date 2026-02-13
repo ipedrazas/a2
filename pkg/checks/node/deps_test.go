@@ -47,7 +47,7 @@ func (suite *DepsTestSuite) TestDepsCheck_Run_NoPackageJSON() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 	suite.Equal("node:deps", result.ID)
 	suite.Equal("Node Vulnerabilities", result.Name)
 }
@@ -64,7 +64,7 @@ func (suite *DepsTestSuite) TestDepsCheck_Run_BunSkipped() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "Bun does not have built-in security audit")
+	suite.Contains(result.Reason, "Bun does not have built-in security audit")
 }
 
 // TestDepsCheck_ID tests that DepsCheck returns correct ID.
@@ -221,7 +221,7 @@ func (suite *DepsTestSuite) TestDepsCheck_Run_NonExistentPath() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 }
 
 // TestDepsTestSuite runs all the tests in the suite.

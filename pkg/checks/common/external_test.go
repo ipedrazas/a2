@@ -43,7 +43,7 @@ func (suite *ExternalTestSuite) TestResultFromJSON_Pass() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Equal("All good", result.Message)
+	suite.Equal("All good", result.Reason)
 	suite.Equal("test", result.ID)
 	suite.Equal("Test Check", result.Name)
 }
@@ -65,7 +65,7 @@ func (suite *ExternalTestSuite) TestResultFromJSON_Warn() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
-	suite.Equal("Warning message", result.Message)
+	suite.Equal("Warning message", result.Reason)
 }
 
 // TestResultFromJSON_Warning tests that resultFromJSON handles "warning" status (case-insensitive).
@@ -104,7 +104,7 @@ func (suite *ExternalTestSuite) TestResultFromJSON_Fail() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Equal("Failed", result.Message)
+	suite.Equal("Failed", result.Reason)
 }
 
 // TestResultFromJSON_Error tests that resultFromJSON handles "error" status.
@@ -138,7 +138,7 @@ func (suite *ExternalTestSuite) TestResultFromExitCode_ExitCode0() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Equal("Success message", result.Message)
+	suite.Equal("Success message", result.Reason)
 }
 
 // TestResultFromExitCode_ExitCode1 tests that resultFromExitCode returns Warn for exit code 1.
@@ -210,7 +210,7 @@ func (suite *ExternalTestSuite) TestResultFromExitCode_EmptyOutput() {
 
 	suite.NoError(err)
 	suite.False(result.Passed)
-	suite.Equal("Check failed", result.Message)
+	suite.Equal("Check failed", result.Reason)
 }
 
 // TestExternalCheck_Run_ExitCode0 tests ExternalCheck with exit code 0 (using true command).
@@ -259,7 +259,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_WithOutput() {
 
 	suite.NoError(err)
 	suite.True(result.Passed)
-	suite.Contains(result.Message, "Hello")
+	suite.Contains(result.Reason, "Hello")
 }
 
 // TestExternalCheck_Run_JSONOutput tests ExternalCheck with JSON output format.
@@ -278,7 +278,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_JSONOutput() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
-	suite.Equal("Test message", result.Message)
+	suite.Equal("Test message", result.Reason)
 }
 
 // TestExternalCheck_Run_JSONOutput_Pass tests ExternalCheck with JSON pass status.
@@ -295,7 +295,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_JSONOutput_Pass() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Equal("All good", result.Message)
+	suite.Equal("All good", result.Reason)
 }
 
 // TestExternalCheck_Run_JSONOutput_Fail tests ExternalCheck with JSON fail status.
@@ -312,7 +312,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_JSONOutput_Fail() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Equal("Critical failure", result.Message)
+	suite.Equal("Critical failure", result.Reason)
 }
 
 // TestExternalCheck_Run_InvalidCommand tests ExternalCheck with invalid command.
@@ -349,7 +349,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_StderrFallback() {
 
 	suite.NoError(err)
 	suite.False(result.Passed)
-	suite.Contains(result.Message, "stderr message")
+	suite.Contains(result.Reason, "stderr message")
 }
 
 // TestExternalCheck_Run_InvalidSourceDir tests that invalid source_dir (e.g. traversal) returns Warn.
@@ -367,7 +367,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_InvalidSourceDir() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
-	suite.Contains(result.Message, "invalid source_dir")
+	suite.Contains(result.Reason, "invalid source_dir")
 }
 
 // TestExternalCheck_Run_WithSourceDir tests that the command runs in the given source_dir.
@@ -390,7 +390,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_WithSourceDir() {
 
 	suite.NoError(err)
 	suite.True(result.Passed)
-	suite.Contains(result.Message, "mydir")
+	suite.Contains(result.Reason, "mydir")
 }
 
 // TestExternalTestSuite runs all the tests in the suite.

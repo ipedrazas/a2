@@ -38,7 +38,7 @@ func (s *BuildCheckTestSuite) TestRun_NoBuildTool() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "No build tool detected")
+	s.Contains(result.Reason, "No build tool detected")
 }
 
 func (s *BuildCheckTestSuite) TestRun_ResultLanguage() {

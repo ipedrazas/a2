@@ -109,22 +109,22 @@ func (suite *RunnerTestSuite) TestRunSuite_AllPass() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "All good",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "All good",
 			},
 		},
 		&mockChecker{
 			id:   "check2",
 			name: "Check 2",
 			result: checker.Result{
-				Name:    "Check 2",
-				ID:      "check2",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "All good",
+				Name:   "Check 2",
+				ID:     "check2",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "All good",
 			},
 		},
 	}
@@ -147,33 +147,33 @@ func (suite *RunnerTestSuite) TestRunSuite_WithWarnings() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "All good",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "All good",
 			},
 		},
 		&mockChecker{
 			id:   "check2",
 			name: "Check 2",
 			result: checker.Result{
-				Name:    "Check 2",
-				ID:      "check2",
-				Passed:  false,
-				Status:  checker.Warn,
-				Message: "Warning message",
+				Name:   "Check 2",
+				ID:     "check2",
+				Passed: false,
+				Status: checker.Warn,
+				Reason: "Warning message",
 			},
 		},
 		&mockChecker{
 			id:   "check3",
 			name: "Check 3",
 			result: checker.Result{
-				Name:    "Check 3",
-				ID:      "check3",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "All good",
+				Name:   "Check 3",
+				ID:     "check3",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "All good",
 			},
 		},
 	}
@@ -196,33 +196,33 @@ func (suite *RunnerTestSuite) TestRunSuite_WithFailure() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "All good",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "All good",
 			},
 		},
 		&mockChecker{
 			id:   "check2",
 			name: "Check 2",
 			result: checker.Result{
-				Name:    "Check 2",
-				ID:      "check2",
-				Passed:  false,
-				Status:  checker.Fail,
-				Message: "Critical failure",
+				Name:   "Check 2",
+				ID:     "check2",
+				Passed: false,
+				Status: checker.Fail,
+				Reason: "Critical failure",
 			},
 		},
 		&mockChecker{
 			id:   "check3",
 			name: "Check 3",
 			result: checker.Result{
-				Name:    "Check 3",
-				ID:      "check3",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "This should not run",
+				Name:   "Check 3",
+				ID:     "check3",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "This should not run",
 			},
 		},
 	}
@@ -250,11 +250,11 @@ func (suite *RunnerTestSuite) TestRunSuite_InternalError() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "All good",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "All good",
 			},
 		},
 		&mockChecker{
@@ -266,11 +266,11 @@ func (suite *RunnerTestSuite) TestRunSuite_InternalError() {
 			id:   "check3",
 			name: "Check 3",
 			result: checker.Result{
-				Name:    "Check 3",
-				ID:      "check3",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "This should not run",
+				Name:   "Check 3",
+				ID:     "check3",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "This should not run",
 			},
 		},
 	}
@@ -291,7 +291,7 @@ func (suite *RunnerTestSuite) TestRunSuite_InternalError() {
 	suite.Equal("check2", result.Results[1].ID)
 	suite.False(result.Results[1].Passed)
 	suite.Equal(checker.Fail, result.Results[1].Status)
-	suite.Contains(result.Results[1].Message, "Internal error")
+	suite.Contains(result.Results[1].Reason, "Internal error")
 }
 
 // TestRunSuite_EmptyChecks tests with an empty check list.
@@ -315,44 +315,44 @@ func (suite *RunnerTestSuite) TestRunSuite_MixedResults() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Passed",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Passed",
 			},
 		},
 		&mockChecker{
 			id:   "check2",
 			name: "Check 2",
 			result: checker.Result{
-				Name:    "Check 2",
-				ID:      "check2",
-				Passed:  false,
-				Status:  checker.Warn,
-				Message: "Warning",
+				Name:   "Check 2",
+				ID:     "check2",
+				Passed: false,
+				Status: checker.Warn,
+				Reason: "Warning",
 			},
 		},
 		&mockChecker{
 			id:   "check3",
 			name: "Check 3",
 			result: checker.Result{
-				Name:    "Check 3",
-				ID:      "check3",
-				Passed:  false,
-				Status:  checker.Fail,
-				Message: "Failed",
+				Name:   "Check 3",
+				ID:     "check3",
+				Passed: false,
+				Status: checker.Fail,
+				Reason: "Failed",
 			},
 		},
 		&mockChecker{
 			id:   "check4",
 			name: "Check 4",
 			result: checker.Result{
-				Name:    "Check 4",
-				ID:      "check4",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Should not run",
+				Name:   "Check 4",
+				ID:     "check4",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Should not run",
 			},
 		},
 	}
@@ -375,33 +375,33 @@ func (suite *RunnerTestSuite) TestRunSuite_WarnDoesNotAbort() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  false,
-				Status:  checker.Warn,
-				Message: "Warning",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: false,
+				Status: checker.Warn,
+				Reason: "Warning",
 			},
 		},
 		&mockChecker{
 			id:   "check2",
 			name: "Check 2",
 			result: checker.Result{
-				Name:    "Check 2",
-				ID:      "check2",
-				Passed:  false,
-				Status:  checker.Warn,
-				Message: "Another warning",
+				Name:   "Check 2",
+				ID:     "check2",
+				Passed: false,
+				Status: checker.Warn,
+				Reason: "Another warning",
 			},
 		},
 		&mockChecker{
 			id:   "check3",
 			name: "Check 3",
 			result: checker.Result{
-				Name:    "Check 3",
-				ID:      "check3",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Should run",
+				Name:   "Check 3",
+				ID:     "check3",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Should run",
 			},
 		},
 	}
@@ -458,33 +458,33 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelRunsAllChecks() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Passed",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Passed",
 			},
 		},
 		&mockChecker{
 			id:   "check2",
 			name: "Check 2",
 			result: checker.Result{
-				Name:    "Check 2",
-				ID:      "check2",
-				Passed:  false,
-				Status:  checker.Fail,
-				Message: "Critical failure",
+				Name:   "Check 2",
+				ID:     "check2",
+				Passed: false,
+				Status: checker.Fail,
+				Reason: "Critical failure",
 			},
 		},
 		&mockChecker{
 			id:   "check3",
 			name: "Check 3",
 			result: checker.Result{
-				Name:    "Check 3",
-				ID:      "check3",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Should run in parallel mode",
+				Name:   "Check 3",
+				ID:     "check3",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Should run in parallel mode",
 			},
 		},
 	}
@@ -512,33 +512,33 @@ func (suite *RunnerTestSuite) TestRunSuite_SequentialStopsOnFailure() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Passed",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Passed",
 			},
 		},
 		&mockChecker{
 			id:   "check2",
 			name: "Check 2",
 			result: checker.Result{
-				Name:    "Check 2",
-				ID:      "check2",
-				Passed:  false,
-				Status:  checker.Fail,
-				Message: "Critical failure",
+				Name:   "Check 2",
+				ID:     "check2",
+				Passed: false,
+				Status: checker.Fail,
+				Reason: "Critical failure",
 			},
 		},
 		&mockChecker{
 			id:   "check3",
 			name: "Check 3",
 			result: checker.Result{
-				Name:    "Check 3",
-				ID:      "check3",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Should NOT run in sequential mode",
+				Name:   "Check 3",
+				ID:     "check3",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Should NOT run in sequential mode",
 			},
 		},
 	}
@@ -566,22 +566,22 @@ func (suite *RunnerTestSuite) TestRunSuiteWithOptions_Parallel() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Passed",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Passed",
 			},
 		},
 		&mockChecker{
 			id:   "check2",
 			name: "Check 2",
 			result: checker.Result{
-				Name:    "Check 2",
-				ID:      "check2",
-				Passed:  false,
-				Status:  checker.Warn,
-				Message: "Warning",
+				Name:   "Check 2",
+				ID:     "check2",
+				Passed: false,
+				Status: checker.Warn,
+				Reason: "Warning",
 			},
 		},
 	}
@@ -602,22 +602,22 @@ func (suite *RunnerTestSuite) TestRunSuiteWithOptions_Sequential() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Passed",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Passed",
 			},
 		},
 		&mockChecker{
 			id:   "check2",
 			name: "Check 2",
 			result: checker.Result{
-				Name:    "Check 2",
-				ID:      "check2",
-				Passed:  false,
-				Status:  checker.Warn,
-				Message: "Warning",
+				Name:   "Check 2",
+				ID:     "check2",
+				Passed: false,
+				Status: checker.Warn,
+				Reason: "Warning",
 			},
 		},
 	}
@@ -649,11 +649,11 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelWithError() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "All good",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "All good",
 			},
 		},
 		&mockChecker{
@@ -665,11 +665,11 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelWithError() {
 			id:   "check3",
 			name: "Check 3",
 			result: checker.Result{
-				Name:    "Check 3",
-				ID:      "check3",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Should run in parallel mode",
+				Name:   "Check 3",
+				ID:     "check3",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Should run in parallel mode",
 			},
 		},
 	}
@@ -686,7 +686,7 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelWithError() {
 	// Verify the error was converted to a Fail result
 	suite.False(result.Results[1].Passed)
 	suite.Equal(checker.Fail, result.Results[1].Status)
-	suite.Contains(result.Results[1].Message, "Internal error")
+	suite.Contains(result.Results[1].Reason, "Internal error")
 }
 
 // TestRunSuite_WithInfo tests that Info status checks are counted separately and don't affect score.
@@ -696,33 +696,33 @@ func (suite *RunnerTestSuite) TestRunSuite_WithInfo() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Passed",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Passed",
 			},
 		},
 		&mockChecker{
 			id:   "check2",
 			name: "Check 2",
 			result: checker.Result{
-				Name:    "Check 2",
-				ID:      "check2",
-				Passed:  true,
-				Status:  checker.Info,
-				Message: "Informational only",
+				Name:   "Check 2",
+				ID:     "check2",
+				Passed: true,
+				Status: checker.Info,
+				Reason: "Informational only",
 			},
 		},
 		&mockChecker{
 			id:   "check3",
 			name: "Check 3",
 			result: checker.Result{
-				Name:    "Check 3",
-				ID:      "check3",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Passed",
+				Name:   "Check 3",
+				ID:     "check3",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Passed",
 			},
 		},
 	}
@@ -746,33 +746,33 @@ func (suite *RunnerTestSuite) TestRunSuite_InfoDoesNotAbort() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Info,
-				Message: "Info 1",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Info,
+				Reason: "Info 1",
 			},
 		},
 		&mockChecker{
 			id:   "check2",
 			name: "Check 2",
 			result: checker.Result{
-				Name:    "Check 2",
-				ID:      "check2",
-				Passed:  true,
-				Status:  checker.Info,
-				Message: "Info 2",
+				Name:   "Check 2",
+				ID:     "check2",
+				Passed: true,
+				Status: checker.Info,
+				Reason: "Info 2",
 			},
 		},
 		&mockChecker{
 			id:   "check3",
 			name: "Check 3",
 			result: checker.Result{
-				Name:    "Check 3",
-				ID:      "check3",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Should run",
+				Name:   "Check 3",
+				ID:     "check3",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Should run",
 			},
 		},
 	}
@@ -817,11 +817,11 @@ func (suite *RunnerTestSuite) TestRunSuite_DurationIsSet() {
 				id:   "check1",
 				name: "Check 1",
 				result: checker.Result{
-					Name:    "Check 1",
-					ID:      "check1",
-					Passed:  true,
-					Status:  checker.Pass,
-					Message: "All good",
+					Name:   "Check 1",
+					ID:     "check1",
+					Passed: true,
+					Status: checker.Pass,
+					Reason: "All good",
 				},
 			},
 			delay: 10 * time.Millisecond,
@@ -831,11 +831,11 @@ func (suite *RunnerTestSuite) TestRunSuite_DurationIsSet() {
 				id:   "check2",
 				name: "Check 2",
 				result: checker.Result{
-					Name:    "Check 2",
-					ID:      "check2",
-					Passed:  true,
-					Status:  checker.Pass,
-					Message: "All good",
+					Name:   "Check 2",
+					ID:     "check2",
+					Passed: true,
+					Status: checker.Pass,
+					Reason: "All good",
 				},
 			},
 			delay: 20 * time.Millisecond,
@@ -862,11 +862,11 @@ func (suite *RunnerTestSuite) TestRunSuite_TotalDurationIsSet() {
 				id:   "check1",
 				name: "Check 1",
 				result: checker.Result{
-					Name:    "Check 1",
-					ID:      "check1",
-					Passed:  true,
-					Status:  checker.Pass,
-					Message: "All good",
+					Name:   "Check 1",
+					ID:     "check1",
+					Passed: true,
+					Status: checker.Pass,
+					Reason: "All good",
 				},
 			},
 			delay: 15 * time.Millisecond,
@@ -888,11 +888,11 @@ func (suite *RunnerTestSuite) TestRunSuite_SequentialTiming() {
 				id:   "check1",
 				name: "Check 1",
 				result: checker.Result{
-					Name:    "Check 1",
-					ID:      "check1",
-					Passed:  true,
-					Status:  checker.Pass,
-					Message: "All good",
+					Name:   "Check 1",
+					ID:     "check1",
+					Passed: true,
+					Status: checker.Pass,
+					Reason: "All good",
 				},
 			},
 			delay: 10 * time.Millisecond,
@@ -902,11 +902,11 @@ func (suite *RunnerTestSuite) TestRunSuite_SequentialTiming() {
 				id:   "check2",
 				name: "Check 2",
 				result: checker.Result{
-					Name:    "Check 2",
-					ID:      "check2",
-					Passed:  true,
-					Status:  checker.Pass,
-					Message: "All good",
+					Name:   "Check 2",
+					ID:     "check2",
+					Passed: true,
+					Status: checker.Pass,
+					Reason: "All good",
 				},
 			},
 			delay: 10 * time.Millisecond,
@@ -930,11 +930,11 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelTiming() {
 				id:   "check1",
 				name: "Check 1",
 				result: checker.Result{
-					Name:    "Check 1",
-					ID:      "check1",
-					Passed:  true,
-					Status:  checker.Pass,
-					Message: "All good",
+					Name:   "Check 1",
+					ID:     "check1",
+					Passed: true,
+					Status: checker.Pass,
+					Reason: "All good",
 				},
 			},
 			delay: 20 * time.Millisecond,
@@ -944,11 +944,11 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelTiming() {
 				id:   "check2",
 				name: "Check 2",
 				result: checker.Result{
-					Name:    "Check 2",
-					ID:      "check2",
-					Passed:  true,
-					Status:  checker.Pass,
-					Message: "All good",
+					Name:   "Check 2",
+					ID:     "check2",
+					Passed: true,
+					Status: checker.Pass,
+					Reason: "All good",
 				},
 			},
 			delay: 20 * time.Millisecond,
@@ -985,11 +985,11 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutNotExceeded() {
 				id:   "check1",
 				name: "Check 1",
 				result: checker.Result{
-					Name:    "Check 1",
-					ID:      "check1",
-					Passed:  true,
-					Status:  checker.Pass,
-					Message: "Completed in time",
+					Name:   "Check 1",
+					ID:     "check1",
+					Passed: true,
+					Status: checker.Pass,
+					Reason: "Completed in time",
 				},
 			},
 			delay: 10 * time.Millisecond,
@@ -1006,7 +1006,7 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutNotExceeded() {
 	suite.Equal(1, result.Passed)
 	suite.Equal(0, result.Failed)
 	suite.True(result.Success())
-	suite.Equal("Completed in time", result.Results[0].Message)
+	suite.Equal("Completed in time", result.Results[0].Reason)
 }
 
 // TestRunSuite_TimeoutExceeded tests that checks fail when timeout is exceeded.
@@ -1017,11 +1017,11 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutExceeded() {
 				id:   "check1",
 				name: "Check 1",
 				result: checker.Result{
-					Name:    "Check 1",
-					ID:      "check1",
-					Passed:  true,
-					Status:  checker.Pass,
-					Message: "Should not see this",
+					Name:   "Check 1",
+					ID:     "check1",
+					Passed: true,
+					Status: checker.Pass,
+					Reason: "Should not see this",
 				},
 			},
 			delay: 100 * time.Millisecond, // Takes 100ms
@@ -1038,7 +1038,7 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutExceeded() {
 	suite.Equal(0, result.Passed)
 	suite.Equal(1, result.Failed)
 	suite.False(result.Success())
-	suite.Contains(result.Results[0].Message, "timed out")
+	suite.Contains(result.Results[0].Reason, "timed out")
 	suite.Equal("check1", result.Results[0].ID)
 	suite.Equal("Check 1", result.Results[0].Name)
 }
@@ -1051,11 +1051,11 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutSequential() {
 				id:   "check1",
 				name: "Check 1",
 				result: checker.Result{
-					Name:    "Check 1",
-					ID:      "check1",
-					Passed:  true,
-					Status:  checker.Pass,
-					Message: "Fast check",
+					Name:   "Check 1",
+					ID:     "check1",
+					Passed: true,
+					Status: checker.Pass,
+					Reason: "Fast check",
 				},
 			},
 			delay: 5 * time.Millisecond,
@@ -1065,11 +1065,11 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutSequential() {
 				id:   "check2",
 				name: "Check 2",
 				result: checker.Result{
-					Name:    "Check 2",
-					ID:      "check2",
-					Passed:  true,
-					Status:  checker.Pass,
-					Message: "Slow check",
+					Name:   "Check 2",
+					ID:     "check2",
+					Passed: true,
+					Status: checker.Pass,
+					Reason: "Slow check",
 				},
 			},
 			delay: 100 * time.Millisecond, // Too slow
@@ -1079,11 +1079,11 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutSequential() {
 				id:   "check3",
 				name: "Check 3",
 				result: checker.Result{
-					Name:    "Check 3",
-					ID:      "check3",
-					Passed:  true,
-					Status:  checker.Pass,
-					Message: "Should not run",
+					Name:   "Check 3",
+					ID:     "check3",
+					Passed: true,
+					Status: checker.Pass,
+					Reason: "Should not run",
 				},
 			},
 			delay: 5 * time.Millisecond,
@@ -1101,7 +1101,7 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutSequential() {
 	suite.Equal(1, result.Passed)
 	suite.Equal(1, result.Failed)
 	suite.True(result.Aborted) // Should abort because timeout produces a Fail result
-	suite.Contains(result.Results[1].Message, "timed out")
+	suite.Contains(result.Results[1].Reason, "timed out")
 }
 
 // TestRunSuite_TimeoutZeroMeansNoTimeout tests that timeout=0 means no timeout.
@@ -1112,11 +1112,11 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutZeroMeansNoTimeout() {
 				id:   "check1",
 				name: "Check 1",
 				result: checker.Result{
-					Name:    "Check 1",
-					ID:      "check1",
-					Passed:  true,
-					Status:  checker.Pass,
-					Message: "Slow but should complete",
+					Name:   "Check 1",
+					ID:     "check1",
+					Passed: true,
+					Status: checker.Pass,
+					Reason: "Slow but should complete",
 				},
 			},
 			delay: 50 * time.Millisecond,
@@ -1132,7 +1132,7 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutZeroMeansNoTimeout() {
 	suite.Equal(1, result.TotalChecks())
 	suite.Equal(1, result.Passed)
 	suite.True(result.Success())
-	suite.Equal("Slow but should complete", result.Results[0].Message)
+	suite.Equal("Slow but should complete", result.Results[0].Reason)
 }
 
 // TestRunSuite_PanicRecoveryParallel tests that panics are recovered in parallel mode.
@@ -1142,11 +1142,11 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryParallel() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Should complete",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Should complete",
 			},
 		},
 		&panicMockChecker{
@@ -1158,11 +1158,11 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryParallel() {
 			id:   "check3",
 			name: "Check 3",
 			result: checker.Result{
-				Name:    "Check 3",
-				ID:      "check3",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Should also complete",
+				Name:   "Check 3",
+				ID:     "check3",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Should also complete",
 			},
 		},
 	}
@@ -1181,8 +1181,8 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryParallel() {
 	suite.Equal("Panicking Check", result.Results[1].Name)
 	suite.False(result.Results[1].Passed)
 	suite.Equal(checker.Fail, result.Results[1].Status)
-	suite.Contains(result.Results[1].Message, "panicked")
-	suite.Contains(result.Results[1].Message, "something went wrong")
+	suite.Contains(result.Results[1].Reason, "panicked")
+	suite.Contains(result.Results[1].Reason, "something went wrong")
 
 	// Verify other checks completed normally
 	suite.True(result.Results[0].Passed)
@@ -1204,8 +1204,8 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithError() {
 	suite.Equal(1, result.TotalChecks())
 	suite.Equal(0, result.Passed)
 	suite.Equal(1, result.Failed)
-	suite.Contains(result.Results[0].Message, "panicked")
-	suite.Contains(result.Results[0].Message, "error panic value")
+	suite.Contains(result.Results[0].Reason, "panicked")
+	suite.Contains(result.Results[0].Reason, "error panic value")
 }
 
 // TestRunSuite_PanicRecoveryWithUnknownValue tests panic with non-string/non-error value.
@@ -1223,7 +1223,7 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithUnknownValue() {
 	suite.Equal(1, result.TotalChecks())
 	suite.Equal(0, result.Passed)
 	suite.Equal(1, result.Failed)
-	suite.Contains(result.Results[0].Message, "panicked unexpectedly")
+	suite.Contains(result.Results[0].Reason, "panicked unexpectedly")
 }
 
 // TestRunSuite_PanicRecoveryWithTimeout tests panic recovery when timeout is set.
@@ -1233,11 +1233,11 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithTimeout() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Should complete",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Should complete",
 			},
 		},
 		&panicMockChecker{
@@ -1258,8 +1258,8 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithTimeout() {
 	suite.Equal(1, result.Failed)
 
 	// Verify the panicking check was recovered
-	suite.Contains(result.Results[1].Message, "panicked")
-	suite.Contains(result.Results[1].Message, "timeout test panic")
+	suite.Contains(result.Results[1].Reason, "panicked")
+	suite.Contains(result.Results[1].Reason, "timeout test panic")
 }
 
 // TestRunSuite_PanicRecoverySequential tests panic recovery in sequential mode.
@@ -1269,11 +1269,11 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoverySequential() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Should complete first",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Should complete first",
 			},
 		},
 		&panicMockChecker{
@@ -1285,11 +1285,11 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoverySequential() {
 			id:   "check3",
 			name: "Check 3",
 			result: checker.Result{
-				Name:    "Check 3",
-				ID:      "check3",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Should not run (aborted)",
+				Name:   "Check 3",
+				ID:     "check3",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Should not run (aborted)",
 			},
 		},
 	}
@@ -1306,7 +1306,7 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoverySequential() {
 	suite.Equal(1, result.Failed)
 	suite.True(result.Aborted)
 
-	suite.Contains(result.Results[1].Message, "panicked")
+	suite.Contains(result.Results[1].Reason, "panicked")
 }
 
 // TestFormatPanicMessage tests the formatPanicMessage helper function.
@@ -1504,33 +1504,33 @@ func (suite *RunnerTestSuite) TestRunSuite_OptionalCheck_WarnBecomesInfo() {
 			id:   "check1",
 			name: "Check 1",
 			result: checker.Result{
-				Name:    "Check 1",
-				ID:      "check1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Passed",
+				Name:   "Check 1",
+				ID:     "check1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Passed",
 			},
 		},
 		&mockChecker{
 			id:   "check2",
 			name: "Optional Check",
 			result: checker.Result{
-				Name:    "Optional Check",
-				ID:      "check2",
-				Passed:  false,
-				Status:  checker.Warn,
-				Message: "Warning but optional",
+				Name:   "Optional Check",
+				ID:     "check2",
+				Passed: false,
+				Status: checker.Warn,
+				Reason: "Warning but optional",
 			},
 		},
 		&mockChecker{
 			id:   "check3",
 			name: "Check 3",
 			result: checker.Result{
-				Name:    "Check 3",
-				ID:      "check3",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "Passed",
+				Name:   "Check 3",
+				ID:     "check3",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "Passed",
 			},
 		},
 	}
@@ -1560,11 +1560,11 @@ func (suite *RunnerTestSuite) TestRunSuite_OptionalCheck_FailStaysFail() {
 			id:   "check1",
 			name: "Optional Check",
 			result: checker.Result{
-				Name:    "Optional Check",
-				ID:      "check1",
-				Passed:  false,
-				Status:  checker.Fail,
-				Message: "Critical failure",
+				Name:   "Optional Check",
+				ID:     "check1",
+				Passed: false,
+				Status: checker.Fail,
+				Reason: "Critical failure",
 			},
 		},
 	}

@@ -44,7 +44,7 @@ func (s *ProjectCheckTestSuite) TestRun_MavenProject() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Maven")
+	s.Contains(result.Reason, "Maven")
 }
 
 func (s *ProjectCheckTestSuite) TestRun_MavenProjectWithWrapper() {
@@ -60,8 +60,8 @@ func (s *ProjectCheckTestSuite) TestRun_MavenProjectWithWrapper() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Maven")
-	s.Contains(result.Message, "wrapper")
+	s.Contains(result.Reason, "Maven")
+	s.Contains(result.Reason, "wrapper")
 }
 
 func (s *ProjectCheckTestSuite) TestRun_GradleProject() {
@@ -74,8 +74,8 @@ func (s *ProjectCheckTestSuite) TestRun_GradleProject() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Gradle")
-	s.Contains(result.Message, "Groovy")
+	s.Contains(result.Reason, "Gradle")
+	s.Contains(result.Reason, "Groovy")
 }
 
 func (s *ProjectCheckTestSuite) TestRun_GradleKotlinDSL() {
@@ -87,8 +87,8 @@ func (s *ProjectCheckTestSuite) TestRun_GradleKotlinDSL() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Gradle")
-	s.Contains(result.Message, "Kotlin")
+	s.Contains(result.Reason, "Gradle")
+	s.Contains(result.Reason, "Kotlin")
 }
 
 func (s *ProjectCheckTestSuite) TestRun_GradleProjectWithWrapper() {
@@ -104,8 +104,8 @@ func (s *ProjectCheckTestSuite) TestRun_GradleProjectWithWrapper() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Gradle")
-	s.Contains(result.Message, "wrapper")
+	s.Contains(result.Reason, "Gradle")
+	s.Contains(result.Reason, "wrapper")
 }
 
 func (s *ProjectCheckTestSuite) TestRun_NoProject() {
@@ -114,7 +114,7 @@ func (s *ProjectCheckTestSuite) TestRun_NoProject() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "No Java project")
+	s.Contains(result.Reason, "No Java project")
 }
 
 func (s *ProjectCheckTestSuite) TestRun_GradlePreferredOverMaven() {
@@ -131,7 +131,7 @@ func (s *ProjectCheckTestSuite) TestRun_GradlePreferredOverMaven() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Gradle")
+	s.Contains(result.Reason, "Gradle")
 }
 
 func (s *ProjectCheckTestSuite) TestRun_ResultLanguage() {

@@ -99,7 +99,7 @@ func TestPass(t *testing.T) {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "All tests passed")
+	suite.Contains(result.Reason, "All tests passed")
 	suite.Equal("go:tests", result.ID)
 	suite.Equal("Go Tests", result.Name)
 }
@@ -126,8 +126,8 @@ func TestFail(t *testing.T) {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status) // Critical - should be Fail
-	suite.Contains(result.Message, "Tests failed")
-	suite.NotEmpty(result.Message)
+	suite.Contains(result.Reason, "Tests failed")
+	suite.NotEmpty(result.Reason)
 }
 
 // TestTestRunnerCheck_Run_NoTestFiles tests that TestRunnerCheck returns Pass when no test files exist.
@@ -152,7 +152,7 @@ func main() {
 	// No test files should pass (not a failure)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "No test files found")
+	suite.Contains(result.Reason, "No test files found")
 }
 
 // TestTestCheck_Run_EmptyDirectory tests that TestsCheck handles empty directories.
@@ -171,7 +171,7 @@ func (suite *TestsTestSuite) TestTestsCheck_Run_EmptyDirectory() {
 	// Directory with code but no test files should pass
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "No test files found")
+	suite.Contains(result.Reason, "No test files found")
 }
 
 // TestTestRunnerCheck_Run_MultipleTestFiles tests that TestsCheck handles multiple test files.
@@ -209,7 +209,7 @@ func TestTwo(t *testing.T) {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "All tests passed")
+	suite.Contains(result.Reason, "All tests passed")
 }
 
 // TestTestRunnerCheck_Run_NestedPackages tests that TestsCheck checks nested packages.
@@ -289,7 +289,7 @@ func TestFail(t *testing.T) {
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
 	// Should have error message
-	suite.NotEmpty(result.Message)
+	suite.NotEmpty(result.Reason)
 }
 
 // TestTestRunnerCheck_Run_PartialFailure tests that TestRunnerCheck handles partial test failures.
@@ -318,7 +318,7 @@ func TestFail(t *testing.T) {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "Tests failed")
+	suite.Contains(result.Reason, "Tests failed")
 }
 
 // TestTestsTestSuite runs all the tests in the suite.

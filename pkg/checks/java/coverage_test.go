@@ -37,7 +37,7 @@ func (s *CoverageCheckTestSuite) TestRun_NoJaCoCo() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "JaCoCo not configured")
+	s.Contains(result.Reason, "JaCoCo not configured")
 }
 
 func (s *CoverageCheckTestSuite) TestRun_ResultLanguage() {
@@ -68,7 +68,7 @@ func (s *CoverageCheckTestSuite) TestRun_JaCoCoConfigured_NoReport() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "no coverage report found")
+	s.Contains(result.Reason, "no coverage report found")
 }
 
 func (s *CoverageCheckTestSuite) TestRun_JaCoCoConfigured_Gradle() {
@@ -89,7 +89,7 @@ test {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "no coverage report found")
+	s.Contains(result.Reason, "no coverage report found")
 }
 
 func (s *CoverageCheckTestSuite) TestRun_JaCoCoConfigured_GradleKts() {
@@ -105,7 +105,7 @@ func (s *CoverageCheckTestSuite) TestRun_JaCoCoConfigured_GradleKts() {
 
 	s.NoError(err)
 	s.False(result.Passed)
-	s.Contains(result.Message, "no coverage report found")
+	s.Contains(result.Reason, "no coverage report found")
 }
 
 func (s *CoverageCheckTestSuite) TestRun_WithReport_AboveThreshold() {
@@ -142,8 +142,8 @@ func (s *CoverageCheckTestSuite) TestRun_WithReport_AboveThreshold() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "85.0%")
-	s.Contains(result.Message, "80")
+	s.Contains(result.Reason, "85.0%")
+	s.Contains(result.Reason, "80")
 }
 
 func (s *CoverageCheckTestSuite) TestRun_WithReport_BelowThreshold() {
@@ -179,8 +179,8 @@ func (s *CoverageCheckTestSuite) TestRun_WithReport_BelowThreshold() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "60.0%")
-	s.Contains(result.Message, "below threshold")
+	s.Contains(result.Reason, "60.0%")
+	s.Contains(result.Reason, "below threshold")
 }
 
 func (s *CoverageCheckTestSuite) TestRun_CustomThreshold() {
@@ -217,8 +217,8 @@ func (s *CoverageCheckTestSuite) TestRun_CustomThreshold() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "60.0%")
-	s.Contains(result.Message, "50.0%")
+	s.Contains(result.Reason, "60.0%")
+	s.Contains(result.Reason, "50.0%")
 }
 
 func (s *CoverageCheckTestSuite) TestRun_GradleReportLocation() {
@@ -247,7 +247,7 @@ func (s *CoverageCheckTestSuite) TestRun_GradleReportLocation() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "90.0%")
+	s.Contains(result.Reason, "90.0%")
 }
 
 func (s *CoverageCheckTestSuite) TestParseCoverageReport_InvalidXML() {

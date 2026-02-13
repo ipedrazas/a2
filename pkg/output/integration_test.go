@@ -25,7 +25,8 @@ func createTestSuiteResult() runner.SuiteResult {
 				ID:       "go:build",
 				Passed:   true,
 				Status:   checker.Pass,
-				Message:  "Build successful",
+				Message:  "Check passed",
+				Reason:   "Build successful",
 				Language: checker.LangGo,
 				Duration: 150 * time.Millisecond,
 			},
@@ -34,7 +35,8 @@ func createTestSuiteResult() runner.SuiteResult {
 				ID:       "go:tests",
 				Passed:   true,
 				Status:   checker.Pass,
-				Message:  "All tests passed",
+				Message:  "Check passed",
+				Reason:   "All tests passed",
 				Language: checker.LangGo,
 				Duration: 2500 * time.Millisecond,
 			},
@@ -43,7 +45,8 @@ func createTestSuiteResult() runner.SuiteResult {
 				ID:       "go:format",
 				Passed:   false,
 				Status:   checker.Warn,
-				Message:  "3 files need formatting",
+				Message:  "Needs attention",
+				Reason:   "3 files need formatting",
 				Language: checker.LangGo,
 				Duration: 50 * time.Millisecond,
 			},
@@ -52,7 +55,8 @@ func createTestSuiteResult() runner.SuiteResult {
 				ID:       "go:coverage",
 				Passed:   false,
 				Status:   checker.Fail,
-				Message:  "Coverage 45% below threshold 80%",
+				Message:  "Check failed",
+				Reason:   "Coverage 45% below threshold 80%",
 				Language: checker.LangGo,
 				Duration: 3000 * time.Millisecond,
 			},
@@ -61,7 +65,8 @@ func createTestSuiteResult() runner.SuiteResult {
 				ID:       "common:version",
 				Passed:   true,
 				Status:   checker.Info,
-				Message:  "v1.0.0",
+				Message:  "Informational",
+				Reason:   "v1.0.0",
 				Language: checker.LangCommon,
 				Duration: 5 * time.Millisecond,
 			},
@@ -141,7 +146,7 @@ func (suite *IntegrationTestSuite) TestTOON_IntegrationOutput() {
 
 	// Verify TOON structure
 	suite.Contains(output, "languages[1]: go")
-	suite.Contains(output, "results[5]{name,id,passed,status,message,language,duration_ms}:")
+	suite.Contains(output, "results[5]{name,id,passed,status,message,reason,language,duration_ms}:")
 	suite.Contains(output, "summary:")
 	suite.Contains(output, "total: 4")
 	suite.Contains(output, "passed: 2")
@@ -154,8 +159,8 @@ func (suite *IntegrationTestSuite) TestTOON_IntegrationOutput() {
 	suite.Contains(output, "success: false")
 
 	// Verify result rows (note: IDs with colons are quoted in TOON format)
-	suite.Contains(output, "Go Build,\"go:build\",true,pass,Build successful,go,150")
-	suite.Contains(output, "Go Tests,\"go:tests\",true,pass,All tests passed,go,2500")
+	suite.Contains(output, "Go Build,\"go:build\",true,pass,Check passed,Build successful,go,150")
+	suite.Contains(output, "Go Tests,\"go:tests\",true,pass,Check passed,All tests passed,go,2500")
 }
 
 // TestPretty_IntegrationOutput tests the Pretty formatter produces readable output.
@@ -224,7 +229,7 @@ func (suite *IntegrationTestSuite) TestTOON_EmptyResults() {
 	})
 
 	suite.Contains(output, "languages[0]:")
-	suite.Contains(output, "results[0]{name,id,passed,status,message,language,duration_ms}:")
+	suite.Contains(output, "results[0]{name,id,passed,status,message,reason,language,duration_ms}:")
 	suite.Contains(output, "score: 100")
 	suite.Contains(output, "success: true")
 }
@@ -238,7 +243,7 @@ func (suite *IntegrationTestSuite) TestJSON_AllPass() {
 				ID:       "check1",
 				Passed:   true,
 				Status:   checker.Pass,
-				Message:  "OK",
+				Reason:   "OK",
 				Language: checker.LangGo,
 				Duration: 100 * time.Millisecond,
 			},
@@ -247,7 +252,7 @@ func (suite *IntegrationTestSuite) TestJSON_AllPass() {
 				ID:       "check2",
 				Passed:   true,
 				Status:   checker.Pass,
-				Message:  "OK",
+				Reason:   "OK",
 				Language: checker.LangGo,
 				Duration: 100 * time.Millisecond,
 			},
@@ -324,7 +329,7 @@ func (suite *IntegrationTestSuite) TestOutputConsistency_SuccessFlag() {
 	// Test without failures
 	resultPass := runner.SuiteResult{
 		Results: []checker.Result{
-			{Name: "Test", ID: "test", Passed: true, Status: checker.Pass, Message: "OK"},
+			{Name: "Test", ID: "test", Passed: true, Status: checker.Pass, Reason: "OK"},
 		},
 		Passed: 1,
 	}
@@ -352,11 +357,11 @@ func (suite *IntegrationTestSuite) TestJSON_SpecialCharactersInMessage() {
 	result := runner.SuiteResult{
 		Results: []checker.Result{
 			{
-				Name:    "Test",
-				ID:      "test",
-				Passed:  false,
-				Status:  checker.Fail,
-				Message: "Error: \"file not found\" at path/to/file",
+				Name:   "Test",
+				ID:     "test",
+				Passed: false,
+				Status: checker.Fail,
+				Reason: "Error: \"file not found\" at path/to/file",
 			},
 		},
 		Failed: 1,
@@ -368,11 +373,11 @@ func (suite *IntegrationTestSuite) TestJSON_SpecialCharactersInMessage() {
 		suite.NoError(err)
 	})
 
-	// Should be valid JSON even with quotes in message
+	// Should be valid JSON even with quotes in reason
 	var jsonOutput JSONOutput
 	err := json.Unmarshal([]byte(output), &jsonOutput)
 	suite.NoError(err)
-	suite.Contains(jsonOutput.Results[0].Message, "file not found")
+	suite.Contains(jsonOutput.Results[0].Reason, "file not found")
 }
 
 // TestTOON_SpecialCharactersInMessage tests TOON handles special characters.
@@ -380,11 +385,11 @@ func (suite *IntegrationTestSuite) TestTOON_SpecialCharactersInMessage() {
 	result := runner.SuiteResult{
 		Results: []checker.Result{
 			{
-				Name:    "Test",
-				ID:      "test",
-				Passed:  false,
-				Status:  checker.Fail,
-				Message: "Error: has,comma and \"quotes\"",
+				Name:   "Test",
+				ID:     "test",
+				Passed: false,
+				Status: checker.Fail,
+				Reason: "Error: has,comma and \"quotes\"",
 			},
 		},
 		Failed: 1,
@@ -396,7 +401,7 @@ func (suite *IntegrationTestSuite) TestTOON_SpecialCharactersInMessage() {
 		suite.NoError(err)
 	})
 
-	// Message with comma should be quoted in TOON
+	// Reason with comma should be quoted in TOON
 	suite.Contains(output, `"Error: has,comma and \"quotes\""`)
 }
 

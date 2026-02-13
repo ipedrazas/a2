@@ -201,9 +201,18 @@ func printResult(r checker.Result, verbosity VerbosityLevel) {
 		durationStyle.Render("- "+r.ID),
 	)
 
-	// Print message if present
+	// Print message (what) and reason (why) if present
 	if r.Message != "" {
 		fmt.Println(messageStyle.Render(r.Message))
+	}
+	if r.Reason != "" {
+		if r.Reason != r.Message {
+			reasonLine := r.Reason
+			if r.Message != "" {
+				reasonLine = "Reason: " + reasonLine
+			}
+			fmt.Println(messageStyle.Render(reasonLine))
+		}
 	}
 
 	// Print raw output based on verbosity level
@@ -337,7 +346,11 @@ func printTopIssues(result runner.SuiteResult) {
 			order:      m.order,
 		}
 		if issue.suggestion == "" {
-			issue.suggestion = r.Message
+			if r.Reason != "" {
+				issue.suggestion = r.Reason
+			} else {
+				issue.suggestion = r.Message
+			}
 		}
 		issues = append(issues, issue)
 	}
@@ -363,7 +376,10 @@ func printTopIssues(result runner.SuiteResult) {
 		}
 		detail := issue.suggestion
 		if detail == "" {
-			detail = issue.result.Message
+			detail = issue.result.Reason
+			if detail == "" {
+				detail = issue.result.Message
+			}
 		}
 		if detail != "" {
 			detail = " - " + detail

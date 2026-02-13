@@ -53,7 +53,7 @@ func (s *DepsTestSuite) TestRun_NoCargoToml() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "No Cargo.toml found")
+	s.Contains(result.Reason, "No Cargo.toml found")
 }
 
 func (s *DepsTestSuite) TestRun_ResultLanguage() {

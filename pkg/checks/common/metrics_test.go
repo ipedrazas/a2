@@ -46,7 +46,7 @@ require github.com/prometheus/client_golang v1.17.0
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Prometheus")
+	s.Contains(result.Reason, "Prometheus")
 }
 
 func (s *MetricsCheckTestSuite) TestGoOpenTelemetry() {
@@ -66,7 +66,7 @@ require go.opentelemetry.io/otel/sdk v1.19.0
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "OpenTelemetry")
+	s.Contains(result.Reason, "OpenTelemetry")
 }
 
 func (s *MetricsCheckTestSuite) TestGoDatadog() {
@@ -85,7 +85,7 @@ require gopkg.in/DataDog/dd-trace-go.v1 v1.56.0
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Datadog")
+	s.Contains(result.Reason, "Datadog")
 }
 
 func (s *MetricsCheckTestSuite) TestPythonPrometheus() {
@@ -104,7 +104,7 @@ dependencies = [
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Prometheus")
+	s.Contains(result.Reason, "Prometheus")
 }
 
 func (s *MetricsCheckTestSuite) TestPythonStatsD() {
@@ -120,7 +120,7 @@ statsd>=4.0.0
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "StatsD")
+	s.Contains(result.Reason, "StatsD")
 }
 
 func (s *MetricsCheckTestSuite) TestNodePromClient() {
@@ -140,7 +140,7 @@ func (s *MetricsCheckTestSuite) TestNodePromClient() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Prometheus")
+	s.Contains(result.Reason, "Prometheus")
 }
 
 func (s *MetricsCheckTestSuite) TestNodeOpenTelemetry() {
@@ -160,7 +160,7 @@ func (s *MetricsCheckTestSuite) TestNodeOpenTelemetry() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "OpenTelemetry")
+	s.Contains(result.Reason, "OpenTelemetry")
 }
 
 func (s *MetricsCheckTestSuite) TestNodeDatadog() {
@@ -179,7 +179,7 @@ func (s *MetricsCheckTestSuite) TestNodeDatadog() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Datadog")
+	s.Contains(result.Reason, "Datadog")
 }
 
 func (s *MetricsCheckTestSuite) TestJavaMicrometer() {
@@ -202,7 +202,7 @@ func (s *MetricsCheckTestSuite) TestJavaMicrometer() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Micrometer")
+	s.Contains(result.Reason, "Micrometer")
 }
 
 func (s *MetricsCheckTestSuite) TestJavaDropwizardMetrics() {
@@ -223,7 +223,7 @@ dependencies {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Dropwizard Metrics")
+	s.Contains(result.Reason, "Dropwizard Metrics")
 }
 
 func (s *MetricsCheckTestSuite) TestPrometheusConfigFile() {
@@ -244,7 +244,7 @@ scrape_configs:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "prometheus.yml")
+	s.Contains(result.Reason, "prometheus.yml")
 }
 
 func (s *MetricsCheckTestSuite) TestOtelCollectorConfig() {
@@ -273,7 +273,7 @@ service:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "otel-collector-config.yaml")
+	s.Contains(result.Reason, "otel-collector-config.yaml")
 }
 
 func (s *MetricsCheckTestSuite) TestGrafanaDashboards() {
@@ -294,7 +294,7 @@ func (s *MetricsCheckTestSuite) TestGrafanaDashboards() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Grafana dashboards")
+	s.Contains(result.Reason, "Grafana dashboards")
 }
 
 func (s *MetricsCheckTestSuite) TestMultipleMetricsLibraries() {
@@ -317,8 +317,8 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Prometheus")
-	s.Contains(result.Message, "OpenTelemetry")
+	s.Contains(result.Reason, "Prometheus")
+	s.Contains(result.Reason, "OpenTelemetry")
 }
 
 func (s *MetricsCheckTestSuite) TestNoMetrics() {
@@ -338,7 +338,7 @@ require github.com/gin-gonic/gin v1.9.0
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No metrics instrumentation found")
+	s.Contains(result.Reason, "No metrics instrumentation found")
 }
 
 func (s *MetricsCheckTestSuite) TestEmptyDirectory() {
@@ -348,7 +348,7 @@ func (s *MetricsCheckTestSuite) TestEmptyDirectory() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No metrics instrumentation found")
+	s.Contains(result.Reason, "No metrics instrumentation found")
 }
 
 func TestMetricsCheckTestSuite(t *testing.T) {

@@ -138,18 +138,18 @@ func (suite *JSONTestSuite) TestJSONOutput_Structure() {
 	result := runner.SuiteResult{
 		Results: []checker.Result{
 			{
-				Name:    "Test Check 1",
-				ID:      "test1",
-				Passed:  true,
-				Status:  checker.Pass,
-				Message: "All good",
+				Name:   "Test Check 1",
+				ID:     "test1",
+				Passed: true,
+				Status: checker.Pass,
+				Reason: "All good",
 			},
 			{
-				Name:    "Test Check 2",
-				ID:      "test2",
-				Passed:  false,
-				Status:  checker.Warn,
-				Message: "Warning message",
+				Name:   "Test Check 2",
+				ID:     "test2",
+				Passed: false,
+				Status: checker.Warn,
+				Reason: "Warning message",
 			},
 		},
 		Passed:   1,
@@ -175,11 +175,11 @@ func (suite *JSONTestSuite) TestJSONOutput_Structure() {
 
 	for _, r := range result.Results {
 		output.Results = append(output.Results, JSONResult{
-			Name:    r.Name,
-			ID:      r.ID,
-			Passed:  r.Passed,
-			Status:  statusToString(r.Status),
-			Message: r.Message,
+			Name:   r.Name,
+			ID:     r.ID,
+			Passed: r.Passed,
+			Status: statusToString(r.Status),
+			Reason: r.Reason,
 		})
 	}
 
@@ -198,14 +198,14 @@ func (suite *JSONTestSuite) TestJSONOutput_Structure() {
 	suite.Equal("test1", output.Results[0].ID)
 	suite.True(output.Results[0].Passed)
 	suite.Equal("pass", output.Results[0].Status)
-	suite.Equal("All good", output.Results[0].Message)
+	suite.Equal("All good", output.Results[0].Reason)
 
 	// Verify second result
 	suite.Equal("Test Check 2", output.Results[1].Name)
 	suite.Equal("test2", output.Results[1].ID)
 	suite.False(output.Results[1].Passed)
 	suite.Equal("warn", output.Results[1].Status)
-	suite.Equal("Warning message", output.Results[1].Message)
+	suite.Equal("Warning message", output.Results[1].Reason)
 }
 
 // TestJSONOutput_EmptyResults tests JSON output with empty results.
@@ -240,11 +240,11 @@ func (suite *JSONTestSuite) TestJSONOutput_Aborted() {
 	result := runner.SuiteResult{
 		Results: []checker.Result{
 			{
-				Name:    "Critical Check",
-				ID:      "critical",
-				Passed:  false,
-				Status:  checker.Fail,
-				Message: "Critical failure",
+				Name:   "Critical Check",
+				ID:     "critical",
+				Passed: false,
+				Status: checker.Fail,
+				Reason: "Critical failure",
 			},
 		},
 		Passed:  0,
@@ -276,11 +276,11 @@ func (suite *JSONTestSuite) TestJSONOutput_Serialization() {
 	output := JSONOutput{
 		Results: []JSONResult{
 			{
-				Name:    "Test",
-				ID:      "test",
-				Passed:  true,
-				Status:  "pass",
-				Message: "Message",
+				Name:   "Test",
+				ID:     "test",
+				Passed: true,
+				Status: "pass",
+				Reason: "Message",
 			},
 		},
 		Summary: JSONSummary{

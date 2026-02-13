@@ -66,7 +66,7 @@ func (suite *TypeTestSuite) TestTypeCheck_Run_NotTypedProject() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "Not a typed Python project")
+	suite.Contains(result.Reason, "Not a typed Python project")
 	suite.Equal(checker.LangPython, result.Language)
 }
 
@@ -81,7 +81,7 @@ func (suite *TypeTestSuite) TestTypeCheck_Run_MypyIniExists() {
 
 	suite.NoError(err)
 	// Result depends on whether mypy is installed
-	suite.NotEmpty(result.Message)
+	suite.NotEmpty(result.Reason)
 	suite.Equal(checker.LangPython, result.Language)
 }
 
@@ -96,7 +96,7 @@ func (suite *TypeTestSuite) TestTypeCheck_Run_PyTypedExists() {
 
 	suite.NoError(err)
 	// Result depends on whether mypy is installed
-	suite.NotEmpty(result.Message)
+	suite.NotEmpty(result.Reason)
 	suite.Equal(checker.LangPython, result.Language)
 }
 
@@ -113,7 +113,7 @@ strict = true
 
 	suite.NoError(err)
 	// Result depends on whether mypy is installed
-	suite.NotEmpty(result.Message)
+	suite.NotEmpty(result.Reason)
 	suite.Equal(checker.LangPython, result.Language)
 }
 

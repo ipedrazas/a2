@@ -48,7 +48,7 @@ func (suite *BuildTestSuite) TestBuildCheck_Run_NoPackageJSON() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 	suite.Equal("node:build", result.ID)
 	suite.Equal("Node Build", result.Name)
 }
@@ -132,7 +132,7 @@ func (suite *BuildTestSuite) TestBuildCheck_Run_NonExistentPath() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 }
 
 // TestTruncateMessage tests the TruncateMessage helper function.

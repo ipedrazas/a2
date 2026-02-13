@@ -52,7 +52,8 @@ type Result struct {
 	ID        string        // Unique identifier for the check
 	Passed    bool          // Whether the check passed
 	Status    Status        // Severity level (Pass, Warn, Fail)
-	Message   string        // Descriptive message about the result
+	Message   string        // What happened (short, user-facing summary)
+	Reason    string        // Why it happened (evidence or rationale)
 	Language  Language      // Which language this check applies to
 	Duration  time.Duration // How long the check took to execute
 	RawOutput string        // Full command output for verbose display

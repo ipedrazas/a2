@@ -37,7 +37,7 @@ func (s *FormatCheckTestSuite) TestRun_NoFormatter() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No formatter configuration found")
+	s.Contains(result.Reason, "No formatter configuration found")
 }
 
 func (s *FormatCheckTestSuite) TestRun_ResultLanguage() {
@@ -71,7 +71,7 @@ func (s *FormatCheckTestSuite) TestRun_GoogleJavaFormat_Maven() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "google-java-format")
+	s.Contains(result.Reason, "google-java-format")
 }
 
 func (s *FormatCheckTestSuite) TestRun_GoogleJavaFormat_Gradle() {
@@ -86,7 +86,7 @@ func (s *FormatCheckTestSuite) TestRun_GoogleJavaFormat_Gradle() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "google-java-format")
+	s.Contains(result.Reason, "google-java-format")
 }
 
 func (s *FormatCheckTestSuite) TestRun_GoogleJavaFormat_GradleKts() {
@@ -101,7 +101,7 @@ func (s *FormatCheckTestSuite) TestRun_GoogleJavaFormat_GradleKts() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "google-java-format")
+	s.Contains(result.Reason, "google-java-format")
 }
 
 func (s *FormatCheckTestSuite) TestRun_Spotless_Maven() {
@@ -123,7 +123,7 @@ func (s *FormatCheckTestSuite) TestRun_Spotless_Maven() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Spotless")
+	s.Contains(result.Reason, "Spotless")
 }
 
 func (s *FormatCheckTestSuite) TestRun_Spotless_Gradle() {
@@ -144,7 +144,7 @@ spotless {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Spotless")
+	s.Contains(result.Reason, "Spotless")
 }
 
 func (s *FormatCheckTestSuite) TestRun_EditorConfig() {
@@ -162,7 +162,7 @@ indent_size = 4
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "EditorConfig")
+	s.Contains(result.Reason, "EditorConfig")
 }
 
 func (s *FormatCheckTestSuite) TestRun_EditorConfig_WithoutJava() {
@@ -197,7 +197,7 @@ func (s *FormatCheckTestSuite) TestRun_IntelliJFormatter() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "IntelliJ")
+	s.Contains(result.Reason, "IntelliJ")
 }
 
 func (s *FormatCheckTestSuite) TestRun_IntelliJCodeStyleSettings() {
@@ -214,7 +214,7 @@ func (s *FormatCheckTestSuite) TestRun_IntelliJCodeStyleSettings() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "IntelliJ")
+	s.Contains(result.Reason, "IntelliJ")
 }
 
 func (s *FormatCheckTestSuite) TestRun_EclipseFormatter_Settings() {
@@ -227,7 +227,7 @@ func (s *FormatCheckTestSuite) TestRun_EclipseFormatter_Settings() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Eclipse")
+	s.Contains(result.Reason, "Eclipse")
 }
 
 func (s *FormatCheckTestSuite) TestRun_EclipseFormatter_File() {
@@ -239,7 +239,7 @@ func (s *FormatCheckTestSuite) TestRun_EclipseFormatter_File() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Eclipse")
+	s.Contains(result.Reason, "Eclipse")
 }
 
 func (s *FormatCheckTestSuite) TestRun_MultipleFormatters() {
@@ -268,8 +268,8 @@ indent_style = space
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Spotless")
-	s.Contains(result.Message, "EditorConfig")
+	s.Contains(result.Reason, "Spotless")
+	s.Contains(result.Reason, "EditorConfig")
 }
 
 func TestFormatCheckTestSuite(t *testing.T) {

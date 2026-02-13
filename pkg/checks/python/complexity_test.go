@@ -41,7 +41,7 @@ func (s *ComplexityCheckTestSuite) TestNoPythonProject() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "Python project not found")
+	s.Contains(result.Reason, "Python project not found")
 }
 
 func (s *ComplexityCheckTestSuite) TestParseRadonOutput() {

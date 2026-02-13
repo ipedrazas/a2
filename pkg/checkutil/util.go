@@ -18,6 +18,13 @@ type ResultBuilder struct {
 	language checker.Language
 }
 
+const (
+	messagePass = "Check passed"
+	messageWarn = "Needs attention"
+	messageFail = "Check failed"
+	messageInfo = "Informational"
+)
+
 // NewResultBuilder creates a new ResultBuilder for a checker.
 // The builder captures the checker's Name() and ID() so they don't need
 // to be repeated in every result construction.
@@ -29,53 +36,57 @@ func NewResultBuilder(c checker.Checker, lang checker.Language) *ResultBuilder {
 	}
 }
 
-// Pass creates a passing result with the given message.
-func (b *ResultBuilder) Pass(message string) checker.Result {
+// Pass creates a passing result with the given reason.
+func (b *ResultBuilder) Pass(reason string) checker.Result {
 	return checker.Result{
 		Name:     b.name,
 		ID:       b.id,
 		Passed:   true,
 		Status:   checker.Pass,
-		Message:  message,
+		Message:  messagePass,
+		Reason:   reason,
 		Language: b.language,
 	}
 }
 
-// Fail creates a failing result with the given message.
+// Fail creates a failing result with the given reason.
 // Fail status indicates a critical failure that may abort execution.
-func (b *ResultBuilder) Fail(message string) checker.Result {
+func (b *ResultBuilder) Fail(reason string) checker.Result {
 	return checker.Result{
 		Name:     b.name,
 		ID:       b.id,
 		Passed:   false,
 		Status:   checker.Fail,
-		Message:  message,
+		Message:  messageFail,
+		Reason:   reason,
 		Language: b.language,
 	}
 }
 
-// Warn creates a warning result with the given message.
+// Warn creates a warning result with the given reason.
 // Warnings indicate issues but don't cause execution to abort.
-func (b *ResultBuilder) Warn(message string) checker.Result {
+func (b *ResultBuilder) Warn(reason string) checker.Result {
 	return checker.Result{
 		Name:     b.name,
 		ID:       b.id,
 		Passed:   false,
 		Status:   checker.Warn,
-		Message:  message,
+		Message:  messageWarn,
+		Reason:   reason,
 		Language: b.language,
 	}
 }
 
-// Info creates an informational result with the given message.
+// Info creates an informational result with the given reason.
 // Info results don't affect the pass/fail status or maturity score.
-func (b *ResultBuilder) Info(message string) checker.Result {
+func (b *ResultBuilder) Info(reason string) checker.Result {
 	return checker.Result{
 		Name:     b.name,
 		ID:       b.id,
 		Passed:   true,
 		Status:   checker.Info,
-		Message:  message,
+		Message:  messageInfo,
+		Reason:   reason,
 		Language: b.language,
 	}
 }
@@ -94,45 +105,49 @@ func (b *ResultBuilder) ToolNotInstalled(toolName, installHint string) checker.R
 		ID:       b.id,
 		Passed:   true,
 		Status:   checker.Info,
-		Message:  message,
+		Message:  "Tool not installed",
+		Reason:   message,
 		Language: b.language,
 	}
 }
 
-// PassWithOutput creates a passing result with the given message and raw output.
-func (b *ResultBuilder) PassWithOutput(message, rawOutput string) checker.Result {
+// PassWithOutput creates a passing result with the given reason and raw output.
+func (b *ResultBuilder) PassWithOutput(reason, rawOutput string) checker.Result {
 	return checker.Result{
 		Name:      b.name,
 		ID:        b.id,
 		Passed:    true,
 		Status:    checker.Pass,
-		Message:   message,
+		Message:   messagePass,
+		Reason:    reason,
 		Language:  b.language,
 		RawOutput: rawOutput,
 	}
 }
 
-// FailWithOutput creates a failing result with the given message and raw output.
-func (b *ResultBuilder) FailWithOutput(message, rawOutput string) checker.Result {
+// FailWithOutput creates a failing result with the given reason and raw output.
+func (b *ResultBuilder) FailWithOutput(reason, rawOutput string) checker.Result {
 	return checker.Result{
 		Name:      b.name,
 		ID:        b.id,
 		Passed:    false,
 		Status:    checker.Fail,
-		Message:   message,
+		Message:   messageFail,
+		Reason:    reason,
 		Language:  b.language,
 		RawOutput: rawOutput,
 	}
 }
 
-// WarnWithOutput creates a warning result with the given message and raw output.
-func (b *ResultBuilder) WarnWithOutput(message, rawOutput string) checker.Result {
+// WarnWithOutput creates a warning result with the given reason and raw output.
+func (b *ResultBuilder) WarnWithOutput(reason, rawOutput string) checker.Result {
 	return checker.Result{
 		Name:      b.name,
 		ID:        b.id,
 		Passed:    false,
 		Status:    checker.Warn,
-		Message:   message,
+		Message:   messageWarn,
+		Reason:    reason,
 		Language:  b.language,
 		RawOutput: rawOutput,
 	}

@@ -47,8 +47,8 @@ func (s *SASTCheckTestSuite) TestSemgrepInstalled_RunsWithDefaults() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "semgrep:")
-	s.Contains(result.Message, "auto rules")
+	s.Contains(result.Reason, "semgrep:")
+	s.Contains(result.Reason, "auto rules")
 }
 
 func (s *SASTCheckTestSuite) TestSemgrepInstalled_UsesConfig() {
@@ -64,8 +64,8 @@ func (s *SASTCheckTestSuite) TestSemgrepInstalled_UsesConfig() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "semgrep:")
-	s.Contains(result.Message, ".semgrep.yml")
+	s.Contains(result.Reason, "semgrep:")
+	s.Contains(result.Reason, ".semgrep.yml")
 }
 
 // Tests for config detection when semgrep is NOT installed
@@ -83,7 +83,7 @@ func (s *SASTCheckTestSuite) TestSemgrepYml() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Semgrep")
+	s.Contains(result.Reason, "Semgrep")
 }
 
 func (s *SASTCheckTestSuite) TestSemgrepYaml() {
@@ -99,7 +99,7 @@ func (s *SASTCheckTestSuite) TestSemgrepYaml() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Semgrep")
+	s.Contains(result.Reason, "Semgrep")
 }
 
 func (s *SASTCheckTestSuite) TestSemgrepDir() {
@@ -115,7 +115,7 @@ func (s *SASTCheckTestSuite) TestSemgrepDir() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Semgrep")
+	s.Contains(result.Reason, "Semgrep")
 }
 
 // The following tests check config detection and only run when semgrep is NOT installed
@@ -138,7 +138,7 @@ sonar.organization=myorg
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "SonarQube")
+	s.Contains(result.Reason, "SonarQube")
 }
 
 func (s *SASTCheckTestSuite) TestSonarCloudProperties() {
@@ -154,7 +154,7 @@ func (s *SASTCheckTestSuite) TestSonarCloudProperties() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SonarQube")
+	s.Contains(result.Reason, "SonarQube")
 }
 
 func (s *SASTCheckTestSuite) TestSonarInGradle() {
@@ -175,7 +175,7 @@ func (s *SASTCheckTestSuite) TestSonarInGradle() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SonarQube")
+	s.Contains(result.Reason, "SonarQube")
 }
 
 func (s *SASTCheckTestSuite) TestSonarInMaven() {
@@ -198,7 +198,7 @@ func (s *SASTCheckTestSuite) TestSonarInMaven() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "SonarQube")
+	s.Contains(result.Reason, "SonarQube")
 }
 
 func (s *SASTCheckTestSuite) TestSnykConfig() {
@@ -215,7 +215,7 @@ func (s *SASTCheckTestSuite) TestSnykConfig() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Snyk")
+	s.Contains(result.Reason, "Snyk")
 }
 
 func (s *SASTCheckTestSuite) TestSnykJson() {
@@ -231,7 +231,7 @@ func (s *SASTCheckTestSuite) TestSnykJson() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Snyk")
+	s.Contains(result.Reason, "Snyk")
 }
 
 func (s *SASTCheckTestSuite) TestCodeQLConfig() {
@@ -249,7 +249,7 @@ func (s *SASTCheckTestSuite) TestCodeQLConfig() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "CodeQL")
+	s.Contains(result.Reason, "CodeQL")
 }
 
 func (s *SASTCheckTestSuite) TestCodeQLWorkflow() {
@@ -278,7 +278,7 @@ jobs:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "CodeQL")
+	s.Contains(result.Reason, "CodeQL")
 }
 
 func (s *SASTCheckTestSuite) TestCodeQLWorkflowByContent() {
@@ -306,7 +306,7 @@ jobs:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "CodeQL")
+	s.Contains(result.Reason, "CodeQL")
 }
 
 func (s *SASTCheckTestSuite) TestCheckmarx() {
@@ -322,7 +322,7 @@ func (s *SASTCheckTestSuite) TestCheckmarx() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Checkmarx")
+	s.Contains(result.Reason, "Checkmarx")
 }
 
 func (s *SASTCheckTestSuite) TestVeracode() {
@@ -338,7 +338,7 @@ func (s *SASTCheckTestSuite) TestVeracode() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Veracode")
+	s.Contains(result.Reason, "Veracode")
 }
 
 func (s *SASTCheckTestSuite) TestFortify() {
@@ -354,7 +354,7 @@ func (s *SASTCheckTestSuite) TestFortify() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Fortify")
+	s.Contains(result.Reason, "Fortify")
 }
 
 func (s *SASTCheckTestSuite) TestBearer() {
@@ -370,7 +370,7 @@ func (s *SASTCheckTestSuite) TestBearer() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Bearer")
+	s.Contains(result.Reason, "Bearer")
 }
 
 func (s *SASTCheckTestSuite) TestHorusec() {
@@ -386,7 +386,7 @@ func (s *SASTCheckTestSuite) TestHorusec() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Horusec")
+	s.Contains(result.Reason, "Horusec")
 }
 
 func (s *SASTCheckTestSuite) TestGosecInMakefile() {
@@ -409,7 +409,7 @@ func (s *SASTCheckTestSuite) TestGosecInMakefile() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "gosec")
+	s.Contains(result.Reason, "gosec")
 }
 
 func (s *SASTCheckTestSuite) TestGosecInTaskfile() {
@@ -435,7 +435,7 @@ tasks:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "gosec")
+	s.Contains(result.Reason, "gosec")
 }
 
 func (s *SASTCheckTestSuite) TestBanditConfig() {
@@ -451,7 +451,7 @@ func (s *SASTCheckTestSuite) TestBanditConfig() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Bandit")
+	s.Contains(result.Reason, "Bandit")
 }
 
 func (s *SASTCheckTestSuite) TestBanditInPyproject() {
@@ -470,7 +470,7 @@ exclude_dirs = ["tests"]
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Bandit")
+	s.Contains(result.Reason, "Bandit")
 }
 
 func (s *SASTCheckTestSuite) TestSafetyPolicy() {
@@ -486,7 +486,7 @@ func (s *SASTCheckTestSuite) TestSafetyPolicy() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Safety")
+	s.Contains(result.Reason, "Safety")
 }
 
 func (s *SASTCheckTestSuite) TestEslintPluginSecurity() {
@@ -508,7 +508,7 @@ func (s *SASTCheckTestSuite) TestEslintPluginSecurity() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "eslint-plugin-security")
+	s.Contains(result.Reason, "eslint-plugin-security")
 }
 
 func (s *SASTCheckTestSuite) TestAuditCI() {
@@ -530,7 +530,7 @@ func (s *SASTCheckTestSuite) TestAuditCI() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "audit-ci")
+	s.Contains(result.Reason, "audit-ci")
 }
 
 func (s *SASTCheckTestSuite) TestFindSecBugs() {
@@ -566,7 +566,7 @@ func (s *SASTCheckTestSuite) TestFindSecBugs() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "FindSecBugs")
+	s.Contains(result.Reason, "FindSecBugs")
 }
 
 func (s *SASTCheckTestSuite) TestCISemgrep() {
@@ -594,7 +594,7 @@ jobs:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Semgrep")
+	s.Contains(result.Reason, "Semgrep")
 }
 
 func (s *SASTCheckTestSuite) TestCITrivy() {
@@ -622,7 +622,7 @@ jobs:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Trivy")
+	s.Contains(result.Reason, "Trivy")
 }
 
 func (s *SASTCheckTestSuite) TestGitLabSAST() {
@@ -644,7 +644,7 @@ sast:
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "GitLab SAST")
+	s.Contains(result.Reason, "GitLab SAST")
 }
 
 func (s *SASTCheckTestSuite) TestMultipleFindings() {
@@ -665,8 +665,8 @@ func (s *SASTCheckTestSuite) TestMultipleFindings() {
 
 	s.NoError(err)
 	s.True(result.Passed)
-	s.Contains(result.Message, "Semgrep")
-	s.Contains(result.Message, "Snyk")
+	s.Contains(result.Reason, "Semgrep")
+	s.Contains(result.Reason, "Snyk")
 }
 
 func (s *SASTCheckTestSuite) TestNoSASTTooling() {
@@ -680,7 +680,7 @@ func (s *SASTCheckTestSuite) TestNoSASTTooling() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No SAST tooling found")
+	s.Contains(result.Reason, "No SAST tooling found")
 }
 
 func (s *SASTCheckTestSuite) TestResultLanguage() {

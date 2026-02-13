@@ -47,7 +47,7 @@ func main() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No health endpoint pattern detected")
+	s.Contains(result.Reason, "No health endpoint pattern detected")
 }
 
 func (s *HealthCheckTestSuite) TestHealthEndpointGo() {
@@ -68,7 +68,7 @@ func main() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "/health")
+	s.Contains(result.Reason, "/health")
 }
 
 func (s *HealthCheckTestSuite) TestHealthzEndpoint() {
@@ -88,7 +88,7 @@ func setupRoutes() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "/readiness")
+	s.Contains(result.Reason, "/readiness")
 }
 
 func (s *HealthCheckTestSuite) TestReadinessEndpoint() {
@@ -109,7 +109,7 @@ def ready():
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "/ready")
+	s.Contains(result.Reason, "/ready")
 }
 
 func (s *HealthCheckTestSuite) TestHealthCheckFunction() {
@@ -128,7 +128,7 @@ func HealthCheck() error {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "HealthCheck")
+	s.Contains(result.Reason, "HealthCheck")
 }
 
 func (s *HealthCheckTestSuite) TestHealthCheckInPython() {
@@ -144,7 +144,7 @@ func (s *HealthCheckTestSuite) TestHealthCheckInPython() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "health_check")
+	s.Contains(result.Reason, "health_check")
 }
 
 func (s *HealthCheckTestSuite) TestHealthInTypeScript() {
@@ -165,7 +165,7 @@ app.get('/health', (req, res) => {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "/health")
+	s.Contains(result.Reason, "/health")
 }
 
 func (s *HealthCheckTestSuite) TestSkipsNodeModules() {

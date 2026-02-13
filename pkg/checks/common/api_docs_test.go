@@ -49,7 +49,7 @@ paths:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "openapi.yaml")
+	s.Contains(result.Reason, "openapi.yaml")
 }
 
 func (s *APIDocsCheckTestSuite) TestSwaggerJsonExists() {
@@ -69,7 +69,7 @@ func (s *APIDocsCheckTestSuite) TestSwaggerJsonExists() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "swagger.json")
+	s.Contains(result.Reason, "swagger.json")
 }
 
 func (s *APIDocsCheckTestSuite) TestOpenAPIInDocsDir() {
@@ -90,7 +90,7 @@ info:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "docs/openapi.yaml")
+	s.Contains(result.Reason, "docs/openapi.yaml")
 }
 
 func (s *APIDocsCheckTestSuite) TestAPIDocsDirectory() {
@@ -108,7 +108,7 @@ func (s *APIDocsCheckTestSuite) TestAPIDocsDirectory() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "api-docs/")
+	s.Contains(result.Reason, "api-docs/")
 }
 
 func (s *APIDocsCheckTestSuite) TestGoSwaggo() {
@@ -127,7 +127,7 @@ require github.com/swaggo/swag v1.16.0
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "swaggo")
+	s.Contains(result.Reason, "swaggo")
 }
 
 func (s *APIDocsCheckTestSuite) TestGoSwagger() {
@@ -146,7 +146,7 @@ require github.com/go-swagger/go-swagger v0.30.0
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "go-swagger")
+	s.Contains(result.Reason, "go-swagger")
 }
 
 func (s *APIDocsCheckTestSuite) TestPythonFastAPI() {
@@ -166,7 +166,7 @@ dependencies = [
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "FastAPI")
+	s.Contains(result.Reason, "FastAPI")
 }
 
 func (s *APIDocsCheckTestSuite) TestPythonDRFSpectacular() {
@@ -187,7 +187,7 @@ dependencies = [
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "drf-spectacular")
+	s.Contains(result.Reason, "drf-spectacular")
 }
 
 func (s *APIDocsCheckTestSuite) TestNodeSwaggerJsdoc() {
@@ -208,7 +208,7 @@ func (s *APIDocsCheckTestSuite) TestNodeSwaggerJsdoc() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "swagger-jsdoc")
+	s.Contains(result.Reason, "swagger-jsdoc")
 }
 
 func (s *APIDocsCheckTestSuite) TestNodeNestJSSwagger() {
@@ -228,7 +228,7 @@ func (s *APIDocsCheckTestSuite) TestNodeNestJSSwagger() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "@nestjs/swagger")
+	s.Contains(result.Reason, "@nestjs/swagger")
 }
 
 func (s *APIDocsCheckTestSuite) TestGraphQLSchema() {
@@ -252,7 +252,7 @@ type User {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "GraphQL schema")
+	s.Contains(result.Reason, "GraphQL schema")
 }
 
 func (s *APIDocsCheckTestSuite) TestProtocolBuffers() {
@@ -282,7 +282,7 @@ message User {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Protocol Buffers")
+	s.Contains(result.Reason, "Protocol Buffers")
 }
 
 func (s *APIDocsCheckTestSuite) TestProtoInSubdirectory() {
@@ -302,7 +302,7 @@ package myapp;
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Protocol Buffers")
+	s.Contains(result.Reason, "Protocol Buffers")
 }
 
 func (s *APIDocsCheckTestSuite) TestMultipleAPIDocs() {
@@ -325,8 +325,8 @@ info:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "openapi.yaml")
-	s.Contains(result.Message, "GraphQL schema")
+	s.Contains(result.Reason, "openapi.yaml")
+	s.Contains(result.Reason, "GraphQL schema")
 }
 
 func (s *APIDocsCheckTestSuite) TestNoAPIDocs() {
@@ -340,7 +340,7 @@ func (s *APIDocsCheckTestSuite) TestNoAPIDocs() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No API documentation found")
+	s.Contains(result.Reason, "No API documentation found")
 }
 
 func (s *APIDocsCheckTestSuite) TestEmptyDirectory() {
@@ -350,7 +350,7 @@ func (s *APIDocsCheckTestSuite) TestEmptyDirectory() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No API documentation found")
+	s.Contains(result.Reason, "No API documentation found")
 }
 
 func TestAPIDocsCheckTestSuite(t *testing.T) {

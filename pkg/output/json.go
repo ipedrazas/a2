@@ -17,6 +17,7 @@ type JSONResult struct {
 	Passed     bool   `json:"passed"`
 	Status     string `json:"status"`
 	Message    string `json:"message,omitempty"`
+	Reason     string `json:"reason,omitempty"`
 	Language   string `json:"language,omitempty"`
 	DurationMs int64  `json:"duration_ms"`          // Duration in milliseconds
 	RawOutput  string `json:"raw_output,omitempty"` // Full command output (with -v or -vv)
@@ -90,6 +91,7 @@ func JSON(result runner.SuiteResult, detected language.DetectionResult, verbosit
 			Passed:     r.Passed,
 			Status:     statusToString(r.Status),
 			Message:    r.Message,
+			Reason:     r.Reason,
 			Language:   string(r.Language),
 			DurationMs: r.Duration.Milliseconds(),
 		}

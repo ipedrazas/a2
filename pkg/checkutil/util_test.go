@@ -182,7 +182,8 @@ func (s *UtilTestSuite) TestResultBuilder_Pass() {
 	assert.Equal(s.T(), "go:build", result.ID)
 	assert.True(s.T(), result.Passed)
 	assert.Equal(s.T(), checker.Pass, result.Status)
-	assert.Equal(s.T(), "Build successful", result.Message)
+	assert.Equal(s.T(), "Check passed", result.Message)
+	assert.Equal(s.T(), "Build successful", result.Reason)
 	assert.Equal(s.T(), checker.LangGo, result.Language)
 }
 
@@ -196,7 +197,8 @@ func (s *UtilTestSuite) TestResultBuilder_Fail() {
 	assert.Equal(s.T(), "python:tests", result.ID)
 	assert.False(s.T(), result.Passed)
 	assert.Equal(s.T(), checker.Fail, result.Status)
-	assert.Equal(s.T(), "Tests failed: 3 errors", result.Message)
+	assert.Equal(s.T(), "Check failed", result.Message)
+	assert.Equal(s.T(), "Tests failed: 3 errors", result.Reason)
 	assert.Equal(s.T(), checker.LangPython, result.Language)
 }
 
@@ -210,7 +212,8 @@ func (s *UtilTestSuite) TestResultBuilder_Warn() {
 	assert.Equal(s.T(), "node:deps", result.ID)
 	assert.False(s.T(), result.Passed)
 	assert.Equal(s.T(), checker.Warn, result.Status)
-	assert.Equal(s.T(), "Outdated dependencies found", result.Message)
+	assert.Equal(s.T(), "Needs attention", result.Message)
+	assert.Equal(s.T(), "Outdated dependencies found", result.Reason)
 	assert.Equal(s.T(), checker.LangNode, result.Language)
 }
 
@@ -224,7 +227,8 @@ func (s *UtilTestSuite) TestResultBuilder_Info() {
 	assert.Equal(s.T(), "common:version", result.ID)
 	assert.True(s.T(), result.Passed) // Info doesn't affect pass/fail
 	assert.Equal(s.T(), checker.Info, result.Status)
-	assert.Equal(s.T(), "Version: 1.0.0", result.Message)
+	assert.Equal(s.T(), "Informational", result.Message)
+	assert.Equal(s.T(), "Version: 1.0.0", result.Reason)
 	assert.Equal(s.T(), checker.LangCommon, result.Language)
 }
 
@@ -238,7 +242,8 @@ func (s *UtilTestSuite) TestResultBuilder_ToolNotInstalled_WithHint() {
 	assert.Equal(s.T(), "go:deps", result.ID)
 	assert.True(s.T(), result.Passed) // Info doesn't affect pass/fail
 	assert.Equal(s.T(), checker.Info, result.Status)
-	assert.Equal(s.T(), "govulncheck not installed (go install golang.org/x/vuln/cmd/govulncheck@latest)", result.Message)
+	assert.Equal(s.T(), "Tool not installed", result.Message)
+	assert.Equal(s.T(), "govulncheck not installed (go install golang.org/x/vuln/cmd/govulncheck@latest)", result.Reason)
 	assert.Equal(s.T(), checker.LangGo, result.Language)
 }
 
@@ -252,7 +257,8 @@ func (s *UtilTestSuite) TestResultBuilder_ToolNotInstalled_WithoutHint() {
 	assert.Equal(s.T(), "python:lint", result.ID)
 	assert.True(s.T(), result.Passed)
 	assert.Equal(s.T(), checker.Info, result.Status)
-	assert.Equal(s.T(), "ruff not installed", result.Message)
+	assert.Equal(s.T(), "Tool not installed", result.Message)
+	assert.Equal(s.T(), "ruff not installed", result.Reason)
 	assert.Equal(s.T(), checker.LangPython, result.Language)
 }
 

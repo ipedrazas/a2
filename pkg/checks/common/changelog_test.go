@@ -52,8 +52,8 @@ func (s *ChangelogCheckTestSuite) TestChangelogMdExists() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "CHANGELOG.md")
-	s.Contains(result.Message, "Keep a Changelog")
+	s.Contains(result.Reason, "CHANGELOG.md")
+	s.Contains(result.Reason, "Keep a Changelog")
 }
 
 func (s *ChangelogCheckTestSuite) TestChangesFileExists() {
@@ -70,7 +70,7 @@ v1.0.0 - Initial release
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "CHANGES.md")
+	s.Contains(result.Reason, "CHANGES.md")
 }
 
 func (s *ChangelogCheckTestSuite) TestHistoryFileExists() {
@@ -88,7 +88,7 @@ func (s *ChangelogCheckTestSuite) TestHistoryFileExists() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "HISTORY.md")
+	s.Contains(result.Reason, "HISTORY.md")
 }
 
 func (s *ChangelogCheckTestSuite) TestNewsFileExists() {
@@ -104,7 +104,7 @@ func (s *ChangelogCheckTestSuite) TestNewsFileExists() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "NEWS")
+	s.Contains(result.Reason, "NEWS")
 }
 
 func (s *ChangelogCheckTestSuite) TestGoReleaserConfigured() {
@@ -121,7 +121,7 @@ builds:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "GoReleaser")
+	s.Contains(result.Reason, "GoReleaser")
 }
 
 func (s *ChangelogCheckTestSuite) TestSemanticReleaseConfigured() {
@@ -137,7 +137,7 @@ func (s *ChangelogCheckTestSuite) TestSemanticReleaseConfigured() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "semantic-release")
+	s.Contains(result.Reason, "semantic-release")
 }
 
 func (s *ChangelogCheckTestSuite) TestReleasePleaseConfigured() {
@@ -153,7 +153,7 @@ func (s *ChangelogCheckTestSuite) TestReleasePleaseConfigured() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "release-please")
+	s.Contains(result.Reason, "release-please")
 }
 
 func (s *ChangelogCheckTestSuite) TestChangesetsConfigured() {
@@ -173,7 +173,7 @@ func (s *ChangelogCheckTestSuite) TestChangesetsConfigured() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "changesets")
+	s.Contains(result.Reason, "changesets")
 }
 
 func (s *ChangelogCheckTestSuite) TestChangelogWithGoReleaser() {
@@ -196,8 +196,8 @@ func (s *ChangelogCheckTestSuite) TestChangelogWithGoReleaser() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "CHANGELOG.md")
-	s.Contains(result.Message, "GoReleaser")
+	s.Contains(result.Reason, "CHANGELOG.md")
+	s.Contains(result.Reason, "GoReleaser")
 }
 
 func (s *ChangelogCheckTestSuite) TestKeepAChangelogFormat() {
@@ -233,7 +233,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Keep a Changelog")
+	s.Contains(result.Reason, "Keep a Changelog")
 }
 
 func (s *ChangelogCheckTestSuite) TestConventionalChangelogFormat() {
@@ -266,7 +266,7 @@ func (s *ChangelogCheckTestSuite) TestConventionalChangelogFormat() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Conventional Changelog")
+	s.Contains(result.Reason, "Conventional Changelog")
 }
 
 func (s *ChangelogCheckTestSuite) TestPlainTextFormat() {
@@ -283,7 +283,7 @@ func (s *ChangelogCheckTestSuite) TestPlainTextFormat() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "plain text")
+	s.Contains(result.Reason, "plain text")
 }
 
 func (s *ChangelogCheckTestSuite) TestNoChangelog() {
@@ -297,7 +297,7 @@ func (s *ChangelogCheckTestSuite) TestNoChangelog() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No changelog found")
+	s.Contains(result.Reason, "No changelog found")
 }
 
 func (s *ChangelogCheckTestSuite) TestEmptyDirectory() {
@@ -307,7 +307,7 @@ func (s *ChangelogCheckTestSuite) TestEmptyDirectory() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No changelog found")
+	s.Contains(result.Reason, "No changelog found")
 }
 
 func (s *ChangelogCheckTestSuite) TestReleaseNotesFile() {
@@ -325,7 +325,7 @@ Initial release
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "RELEASE_NOTES.md")
+	s.Contains(result.Reason, "RELEASE_NOTES.md")
 }
 
 func (s *ChangelogCheckTestSuite) TestStandardVersionConfigured() {
@@ -344,7 +344,7 @@ func (s *ChangelogCheckTestSuite) TestStandardVersionConfigured() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "standard-version")
+	s.Contains(result.Reason, "standard-version")
 }
 
 func TestChangelogCheckTestSuite(t *testing.T) {

@@ -76,7 +76,7 @@ func main() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "All Go files are properly formatted")
+	suite.Contains(result.Reason, "All Go files are properly formatted")
 }
 
 // TestGofmtCheck_Run_UnformattedFiles tests that FormatCheck returns Warn when files need formatting.
@@ -96,9 +96,9 @@ fmt.Println("Hello, World")
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
-	suite.Contains(result.Message, "Unformatted files")
-	suite.Contains(result.Message, "main.go")
-	suite.Contains(result.Message, "Unformatted files: main.go. Run 'gofmt -w .' to fix.")
+	suite.Contains(result.Reason, "Unformatted files")
+	suite.Contains(result.Reason, "main.go")
+	suite.Contains(result.Reason, "Unformatted files: main.go. Run 'gofmt -w .' to fix.")
 }
 
 // TestGofmtCheck_Run_MultipleUnformattedFiles tests that FormatCheck lists all unformatted files.
@@ -125,10 +125,10 @@ fmt.Println("Helper")
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
-	suite.Contains(result.Message, "Unformatted files")
+	suite.Contains(result.Reason, "Unformatted files")
 	// Should mention both files
-	suite.Contains(result.Message, "main.go")
-	suite.Contains(result.Message, "utils.go")
+	suite.Contains(result.Reason, "main.go")
+	suite.Contains(result.Reason, "utils.go")
 }
 
 // TestGofmtCheck_Run_NoGoFiles tests that FormatCheck handles directories with no Go files.
@@ -184,9 +184,9 @@ fmt.Println("Helper")
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
 	// Should only mention the unformatted file
-	suite.Contains(result.Message, "utils.go")
+	suite.Contains(result.Reason, "utils.go")
 	// Should not mention the formatted file
-	suite.NotContains(result.Message, "main.go")
+	suite.NotContains(result.Reason, "main.go")
 }
 
 // TestGofmtCheck_Run_NestedDirectories tests that FormatCheck checks nested directories.
@@ -206,7 +206,7 @@ fmt.Println("Test")
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
-	suite.Contains(result.Message, "sub/helper.go")
+	suite.Contains(result.Reason, "sub/helper.go")
 }
 
 // TestGofmtTestSuite runs all the tests in the suite.

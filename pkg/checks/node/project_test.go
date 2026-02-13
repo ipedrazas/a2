@@ -46,7 +46,7 @@ func (suite *ProjectTestSuite) TestProjectCheck_Run_NoPackageJSON() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 	suite.Equal("node:project", result.ID)
 	suite.Equal("Node Project", result.Name)
 }
@@ -67,8 +67,8 @@ func (suite *ProjectTestSuite) TestProjectCheck_Run_ValidPackageJSON() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "test-package")
-	suite.Contains(result.Message, "1.0.0")
+	suite.Contains(result.Reason, "test-package")
+	suite.Contains(result.Reason, "1.0.0")
 }
 
 // TestProjectCheck_Run_InvalidJSON tests that ProjectCheck returns Fail when package.json is invalid JSON.
@@ -83,7 +83,7 @@ func (suite *ProjectTestSuite) TestProjectCheck_Run_InvalidJSON() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "invalid JSON")
+	suite.Contains(result.Reason, "invalid JSON")
 }
 
 // TestProjectCheck_Run_MissingName tests that ProjectCheck returns Fail when name field is missing.
@@ -100,7 +100,7 @@ func (suite *ProjectTestSuite) TestProjectCheck_Run_MissingName() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "missing required 'name' field")
+	suite.Contains(result.Reason, "missing required 'name' field")
 }
 
 // TestProjectCheck_Run_MissingVersion tests that ProjectCheck returns Warn when version field is missing.
@@ -117,7 +117,7 @@ func (suite *ProjectTestSuite) TestProjectCheck_Run_MissingVersion() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
-	suite.Contains(result.Message, "missing 'version' field")
+	suite.Contains(result.Reason, "missing 'version' field")
 }
 
 // TestProjectCheck_ID tests that ProjectCheck returns correct ID.
@@ -159,8 +159,8 @@ func (suite *ProjectTestSuite) TestProjectCheck_Run_ComplexPackageJSON() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "@scope/test-package")
-	suite.Contains(result.Message, "2.0.0-beta.1")
+	suite.Contains(result.Reason, "@scope/test-package")
+	suite.Contains(result.Reason, "2.0.0-beta.1")
 }
 
 // TestProjectCheck_Run_NonExistentPath tests that ProjectCheck handles non-existent paths.
@@ -172,7 +172,7 @@ func (suite *ProjectTestSuite) TestProjectCheck_Run_NonExistentPath() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 }
 
 // TestProjectTestSuite runs all the tests in the suite.

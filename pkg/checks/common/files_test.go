@@ -53,7 +53,7 @@ func (suite *FilesTestSuite) TestFileExistsCheck_Run_AllFilesExist() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Equal("All required files present", result.Message)
+	suite.Equal("All required files present", result.Reason)
 	suite.Equal("file_exists", result.ID)
 	suite.Equal("Required Files", result.Name)
 }
@@ -72,8 +72,8 @@ func (suite *FilesTestSuite) TestFileExistsCheck_Run_MissingFiles() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
-	suite.Contains(result.Message, "Missing files")
-	suite.Contains(result.Message, "LICENSE")
+	suite.Contains(result.Reason, "Missing files")
+	suite.Contains(result.Reason, "LICENSE")
 }
 
 // TestFileExistsCheck_Run_MultipleMissingFiles tests that FileExistsCheck handles multiple missing files.
@@ -87,10 +87,10 @@ func (suite *FilesTestSuite) TestFileExistsCheck_Run_MultipleMissingFiles() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
-	suite.Contains(result.Message, "Missing files")
-	suite.Contains(result.Message, "README.md")
-	suite.Contains(result.Message, "LICENSE")
-	suite.Contains(result.Message, "CONTRIBUTING.md")
+	suite.Contains(result.Reason, "Missing files")
+	suite.Contains(result.Reason, "README.md")
+	suite.Contains(result.Reason, "LICENSE")
+	suite.Contains(result.Reason, "CONTRIBUTING.md")
 }
 
 // TestFileExistsCheck_Run_EmptyFileList tests that FileExistsCheck handles empty file list.
@@ -104,7 +104,7 @@ func (suite *FilesTestSuite) TestFileExistsCheck_Run_EmptyFileList() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Equal("All required files present", result.Message)
+	suite.Equal("All required files present", result.Reason)
 }
 
 // TestFileExistsCheck_Run_NestedFiles tests that FileExistsCheck handles nested file paths.
@@ -164,9 +164,9 @@ func (suite *FilesTestSuite) TestFileExistsCheck_Run_PartialMatch() {
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
 	// Should mention missing files but not README.md
-	suite.Contains(result.Message, "LICENSE")
-	suite.Contains(result.Message, "CONTRIBUTING.md")
-	suite.NotContains(result.Message, "README.md")
+	suite.Contains(result.Reason, "LICENSE")
+	suite.Contains(result.Reason, "CONTRIBUTING.md")
+	suite.NotContains(result.Reason, "README.md")
 }
 
 // TestFilesTestSuite runs all the tests in the suite.

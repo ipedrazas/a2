@@ -108,7 +108,18 @@ func outputRunResultPretty(result checker.Result, meta checker.CheckMeta) {
 
 	// Print header
 	fmt.Printf("%s %s %s (%.1fs) - %s\n", symbol, statusLabel, result.Name, result.Duration.Seconds(), result.ID)
-	fmt.Printf("    %s\n", result.Message)
+	if result.Message != "" {
+		fmt.Printf("    %s\n", result.Message)
+	}
+	if result.Reason != "" {
+		if result.Reason != result.Message {
+			if result.Message != "" {
+				fmt.Printf("    Reason: %s\n", result.Reason)
+			} else {
+				fmt.Printf("    %s\n", result.Reason)
+			}
+		}
+	}
 
 	// Print suggestion if available and check didn't pass
 	if meta.Suggestion != "" && result.Status != checker.Pass {
@@ -129,6 +140,7 @@ func outputRunResultJSON(result checker.Result) {
 	fmt.Printf("  \"status\": %q,\n", result.Status.String())
 	fmt.Printf("  \"passed\": %t,\n", result.Passed)
 	fmt.Printf("  \"message\": %q,\n", result.Message)
+	fmt.Printf("  \"reason\": %q,\n", result.Reason)
 	fmt.Printf("  \"language\": %q,\n", result.Language)
 	fmt.Printf("  \"duration_ms\": %d", result.Duration.Milliseconds())
 	if result.RawOutput != "" {

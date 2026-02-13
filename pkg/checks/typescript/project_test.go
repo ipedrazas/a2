@@ -53,7 +53,7 @@ func (s *ProjectTestSuite) TestRun_NoTsConfig() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "No tsconfig.json found")
+	s.Contains(result.Reason, "No tsconfig.json found")
 }
 
 func (s *ProjectTestSuite) TestRun_BasicTsConfig() {
@@ -70,9 +70,9 @@ func (s *ProjectTestSuite) TestRun_BasicTsConfig() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "tsconfig.json")
-	s.Contains(result.Message, "ES2020")
-	s.Contains(result.Message, "strict mode")
+	s.Contains(result.Reason, "tsconfig.json")
+	s.Contains(result.Reason, "ES2020")
+	s.Contains(result.Reason, "strict mode")
 }
 
 func (s *ProjectTestSuite) TestRun_TsConfigWithPackageJson() {
@@ -94,7 +94,7 @@ func (s *ProjectTestSuite) TestRun_TsConfigWithPackageJson() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "TypeScript ^5.0.0")
+	s.Contains(result.Reason, "TypeScript ^5.0.0")
 }
 
 func (s *ProjectTestSuite) TestRun_TsConfigBase() {

@@ -46,7 +46,7 @@ receivers:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "OpenTelemetry Collector")
+	s.Contains(result.Reason, "OpenTelemetry Collector")
 }
 
 func (s *TracingCheckTestSuite) TestJaegerConfig() {
@@ -62,7 +62,7 @@ sampling:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Jaeger")
+	s.Contains(result.Reason, "Jaeger")
 }
 
 func (s *TracingCheckTestSuite) TestGoOpenTelemetry() {
@@ -83,7 +83,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "OpenTelemetry")
+	s.Contains(result.Reason, "OpenTelemetry")
 }
 
 func (s *TracingCheckTestSuite) TestGoJaeger() {
@@ -103,7 +103,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Jaeger")
+	s.Contains(result.Reason, "Jaeger")
 }
 
 func (s *TracingCheckTestSuite) TestGoDatadog() {
@@ -123,7 +123,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Datadog")
+	s.Contains(result.Reason, "Datadog")
 }
 
 func (s *TracingCheckTestSuite) TestGoZipkin() {
@@ -143,7 +143,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Zipkin")
+	s.Contains(result.Reason, "Zipkin")
 }
 
 func (s *TracingCheckTestSuite) TestNodeOpenTelemetry() {
@@ -163,7 +163,7 @@ func (s *TracingCheckTestSuite) TestNodeOpenTelemetry() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "OpenTelemetry")
+	s.Contains(result.Reason, "OpenTelemetry")
 }
 
 func (s *TracingCheckTestSuite) TestNodeDatadog() {
@@ -182,7 +182,7 @@ func (s *TracingCheckTestSuite) TestNodeDatadog() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Datadog")
+	s.Contains(result.Reason, "Datadog")
 }
 
 func (s *TracingCheckTestSuite) TestNodeSentry() {
@@ -201,7 +201,7 @@ func (s *TracingCheckTestSuite) TestNodeSentry() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Sentry")
+	s.Contains(result.Reason, "Sentry")
 }
 
 func (s *TracingCheckTestSuite) TestNodeElasticAPM() {
@@ -220,7 +220,7 @@ func (s *TracingCheckTestSuite) TestNodeElasticAPM() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Elastic APM")
+	s.Contains(result.Reason, "Elastic APM")
 }
 
 func (s *TracingCheckTestSuite) TestPythonOpenTelemetry() {
@@ -235,7 +235,7 @@ opentelemetry-instrumentation==0.42b0`
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "OpenTelemetry")
+	s.Contains(result.Reason, "OpenTelemetry")
 }
 
 func (s *TracingCheckTestSuite) TestPythonDatadog() {
@@ -249,7 +249,7 @@ func (s *TracingCheckTestSuite) TestPythonDatadog() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Datadog")
+	s.Contains(result.Reason, "Datadog")
 }
 
 func (s *TracingCheckTestSuite) TestPythonSentry() {
@@ -263,7 +263,7 @@ func (s *TracingCheckTestSuite) TestPythonSentry() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Sentry")
+	s.Contains(result.Reason, "Sentry")
 }
 
 func (s *TracingCheckTestSuite) TestJavaOpenTelemetry() {
@@ -280,7 +280,7 @@ func (s *TracingCheckTestSuite) TestJavaOpenTelemetry() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "OpenTelemetry")
+	s.Contains(result.Reason, "OpenTelemetry")
 }
 
 func (s *TracingCheckTestSuite) TestJavaSpringSleuth() {
@@ -297,7 +297,7 @@ func (s *TracingCheckTestSuite) TestJavaSpringSleuth() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Spring Sleuth")
+	s.Contains(result.Reason, "Spring Sleuth")
 }
 
 func (s *TracingCheckTestSuite) TestJavaMicrometer() {
@@ -311,7 +311,7 @@ func (s *TracingCheckTestSuite) TestJavaMicrometer() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Micrometer")
+	s.Contains(result.Reason, "Micrometer")
 }
 
 func (s *TracingCheckTestSuite) TestCITracing() {
@@ -335,7 +335,7 @@ jobs:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "CI tracing")
+	s.Contains(result.Reason, "CI tracing")
 }
 
 func (s *TracingCheckTestSuite) TestNoTracingFound() {
@@ -355,7 +355,7 @@ require (
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No distributed tracing found")
+	s.Contains(result.Reason, "No distributed tracing found")
 }
 
 func (s *TracingCheckTestSuite) TestEmptyDirectory() {
@@ -365,7 +365,7 @@ func (s *TracingCheckTestSuite) TestEmptyDirectory() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No distributed tracing found")
+	s.Contains(result.Reason, "No distributed tracing found")
 }
 
 func TestTracingCheckTestSuite(t *testing.T) {

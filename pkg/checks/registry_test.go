@@ -372,7 +372,7 @@ func main() { signal.Notify(make(chan os.Signal, 1), syscall.SIGTERM) }
 	result, err := shutdownCheck.Checker.Run(root)
 	suite.NoError(err)
 	suite.True(result.Passed, "common:shutdown should pass when Go signal handling is in source_dir")
-	suite.Contains(result.Message, "Go signal handling")
+	suite.Contains(result.Reason, "Go signal handling")
 }
 
 // TestRegistryTestSuite runs all the tests in the suite.

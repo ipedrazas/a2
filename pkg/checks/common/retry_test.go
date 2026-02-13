@@ -47,7 +47,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "backoff")
+	s.Contains(result.Reason, "backoff")
 }
 
 func (s *RetryCheckTestSuite) TestGoRetryGo() {
@@ -67,7 +67,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "retry-go")
+	s.Contains(result.Reason, "retry-go")
 }
 
 func (s *RetryCheckTestSuite) TestGoRetryableHttp() {
@@ -87,7 +87,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "go-retryablehttp")
+	s.Contains(result.Reason, "go-retryablehttp")
 }
 
 func (s *RetryCheckTestSuite) TestGoCircuitBreaker() {
@@ -107,7 +107,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "gobreaker")
+	s.Contains(result.Reason, "gobreaker")
 }
 
 func (s *RetryCheckTestSuite) TestGoHystrix() {
@@ -127,7 +127,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "hystrix-go")
+	s.Contains(result.Reason, "hystrix-go")
 }
 
 func (s *RetryCheckTestSuite) TestGoFailsafe() {
@@ -147,7 +147,7 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "failsafe-go")
+	s.Contains(result.Reason, "failsafe-go")
 }
 
 func (s *RetryCheckTestSuite) TestNodeAsyncRetry() {
@@ -166,7 +166,7 @@ func (s *RetryCheckTestSuite) TestNodeAsyncRetry() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "async-retry")
+	s.Contains(result.Reason, "async-retry")
 }
 
 func (s *RetryCheckTestSuite) TestNodeAxiosRetry() {
@@ -185,7 +185,7 @@ func (s *RetryCheckTestSuite) TestNodeAxiosRetry() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "axios-retry")
+	s.Contains(result.Reason, "axios-retry")
 }
 
 func (s *RetryCheckTestSuite) TestNodePRetry() {
@@ -204,7 +204,7 @@ func (s *RetryCheckTestSuite) TestNodePRetry() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "p-retry")
+	s.Contains(result.Reason, "p-retry")
 }
 
 func (s *RetryCheckTestSuite) TestNodeGot() {
@@ -223,7 +223,7 @@ func (s *RetryCheckTestSuite) TestNodeGot() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "got")
+	s.Contains(result.Reason, "got")
 }
 
 func (s *RetryCheckTestSuite) TestNodeCockatiel() {
@@ -242,7 +242,7 @@ func (s *RetryCheckTestSuite) TestNodeCockatiel() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Cockatiel")
+	s.Contains(result.Reason, "Cockatiel")
 }
 
 func (s *RetryCheckTestSuite) TestNodeOpossum() {
@@ -261,7 +261,7 @@ func (s *RetryCheckTestSuite) TestNodeOpossum() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Opossum")
+	s.Contains(result.Reason, "Opossum")
 }
 
 func (s *RetryCheckTestSuite) TestPythonTenacity() {
@@ -275,7 +275,7 @@ func (s *RetryCheckTestSuite) TestPythonTenacity() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Tenacity")
+	s.Contains(result.Reason, "Tenacity")
 }
 
 func (s *RetryCheckTestSuite) TestPythonBackoff() {
@@ -289,7 +289,7 @@ func (s *RetryCheckTestSuite) TestPythonBackoff() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "backoff")
+	s.Contains(result.Reason, "backoff")
 }
 
 func (s *RetryCheckTestSuite) TestPythonUrllib3() {
@@ -303,7 +303,7 @@ func (s *RetryCheckTestSuite) TestPythonUrllib3() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "urllib3")
+	s.Contains(result.Reason, "urllib3")
 }
 
 func (s *RetryCheckTestSuite) TestPythonCircuitBreaker() {
@@ -317,7 +317,7 @@ func (s *RetryCheckTestSuite) TestPythonCircuitBreaker() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "circuitbreaker")
+	s.Contains(result.Reason, "circuitbreaker")
 }
 
 func (s *RetryCheckTestSuite) TestJavaSpringRetry() {
@@ -334,7 +334,7 @@ func (s *RetryCheckTestSuite) TestJavaSpringRetry() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Spring Retry")
+	s.Contains(result.Reason, "Spring Retry")
 }
 
 func (s *RetryCheckTestSuite) TestJavaResilience4j() {
@@ -348,7 +348,7 @@ func (s *RetryCheckTestSuite) TestJavaResilience4j() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Resilience4j")
+	s.Contains(result.Reason, "Resilience4j")
 }
 
 func (s *RetryCheckTestSuite) TestJavaFailsafe() {
@@ -362,7 +362,7 @@ func (s *RetryCheckTestSuite) TestJavaFailsafe() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Failsafe")
+	s.Contains(result.Reason, "Failsafe")
 }
 
 func (s *RetryCheckTestSuite) TestRustBackoff() {
@@ -380,7 +380,7 @@ backoff = "0.4"`
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "backoff")
+	s.Contains(result.Reason, "backoff")
 }
 
 func (s *RetryCheckTestSuite) TestRustTokioRetry() {
@@ -398,7 +398,7 @@ tokio-retry = "0.3"`
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "tokio-retry")
+	s.Contains(result.Reason, "tokio-retry")
 }
 
 func (s *RetryCheckTestSuite) TestRustAgain() {
@@ -416,7 +416,7 @@ again = "0.1"`
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "again")
+	s.Contains(result.Reason, "again")
 }
 
 func (s *RetryCheckTestSuite) TestMultipleLibraries() {
@@ -437,8 +437,8 @@ require (
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "backoff")
-	s.Contains(result.Message, "gobreaker")
+	s.Contains(result.Reason, "backoff")
+	s.Contains(result.Reason, "gobreaker")
 }
 
 func (s *RetryCheckTestSuite) TestNoRetryLogicFound() {
@@ -458,7 +458,7 @@ require (
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No retry logic found")
+	s.Contains(result.Reason, "No retry logic found")
 }
 
 func (s *RetryCheckTestSuite) TestEmptyDirectory() {
@@ -468,7 +468,7 @@ func (s *RetryCheckTestSuite) TestEmptyDirectory() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No retry logic found")
+	s.Contains(result.Reason, "No retry logic found")
 }
 
 func TestRetryCheckTestSuite(t *testing.T) {

@@ -87,7 +87,7 @@ func main() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "No issues found")
+	suite.Contains(result.Reason, "No issues found")
 }
 
 // TestGoVetCheck_Run_WithIssues tests that GoVetCheck returns Warn when issues are found.
@@ -113,8 +113,8 @@ func main() {
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
 	// Should contain the vet output
-	suite.NotEmpty(result.Message)
-	suite.NotContains(result.Message, "No issues found")
+	suite.NotEmpty(result.Reason)
+	suite.NotContains(result.Reason, "No issues found")
 }
 
 // TestGoVetCheck_Run_EmptyDirectory tests that GoVetCheck handles empty directories.

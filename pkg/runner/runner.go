@@ -81,7 +81,8 @@ func runParallel(path string, registrations []checker.CheckRegistration, opts Ru
 						ID:      registration.Checker.ID(),
 						Passed:  false,
 						Status:  checker.Fail,
-						Message: formatPanicMessage(r),
+						Message: "Check panicked",
+						Reason:  formatPanicMessage(r),
 					}
 				}
 				// Update progress after check completes
@@ -185,7 +186,8 @@ func runCheckWithTimeout(path string, c checker.Checker, timeout time.Duration) 
 				ID:      c.ID(),
 				Passed:  false,
 				Status:  checker.Fail,
-				Message: "Internal error: " + err.Error(),
+				Message: "Internal error",
+				Reason:  "Internal error: " + err.Error(),
 			}
 		}
 		res.Duration = duration
@@ -212,7 +214,8 @@ func runCheckWithTimeout(path string, c checker.Checker, timeout time.Duration) 
 						ID:      c.ID(),
 						Passed:  false,
 						Status:  checker.Fail,
-						Message: formatPanicMessage(r),
+						Message: "Check panicked",
+						Reason:  formatPanicMessage(r),
 					},
 				}
 			}
@@ -230,7 +233,8 @@ func runCheckWithTimeout(path string, c checker.Checker, timeout time.Duration) 
 			ID:       c.ID(),
 			Passed:   false,
 			Status:   checker.Fail,
-			Message:  "Check timed out after " + timeout.String(),
+			Message:  "Check timed out",
+			Reason:   "Check timed out after " + timeout.String(),
 			Duration: duration,
 		}
 	case cr := <-resultCh:
@@ -242,7 +246,8 @@ func runCheckWithTimeout(path string, c checker.Checker, timeout time.Duration) 
 				ID:      c.ID(),
 				Passed:  false,
 				Status:  checker.Fail,
-				Message: "Internal error: " + cr.err.Error(),
+				Message: "Internal error",
+				Reason:  "Internal error: " + cr.err.Error(),
 			}
 		}
 		res.Duration = duration

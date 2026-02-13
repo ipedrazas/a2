@@ -47,7 +47,7 @@ func (suite *CoverageTestSuite) TestCoverageCheck_Run_NoPackageJSON() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 	suite.Equal("node:coverage", result.ID)
 	suite.Equal("Node Coverage", result.Name)
 }
@@ -67,8 +67,8 @@ func (suite *CoverageTestSuite) TestCoverageCheck_Run_NoTestScript() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
-	suite.Contains(result.Message, "No test script configured")
-	suite.Contains(result.Message, "0%")
+	suite.Contains(result.Reason, "No test script configured")
+	suite.Contains(result.Reason, "0%")
 }
 
 // TestCoverageCheck_Run_DefaultNoTestScript tests that CoverageCheck handles default "no test specified" script.
@@ -89,7 +89,7 @@ func (suite *CoverageTestSuite) TestCoverageCheck_Run_DefaultNoTestScript() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
-	suite.Contains(result.Message, "No test script configured")
+	suite.Contains(result.Reason, "No test script configured")
 }
 
 // TestCoverageCheck_ID tests that CoverageCheck returns correct ID.
@@ -236,7 +236,7 @@ func (suite *CoverageTestSuite) TestCoverageCheck_Run_NonExistentPath() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 }
 
 // TestCoverageTestSuite runs all the tests in the suite.

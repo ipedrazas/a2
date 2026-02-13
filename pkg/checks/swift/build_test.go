@@ -41,7 +41,7 @@ func (s *BuildTestSuite) TestRun_NoPackageSwift() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "No Package.swift found")
+	s.Contains(result.Reason, "No Package.swift found")
 }
 
 func (s *BuildTestSuite) TestRun_ResultLanguage() {

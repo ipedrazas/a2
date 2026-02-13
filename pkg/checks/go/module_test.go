@@ -48,7 +48,7 @@ func (suite *ModuleTestSuite) TestModuleCheck_Run_NoGoMod() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "go.mod not found")
+	suite.Contains(result.Reason, "go.mod not found")
 	suite.Equal("go:module", result.ID)
 	suite.Equal("Go Module", result.Name)
 }
@@ -72,8 +72,8 @@ require (
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "github.com/ipedrazas/a2")
-	suite.Contains(result.Message, "Go 1.21")
+	suite.Contains(result.Reason, "github.com/ipedrazas/a2")
+	suite.Contains(result.Reason, "Go 1.21")
 }
 
 // TestModuleCheck_Run_InvalidGoMod tests that ModuleCheck returns Fail when go.mod is invalid.
@@ -90,7 +90,7 @@ invalid syntax here
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "go.mod is invalid")
+	suite.Contains(result.Reason, "go.mod is invalid")
 }
 
 // TestModuleCheck_Run_NoGoVersion tests that ModuleCheck returns Warn when Go version is missing.
@@ -110,7 +110,7 @@ require (
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Warn, result.Status)
-	suite.Contains(result.Message, "does not specify a Go version")
+	suite.Contains(result.Reason, "does not specify a Go version")
 }
 
 // TestModuleCheck_Run_EmptyGoVersion tests that ModuleCheck handles empty Go version (treated as invalid).
@@ -133,7 +133,7 @@ require (
 	suite.False(result.Passed)
 	// Empty go directive is treated as invalid syntax, not missing version
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "go.mod is invalid")
+	suite.Contains(result.Reason, "go.mod is invalid")
 }
 
 // TestModuleCheck_ID tests that ModuleCheck returns correct ID.
@@ -172,7 +172,7 @@ require (
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "Go 1.21")
+	suite.Contains(result.Reason, "Go 1.21")
 }
 
 // TestModuleCheck_Run_FileReadError tests that ModuleCheck handles file read errors.
@@ -186,7 +186,7 @@ func (suite *ModuleTestSuite) TestModuleCheck_Run_FileReadError() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "go.mod not found")
+	suite.Contains(result.Reason, "go.mod not found")
 }
 
 // TestModuleTestSuite runs all the tests in the suite.

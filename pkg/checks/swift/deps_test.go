@@ -53,7 +53,7 @@ func (s *DepsTestSuite) TestRun_NoPackageSwift() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "No Package.swift found")
+	s.Contains(result.Reason, "No Package.swift found")
 }
 
 func (s *DepsTestSuite) TestRun_NoPackageResolved() {
@@ -67,7 +67,7 @@ let package = Package(name: "Test")
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Info, result.Status)
-	s.Contains(result.Message, "No Package.resolved")
+	s.Contains(result.Reason, "No Package.resolved")
 }
 
 func (s *DepsTestSuite) TestRun_EmptyDeps() {
@@ -85,7 +85,7 @@ let package = Package(name: "Test")
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "No dependencies")
+	s.Contains(result.Reason, "No dependencies")
 }
 
 func (s *DepsTestSuite) TestRun_WithDepsV2() {
@@ -106,7 +106,7 @@ let package = Package(name: "Test")
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "2 dependencies")
+	s.Contains(result.Reason, "2 dependencies")
 }
 
 func (s *DepsTestSuite) TestRun_WithDepsV1() {
@@ -128,7 +128,7 @@ let package = Package(name: "Test")
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "1 dependency")
+	s.Contains(result.Reason, "1 dependency")
 }
 
 func (s *DepsTestSuite) TestRun_InvalidJSON() {
@@ -143,7 +143,7 @@ let package = Package(name: "Test")
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "Cannot parse")
+	s.Contains(result.Reason, "Cannot parse")
 }
 
 func (s *DepsTestSuite) TestRun_ResultLanguage() {

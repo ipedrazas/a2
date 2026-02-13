@@ -87,7 +87,7 @@ func main() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "Build successful")
+	suite.Contains(result.Reason, "Build successful")
 	suite.Equal("go:build", result.ID)
 	suite.Equal("Go Build", result.Name)
 }
@@ -114,8 +114,8 @@ func main() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status) // Critical - should be Fail
-	suite.Contains(result.Message, "Build failed")
-	suite.NotEmpty(result.Message)
+	suite.Contains(result.Reason, "Build failed")
+	suite.NotEmpty(result.Reason)
 }
 
 // TestBuildCheck_Run_EmptyDirectory tests that BuildCheck handles empty directories.
@@ -186,7 +186,7 @@ func main() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "Build failed")
+	suite.Contains(result.Reason, "Build failed")
 }
 
 // TestBuildCheck_Run_StderrOutput tests that BuildCheck captures stderr output.
@@ -210,7 +210,7 @@ func main() {
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
 	// Should capture error message
-	suite.NotEmpty(result.Message)
+	suite.NotEmpty(result.Reason)
 }
 
 // TestBuildCheck_Run_StdoutFallback tests that BuildCheck falls back to stdout when stderr is empty.
@@ -233,7 +233,7 @@ func main() {
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
 	// Should have error message from either stderr or stdout
-	suite.NotEmpty(result.Message)
+	suite.NotEmpty(result.Reason)
 }
 
 // TestBuildCheck_Run_ComplexProject tests that BuildCheck handles complex projects.

@@ -45,7 +45,7 @@ func (s *IntegrationCheckTestSuite) TestIntegrationDirectory() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "tests/integration/")
+	s.Contains(result.Reason, "tests/integration/")
 }
 
 func (s *IntegrationCheckTestSuite) TestE2EDirectory() {
@@ -62,7 +62,7 @@ func (s *IntegrationCheckTestSuite) TestE2EDirectory() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "e2e/")
+	s.Contains(result.Reason, "e2e/")
 }
 
 func (s *IntegrationCheckTestSuite) TestIntegrationTestsDirectory() {
@@ -79,7 +79,7 @@ func (s *IntegrationCheckTestSuite) TestIntegrationTestsDirectory() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "integration_tests/")
+	s.Contains(result.Reason, "integration_tests/")
 }
 
 func (s *IntegrationCheckTestSuite) TestGoIntegrationTestFile() {
@@ -100,7 +100,7 @@ func TestIntegration_UserAPI(t *testing.T) {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Go integration tests")
+	s.Contains(result.Reason, "Go integration tests")
 }
 
 func (s *IntegrationCheckTestSuite) TestDockerComposeTest() {
@@ -122,7 +122,7 @@ services:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "docker-compose.test.yml")
+	s.Contains(result.Reason, "docker-compose.test.yml")
 }
 
 func (s *IntegrationCheckTestSuite) TestDockerComposeE2E() {
@@ -140,7 +140,7 @@ services:
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "docker-compose.e2e.yaml")
+	s.Contains(result.Reason, "docker-compose.e2e.yaml")
 }
 
 func (s *IntegrationCheckTestSuite) TestTestcontainersGo() {
@@ -159,7 +159,7 @@ require github.com/testcontainers/testcontainers-go v0.25.0
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "testcontainers")
+	s.Contains(result.Reason, "testcontainers")
 }
 
 func (s *IntegrationCheckTestSuite) TestTestcontainersPython() {
@@ -179,7 +179,7 @@ dependencies = [
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "testcontainers")
+	s.Contains(result.Reason, "testcontainers")
 }
 
 func (s *IntegrationCheckTestSuite) TestTestcontainersNode() {
@@ -199,7 +199,7 @@ func (s *IntegrationCheckTestSuite) TestTestcontainersNode() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "testcontainers")
+	s.Contains(result.Reason, "testcontainers")
 }
 
 func (s *IntegrationCheckTestSuite) TestCypressConfig() {
@@ -220,7 +220,7 @@ module.exports = defineConfig({
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Cypress")
+	s.Contains(result.Reason, "Cypress")
 }
 
 func (s *IntegrationCheckTestSuite) TestPlaywrightConfig() {
@@ -242,7 +242,7 @@ export default defineConfig({
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Playwright")
+	s.Contains(result.Reason, "Playwright")
 }
 
 func (s *IntegrationCheckTestSuite) TestWebdriverIOConfig() {
@@ -263,7 +263,7 @@ func (s *IntegrationCheckTestSuite) TestWebdriverIOConfig() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "WebdriverIO")
+	s.Contains(result.Reason, "WebdriverIO")
 }
 
 func (s *IntegrationCheckTestSuite) TestSeleniumInPackageJson() {
@@ -283,7 +283,7 @@ func (s *IntegrationCheckTestSuite) TestSeleniumInPackageJson() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Selenium")
+	s.Contains(result.Reason, "Selenium")
 }
 
 func (s *IntegrationCheckTestSuite) TestMultipleIntegrationIndicators() {
@@ -305,8 +305,8 @@ func (s *IntegrationCheckTestSuite) TestMultipleIntegrationIndicators() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "tests/integration/")
-	s.Contains(result.Message, "Cypress")
+	s.Contains(result.Reason, "tests/integration/")
+	s.Contains(result.Reason, "Cypress")
 }
 
 func (s *IntegrationCheckTestSuite) TestNoIntegrationTests() {
@@ -320,7 +320,7 @@ func (s *IntegrationCheckTestSuite) TestNoIntegrationTests() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No integration tests found")
+	s.Contains(result.Reason, "No integration tests found")
 }
 
 func (s *IntegrationCheckTestSuite) TestEmptyDirectory() {
@@ -330,7 +330,7 @@ func (s *IntegrationCheckTestSuite) TestEmptyDirectory() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No integration tests found")
+	s.Contains(result.Reason, "No integration tests found")
 }
 
 func TestIntegrationCheckTestSuite(t *testing.T) {

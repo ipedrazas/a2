@@ -46,7 +46,7 @@ module.exports = {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Cypress")
+	s.Contains(result.Reason, "Cypress")
 }
 
 func (s *E2ECheckTestSuite) TestCypressConfigTs() {
@@ -61,7 +61,7 @@ export default defineConfig({});
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Cypress")
+	s.Contains(result.Reason, "Cypress")
 }
 
 func (s *E2ECheckTestSuite) TestPlaywrightConfig() {
@@ -77,7 +77,7 @@ export default defineConfig({});
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Playwright")
+	s.Contains(result.Reason, "Playwright")
 }
 
 func (s *E2ECheckTestSuite) TestWebdriverIO() {
@@ -92,7 +92,7 @@ exports.config = {};
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "WebdriverIO")
+	s.Contains(result.Reason, "WebdriverIO")
 }
 
 func (s *E2ECheckTestSuite) TestNightwatch() {
@@ -107,7 +107,7 @@ module.exports = {};
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Nightwatch")
+	s.Contains(result.Reason, "Nightwatch")
 }
 
 func (s *E2ECheckTestSuite) TestTestCafe() {
@@ -124,7 +124,7 @@ func (s *E2ECheckTestSuite) TestTestCafe() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "TestCafe")
+	s.Contains(result.Reason, "TestCafe")
 }
 
 func (s *E2ECheckTestSuite) TestCodeceptJS() {
@@ -139,7 +139,7 @@ exports.config = {};
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "CodeceptJS")
+	s.Contains(result.Reason, "CodeceptJS")
 }
 
 func (s *E2ECheckTestSuite) TestDetox() {
@@ -156,7 +156,7 @@ func (s *E2ECheckTestSuite) TestDetox() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Detox")
+	s.Contains(result.Reason, "Detox")
 }
 
 func (s *E2ECheckTestSuite) TestE2EDirectory() {
@@ -175,7 +175,7 @@ describe('E2E', () => {});
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "e2e directory")
+	s.Contains(result.Reason, "e2e directory")
 }
 
 func (s *E2ECheckTestSuite) TestCypressDirectory() {
@@ -189,7 +189,7 @@ func (s *E2ECheckTestSuite) TestCypressDirectory() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "cypress directory")
+	s.Contains(result.Reason, "cypress directory")
 }
 
 func (s *E2ECheckTestSuite) TestPlaywrightDirectory() {
@@ -203,7 +203,7 @@ func (s *E2ECheckTestSuite) TestPlaywrightDirectory() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "playwright directory")
+	s.Contains(result.Reason, "playwright directory")
 }
 
 func (s *E2ECheckTestSuite) TestE2EDependencyInPackageJson() {
@@ -222,7 +222,7 @@ func (s *E2ECheckTestSuite) TestE2EDependencyInPackageJson() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Cypress")
+	s.Contains(result.Reason, "Cypress")
 }
 
 func (s *E2ECheckTestSuite) TestPlaywrightTestInPackageJson() {
@@ -241,7 +241,7 @@ func (s *E2ECheckTestSuite) TestPlaywrightTestInPackageJson() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Playwright")
+	s.Contains(result.Reason, "Playwright")
 }
 
 func (s *E2ECheckTestSuite) TestPuppeteerInPackageJson() {
@@ -260,7 +260,7 @@ func (s *E2ECheckTestSuite) TestPuppeteerInPackageJson() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Puppeteer")
+	s.Contains(result.Reason, "Puppeteer")
 }
 
 func (s *E2ECheckTestSuite) TestSeleniumInPackageJson() {
@@ -279,7 +279,7 @@ func (s *E2ECheckTestSuite) TestSeleniumInPackageJson() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Selenium")
+	s.Contains(result.Reason, "Selenium")
 }
 
 func (s *E2ECheckTestSuite) TestPythonSelenium() {
@@ -294,7 +294,7 @@ pytest==7.4.0`
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Selenium")
+	s.Contains(result.Reason, "Selenium")
 }
 
 func (s *E2ECheckTestSuite) TestPythonPlaywright() {
@@ -308,7 +308,7 @@ func (s *E2ECheckTestSuite) TestPythonPlaywright() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Playwright")
+	s.Contains(result.Reason, "Playwright")
 }
 
 func (s *E2ECheckTestSuite) TestPythonRobot() {
@@ -322,7 +322,7 @@ func (s *E2ECheckTestSuite) TestPythonRobot() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Robot")
+	s.Contains(result.Reason, "Robot")
 }
 
 func (s *E2ECheckTestSuite) TestBehave() {
@@ -338,7 +338,7 @@ format=pretty
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Behave")
+	s.Contains(result.Reason, "Behave")
 }
 
 func (s *E2ECheckTestSuite) TestCucumber() {
@@ -357,7 +357,7 @@ require 'cucumber'
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Cucumber")
+	s.Contains(result.Reason, "Cucumber")
 }
 
 func (s *E2ECheckTestSuite) TestNoE2EFound() {
@@ -373,7 +373,7 @@ func (s *E2ECheckTestSuite) TestNoE2EFound() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No E2E tests found")
+	s.Contains(result.Reason, "No E2E tests found")
 }
 
 func (s *E2ECheckTestSuite) TestEmptyDirectory() {
@@ -383,7 +383,7 @@ func (s *E2ECheckTestSuite) TestEmptyDirectory() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No E2E tests found")
+	s.Contains(result.Reason, "No E2E tests found")
 }
 
 func TestE2ECheckTestSuite(t *testing.T) {

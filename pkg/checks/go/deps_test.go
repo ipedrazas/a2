@@ -59,7 +59,7 @@ func (suite *DepsTestSuite) TestDepsCheck_Run_WithGovulncheck() {
 	suite.NotNil(result)
 	// Result depends on whether vulnerabilities are found
 	// But should always have a message
-	suite.NotEmpty(result.Message)
+	suite.NotEmpty(result.Reason)
 }
 
 // TestCountVulnerabilities_VulnerabilityPattern tests that countVulnerabilities finds "Vulnerability #" pattern.

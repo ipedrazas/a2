@@ -53,7 +53,7 @@ func (s *FormatTestSuite) TestRun_NoTsconfig() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Fail, result.Status)
-	s.Contains(result.Message, "No tsconfig.json found")
+	s.Contains(result.Reason, "No tsconfig.json found")
 }
 
 func (s *FormatTestSuite) TestRun_ResultLanguage() {

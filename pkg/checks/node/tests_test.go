@@ -47,7 +47,7 @@ func (suite *TestsCheckTestSuite) TestTestsCheck_Run_NoPackageJSON() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 	suite.Equal("node:tests", result.ID)
 	suite.Equal("Node Tests", result.Name)
 }
@@ -67,7 +67,7 @@ func (suite *TestsCheckTestSuite) TestTestsCheck_Run_NoTestScript() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "No test script defined")
+	suite.Contains(result.Reason, "No test script defined")
 }
 
 // TestTestsCheck_Run_DefaultNoTestScript tests that TestsCheck handles default "no test specified" script.
@@ -88,7 +88,7 @@ func (suite *TestsCheckTestSuite) TestTestsCheck_Run_DefaultNoTestScript() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Message, "No tests configured")
+	suite.Contains(result.Reason, "No tests configured")
 }
 
 // TestTestsCheck_ID tests that TestsCheck returns correct ID.
@@ -193,7 +193,7 @@ func (suite *TestsCheckTestSuite) TestTestsCheck_Run_NonExistentPath() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Message, "package.json not found")
+	suite.Contains(result.Reason, "package.json not found")
 }
 
 // TestTestsCheck_DetectPackageManager_NPM tests npm detection (default).

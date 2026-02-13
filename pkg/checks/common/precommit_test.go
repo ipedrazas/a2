@@ -47,7 +47,7 @@ func (s *PrecommitCheckTestSuite) TestPreCommitConfigYaml() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "pre-commit")
+	s.Contains(result.Reason, "pre-commit")
 }
 
 func (s *PrecommitCheckTestSuite) TestPreCommitConfigYml() {
@@ -66,7 +66,7 @@ func (s *PrecommitCheckTestSuite) TestPreCommitConfigYml() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "pre-commit")
+	s.Contains(result.Reason, "pre-commit")
 }
 
 func (s *PrecommitCheckTestSuite) TestHuskyDirectory() {
@@ -87,7 +87,7 @@ npm run lint
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Husky")
+	s.Contains(result.Reason, "Husky")
 }
 
 func (s *PrecommitCheckTestSuite) TestHuskyInPackageJson() {
@@ -107,7 +107,7 @@ func (s *PrecommitCheckTestSuite) TestHuskyInPackageJson() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Husky")
+	s.Contains(result.Reason, "Husky")
 }
 
 func (s *PrecommitCheckTestSuite) TestHuskyConfigInPackageJson() {
@@ -129,7 +129,7 @@ func (s *PrecommitCheckTestSuite) TestHuskyConfigInPackageJson() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Husky")
+	s.Contains(result.Reason, "Husky")
 }
 
 func (s *PrecommitCheckTestSuite) TestLefthookYml() {
@@ -147,7 +147,7 @@ func (s *PrecommitCheckTestSuite) TestLefthookYml() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Lefthook")
+	s.Contains(result.Reason, "Lefthook")
 }
 
 func (s *PrecommitCheckTestSuite) TestLefthookYaml() {
@@ -165,7 +165,7 @@ func (s *PrecommitCheckTestSuite) TestLefthookYaml() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Lefthook")
+	s.Contains(result.Reason, "Lefthook")
 }
 
 func (s *PrecommitCheckTestSuite) TestOvercommit() {
@@ -182,7 +182,7 @@ func (s *PrecommitCheckTestSuite) TestOvercommit() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Overcommit")
+	s.Contains(result.Reason, "Overcommit")
 }
 
 func (s *PrecommitCheckTestSuite) TestCommitlintConfigJs() {
@@ -198,7 +198,7 @@ func (s *PrecommitCheckTestSuite) TestCommitlintConfigJs() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "commitlint")
+	s.Contains(result.Reason, "commitlint")
 }
 
 func (s *PrecommitCheckTestSuite) TestCommitlintRc() {
@@ -214,7 +214,7 @@ func (s *PrecommitCheckTestSuite) TestCommitlintRc() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "commitlint")
+	s.Contains(result.Reason, "commitlint")
 }
 
 func (s *PrecommitCheckTestSuite) TestCommitlintInPackageJson() {
@@ -234,7 +234,7 @@ func (s *PrecommitCheckTestSuite) TestCommitlintInPackageJson() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "commitlint")
+	s.Contains(result.Reason, "commitlint")
 }
 
 func (s *PrecommitCheckTestSuite) TestLintStagedConfigJs() {
@@ -250,7 +250,7 @@ func (s *PrecommitCheckTestSuite) TestLintStagedConfigJs() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "lint-staged")
+	s.Contains(result.Reason, "lint-staged")
 }
 
 func (s *PrecommitCheckTestSuite) TestLintStagedInPackageJson() {
@@ -270,7 +270,7 @@ func (s *PrecommitCheckTestSuite) TestLintStagedInPackageJson() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "lint-staged")
+	s.Contains(result.Reason, "lint-staged")
 }
 
 func (s *PrecommitCheckTestSuite) TestGitHooksDirectory() {
@@ -292,7 +292,7 @@ echo "Running pre-commit hook"
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "git hooks")
+	s.Contains(result.Reason, "git hooks")
 }
 
 func (s *PrecommitCheckTestSuite) TestGitHooksSampleIgnored() {
@@ -313,7 +313,7 @@ echo "Sample hook"
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No pre-commit hooks configured")
+	s.Contains(result.Reason, "No pre-commit hooks configured")
 }
 
 func (s *PrecommitCheckTestSuite) TestMultipleTools() {
@@ -338,8 +338,8 @@ func (s *PrecommitCheckTestSuite) TestMultipleTools() {
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "pre-commit")
-	s.Contains(result.Message, "commitlint")
+	s.Contains(result.Reason, "pre-commit")
+	s.Contains(result.Reason, "commitlint")
 }
 
 func (s *PrecommitCheckTestSuite) TestNoPrecommitHooks() {
@@ -353,7 +353,7 @@ func (s *PrecommitCheckTestSuite) TestNoPrecommitHooks() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No pre-commit hooks configured")
+	s.Contains(result.Reason, "No pre-commit hooks configured")
 }
 
 func (s *PrecommitCheckTestSuite) TestEmptyDirectory() {
@@ -363,7 +363,7 @@ func (s *PrecommitCheckTestSuite) TestEmptyDirectory() {
 	s.NoError(err)
 	s.False(result.Passed)
 	s.Equal(checker.Warn, result.Status)
-	s.Contains(result.Message, "No pre-commit hooks configured")
+	s.Contains(result.Reason, "No pre-commit hooks configured")
 }
 
 func (s *PrecommitCheckTestSuite) TestHuskyWithCommitMsg() {
@@ -384,7 +384,7 @@ npx --no-install commitlint --edit "$1"
 	s.NoError(err)
 	s.True(result.Passed)
 	s.Equal(checker.Pass, result.Status)
-	s.Contains(result.Message, "Husky")
+	s.Contains(result.Reason, "Husky")
 }
 
 func TestPrecommitCheckTestSuite(t *testing.T) {
