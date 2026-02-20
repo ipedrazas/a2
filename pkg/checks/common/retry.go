@@ -1,6 +1,7 @@
 package common
 
 import (
+	"path/filepath"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -139,9 +140,92 @@ func (c *RetryCheck) Run(path string) (checker.Result, error) {
 		}
 	}
 
+	// If no library found, scan source code for custom retry implementations
+	if len(found) == 0 {
+		if c.hasCustomRetryCode(path) {
+			found = append(found, "custom implementation")
+		}
+	}
+
 	// Build result
 	if len(found) > 0 {
 		return rb.Pass("Retry/resilience: " + strings.Join(found, ", ")), nil
 	}
 	return rb.Warn("No retry logic found (consider adding for external calls)"), nil
+}
+
+// retryCodePatterns are code-level indicators of custom retry logic.
+var retryCodePatterns = []string{
+	"withRetry",
+	"retryWithBackoff",
+	"retryRequest",
+	"retryable",
+	"maxRetries",
+	"max_retries",
+	"retryCount",
+	"retry_count",
+	"retryDelay",
+	"retry_delay",
+	"backoffMs",
+	"backoff_ms",
+	"exponentialBackoff",
+	"exponential_backoff",
+	"@Retryable",
+	"@retry",
+}
+
+func (c *RetryCheck) hasCustomRetryCode(path string) bool {
+	// Scan source files across all ecosystems
+	filePatterns := []string{
+		// Go
+		"*.go", "cmd/*.go", "cmd/*/*.go", "internal/*.go", "internal/*/*.go", "pkg/*.go", "pkg/*/*.go",
+		// Node/TS
+		"*.js", "*.ts", "src/*.js", "src/*.ts", "src/*/*.js", "src/*/*.ts", "src/*/*/*.js", "src/*/*/*.ts",
+		"lib/*.js", "lib/*.ts", "lib/*/*.js", "lib/*/*.ts",
+		// Python
+		"*.py", "src/*.py", "src/*/*.py", "app/*.py", "app/*/*.py",
+		// Java
+		"src/main/java/*.java", "src/main/java/*/*.java", "src/main/java/*/*/*.java",
+		"src/main/java/*/*/*/*.java", "src/main/java/*/*/*/*/*.java",
+		// Rust
+		"src/*.rs", "src/*/*.rs",
+	}
+
+	for _, pattern := range filePatterns {
+		files, err := safepath.Glob(path, pattern)
+		if err != nil {
+			continue
+		}
+		for _, file := range files {
+			baseName := filepath.Base(file)
+
+			// Skip test files, vendored code, node_modules
+			if strings.Contains(baseName, "test") || strings.Contains(baseName, "spec") ||
+				strings.Contains(file, "node_modules") || strings.Contains(file, "vendor") ||
+				strings.Contains(file, "venv") {
+				continue
+			}
+
+			// Strong signal: file named retry or backoff
+			nameNoExt := strings.TrimSuffix(baseName, filepath.Ext(baseName))
+			if nameNoExt == "retry" || nameNoExt == "backoff" ||
+				nameNoExt == "retrier" || nameNoExt == "retry_utils" || nameNoExt == "retryUtils" {
+				return true
+			}
+
+			// Scan file contents for retry patterns
+			content, err := safepath.ReadFileAbs(file)
+			if err != nil {
+				continue
+			}
+			text := string(content)
+			for _, p := range retryCodePatterns {
+				if strings.Contains(text, p) {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
 }

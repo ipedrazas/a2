@@ -471,6 +471,93 @@ func (s *RetryCheckTestSuite) TestEmptyDirectory() {
 	s.Contains(result.Reason, "No retry logic found")
 }
 
+func (s *RetryCheckTestSuite) TestCustomRetry_FileNamedRetry() {
+	// A file named retry.ts in src/utils/ should be detected
+	err := os.MkdirAll(filepath.Join(s.tempDir, "src", "utils"), 0755)
+	s.Require().NoError(err)
+
+	content := `export async function withRetry<T>(fn: () => Promise<T>, retries = 3): Promise<T> {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try { return await fn(); } catch (err) { if (attempt === retries) throw err; }
+  }
+  throw new Error('Unreachable');
+}`
+	err = os.WriteFile(filepath.Join(s.tempDir, "src", "utils", "retry.ts"), []byte(content), 0644)
+	s.Require().NoError(err)
+
+	check := &RetryCheck{}
+	result, err := check.Run(s.tempDir)
+
+	s.NoError(err)
+	s.True(result.Passed)
+	s.Equal(checker.Pass, result.Status)
+	s.Contains(result.Reason, "custom implementation")
+}
+
+func (s *RetryCheckTestSuite) TestCustomRetry_CodePattern() {
+	// A Go file with retry patterns should be detected
+	err := os.MkdirAll(filepath.Join(s.tempDir, "pkg", "http"), 0755)
+	s.Require().NoError(err)
+
+	content := `package http
+
+func doRequest(url string) error {
+	maxRetries := 3
+	for i := 0; i < maxRetries; i++ {
+		// attempt request
+	}
+	return nil
+}`
+	err = os.WriteFile(filepath.Join(s.tempDir, "pkg", "http", "client.go"), []byte(content), 0644)
+	s.Require().NoError(err)
+
+	check := &RetryCheck{}
+	result, err := check.Run(s.tempDir)
+
+	s.NoError(err)
+	s.True(result.Passed)
+	s.Equal(checker.Pass, result.Status)
+	s.Contains(result.Reason, "custom implementation")
+}
+
+func (s *RetryCheckTestSuite) TestCustomRetry_TestFilesIgnored() {
+	// Retry patterns in test files should NOT count
+	err := os.MkdirAll(filepath.Join(s.tempDir, "src"), 0755)
+	s.Require().NoError(err)
+
+	content := `describe('withRetry', () => { it('retries maxRetries times', () => {}); });`
+	err = os.WriteFile(filepath.Join(s.tempDir, "src", "retry.test.ts"), []byte(content), 0644)
+	s.Require().NoError(err)
+
+	check := &RetryCheck{}
+	result, err := check.Run(s.tempDir)
+
+	s.NoError(err)
+	s.False(result.Passed)
+	s.Equal(checker.Warn, result.Status)
+}
+
+func (s *RetryCheckTestSuite) TestCustomRetry_LibraryTakesPrecedence() {
+	// When a library is found, it should be reported instead of "custom implementation"
+	pkgJSON := `{"name": "my-app", "dependencies": {"p-retry": "^6.0.0"}}`
+	err := os.WriteFile(filepath.Join(s.tempDir, "package.json"), []byte(pkgJSON), 0644)
+	s.Require().NoError(err)
+
+	err = os.MkdirAll(filepath.Join(s.tempDir, "src", "utils"), 0755)
+	s.Require().NoError(err)
+	retryCode := `export function withRetry() { /* uses p-retry internally */ }`
+	err = os.WriteFile(filepath.Join(s.tempDir, "src", "utils", "retry.ts"), []byte(retryCode), 0644)
+	s.Require().NoError(err)
+
+	check := &RetryCheck{}
+	result, err := check.Run(s.tempDir)
+
+	s.NoError(err)
+	s.True(result.Passed)
+	s.Contains(result.Reason, "p-retry")
+	s.NotContains(result.Reason, "custom implementation")
+}
+
 func TestRetryCheckTestSuite(t *testing.T) {
 	suite.Run(t, new(RetryCheckTestSuite))
 }
