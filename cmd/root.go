@@ -29,6 +29,7 @@ var (
 	timeout       time.Duration // Timeout for each individual check
 	verbosity     int           // Verbosity level (0=normal, 1=failures, 2=all)
 	failFast      bool          // Cancel remaining checks on first critical failure (parallel mode)
+	dryRun        bool          // List checks without running them
 )
 
 var rootCmd = &cobra.Command{
@@ -118,6 +119,7 @@ func init() {
 	checkCmd.Flags().DurationVar(&timeout, "timeout", 0, "Timeout for each individual check (e.g., 30s, 1m). 0 means no timeout")
 	checkCmd.Flags().CountVarP(&verbosity, "verbose", "v", "Increase verbosity (-v for failures, -vv for all)")
 	checkCmd.Flags().BoolVar(&failFast, "fail-fast", false, "Cancel remaining checks on first critical failure (parallel mode only)")
+	checkCmd.Flags().BoolVar(&dryRun, "dry-run", false, "List checks without running them")
 	rootCmd.AddCommand(checkCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(profilesCmd)
@@ -217,6 +219,11 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	// Get the list of checks to run
 	registrations := checks.GetChecks(cfg, detected)
 	skipped := buildSkippedChecks(cfg, detected, registrations, baseDisabled, targetDisabled, profileDisabled, skippedChecks, target, profile)
+
+	if dryRun {
+		output.DryRun(registrations, detected, skipped)
+		return nil
+	}
 
 	// Set up progress callback for Pretty format only
 	var progress *output.ProgressReporter
