@@ -21,11 +21,11 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 	var result *checkutil.CommandResult
 	var cmdDesc string
 
-	if checkutil.ToolAvailable("pip-audit") {
-		result = checkutil.RunCommand(path, "pip-audit")
+	if pythonToolAvailable(path, "pip-audit") {
+		result = runPythonCommand(path, "pip-audit")
 		cmdDesc = "pip-audit"
-	} else if checkutil.ToolAvailable("safety") {
-		result = checkutil.RunCommand(path, "safety", "check")
+	} else if pythonToolAvailable(path, "safety") {
+		result = runPythonCommand(path, "safety", "check")
 		cmdDesc = "safety"
 	} else {
 		return rb.Pass("No vulnerability scanner installed (install pip-audit or safety)"), nil

@@ -50,12 +50,12 @@ func (c *ComplexityCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Check if radon is installed
-	if !checkutil.ToolAvailable("radon") {
+	if !pythonToolAvailable(path, "radon") {
 		return rb.ToolNotInstalled("radon", "pip install radon"), nil
 	}
 
 	// Run radon cc with show-complexity flag
-	result := checkutil.RunCommand(path, "radon", "cc", "-s", ".")
+	result := runPythonCommand(path, "radon", "cc", "-s", ".")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

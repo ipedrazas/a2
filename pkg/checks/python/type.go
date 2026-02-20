@@ -29,12 +29,12 @@ func (c *TypeCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Check if mypy is installed
-	if !checkutil.ToolAvailable("mypy") {
+	if !pythonToolAvailable(path, "mypy") {
 		return rb.ToolNotInstalled("mypy", "pip install mypy"), nil
 	}
 
 	// Run mypy
-	result := checkutil.RunCommand(path, "mypy", ".", "--ignore-missing-imports")
+	result := runPythonCommand(path, "mypy", ".", "--ignore-missing-imports")
 	output := result.CombinedOutput()
 
 	if !result.Success() {
