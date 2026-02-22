@@ -62,7 +62,7 @@ jobs:
           sha256sum a2-* > checksums.txt
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.4.2
         with:
           tag_name: ${{ inputs.version }}
           name: Release ${{ inputs.version }}
