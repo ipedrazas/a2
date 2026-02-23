@@ -127,11 +127,11 @@ func main() {
 	suite.NoError(err)
 	suite.True(result.Passed)
 	suite.Equal(checker.Pass, result.Status)
-	suite.Contains(result.Reason, "No path traversal")
+	suite.Contains(result.Reason, "No unsafe file writes")
 }
 
-// TestFileSystemCheck_Run_PathTraversal tests detection of path traversal.
-func (suite *SecurityTestSuite) TestFileSystemCheck_Run_PathTraversal() {
+// TestFileSystemCheck_Run_SystemDirectoryWrite tests detection of writes to system directories.
+func (suite *SecurityTestSuite) TestFileSystemCheck_Run_SystemDirectoryWrite() {
 	suite.createTempFile("main.go", `package main
 
 import (
@@ -140,8 +140,8 @@ import (
 )
 
 func main() {
-	data, _ := ioutil.ReadFile("../../../etc/passwd")
-	fmt.Println(data)
+	_ = ioutil.WriteFile("/etc/passwd", []byte("data"), 0644)
+	fmt.Println("done")
 }
 `)
 
@@ -151,7 +151,7 @@ func main() {
 	suite.NoError(err)
 	suite.False(result.Passed)
 	suite.Equal(checker.Fail, result.Status)
-	suite.Contains(result.Reason, "Path traversal")
+	suite.Contains(result.Reason, "system directory")
 }
 
 // TestFileSystemCheck_Run_AllowlistByLine tests allowlist rule by file:line.
@@ -161,8 +161,8 @@ func (suite *SecurityTestSuite) TestFileSystemCheck_Run_AllowlistByLine() {
 import "os"
 
 func main() {
-	path := "some"
-	os.ReadDir(path)
+	path := "output.txt"
+	os.WriteFile(path, []byte("test"), 0644)
 }
 `)
 
@@ -183,13 +183,13 @@ func (suite *SecurityTestSuite) TestFileSystemCheck_Run_AllowlistByMatch() {
 import "os"
 
 func main() {
-	path := "some"
-	os.ReadDir(path)
+	path := "output.txt"
+	os.WriteFile(path, []byte("test"), 0644)
 }
 `)
 
 	check := &FileSystemCheck{
-		Allowlist: []string{"main.go:os.ReadDir(path)"},
+		Allowlist: []string{"main.go:os.WriteFile(path"},
 	}
 	result, err := check.Run(suite.tempDir)
 
@@ -209,8 +209,8 @@ import (
 
 func main() {
 	root := "repo"
-	safePath, _ := safepath.SafeJoin(root, "charts")
-	os.ReadDir(safePath)
+	safePath, _ := safepath.SafeJoin(root, "output.txt")
+	os.WriteFile(safePath, []byte("data"), 0644)
 }
 `)
 

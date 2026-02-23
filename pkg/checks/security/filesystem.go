@@ -61,7 +61,6 @@ func (c *FileSystemCheck) Name() string {
 func (c *FileSystemCheck) Run(path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
-	// Initialize patterns if not already done
 	if c.Patterns == nil {
 		c.Patterns = c.getPatterns()
 	}
@@ -69,155 +68,140 @@ func (c *FileSystemCheck) Run(path string) (checker.Result, error) {
 		c.allowRules = c.compileAllowRules()
 	}
 
-	// Scan all source files
 	findings := c.scanDirectory(path)
 
 	if len(findings) == 0 {
-		return rb.Pass("No path traversal or unsafe file operations detected"), nil
+		return rb.Pass("No unsafe file writes or system directory access detected"), nil
 	}
 
-	// Format findings into message
 	msg := c.formatFindings(findings)
 	return rb.Fail(msg), nil
 }
 
 // getPatterns returns language-specific patterns for detecting file system abuse.
+// Focus: write operations to unexpected/system directories, path traversal.
+// Excluded: ENV VAR usage (users consider this safe for config paths).
 func (c *FileSystemCheck) getPatterns() map[string][]*regexp.Regexp {
 	patterns := make(map[string][]*regexp.Regexp)
 
-	// Go patterns
+	// Go patterns - focus on write operations and system directory access
 	patterns["go"] = []*regexp.Regexp{
-		// File operations with variables
-		regexp.MustCompile(`ioutil\.(ReadFile|WriteFile)\s*\(\s*[a-zA-Z_]\w*\s*[\+,]`),
-		regexp.MustCompile(`os\.(Open|OpenFile|ReadFile|WriteFile)\s*\(\s*[a-zA-Z_]\w*\s*[\+,]`),
-		regexp.MustCompile(`os\.(ReadDir|ReadFile)\s*\(\s*[a-zA-Z_]\w*\s*\)`),
-		regexp.MustCompile(`filepath\.Join\s*\(\s*[a-zA-Z_]\w*\s*,\s*[a-zA-Z_]\w*\s*\)`), // Multiple variables
-		// Path traversal patterns
-		regexp.MustCompile(`\.\.\/`),                                 // Parent directory reference
-		regexp.MustCompile(`~\/`),                                    // Home directory reference
-		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root)`), // System directories
-		regexp.MustCompile(`os\.Getenv\s*\(\s*[\"']`),                // Environment variable usage
-		regexp.MustCompile(`filepath\.Abs\s*\(\s*[a-zA-Z_]\w*\s*\)`), // Absolute path from variable
+		// Write operations
+		regexp.MustCompile(`ioutil\.WriteFile\s*\(\s*[a-zA-Z_]\w*\s*[\+,]`),
+		regexp.MustCompile(`os\.WriteFile\s*\(\s*[a-zA-Z_]\w*\s*[\+,]`),
+		regexp.MustCompile(`os\.Create\s*\(\s*[a-zA-Z_]\w*\s*\)`),
+		regexp.MustCompile(`os\.OpenFile\s*\(\s*[a-zA-Z_]\w*\s*,\s*os\.O_WRONLY|os\.O_RDWR|os\.O_CREATE`),
+		// System directory writes (hardcoded paths)
+		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root|sys|proc)`),
 	}
 
-	// Python patterns
+	// Python patterns - focus on write operations and system directory access
 	patterns["python"] = []*regexp.Regexp{
-		// File operations with user input
-		regexp.MustCompile(`open\s*\(\s*[a-zA-Z_]\w*\s*[,+]`),
-		regexp.MustCompile(`pathlib\.Path\s*\(\s*[a-zA-Z_]\w*\s*\)`),
-		regexp.MustCompile(`Path\s*\(\s*[a-zA-Z_]\w*\s*\)[.]open\s*\(`),
-		// os.path operations
-		regexp.MustCompile(`os\.path\.(join|abspath)\s*\(\s*[a-zA-Z_]\w*\s*,\s*[a-zA-Z_]\w*\s*\)`),
-		regexp.MustCompile(`os\.(makedirs|removedirs|rename)\s*\(\s*[a-zA-Z_]\w*\s*[,+]`),
-		// Path traversal patterns
-		regexp.MustCompile(`\.\.\/`),                                 // Parent directory
-		regexp.MustCompile(`~\/`),                                    // Home directory
-		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root)`), // System directories
-		regexp.MustCompile(`os\.getenv\s*\(\s*["']`),                 // Environment variables
-		regexp.MustCompile(`os\.environ\[`),                          // Environment access
-		// shutil operations
-		regexp.MustCompile(`shutil\.(copy|move|rmtree)\s*\(\s*[a-zA-Z_]\w*\s*[,+]`),
+		// Write operations with variables
+		regexp.MustCompile(`open\s*\(\s*[a-zA-Z_]\w*\s*,\s*["']w`),
+		regexp.MustCompile(`open\s*\(\s*[a-zA-Z_]\w*\s*,\s*["']a`),
+		regexp.MustCompile(`Path\s*\(\s*[a-zA-Z_]\w*\s*\)\.write_`),
+		regexp.MustCompile(`Path\s*\(\s*[a-zA-Z_]\w*\s*\)[.]open\s*\(\s*["']w`),
+		// Dangerous directory operations
+		regexp.MustCompile(`os\.makedirs\s*\(\s*[a-zA-Z_]\w*\s*[,)]`),
+		regexp.MustCompile(`shutil\.(rmtree|move)\s*\(\s*[a-zA-Z_]\w*\s*[,+]`),
+		// System directory writes
+		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root|sys|proc)`),
 	}
 
 	// Node/JavaScript patterns
 	patterns["node"] = []*regexp.Regexp{
-		// fs operations with variables
-		regexp.MustCompile(`fs\.(readFile|writeFile|readFileSync|writeFileSync|open|openSync)\s*\(\s*[a-zA-Z_$]\w*\s*[,+]`),
-		regexp.MustCompile(`fs\.exists\s*\(\s*[a-zA-Z_$]\w*\s*[,+]`),
-		regexp.MustCompile(`fs\.stat\s*\(\s*[a-zA-Z_$]\w*\s*`),
-		// path operations
-		regexp.MustCompile(`path\.(join|resolve|normalize)\s*\(\s*[a-zA-Z_$]\w*\s*[,+]`),
-		regexp.MustCompile(`path\.join\s*\(\s*["']\.\.\/`),    // Explicit parent dir
-		regexp.MustCompile(`path\.resolve\s*\(\s*["']\.\.\/`), // Parent dir in resolve
-		// Path traversal patterns
-		regexp.MustCompile(`\.\.\/`),                                 // Parent directory
-		regexp.MustCompile(`~\/`),                                    // Home directory
-		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root)`), // System directories
-		regexp.MustCompile(`process\.env\.[a-zA-Z_$]\w*`),            // Environment access
-		// child_process file operations
-		regexp.MustCompile(`child_process\.(exec|spawn)\s*\(\s*[a-zA-Z_$]\w*\s*[,+]"`),
-		// fs-extra operations
-		regexp.MustCompile(`fs-extra\.(copy|move|remove)`),
+		// Write operations
+		regexp.MustCompile(`fs\.writeFile\s*\(\s*[a-zA-Z_$]\w*\s*[,+]`),
+		regexp.MustCompile(`fs\.writeFileSync\s*\(\s*[a-zA-Z_$]\w*\s*[,+]`),
+		regexp.MustCompile(`fs\.createWriteStream\s*\(\s*[a-zA-Z_$]\w*\s*[,)]`),
+		regexp.MustCompile(`fs\.(unlink|rename|mkdir|rmdir)\s*\(\s*[a-zA-Z_$]\w*\s*[,)]`),
+		// fs-extra write operations
+		regexp.MustCompile(`fs-extra\.(copy|move|remove|emptyDir)`),
+		regexp.MustCompile(`fs\.(copy|move|remove)\s*\(`),
+		// System directory writes
+		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root|sys|proc)`),
 	}
 
-	// TypeScript patterns (same as Node plus TypeScript-specific)
+	// TypeScript patterns (same as Node)
 	patterns["typescript"] = patterns["node"]
 
 	// Java patterns
 	patterns["java"] = []*regexp.Regexp{
-		// File operations with variables
-		regexp.MustCompile(`new\s+File\s*\(\s*[a-zA-Z_]\w*\s*[\+,]`),
-		regexp.MustCompile(`File\s*\(\s*[a-zA-Z_]\w*\s*\)`),
-		regexp.MustCompile(`Files\.(read|write|copy|move)\s*\(\s*[a-zA-Z_]\w*`),
-		regexp.MustCompile(`FileReader|FileWriter\s*\(\s*[a-zA-Z_]\w*\s*\)`),
-		regexp.MustCompile(`FileInputStream|FileOutputStream\s*\(\s*[a-zA-Z_]\w*\s*\)`),
-		// Path operations
-		regexp.MustCompile(`Paths\.get\s*\(\s*[a-zA-Z_]\w*`),
-		regexp.MustCompile(`Path\.of\s*\(\s*[a-zA-Z_]\w*`),
-		// Path traversal patterns
-		regexp.MustCompile(`\.\.\/`),                                 // Parent directory
-		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root)`), // System directories
-		regexp.MustCompile(`System\.getenv\s*\(`),                    // Environment access
+		// Write operations
+		regexp.MustCompile(`FileWriter\s*\(\s*[a-zA-Z_]\w*\s*\)`),
+		regexp.MustCompile(`FileOutputStream\s*\(\s*[a-zA-Z_]\w*\s*\)`),
+		regexp.MustCompile(`Files\.write\s*\(\s*[a-zA-Z_]\w*`),
+		regexp.MustCompile(`Files\.copy\s*\(\s*[a-zA-Z_]\w*`),
+		regexp.MustCompile(`Files\.move\s*\(\s*[a-zA-Z_]\w*`),
+		regexp.MustCompile(`Files\.delete\s*\(`),
+		regexp.MustCompile(`\.createNewFile\s*\(`),
+		// System directory writes
+		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root|sys|proc)`),
 	}
 
 	// Ruby patterns
 	patterns["ruby"] = []*regexp.Regexp{
-		// File operations with user input
-		regexp.MustCompile(`File\.(open|read|write|delete)\s*\(\s*[a-zA-Z_]\w*\s*[,+]`),
-		regexp.MustCompile(`File\.open\s*\(\s*["'].*#\{[a-zA-Z_]\w*\}`),
-		regexp.MustCompile(`IO\.(read|write|foreach)\s*\(\s*[a-zA-Z_]\w*\s*[,+]`),
-		// File operations
-		regexp.MustCompile(`FileUtils\.(cp|mv|rm|mkdir_p)\s*\(\s*[a-zA-Z_]\w*\s*[,+]`),
-		// Path traversal patterns
-		regexp.MustCompile(`\.\.\/`),                                 // Parent directory
-		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root)`), // System directories
-		regexp.MustCompile(`ENV\[`),                                  // Environment access
+		// Write operations
+		regexp.MustCompile(`File\.write\s*\(\s*[a-zA-Z_]\w*\s*[,+]`),
+		regexp.MustCompile(`File\.open\s*\(\s*[a-zA-Z_]\w*\s*,\s*["']w`),
+		regexp.MustCompile(`File\.open\s*\(\s*["'][^"']*["']\s*,\s*["']w`),
+		regexp.MustCompile(`FileUtils\.(rm|rmtree|mv|cp_r)\s*\(`),
+		// System directory writes
+		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root|sys|proc)`),
 	}
 
 	// PHP patterns
 	patterns["php"] = []*regexp.Regexp{
-		// File operations with variables
-		regexp.MustCompile(`file_(get|put|read|write)_contents\s*\(\s*\$[a-zA-Z_]\w*\s*[\$,]`),
-		regexp.MustCompile(`fopen\s*\(\s*\$[a-zA-Z_]\w*\s*[\$,]`),
+		// Write operations
+		regexp.MustCompile(`file_put_contents\s*\(\s*\$?[a-zA-Z_]\w*\s*[,)]`),
+		regexp.MustCompile(`fwrite\s*\(`),
 		regexp.MustCompile(`unlink\s*\(\s*\$[a-zA-Z_]\w*\s*\)`),
-		regexp.MustCompile(`is_dir|is_file\s*\(\s*\$[a-zA-Z_]\w*\s*\)`),
-		// Path traversal patterns
-		regexp.MustCompile(`\.\.\/`),                                 // Parent directory
-		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root)`), // System directories
-		regexp.MustCompile(`\$_ENV\[`),                               // Environment access
-		regexp.MustCompile(`\$_SERVER\[`),                            // Server variables
+		regexp.MustCompile(`rename\s*\(\s*\$[a-zA-Z_]\w*\s*[,)]`),
+		regexp.MustCompile(`mkdir\s*\(\s*\$[a-zA-Z_]\w*\s*[,)]`),
+		regexp.MustCompile(`rmdir\s*\(\s*\$[a-zA-Z_]\w*\s*\)`),
+		// System directory writes
+		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root|sys|proc)`),
 	}
 
 	// C/C++ patterns
 	patterns["c"] = []*regexp.Regexp{
-		regexp.MustCompile(`fopen\s*\(\s*[a-zA-Z_]\w*\s*[\$,]`),
-		regexp.MustCompile(`open\s*\(\s*[a-zA-Z_]\w*\s*[\$,]`),
+		// Write operations
+		regexp.MustCompile(`fopen\s*\(\s*[a-zA-Z_]\w*\s*,\s*["']w`),
+		regexp.MustCompile(`fopen\s*\(\s*[a-zA-Z_]\w*\s*,\s*["']a`),
 		regexp.MustCompile(`remove\s*\(\s*[a-zA-Z_]\w*\s*\)`),
 		regexp.MustCompile(`unlink\s*\(\s*[a-zA-Z_]\w*\s*\)`),
-		regexp.MustCompile(`\.\.\/`),                                 // Parent directory
-		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root)`), // System directories
-		regexp.MustCompile(`getenv\s*\(`),                            // Environment access
+		regexp.MustCompile(`rename\s*\(\s*[a-zA-Z_]\w*\s*[,)]`),
+		// System directory writes
+		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root|sys|proc)`),
 	}
 	patterns["cpp"] = patterns["c"]
 
 	// Rust patterns
 	patterns["rust"] = []*regexp.Regexp{
-		regexp.MustCompile(`File::open\s*\(\s*&?[a-zA-Z_]\w*\s*\)`),
+		// Write operations
 		regexp.MustCompile(`File::create\s*\(\s*&?[a-zA-Z_]\w*\s*\)`),
-		regexp.MustCompile(`fs::(read|write|remove|rename)\s*\(\s*&?[a-zA-Z_]\w*`),
-		regexp.MustCompile(`std::fs::.*\s*\(\s*&?[a-zA-Z_]\w*`),
-		regexp.MustCompile(`PathBuf::(from|push)\s*\(\s*&?[a-zA-Z_]\w*`),
-		regexp.MustCompile(`\.\.\/`),                                 // Parent directory
-		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root)`), // System directories
-		regexp.MustCompile(`std::env::var\s*\(`),                     // Environment access
+		regexp.MustCompile(`fs::write\s*\(\s*&?[a-zA-Z_]\w*`),
+		regexp.MustCompile(`fs::remove_file\s*\(`),
+		regexp.MustCompile(`fs::remove_dir\s*\(`),
+		regexp.MustCompile(`fs::rename\s*\(`),
+		regexp.MustCompile(`fs::copy\s*\(`),
+		regexp.MustCompile(`OpenOptions::new\(\).*\.write\(true\)`),
+		// System directory writes
+		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root|sys|proc)`),
 	}
 
 	// Swift patterns
 	patterns["swift"] = []*regexp.Regexp{
-		regexp.MustCompile(`FileManager\.(default|s*).*\.(contents|attributes)\(atPath:\s*[a-zA-Z_]\w*`),
-		regexp.MustCompile(`FileHandle\s*\(\s*[a-zA-Z_]\w*`),
-		regexp.MustCompile(`\.\.\/`),                                // Parent directory
-		regexp.MustCompile(`ProcessInfo\.processInfo\.environment`), // Environment access
+		// Write operations
+		regexp.MustCompile(`FileManager.*createFile\s*\(`),
+		regexp.MustCompile(`FileManager.*removeItem\s*\(`),
+		regexp.MustCompile(`FileManager.*moveItem\s*\(`),
+		regexp.MustCompile(`FileManager.*copyItem\s*\(`),
+		regexp.MustCompile(`FileHandle.*write\s*\(`),
+		regexp.MustCompile(`\.write\s*\(\s*to:\s*[a-zA-Z_]\w*`),
+		// System directory writes
+		regexp.MustCompile(`[\"']\/(etc|var|tmp|usr|bin|home|root|sys|proc)`),
 	}
 
 	return patterns
@@ -287,7 +271,6 @@ func (c *FileSystemCheck) scanFile(root, filePath string, language string, patte
 		}
 	}()
 
-	// Get relative path for reporting
 	relPath, err := filepath.Rel(root, filePath)
 	if err != nil {
 		relPath = filepath.Base(filePath)
@@ -306,30 +289,43 @@ func (c *FileSystemCheck) scanFile(root, filePath string, language string, patte
 			c.updateGoSafeVars(line, safeVars)
 		}
 
-		// Skip comment lines
 		if isCommentLine(line, language) {
 			continue
 		}
 
-		// Check each pattern
 		for _, pattern := range patterns {
 			if pattern.MatchString(line) {
-				// Extract matched pattern for better reporting
 				match := pattern.FindString(line)
+
 				if language == "go" && c.isGoSafeUsage(line, safeVars) {
-					break // Skip safe usage
+					break
 				}
+
+				if c.isSystemPathMatch(match) {
+					finding := Finding{
+						Type:        "filesystem",
+						File:        relPath,
+						Line:        lineNum,
+						Description: fmt.Sprintf("writes to system directory: %s", c.sanitizeMatch(match)),
+						Severity:    "high",
+					}
+					if !c.isAllowedFinding(finding, line) {
+						findings = append(findings, finding)
+					}
+					break
+				}
+
 				finding := Finding{
 					Type:        "filesystem",
 					File:        relPath,
 					Line:        lineNum,
-					Description: fmt.Sprintf("unsafe file operation: %s", c.sanitizeMatch(match)),
-					Severity:    "high",
+					Description: fmt.Sprintf("potentially unsafe file write: %s", c.sanitizeMatch(match)),
+					Severity:    "medium",
 				}
 				if !c.isAllowedFinding(finding, line) {
 					findings = append(findings, finding)
 				}
-				break // One finding per line
+				break
 			}
 		}
 	}
@@ -376,6 +372,19 @@ func (c *FileSystemCheck) isGoSafeUsage(line string, safeVars map[string]struct{
 	}
 	_, ok := safeVars[m[1]]
 	return ok
+}
+
+// isSystemPathMatch checks if the matched string indicates a system directory path.
+func (c *FileSystemCheck) isSystemPathMatch(match string) bool {
+	return strings.Contains(match, "/etc") ||
+		strings.Contains(match, "/var") ||
+		strings.Contains(match, "/tmp") ||
+		strings.Contains(match, "/usr") ||
+		strings.Contains(match, "/bin") ||
+		strings.Contains(match, "/home") ||
+		strings.Contains(match, "/root") ||
+		strings.Contains(match, "/sys") ||
+		strings.Contains(match, "/proc")
 }
 
 func (c *FileSystemCheck) compileAllowRules() []allowRule {
@@ -507,10 +516,10 @@ func atoiSafe(s string) int {
 // formatFindings formats findings into a readable message.
 func (c *FileSystemCheck) formatFindings(findings []Finding) string {
 	if len(findings) == 1 {
-		return fmt.Sprintf("Path traversal/unsafe file operation detected:\n- %s", findings[0].String())
+		return fmt.Sprintf("Unsafe file write detected:\n- %s", findings[0].String())
 	}
 
-	return fmt.Sprintf("%d path traversal/unsafe file operations detected:\n%s", len(findings),
+	return fmt.Sprintf("%d unsafe file writes detected:\n%s", len(findings),
 		c.joinFindingsLines(findings))
 }
 
