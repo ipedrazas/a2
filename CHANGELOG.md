@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-02-24
+
+### Changed
+- **Security:filesystem check refactored** to reduce noise and focus on real threats:
+  - Removed ENV VAR usage patterns (users consider config via env vars safe)
+  - Now focuses on **write operations only** (previously flagged read operations too)
+  - Added safe path detection: writes to `.`, `./`, `~/.config/`, and relative paths are allowed
+  - System directory writes (`/etc`, `/var`, `/tmp`, `/usr`, `/bin`, `/home`, `/root`, `/sys`, `/proc`) flagged as high severity
+  - Other write operations flagged as medium severity
+  - Updated pass message: "No unsafe file writes or system directory access detected"
+
 ## [0.6.0] - 2026-01-24
 
 ### Added
