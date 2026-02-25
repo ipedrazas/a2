@@ -54,6 +54,12 @@ func ProcessJob(ctx context.Context, job *Job, wm *WorkspaceManager) error {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 
+	// Security: do not execute external checks from cloned repositories.
+	// External checks allow arbitrary command execution, which is safe in CLI mode
+	// (developer controls their own .a2.yaml) but dangerous in server mode
+	// (attacker controls the cloned repo's .a2.yaml).
+	cfg.External = nil
+
 	// Apply target if specified (maturity level)
 	if job.Request.Target != "" {
 		t, ok := targets.Get(job.Request.Target)
