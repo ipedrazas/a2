@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/subtle"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"sort"
@@ -57,6 +58,7 @@ func (s *Server) setupRoutes() {
 	s.router.HandleFunc("/health", s.handleHealth).Methods("GET")
 
 	api := s.router.PathPrefix("/api").Subrouter()
+	api.Use(s.maxBodySizeMiddleware)
 	api.Use(s.authMiddleware)
 
 	// API endpoints (authenticated when token is configured)
@@ -66,6 +68,14 @@ func (s *Server) setupRoutes() {
 
 	// Serve static files (UI) at root
 	s.router.PathPrefix("/").Handler(s.fileServerHandler())
+}
+
+// maxBodySizeMiddleware limits request body size to 1 MB to prevent DoS.
+func (s *Server) maxBodySizeMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
+		next.ServeHTTP(w, r)
+	})
 }
 
 // authMiddleware checks for a valid Bearer token on API requests.
@@ -138,6 +148,14 @@ func (s *Server) handleSubmitCheck(w http.ResponseWriter, r *http.Request) {
 	// Parse request
 	var req CheckRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		var maxBytesErr *http.MaxBytesError
+		if errors.As(err, &maxBytesErr) {
+			w.WriteHeader(http.StatusRequestEntityTooLarge)
+			_ = json.NewEncoder(w).Encode(map[string]string{
+				"error": "Request body too large",
+			})
+			return
+		}
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(map[string]string{
 			"error": "Invalid request body: " + err.Error(),
