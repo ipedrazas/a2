@@ -2,10 +2,12 @@ package server
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -19,10 +21,11 @@ type Server struct {
 	queue        *JobQueue
 	workspaceDir string
 	cleanupAfter bool
+	apiToken     string
 }
 
 // NewServer creates a new HTTP server.
-func NewServer(host string, port int, jobStore *JobStore, queue *JobQueue, workspaceDir string, cleanupAfter bool) *Server {
+func NewServer(host string, port int, jobStore *JobStore, queue *JobQueue, workspaceDir string, cleanupAfter bool, apiToken string) *Server {
 	router := mux.NewRouter()
 	s := &Server{
 		router:       router,
@@ -30,6 +33,7 @@ func NewServer(host string, port int, jobStore *JobStore, queue *JobQueue, works
 		queue:        queue,
 		workspaceDir: workspaceDir,
 		cleanupAfter: cleanupAfter,
+		apiToken:     apiToken,
 	}
 
 	// Set up routes
@@ -49,16 +53,60 @@ func NewServer(host string, port int, jobStore *JobStore, queue *JobQueue, works
 
 // setupRoutes configures all HTTP routes.
 func (s *Server) setupRoutes() {
-	api := s.router.PathPrefix("/api").Subrouter()
+	// Health check on root router (unauthenticated)
+	s.router.HandleFunc("/health", s.handleHealth).Methods("GET")
 
-	// API endpoints
+	api := s.router.PathPrefix("/api").Subrouter()
+	api.Use(s.authMiddleware)
+
+	// API endpoints (authenticated when token is configured)
 	api.HandleFunc("/check", s.handleSubmitCheck).Methods("POST")
 	api.HandleFunc("/check/{id}", s.handleGetCheck).Methods("GET")
 	api.HandleFunc("/jobs", s.handleListJobs).Methods("GET")
-	api.HandleFunc("/health", s.handleHealth).Methods("GET")
 
 	// Serve static files (UI) at root
 	s.router.PathPrefix("/").Handler(s.fileServerHandler())
+}
+
+// authMiddleware checks for a valid Bearer token on API requests.
+// If no token is configured, all requests pass through.
+func (s *Server) authMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if s.apiToken == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			writeUnauthorized(w, "missing authorization header")
+			return
+		}
+
+		token := strings.TrimPrefix(authHeader, "Bearer ")
+		if token == authHeader {
+			// No "Bearer " prefix found
+			writeUnauthorized(w, "invalid authorization header format")
+			return
+		}
+
+		if subtle.ConstantTimeCompare([]byte(token), []byte(s.apiToken)) != 1 {
+			writeUnauthorized(w, "invalid token")
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// writeUnauthorized writes a 401 JSON error response.
+func writeUnauthorized(w http.ResponseWriter, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusUnauthorized)
+	err := json.NewEncoder(w).Encode(map[string]string{"error": message})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 // ListenAndServe starts the server.

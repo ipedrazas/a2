@@ -22,6 +22,7 @@ var (
 	maxConcurrent    int
 	cleanupInterval  time.Duration
 	jobHistoryMaxAge time.Duration
+	apiToken         string
 )
 
 var serverCmd = &cobra.Command{
@@ -45,6 +46,7 @@ func init() {
 	serverCmd.Flags().IntVar(&maxConcurrent, "max-concurrent", 5, "Maximum number of concurrent jobs")
 	serverCmd.Flags().DurationVar(&cleanupInterval, "cleanup-interval", 1*time.Hour, "Interval for cleanup of old jobs/workspaces")
 	serverCmd.Flags().DurationVar(&jobHistoryMaxAge, "job-history-max-age", 24*time.Hour, "Maximum age to keep job history")
+	serverCmd.Flags().StringVar(&apiToken, "api-token", "", "Bearer token for API authentication (env: A2_API_TOKEN)")
 }
 
 func runServer(cmd *cobra.Command, args []string) error {
@@ -68,8 +70,17 @@ func runServer(cmd *cobra.Command, args []string) error {
 	}
 	defer queue.Stop()
 
+	// Resolve API token: flag takes precedence, fall back to env var
+	if apiToken == "" {
+		apiToken = os.Getenv("A2_API_TOKEN")
+	}
+
 	// Create HTTP server
-	srv := server.NewServer(serverHost, serverPort, jobStore, queue, workspaceDir, cleanupAfter)
+	srv := server.NewServer(serverHost, serverPort, jobStore, queue, workspaceDir, cleanupAfter, apiToken)
+
+	if apiToken == "" {
+		log.Println("WARNING: No API token configured. API endpoints are unauthenticated. Set --api-token or A2_API_TOKEN to enable authentication.")
+	}
 
 	// Start background cleanup
 	ctx, cancel := context.WithCancel(context.Background())
