@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -209,7 +210,11 @@ func (s *Server) handleSubmitCheck(w http.ResponseWriter, r *http.Request) {
 
 	// Enqueue job
 	if err := s.queue.Enqueue(job); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		// Clean up orphaned job and workspace
+		s.jobStore.Delete(job.ID)
+		_ = os.RemoveAll(workspaceDir)
+
+		w.WriteHeader(http.StatusServiceUnavailable)
 		err := json.NewEncoder(w).Encode(map[string]string{
 			"error": "Failed to queue job: " + err.Error(),
 		})
