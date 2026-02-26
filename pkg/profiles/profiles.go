@@ -29,7 +29,7 @@ var BuiltInProfiles = map[string]Profile{
 		Description: "Command-line tool - skip server-related checks",
 		Disabled: []string{
 			"common:health",      // No health endpoints
-			"common:k8s",         // Not containerized typically
+			"devops:k8s",         // Not containerized typically
 			"common:metrics",     // No Prometheus metrics
 			"common:api_docs",    // No API documentation
 			"common:integration", // CLI doesn't need integration tests
@@ -52,7 +52,7 @@ var BuiltInProfiles = map[string]Profile{
 		Disabled: []string{
 			"common:dockerfile",  // Libraries aren't containerized
 			"common:health",      // No health endpoints
-			"common:k8s",         // Not deployed
+			"devops:k8s",         // Not deployed
 			"common:shutdown",    // No server to shutdown
 			"common:metrics",     // No runtime metrics
 			"common:errors",      // No error tracking
@@ -67,7 +67,7 @@ var BuiltInProfiles = map[string]Profile{
 		Description: "Desktop application - focus on user-facing quality",
 		Disabled: []string{
 			"common:health",     // No health endpoints
-			"common:k8s",        // Not containerized
+			"devops:k8s",        // Not containerized
 			"common:api_docs",   // No REST API
 			"common:tracing",    // No distributed tracing
 			"common:metrics",    // Different metrics approach

@@ -22,7 +22,7 @@ func (suite *ValidateTestSuite) SetupTest() {
 		"go:vet":          true,
 		"go:coverage":     true,
 		"common:health":   true,
-		"common:k8s":      true,
+		"devops:k8s":      true,
 		"common:secrets":  true,
 		"common:ci":       true,
 		"common:license":  true,

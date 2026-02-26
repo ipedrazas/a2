@@ -22,7 +22,7 @@ func (suite *ValidateTestSuite) SetupTest() {
 		"go:vet":          true,
 		"go:coverage":     true,
 		"common:health":   true,
-		"common:k8s":      true,
+		"devops:k8s":      true,
 		"common:secrets":  true,
 		"common:ci":       true,
 		"common:license":  true,
@@ -41,7 +41,7 @@ func (suite *ValidateTestSuite) TestValidateProfile_ValidProfile() {
 	profile := Profile{
 		Name:        "test",
 		Description: "Test profile",
-		Disabled:    []string{"common:health", "common:k8s"},
+		Disabled:    []string{"common:health", "devops:k8s"},
 		Source:      SourceUser,
 	}
 
@@ -104,7 +104,7 @@ func (suite *ValidateTestSuite) TestValidateProfile_DuplicateDisabled() {
 	profile := Profile{
 		Name:        "dupe",
 		Description: "Profile with duplicate disabled checks",
-		Disabled:    []string{"common:health", "common:k8s", "common:health"}, // duplicate
+		Disabled:    []string{"common:health", "devops:k8s", "common:health"}, // duplicate
 		Source:      SourceUser,
 	}
 

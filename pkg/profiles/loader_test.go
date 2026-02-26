@@ -38,7 +38,7 @@ name: custom
 description: Custom profile for testing
 disabled:
   - common:health
-  - common:k8s
+  - devops:k8s
 `
 	path := suite.createProfileFile("custom.yaml", content)
 
@@ -48,7 +48,7 @@ disabled:
 	suite.NotNil(profile)
 	suite.Equal("custom", profile.Name)
 	suite.Equal("Custom profile for testing", profile.Description)
-	suite.Equal([]string{"common:health", "common:k8s"}, profile.Disabled)
+	suite.Equal([]string{"common:health", "devops:k8s"}, profile.Disabled)
 	suite.Equal(SourceUser, profile.Source)
 }
 
@@ -117,7 +117,7 @@ disabled:
 name: beta
 description: Beta profile
 disabled:
-  - common:k8s
+  - devops:k8s
 `)
 
 	profiles, err := DiscoverProfiles(suite.tempDir)

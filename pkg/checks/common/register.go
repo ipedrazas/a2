@@ -178,18 +178,6 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
-			Checker: &K8sCheck{},
-			Meta: checker.CheckMeta{
-				ID:          "common:k8s",
-				Name:        "Kubernetes Ready",
-				Description: "Checks for Kubernetes manifests or Helm charts for deployment.",
-				Languages:   []checker.Language{checker.LangCommon},
-				Critical:    false,
-				Order:       1030,
-				Suggestion:  "Add Kubernetes manifests for deployment",
-			},
-		},
-		{
 			Checker: &ShutdownCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "common:shutdown",

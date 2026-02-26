@@ -19,7 +19,7 @@ func (s *ProfilesTestSuite) TestGet_CLIProfile() {
 
 	// Verify server-related checks are disabled
 	s.Contains(profile.Disabled, "common:health")
-	s.Contains(profile.Disabled, "common:k8s")
+	s.Contains(profile.Disabled, "devops:k8s")
 	s.Contains(profile.Disabled, "common:metrics")
 	s.Contains(profile.Disabled, "common:api_docs")
 	s.Contains(profile.Disabled, "common:tracing")
@@ -51,7 +51,7 @@ func (s *ProfilesTestSuite) TestGet_LibraryProfile() {
 
 	// Verify deployment checks are disabled
 	s.Contains(profile.Disabled, "common:dockerfile")
-	s.Contains(profile.Disabled, "common:k8s")
+	s.Contains(profile.Disabled, "devops:k8s")
 	s.Contains(profile.Disabled, "common:health")
 	s.Contains(profile.Disabled, "common:metrics")
 
@@ -70,7 +70,7 @@ func (s *ProfilesTestSuite) TestGet_DesktopProfile() {
 
 	// Verify server-related checks are disabled
 	s.Contains(profile.Disabled, "common:health")
-	s.Contains(profile.Disabled, "common:k8s")
+	s.Contains(profile.Disabled, "devops:k8s")
 	s.Contains(profile.Disabled, "common:api_docs")
 	s.Contains(profile.Disabled, "common:tracing")
 

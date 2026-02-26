@@ -1,4 +1,4 @@
-package common
+package devops
 
 import (
 	"os"
@@ -27,7 +27,7 @@ func (s *K8sCheckTestSuite) TearDownTest() {
 }
 
 func (s *K8sCheckTestSuite) TestID() {
-	s.Equal("common:k8s", s.check.ID())
+	s.Equal("devops:k8s", s.check.ID())
 }
 
 func (s *K8sCheckTestSuite) TestName() {
@@ -265,12 +265,10 @@ func (s *K8sCheckTestSuite) TestRun_Tilt() {
 }
 
 func (s *K8sCheckTestSuite) TestRun_MultipleConfigs() {
-	// Create Helm chart
 	chartYaml := filepath.Join(s.tempDir, "Chart.yaml")
 	err := os.WriteFile(chartYaml, []byte("apiVersion: v2\nname: myapp"), 0644)
 	s.Require().NoError(err)
 
-	// Create Docker Compose
 	composeYaml := filepath.Join(s.tempDir, "docker-compose.yaml")
 	err = os.WriteFile(composeYaml, []byte("version: '3'\nservices:"), 0644)
 	s.Require().NoError(err)
@@ -284,7 +282,6 @@ func (s *K8sCheckTestSuite) TestRun_MultipleConfigs() {
 }
 
 func (s *K8sCheckTestSuite) TestRun_NestedK8sManifests() {
-	// Create nested directory structure
 	subDir := filepath.Join(s.tempDir, "k8s", "apps", "myapp")
 	err := os.MkdirAll(subDir, 0755)
 	s.Require().NoError(err)
@@ -305,7 +302,6 @@ metadata:
 }
 
 func (s *K8sCheckTestSuite) TestRun_NonK8sYamlIgnored() {
-	// Create a YAML file that is not a K8s manifest
 	k8sDir := filepath.Join(s.tempDir, "k8s")
 	err := os.MkdirAll(k8sDir, 0755)
 	s.Require().NoError(err)

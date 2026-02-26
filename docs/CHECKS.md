@@ -7,6 +7,7 @@ This document describes all checks available in A2, organized by category.
 - [Check Statuses](#check-statuses)
 - [Language Checks](#language-checks)
 - [Common Checks](#common-checks)
+- [DevOps Checks](#devops-checks)
 - [Security Checks](#security-checks)
 - [External Checks](#external-checks)
 - [Configuration Reference](#configuration-reference)
@@ -78,7 +79,6 @@ These checks apply to all projects regardless of language.
 | `common:integration` | Integration Tests | No | 980 | Detects integration test directories, files, and E2E frameworks |
 | `common:metrics` | Metrics Instrumentation | No | 1010 | Detects Prometheus, OpenTelemetry, and other metrics libraries |
 | `common:errors` | Error Tracking | No | 1020 | Detects Sentry, Rollbar, Bugsnag, and other error tracking SDKs |
-| `common:k8s` | Kubernetes Ready | No | 1030 | Detects Kubernetes manifests and deployment configurations |
 | `common:shutdown` | Graceful Shutdown | No | 1035 | Detects signal handling and graceful shutdown configuration |
 | `common:precommit` | Pre-commit Hooks | No | 1065 | Verifies pre-commit hooks are configured |
 | `common:contributing` | Contributing Guidelines | No | 1070 | Detects CONTRIBUTING.md, PR templates, issue templates |
@@ -373,7 +373,21 @@ Detects error tracking SDK configuration.
 
 ---
 
-### common:k8s
+## DevOps Checks
+
+DevOps checks validate infrastructure and deployment configurations.
+
+| Check ID | Name | Critical | Order | Description |
+|----------|------|----------|-------|-------------|
+| `devops:terraform` | Terraform Configuration | No | 950 | Validates Terraform configurations for syntax and best practices |
+| `devops:ansible` | Ansible Configuration | No | 960 | Validates Ansible playbooks and roles using ansible-lint |
+| `devops:pulumi` | Pulumi Configuration | No | 970 | Validates Pulumi infrastructure as code configurations |
+| `devops:helm` | Helm Charts | No | 980 | Validates Helm charts using helm lint |
+| `devops:k8s` | Kubernetes Ready | No | 1030 | Detects Kubernetes manifests and deployment configurations |
+
+---
+
+### devops:k8s
 
 Detects Kubernetes manifests, Helm charts, and deployment configurations.
 
@@ -578,9 +592,8 @@ Detects path traversal and unsafe file operations.
 security:
   filesystem:
     allow:
-      - "pkg/checks/common/k8s.go:94"
-      - "pkg/checks/common/k8s.go:os.ReadDir(chartsDir)"
-      - "pkg/checks/common/**"
+      - "pkg/checks/devops/k8s.go"
+      - "pkg/checks/devops/**"
 ```
 
 **Allowlist formats:**
@@ -589,9 +602,8 @@ security:
 - `file` — suppress all findings for matching files
 
 **Examples:**
-- `pkg/checks/common/k8s.go:94`
-- `pkg/checks/common/k8s.go:os.ReadDir(chartsDir)`
-- `pkg/checks/common/**`
+- `pkg/checks/devops/k8s.go`
+- `pkg/checks/devops/**`
 
 ---
 
@@ -716,8 +728,9 @@ external:
 | TypeScript | 9 |
 | Java | 8 |
 | Rust | 8 |
-| Common | 23 |
-| **Total** | **77** |
+| Common | 22 |
+| DevOps | 5 |
+| **Total** | **81** |
 
 **Critical checks** stop execution in sequential mode when they fail.
 **Non-critical checks** report warnings but allow other checks to continue.

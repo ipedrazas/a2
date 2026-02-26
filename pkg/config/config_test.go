@@ -211,7 +211,7 @@ func (suite *ConfigTestSuite) TestIsCheckDisabled_CommonAliases() {
 
 	// Short names should disable the full check IDs
 	suite.True(cfg.IsCheckDisabled("common:license"))
-	suite.True(cfg.IsCheckDisabled("common:k8s"))
+	suite.True(cfg.IsCheckDisabled("devops:k8s"))
 	suite.True(cfg.IsCheckDisabled("common:health"))
 
 	// Other checks should still be enabled

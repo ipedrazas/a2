@@ -96,7 +96,7 @@ func runListChecks(cmd *cobra.Command, args []string) {
 	total := len(allRegs)
 	fmt.Printf("Total: %d checks\n", total)
 	fmt.Println()
-	fmt.Println("Example: a2 check --skip=common:k8s,common:health")
+	fmt.Println("Example: a2 check --skip=devops:k8s,common:health")
 }
 
 func formatLanguageName(lang checker.Language) string {

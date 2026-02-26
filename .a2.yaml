@@ -15,7 +15,7 @@ checks:
   disabled:
     - go:logging  # Skip logging check
     - common:health  # Skip health check
-    - common:k8s  # Skip k8s check
+    - devops:k8s  # Skip k8s check
     - common:api_docs  # Skip api docs check
     - common:integration  # Skip integration check
     - common:metrics  # Skip metrics check
@@ -80,8 +80,8 @@ external:
 security:
   filesystem:
     allow:
-      - "pkg/checks/common/k8s.go:94"
-      - "pkg/checks/common/k8s.go:os.ReadDir(chartsDir)"
+      - "pkg/checks/devops/k8s.go"
+      - "pkg/checks/devops/k8s.go:os.ReadDir(chartsDir)"
       - "pkg/checks/common/**"
       - "pkg/config/**"
       - "pkg/safepath/**"

@@ -265,7 +265,7 @@ var checkAliases = map[string]string{
 	"metrics":     "common:metrics",
 	"errors":      "common:errors",
 	"precommit":   "common:precommit",
-	"k8s":         "common:k8s",
+	"k8s":         "devops:k8s",
 	"shutdown":    "common:shutdown",
 }
 
