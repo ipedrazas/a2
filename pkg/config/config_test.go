@@ -236,39 +236,50 @@ func (suite *ConfigTestSuite) TestIsCheckDisabled_GoAliases() {
 	suite.False(cfg.IsCheckDisabled("go:tests"))
 }
 
-// TestGetSourceDir tests that GetSourceDir returns the correct source directory per language.
-func (suite *ConfigTestSuite) TestGetSourceDir() {
+// TestGetSourceDirsForLang tests that GetSourceDirsForLang returns the correct source directories per language.
+func (suite *ConfigTestSuite) TestGetSourceDirsForLang() {
 	cfg := &Config{
 		Language: LanguageConfig{
-			Go:         GoLanguageConfig{SourceDir: "backend/go"},
-			Rust:       RustLanguageConfig{SourceDir: "src-tauri"},
-			TypeScript: TypeScriptLanguageConfig{SourceDir: "frontend"},
+			Go:         GoLanguageConfig{SourceDir: StringOrSlice{"backend/go"}},
+			Rust:       RustLanguageConfig{SourceDir: StringOrSlice{"src-tauri"}},
+			TypeScript: TypeScriptLanguageConfig{SourceDir: StringOrSlice{"frontend"}},
 		},
 	}
 
-	suite.Equal("backend/go", cfg.GetSourceDir("go"))
-	suite.Equal("src-tauri", cfg.GetSourceDir("rust"))
-	suite.Equal("frontend", cfg.GetSourceDir("typescript"))
-	suite.Equal("", cfg.GetSourceDir("python"))  // Not configured
-	suite.Equal("", cfg.GetSourceDir("node"))    // Not configured
-	suite.Equal("", cfg.GetSourceDir("java"))    // Not configured
-	suite.Equal("", cfg.GetSourceDir("unknown")) // Unknown language
+	suite.Equal([]string{"backend/go"}, cfg.GetSourceDirsForLang("go"))
+	suite.Equal([]string{"src-tauri"}, cfg.GetSourceDirsForLang("rust"))
+	suite.Equal([]string{"frontend"}, cfg.GetSourceDirsForLang("typescript"))
+	suite.Nil(cfg.GetSourceDirsForLang("python"))  // Not configured
+	suite.Nil(cfg.GetSourceDirsForLang("node"))    // Not configured
+	suite.Nil(cfg.GetSourceDirsForLang("java"))    // Not configured
+	suite.Nil(cfg.GetSourceDirsForLang("unknown")) // Unknown language
+}
+
+// TestGetSourceDirsForLang_Multiple tests that GetSourceDirsForLang returns multiple directories.
+func (suite *ConfigTestSuite) TestGetSourceDirsForLang_Multiple() {
+	cfg := &Config{
+		Language: LanguageConfig{
+			Go: GoLanguageConfig{SourceDir: StringOrSlice{"api", "agent"}},
+		},
+	}
+
+	suite.Equal([]string{"api", "agent"}, cfg.GetSourceDirsForLang("go"))
 }
 
 // TestGetSourceDirs tests that GetSourceDirs returns a map of all configured source directories.
 func (suite *ConfigTestSuite) TestGetSourceDirs() {
 	cfg := &Config{
 		Language: LanguageConfig{
-			Go:   GoLanguageConfig{SourceDir: "backend"},
-			Rust: RustLanguageConfig{SourceDir: "src-tauri"},
+			Go:   GoLanguageConfig{SourceDir: StringOrSlice{"backend"}},
+			Rust: RustLanguageConfig{SourceDir: StringOrSlice{"src-tauri"}},
 		},
 	}
 
 	dirs := cfg.GetSourceDirs()
 
 	suite.Len(dirs, 2)
-	suite.Equal("backend", dirs["go"])
-	suite.Equal("src-tauri", dirs["rust"])
+	suite.Equal([]string{"backend"}, dirs["go"])
+	suite.Equal([]string{"src-tauri"}, dirs["rust"])
 
 	// Languages without source_dir should not be in the map
 	_, hasNode := dirs["node"]
@@ -284,8 +295,8 @@ func (suite *ConfigTestSuite) TestGetSourceDirs_Empty() {
 	suite.Empty(dirs)
 }
 
-// TestLoad_WithSourceDir tests that Load parses source_dir configuration.
-func (suite *ConfigTestSuite) TestLoad_WithSourceDir() {
+// TestLoad_WithSourceDir_String tests that Load parses source_dir as a single string.
+func (suite *ConfigTestSuite) TestLoad_WithSourceDir_String() {
 	configContent := `
 language:
   rust:
@@ -299,9 +310,30 @@ language:
 
 	suite.NoError(err)
 	suite.NotNil(cfg)
-	suite.Equal("src-tauri", cfg.Language.Rust.SourceDir)
-	suite.Equal("frontend", cfg.Language.Node.SourceDir)
-	suite.Equal("", cfg.Language.Go.SourceDir) // Not configured
+	suite.Equal(StringOrSlice{"src-tauri"}, cfg.Language.Rust.SourceDir)
+	suite.Equal(StringOrSlice{"frontend"}, cfg.Language.Node.SourceDir)
+	suite.Nil(cfg.Language.Go.SourceDir) // Not configured
+}
+
+// TestLoad_WithSourceDir_List tests that Load parses source_dir as a list of strings.
+func (suite *ConfigTestSuite) TestLoad_WithSourceDir_List() {
+	configContent := `
+language:
+  go:
+    source_dir: [api, agent]
+  node:
+    source_dir:
+      - frontend
+      - admin
+`
+	suite.createTempFile(".a2.yaml", configContent)
+
+	cfg, err := Load(suite.tempDir)
+
+	suite.NoError(err)
+	suite.NotNil(cfg)
+	suite.Equal(StringOrSlice{"api", "agent"}, cfg.Language.Go.SourceDir)
+	suite.Equal(StringOrSlice{"frontend", "admin"}, cfg.Language.Node.SourceDir)
 }
 
 // TestGetToolRunByDefault_NotConfigured tests that GetToolRunByDefault returns nil when no tool override.

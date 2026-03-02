@@ -352,7 +352,7 @@ func main() { signal.Notify(make(chan os.Signal, 1), syscall.SIGTERM) }
 `), 0644))
 
 	cfg := config.DefaultConfig()
-	cfg.Language.Go.SourceDir = "backend"
+	cfg.Language.Go.SourceDir = config.StringOrSlice{"backend"}
 	detected := language.DetectionResult{
 		Languages: []checker.Language{checker.LangGo},
 		Primary:   checker.LangGo,
@@ -373,6 +373,27 @@ func main() { signal.Notify(make(chan os.Signal, 1), syscall.SIGTERM) }
 	suite.NoError(err)
 	suite.True(result.Passed, "common:shutdown should pass when Go signal handling is in source_dir")
 	suite.Contains(result.Reason, "Go signal handling")
+}
+
+// TestGetChecks_MultiSourceDir tests that checks are created for each configured source_dir.
+func (suite *RegistryTestSuite) TestGetChecks_MultiSourceDir() {
+	cfg := config.DefaultConfig()
+	cfg.Language.Go.SourceDir = config.StringOrSlice{"api", "agent"}
+
+	detected := language.DetectionResult{
+		Languages: []checker.Language{checker.LangGo},
+		Primary:   checker.LangGo,
+	}
+	checks := GetChecks(cfg, detected)
+
+	// Count how many go:build checks we have (should be 2, one per source_dir)
+	buildCount := 0
+	for _, check := range checks {
+		if check.Meta.ID == "go:build" {
+			buildCount++
+		}
+	}
+	suite.Equal(2, buildCount, "go:build should appear once per source_dir")
 }
 
 // TestRegistryTestSuite runs all the tests in the suite.

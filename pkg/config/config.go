@@ -8,6 +8,37 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// StringOrSlice is a custom YAML type that accepts both a single string
+// and a list of strings. This allows backward-compatible config like:
+//
+//	source_dir: api        → ["api"]
+//	source_dir: [api, agent] → ["api", "agent"]
+type StringOrSlice []string
+
+// UnmarshalYAML implements the yaml.Unmarshaler interface.
+func (s *StringOrSlice) UnmarshalYAML(value *yaml.Node) error {
+	switch value.Kind {
+	case yaml.ScalarNode:
+		var single string
+		if err := value.Decode(&single); err != nil {
+			return err
+		}
+		if single != "" {
+			*s = StringOrSlice{single}
+		}
+		return nil
+	case yaml.SequenceNode:
+		var list []string
+		if err := value.Decode(&list); err != nil {
+			return err
+		}
+		*s = StringOrSlice(list)
+		return nil
+	default:
+		return fmt.Errorf("source_dir must be a string or list of strings")
+	}
+}
+
 // Config represents the .a2.yaml configuration file.
 type Config struct {
 	Coverage  CoverageConfig        `yaml:"coverage"`
@@ -42,62 +73,62 @@ type LanguageConfig struct {
 
 // GoLanguageConfig contains Go-specific settings.
 type GoLanguageConfig struct {
-	SourceDir           string  `yaml:"source_dir,omitempty"` // Subdirectory containing Go code
-	CoverageThreshold   float64 `yaml:"coverage_threshold,omitempty"`
-	CyclomaticThreshold int     `yaml:"cyclomatic_threshold,omitempty"`
+	SourceDir           StringOrSlice `yaml:"source_dir,omitempty"` // Subdirectory(ies) containing Go code
+	CoverageThreshold   float64       `yaml:"coverage_threshold,omitempty"`
+	CyclomaticThreshold int           `yaml:"cyclomatic_threshold,omitempty"`
 }
 
 // PythonLanguageConfig contains Python-specific settings.
 type PythonLanguageConfig struct {
-	SourceDir           string  `yaml:"source_dir,omitempty"`      // Subdirectory containing Python code
-	PackageManager      string  `yaml:"package_manager,omitempty"` // auto, pip, poetry, pipenv
-	TestRunner          string  `yaml:"test_runner,omitempty"`     // auto, pytest, unittest
-	Formatter           string  `yaml:"formatter,omitempty"`       // auto, black, ruff
-	Linter              string  `yaml:"linter,omitempty"`          // auto, pylint, ruff, flake8
-	CoverageThreshold   float64 `yaml:"coverage_threshold,omitempty"`
-	CyclomaticThreshold int     `yaml:"cyclomatic_threshold,omitempty"`
+	SourceDir           StringOrSlice `yaml:"source_dir,omitempty"`      // Subdirectory(ies) containing Python code
+	PackageManager      string        `yaml:"package_manager,omitempty"` // auto, pip, poetry, pipenv
+	TestRunner          string        `yaml:"test_runner,omitempty"`     // auto, pytest, unittest
+	Formatter           string        `yaml:"formatter,omitempty"`       // auto, black, ruff
+	Linter              string        `yaml:"linter,omitempty"`          // auto, pylint, ruff, flake8
+	CoverageThreshold   float64       `yaml:"coverage_threshold,omitempty"`
+	CyclomaticThreshold int           `yaml:"cyclomatic_threshold,omitempty"`
 }
 
 // NodeLanguageConfig contains Node.js-specific settings.
 type NodeLanguageConfig struct {
-	SourceDir         string  `yaml:"source_dir,omitempty"`      // Subdirectory containing Node.js code
-	PackageManager    string  `yaml:"package_manager,omitempty"` // auto, npm, yarn, pnpm, bun
-	TestRunner        string  `yaml:"test_runner,omitempty"`     // auto, jest, vitest, mocha, npm-test
-	Formatter         string  `yaml:"formatter,omitempty"`       // auto, prettier, biome
-	Linter            string  `yaml:"linter,omitempty"`          // auto, eslint, biome, oxlint
-	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"`
+	SourceDir         StringOrSlice `yaml:"source_dir,omitempty"`      // Subdirectory(ies) containing Node.js code
+	PackageManager    string        `yaml:"package_manager,omitempty"` // auto, npm, yarn, pnpm, bun
+	TestRunner        string        `yaml:"test_runner,omitempty"`     // auto, jest, vitest, mocha, npm-test
+	Formatter         string        `yaml:"formatter,omitempty"`       // auto, prettier, biome
+	Linter            string        `yaml:"linter,omitempty"`          // auto, eslint, biome, oxlint
+	CoverageThreshold float64       `yaml:"coverage_threshold,omitempty"`
 }
 
 // JavaLanguageConfig contains Java-specific settings.
 type JavaLanguageConfig struct {
-	SourceDir         string  `yaml:"source_dir,omitempty"`         // Subdirectory containing Java code
-	BuildTool         string  `yaml:"build_tool,omitempty"`         // auto, maven, gradle
-	TestRunner        string  `yaml:"test_runner,omitempty"`        // auto, junit, testng
-	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"` // default 80
+	SourceDir         StringOrSlice `yaml:"source_dir,omitempty"`         // Subdirectory(ies) containing Java code
+	BuildTool         string        `yaml:"build_tool,omitempty"`         // auto, maven, gradle
+	TestRunner        string        `yaml:"test_runner,omitempty"`        // auto, junit, testng
+	CoverageThreshold float64       `yaml:"coverage_threshold,omitempty"` // default 80
 }
 
 // RustLanguageConfig contains Rust-specific settings.
 type RustLanguageConfig struct {
-	SourceDir         string  `yaml:"source_dir,omitempty"`         // Subdirectory containing Rust code
-	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"` // default 80
+	SourceDir         StringOrSlice `yaml:"source_dir,omitempty"`         // Subdirectory(ies) containing Rust code
+	CoverageThreshold float64       `yaml:"coverage_threshold,omitempty"` // default 80
 }
 
 // TypeScriptLanguageConfig contains TypeScript-specific settings.
 type TypeScriptLanguageConfig struct {
-	SourceDir         string  `yaml:"source_dir,omitempty"`      // Subdirectory containing TypeScript code
-	PackageManager    string  `yaml:"package_manager,omitempty"` // auto, npm, yarn, pnpm, bun
-	TestRunner        string  `yaml:"test_runner,omitempty"`     // auto, jest, vitest, mocha
-	Formatter         string  `yaml:"formatter,omitempty"`       // auto, prettier, biome, dprint
-	Linter            string  `yaml:"linter,omitempty"`          // auto, eslint, biome, oxlint
-	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"`
+	SourceDir         StringOrSlice `yaml:"source_dir,omitempty"`      // Subdirectory(ies) containing TypeScript code
+	PackageManager    string        `yaml:"package_manager,omitempty"` // auto, npm, yarn, pnpm, bun
+	TestRunner        string        `yaml:"test_runner,omitempty"`     // auto, jest, vitest, mocha
+	Formatter         string        `yaml:"formatter,omitempty"`       // auto, prettier, biome, dprint
+	Linter            string        `yaml:"linter,omitempty"`          // auto, eslint, biome, oxlint
+	CoverageThreshold float64       `yaml:"coverage_threshold,omitempty"`
 }
 
 // SwiftLanguageConfig contains Swift-specific settings.
 type SwiftLanguageConfig struct {
-	SourceDir         string  `yaml:"source_dir,omitempty"`         // Subdirectory containing Swift code
-	Formatter         string  `yaml:"formatter,omitempty"`          // auto, swift-format, swiftformat
-	Linter            string  `yaml:"linter,omitempty"`             // auto, swiftlint
-	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"` // default 80
+	SourceDir         StringOrSlice `yaml:"source_dir,omitempty"`         // Subdirectory(ies) containing Swift code
+	Formatter         string        `yaml:"formatter,omitempty"`          // auto, swift-format, swiftformat
+	Linter            string        `yaml:"linter,omitempty"`             // auto, swiftlint
+	CoverageThreshold float64       `yaml:"coverage_threshold,omitempty"` // default 80
 }
 
 // ExecutionConfig configures how checks are executed.
@@ -269,9 +300,9 @@ var checkAliases = map[string]string{
 	"shutdown":    "common:shutdown",
 }
 
-// GetSourceDir returns the configured source directory for a language.
-// Returns empty string if not configured (meaning use root path).
-func (c *Config) GetSourceDir(lang string) string {
+// GetSourceDirsForLang returns the configured source directories for a language.
+// Returns nil if not configured (meaning use root path).
+func (c *Config) GetSourceDirsForLang(lang string) []string {
 	switch lang {
 	case "go":
 		return c.Language.Go.SourceDir
@@ -288,33 +319,33 @@ func (c *Config) GetSourceDir(lang string) string {
 	case "swift":
 		return c.Language.Swift.SourceDir
 	default:
-		return ""
+		return nil
 	}
 }
 
 // GetSourceDirs returns a map of all configured source directories.
 // Only languages with non-empty source directories are included.
-func (c *Config) GetSourceDirs() map[string]string {
-	dirs := make(map[string]string)
-	if c.Language.Go.SourceDir != "" {
+func (c *Config) GetSourceDirs() map[string][]string {
+	dirs := make(map[string][]string)
+	if len(c.Language.Go.SourceDir) > 0 {
 		dirs["go"] = c.Language.Go.SourceDir
 	}
-	if c.Language.Python.SourceDir != "" {
+	if len(c.Language.Python.SourceDir) > 0 {
 		dirs["python"] = c.Language.Python.SourceDir
 	}
-	if c.Language.Node.SourceDir != "" {
+	if len(c.Language.Node.SourceDir) > 0 {
 		dirs["node"] = c.Language.Node.SourceDir
 	}
-	if c.Language.Java.SourceDir != "" {
+	if len(c.Language.Java.SourceDir) > 0 {
 		dirs["java"] = c.Language.Java.SourceDir
 	}
-	if c.Language.Rust.SourceDir != "" {
+	if len(c.Language.Rust.SourceDir) > 0 {
 		dirs["rust"] = c.Language.Rust.SourceDir
 	}
-	if c.Language.TypeScript.SourceDir != "" {
+	if len(c.Language.TypeScript.SourceDir) > 0 {
 		dirs["typescript"] = c.Language.TypeScript.SourceDir
 	}
-	if c.Language.Swift.SourceDir != "" {
+	if len(c.Language.Swift.SourceDir) > 0 {
 		dirs["swift"] = c.Language.Swift.SourceDir
 	}
 	return dirs

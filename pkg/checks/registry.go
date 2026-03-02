@@ -81,17 +81,19 @@ func (m *multiPathChecker) Run(path string) (checker.Result, error) {
 func (m *multiPathChecker) pathsToCheck(path string) []string {
 	seen := map[string]bool{path: true}
 	paths := []string{path}
-	for _, dir := range m.cfg.GetSourceDirs() {
-		full := filepath.Join(path, dir)
-		if seen[full] {
-			continue
+	for _, dirs := range m.cfg.GetSourceDirs() {
+		for _, dir := range dirs {
+			full := filepath.Join(path, dir)
+			if seen[full] {
+				continue
+			}
+			info, err := os.Stat(full)
+			if err != nil || !info.IsDir() {
+				continue
+			}
+			seen[full] = true
+			paths = append(paths, full)
 		}
-		info, err := os.Stat(full)
-		if err != nil || !info.IsDir() {
-			continue
-		}
-		seen[full] = true
-		paths = append(paths, full)
 	}
 	return paths
 }
@@ -122,19 +124,24 @@ func GetChecks(cfg *config.Config, detected language.DetectionResult) []checker.
 
 	// Get checks for each detected language
 	for _, lang := range detected.Languages {
-		regs := getChecksForLanguage(lang, cfg)
-		// Get source directory for this language
-		sourceDir := cfg.GetSourceDir(string(lang))
-		// If source_dir is configured, wrap checks to use it
-		if sourceDir != "" {
-			for i := range regs {
-				regs[i].Checker = &pathResolvingChecker{
-					checker:   regs[i].Checker,
-					sourceDir: sourceDir,
+		sourceDirs := cfg.GetSourceDirsForLang(string(lang))
+		if len(sourceDirs) == 0 {
+			// No source_dir configured, run checks from root
+			regs := getChecksForLanguage(lang, cfg)
+			registrations = append(registrations, regs...)
+		} else {
+			// Create a full set of checks per source_dir
+			for _, sourceDir := range sourceDirs {
+				regs := getChecksForLanguage(lang, cfg)
+				for i := range regs {
+					regs[i].Checker = &pathResolvingChecker{
+						checker:   regs[i].Checker,
+						sourceDir: sourceDir,
+					}
 				}
+				registrations = append(registrations, regs...)
 			}
 		}
-		registrations = append(registrations, regs...)
 	}
 
 	// Add devops checks (language-agnostic, root path)

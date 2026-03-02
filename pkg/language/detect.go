@@ -120,9 +120,10 @@ func (r DetectionResult) HasLanguage(lang checker.Language) bool {
 }
 
 // DetectWithSourceDirs detects languages, checking configured source directories.
-// sourceDirs maps language names (e.g., "rust") to subdirectories (e.g., "src-tauri").
+// sourceDirs maps language names (e.g., "rust") to subdirectories (e.g., ["src-tauri"]).
+// Each language may have multiple source directories configured.
 // Languages without a configured source_dir are detected in the root path.
-func DetectWithSourceDirs(path string, sourceDirs map[string]string) DetectionResult {
+func DetectWithSourceDirs(path string, sourceDirs map[string][]string) DetectionResult {
 	result := DetectionResult{
 		Languages:  make([]checker.Language, 0),
 		Indicators: make(map[checker.Language][]string),
@@ -135,15 +136,22 @@ func DetectWithSourceDirs(path string, sourceDirs map[string]string) DetectionRe
 		indicators := LanguageIndicators[lang]
 		found := []string{}
 
-		// Determine the path to check for this language
-		checkPath := path
-		if sourceDir, ok := sourceDirs[string(lang)]; ok && sourceDir != "" {
-			checkPath = filepath.Join(path, sourceDir)
+		// Determine the paths to check for this language
+		dirs, ok := sourceDirs[string(lang)]
+		if !ok || len(dirs) == 0 {
+			// No source_dir configured, check root path
+			dirs = []string{""}
 		}
 
-		for _, indicator := range indicators {
-			if safepath.Exists(checkPath, indicator) {
-				found = append(found, indicator)
+		for _, dir := range dirs {
+			checkPath := path
+			if dir != "" {
+				checkPath = filepath.Join(path, dir)
+			}
+			for _, indicator := range indicators {
+				if safepath.Exists(checkPath, indicator) {
+					found = append(found, indicator)
+				}
 			}
 		}
 		if len(found) > 0 {

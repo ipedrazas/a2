@@ -120,8 +120,8 @@ func (suite *DetectTestSuite) TestDetectWithSourceDirs() {
 	suite.False(result.HasLanguage(checker.LangRust))
 
 	// With source_dir configuration, Rust should be detected
-	sourceDirs := map[string]string{
-		"rust": "src-tauri",
+	sourceDirs := map[string][]string{
+		"rust": {"src-tauri"},
 	}
 	result = DetectWithSourceDirs(suite.tempDir, sourceDirs)
 
@@ -134,7 +134,7 @@ func (suite *DetectTestSuite) TestDetectWithSourceDirs() {
 func (suite *DetectTestSuite) TestDetectWithSourceDirs_EmptyMap() {
 	suite.createFile("go.mod")
 
-	result := DetectWithSourceDirs(suite.tempDir, map[string]string{})
+	result := DetectWithSourceDirs(suite.tempDir, map[string][]string{})
 
 	suite.True(result.HasLanguage(checker.LangGo))
 	suite.Equal(checker.LangGo, result.Primary)
@@ -147,10 +147,10 @@ func (suite *DetectTestSuite) TestDetectWithSourceDirs_MultipleConfigs() {
 	suite.createFile("frontend/package.json")
 	suite.createFile("desktop/Cargo.toml")
 
-	sourceDirs := map[string]string{
-		"go":   "backend",
-		"node": "frontend",
-		"rust": "desktop",
+	sourceDirs := map[string][]string{
+		"go":   {"backend"},
+		"node": {"frontend"},
+		"rust": {"desktop"},
 	}
 	result := DetectWithSourceDirs(suite.tempDir, sourceDirs)
 
@@ -159,6 +159,36 @@ func (suite *DetectTestSuite) TestDetectWithSourceDirs_MultipleConfigs() {
 	suite.True(result.HasLanguage(checker.LangRust))
 	suite.Len(result.Languages, 3)
 	suite.True(result.MultiLang)
+}
+
+// TestDetectWithSourceDirs_MultiDirsPerLang tests detection when a language has multiple source directories.
+func (suite *DetectTestSuite) TestDetectWithSourceDirs_MultiDirsPerLang() {
+	// Create a monorepo with multiple Go projects
+	suite.createFile("api/go.mod")
+	suite.createFile("agent/go.mod")
+
+	sourceDirs := map[string][]string{
+		"go": {"api", "agent"},
+	}
+	result := DetectWithSourceDirs(suite.tempDir, sourceDirs)
+
+	suite.True(result.HasLanguage(checker.LangGo))
+	suite.Equal(checker.LangGo, result.Primary)
+}
+
+// TestDetectWithSourceDirs_MultiDirsPartialMatch tests detection when only some source dirs contain indicators.
+func (suite *DetectTestSuite) TestDetectWithSourceDirs_MultiDirsPartialMatch() {
+	// Only one of the two configured source dirs has go.mod
+	suite.createFile("api/go.mod")
+	// agent/ directory exists but has no go.mod
+
+	sourceDirs := map[string][]string{
+		"go": {"api", "agent"},
+	}
+	result := DetectWithSourceDirs(suite.tempDir, sourceDirs)
+
+	// Should still detect Go since api/ has go.mod
+	suite.True(result.HasLanguage(checker.LangGo))
 }
 
 // TestHasLanguage tests the HasLanguage method.
