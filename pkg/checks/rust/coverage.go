@@ -34,14 +34,19 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 	// Check for tarpaulin (cargo-tarpaulin)
 	if safepath.Exists(path, "tarpaulin.toml") || safepath.Exists(path, ".tarpaulin.toml") {
 		coverageTools = append(coverageTools, "tarpaulin")
+	} else if checkutil.ToolAvailable("cargo-tarpaulin") {
+		coverageTools = append(coverageTools, "tarpaulin")
 	}
 
-	// Check for llvm-cov config in Cargo.toml
+	// Check for llvm-cov config in Cargo.toml or installed binary
 	if content, err := safepath.ReadFile(path, "Cargo.toml"); err == nil {
 		if strings.Contains(string(content), "cargo-llvm-cov") ||
 			strings.Contains(string(content), "llvm-cov") {
 			coverageTools = append(coverageTools, "llvm-cov")
 		}
+	}
+	if !contains(coverageTools, "llvm-cov") && checkutil.ToolAvailable("cargo-llvm-cov") {
+		coverageTools = append(coverageTools, "llvm-cov")
 	}
 
 	// Check for coverage in CI configs
