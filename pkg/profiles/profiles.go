@@ -29,7 +29,7 @@ var BuiltInProfiles = map[string]Profile{
 		Description: "Command-line tool - skip server-related checks",
 		Disabled: []string{
 			"common:health",      // No health endpoints
-			"devops:k8s",         // Not containerized typically
+			"devops:*",           // Not containerized typically
 			"common:metrics",     // No Prometheus metrics
 			"common:api_docs",    // No API documentation
 			"common:integration", // CLI doesn't need integration tests
@@ -37,6 +37,7 @@ var BuiltInProfiles = map[string]Profile{
 			"common:errors",      // No error tracking service
 			"common:e2e",         // No browser E2E tests
 			"common:tracing",     // No distributed tracing
+			"*:logging",          // No logging libraries. Print is fine
 		},
 	},
 	"api": {

@@ -54,6 +54,14 @@ func ProcessJob(ctx context.Context, job *Job, wm *WorkspaceManager) error {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 
+	// Resolve per-directory profiles into disabled check lists
+	cfg.ResolveSourceDirProfiles(func(name string) []string {
+		if p, ok := profiles.Get(name); ok {
+			return p.Disabled
+		}
+		return nil
+	})
+
 	// Security: do not execute external checks from cloned repositories.
 	// External checks allow arbitrary command execution, which is safe in CLI mode
 	// (developer controls their own .a2.yaml) but dangerous in server mode

@@ -240,9 +240,9 @@ func (suite *ConfigTestSuite) TestIsCheckDisabled_GoAliases() {
 func (suite *ConfigTestSuite) TestGetSourceDirsForLang() {
 	cfg := &Config{
 		Language: LanguageConfig{
-			Go:         GoLanguageConfig{SourceDir: StringOrSlice{"backend/go"}},
-			Rust:       RustLanguageConfig{SourceDir: StringOrSlice{"src-tauri"}},
-			TypeScript: TypeScriptLanguageConfig{SourceDir: StringOrSlice{"frontend"}},
+			Go:         GoLanguageConfig{SourceDir: SourceDirConfig{{Path: "backend/go"}}},
+			Rust:       RustLanguageConfig{SourceDir: SourceDirConfig{{Path: "src-tauri"}}},
+			TypeScript: TypeScriptLanguageConfig{SourceDir: SourceDirConfig{{Path: "frontend"}}},
 		},
 	}
 
@@ -259,7 +259,7 @@ func (suite *ConfigTestSuite) TestGetSourceDirsForLang() {
 func (suite *ConfigTestSuite) TestGetSourceDirsForLang_Multiple() {
 	cfg := &Config{
 		Language: LanguageConfig{
-			Go: GoLanguageConfig{SourceDir: StringOrSlice{"api", "agent"}},
+			Go: GoLanguageConfig{SourceDir: SourceDirConfig{{Path: "api"}, {Path: "agent"}}},
 		},
 	}
 
@@ -270,8 +270,8 @@ func (suite *ConfigTestSuite) TestGetSourceDirsForLang_Multiple() {
 func (suite *ConfigTestSuite) TestGetSourceDirs() {
 	cfg := &Config{
 		Language: LanguageConfig{
-			Go:   GoLanguageConfig{SourceDir: StringOrSlice{"backend"}},
-			Rust: RustLanguageConfig{SourceDir: StringOrSlice{"src-tauri"}},
+			Go:   GoLanguageConfig{SourceDir: SourceDirConfig{{Path: "backend"}}},
+			Rust: RustLanguageConfig{SourceDir: SourceDirConfig{{Path: "src-tauri"}}},
 		},
 	}
 
@@ -310,8 +310,8 @@ language:
 
 	suite.NoError(err)
 	suite.NotNil(cfg)
-	suite.Equal(StringOrSlice{"src-tauri"}, cfg.Language.Rust.SourceDir)
-	suite.Equal(StringOrSlice{"frontend"}, cfg.Language.Node.SourceDir)
+	suite.Equal(SourceDirConfig{{Path: "src-tauri"}}, cfg.Language.Rust.SourceDir)
+	suite.Equal(SourceDirConfig{{Path: "frontend"}}, cfg.Language.Node.SourceDir)
 	suite.Nil(cfg.Language.Go.SourceDir) // Not configured
 }
 
@@ -332,8 +332,81 @@ language:
 
 	suite.NoError(err)
 	suite.NotNil(cfg)
-	suite.Equal(StringOrSlice{"api", "agent"}, cfg.Language.Go.SourceDir)
-	suite.Equal(StringOrSlice{"frontend", "admin"}, cfg.Language.Node.SourceDir)
+	suite.Equal(SourceDirConfig{{Path: "api"}, {Path: "agent"}}, cfg.Language.Go.SourceDir)
+	suite.Equal(SourceDirConfig{{Path: "frontend"}, {Path: "admin"}}, cfg.Language.Node.SourceDir)
+}
+
+// TestLoad_WithSourceDir_ObjectsWithProfile tests that Load parses source_dir as a list of objects with profiles.
+func (suite *ConfigTestSuite) TestLoad_WithSourceDir_ObjectsWithProfile() {
+	configContent := `
+language:
+  go:
+    source_dir:
+      - path: api
+        profile: api
+      - path: cli
+        profile: cli
+`
+	suite.createTempFile(".a2.yaml", configContent)
+
+	cfg, err := Load(suite.tempDir)
+
+	suite.NoError(err)
+	suite.NotNil(cfg)
+	suite.Equal(SourceDirConfig{
+		{Path: "api", Profile: "api"},
+		{Path: "cli", Profile: "cli"},
+	}, cfg.Language.Go.SourceDir)
+	// Paths() should return just the directory names
+	suite.Equal([]string{"api", "cli"}, cfg.Language.Go.SourceDir.Paths())
+}
+
+// TestResolveSourceDirProfiles tests that profile names are resolved to disabled check lists.
+func (suite *ConfigTestSuite) TestResolveSourceDirProfiles() {
+	cfg := &Config{
+		Language: LanguageConfig{
+			Go: GoLanguageConfig{
+				SourceDir: SourceDirConfig{
+					{Path: "api", Profile: "api"},
+					{Path: "cli", Profile: "cli"},
+				},
+			},
+		},
+	}
+
+	cfg.ResolveSourceDirProfiles(func(name string) []string {
+		switch name {
+		case "api":
+			return []string{"common:e2e"}
+		case "cli":
+			return []string{"common:health", "go:logging"}
+		}
+		return nil
+	})
+
+	suite.Equal([]string{"common:e2e"}, cfg.Language.Go.SourceDir[0].Disabled)
+	suite.Equal([]string{"common:health", "go:logging"}, cfg.Language.Go.SourceDir[1].Disabled)
+}
+
+// TestResolveSourceDirProfiles_NoProfile tests that entries without profiles are unchanged.
+func (suite *ConfigTestSuite) TestResolveSourceDirProfiles_NoProfile() {
+	cfg := &Config{
+		Language: LanguageConfig{
+			Go: GoLanguageConfig{
+				SourceDir: SourceDirConfig{
+					{Path: "api"},
+					{Path: "cli"},
+				},
+			},
+		},
+	}
+
+	cfg.ResolveSourceDirProfiles(func(name string) []string {
+		return []string{"should-not-appear"}
+	})
+
+	suite.Nil(cfg.Language.Go.SourceDir[0].Disabled)
+	suite.Nil(cfg.Language.Go.SourceDir[1].Disabled)
 }
 
 // TestGetToolRunByDefault_NotConfigured tests that GetToolRunByDefault returns nil when no tool override.

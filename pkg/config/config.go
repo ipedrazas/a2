@@ -8,36 +8,84 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// StringOrSlice is a custom YAML type that accepts both a single string
-// and a list of strings. This allows backward-compatible config like:
+// SourceDirEntry represents a single source directory with an optional profile.
+type SourceDirEntry struct {
+	Path    string `yaml:"path"`
+	Profile string `yaml:"profile,omitempty"`
+	// Disabled is populated at runtime by resolving the Profile name.
+	// It is not read from YAML.
+	Disabled []string `yaml:"-"`
+}
+
+// SourceDirConfig is a custom YAML type that accepts three formats:
 //
-//	source_dir: api        → ["api"]
-//	source_dir: [api, agent] → ["api", "agent"]
-type StringOrSlice []string
+//	source_dir: api                              → [{Path: "api"}]
+//	source_dir: [api, cli]                       → [{Path: "api"}, {Path: "cli"}]
+//	source_dir:
+//	  - path: api
+//	    profile: api                             → [{Path: "api", Profile: "api"}]
+//	  - path: cli
+//	    profile: cli                             → [{Path: "cli", Profile: "cli"}]
+type SourceDirConfig []SourceDirEntry
+
+// Paths returns just the directory paths (for backward-compatible use).
+func (s SourceDirConfig) Paths() []string {
+	if len(s) == 0 {
+		return nil
+	}
+	paths := make([]string, len(s))
+	for i, e := range s {
+		paths[i] = e.Path
+	}
+	return paths
+}
 
 // UnmarshalYAML implements the yaml.Unmarshaler interface.
-func (s *StringOrSlice) UnmarshalYAML(value *yaml.Node) error {
+func (s *SourceDirConfig) UnmarshalYAML(value *yaml.Node) error {
 	switch value.Kind {
 	case yaml.ScalarNode:
+		// source_dir: api
 		var single string
 		if err := value.Decode(&single); err != nil {
 			return err
 		}
 		if single != "" {
-			*s = StringOrSlice{single}
+			*s = SourceDirConfig{{Path: single}}
 		}
 		return nil
 	case yaml.SequenceNode:
-		var list []string
-		if err := value.Decode(&list); err != nil {
+		// Could be a list of strings or a list of objects
+		if len(value.Content) == 0 {
+			return nil
+		}
+		// Check first element to determine format
+		if value.Content[0].Kind == yaml.ScalarNode {
+			// source_dir: [api, cli]
+			var list []string
+			if err := value.Decode(&list); err != nil {
+				return err
+			}
+			entries := make(SourceDirConfig, len(list))
+			for i, p := range list {
+				entries[i] = SourceDirEntry{Path: p}
+			}
+			*s = entries
+			return nil
+		}
+		// source_dir: [{path: api, profile: api}, ...]
+		var entries []SourceDirEntry
+		if err := value.Decode(&entries); err != nil {
 			return err
 		}
-		*s = StringOrSlice(list)
+		*s = SourceDirConfig(entries)
 		return nil
 	default:
-		return fmt.Errorf("source_dir must be a string or list of strings")
+		return fmt.Errorf("source_dir must be a string, list of strings, or list of {path, profile} objects")
 	}
 }
+
+// StringOrSlice is an alias for backward compatibility.
+type StringOrSlice = SourceDirConfig
 
 // Config represents the .a2.yaml configuration file.
 type Config struct {
@@ -300,9 +348,19 @@ var checkAliases = map[string]string{
 	"shutdown":    "common:shutdown",
 }
 
-// GetSourceDirsForLang returns the configured source directories for a language.
+// GetSourceDirsForLang returns the configured source directory paths for a language.
 // Returns nil if not configured (meaning use root path).
 func (c *Config) GetSourceDirsForLang(lang string) []string {
+	entries := c.GetSourceDirEntriesForLang(lang)
+	if len(entries) == 0 {
+		return nil
+	}
+	return SourceDirConfig(entries).Paths()
+}
+
+// GetSourceDirEntriesForLang returns the full source directory entries for a language,
+// including optional profile associations.
+func (c *Config) GetSourceDirEntriesForLang(lang string) []SourceDirEntry {
 	switch lang {
 	case "go":
 		return c.Language.Go.SourceDir
@@ -323,30 +381,30 @@ func (c *Config) GetSourceDirsForLang(lang string) []string {
 	}
 }
 
-// GetSourceDirs returns a map of all configured source directories.
+// GetSourceDirs returns a map of all configured source directory paths.
 // Only languages with non-empty source directories are included.
 func (c *Config) GetSourceDirs() map[string][]string {
 	dirs := make(map[string][]string)
 	if len(c.Language.Go.SourceDir) > 0 {
-		dirs["go"] = c.Language.Go.SourceDir
+		dirs["go"] = c.Language.Go.SourceDir.Paths()
 	}
 	if len(c.Language.Python.SourceDir) > 0 {
-		dirs["python"] = c.Language.Python.SourceDir
+		dirs["python"] = c.Language.Python.SourceDir.Paths()
 	}
 	if len(c.Language.Node.SourceDir) > 0 {
-		dirs["node"] = c.Language.Node.SourceDir
+		dirs["node"] = c.Language.Node.SourceDir.Paths()
 	}
 	if len(c.Language.Java.SourceDir) > 0 {
-		dirs["java"] = c.Language.Java.SourceDir
+		dirs["java"] = c.Language.Java.SourceDir.Paths()
 	}
 	if len(c.Language.Rust.SourceDir) > 0 {
-		dirs["rust"] = c.Language.Rust.SourceDir
+		dirs["rust"] = c.Language.Rust.SourceDir.Paths()
 	}
 	if len(c.Language.TypeScript.SourceDir) > 0 {
-		dirs["typescript"] = c.Language.TypeScript.SourceDir
+		dirs["typescript"] = c.Language.TypeScript.SourceDir.Paths()
 	}
 	if len(c.Language.Swift.SourceDir) > 0 {
-		dirs["swift"] = c.Language.Swift.SourceDir
+		dirs["swift"] = c.Language.Swift.SourceDir.Paths()
 	}
 	return dirs
 }
@@ -377,6 +435,26 @@ func MatchDisabled(checkID, disabled string) bool {
 		return true
 	}
 	return false
+}
+
+// ResolveSourceDirProfiles resolves profile names in source_dir entries to their
+// disabled check lists. The resolver function maps a profile name to its disabled checks.
+// This must be called after loading profiles but before running checks.
+func (c *Config) ResolveSourceDirProfiles(resolver func(string) []string) {
+	resolveEntries := func(entries SourceDirConfig) {
+		for i := range entries {
+			if entries[i].Profile != "" {
+				entries[i].Disabled = resolver(entries[i].Profile)
+			}
+		}
+	}
+	resolveEntries(c.Language.Go.SourceDir)
+	resolveEntries(c.Language.Python.SourceDir)
+	resolveEntries(c.Language.Node.SourceDir)
+	resolveEntries(c.Language.Java.SourceDir)
+	resolveEntries(c.Language.Rust.SourceDir)
+	resolveEntries(c.Language.TypeScript.SourceDir)
+	resolveEntries(c.Language.Swift.SourceDir)
 }
 
 // GetToolRunByDefault returns the run_by_default override for a tool.

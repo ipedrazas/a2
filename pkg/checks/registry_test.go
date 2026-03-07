@@ -352,7 +352,7 @@ func main() { signal.Notify(make(chan os.Signal, 1), syscall.SIGTERM) }
 `), 0644))
 
 	cfg := config.DefaultConfig()
-	cfg.Language.Go.SourceDir = config.StringOrSlice{"backend"}
+	cfg.Language.Go.SourceDir = config.SourceDirConfig{{Path: "backend"}}
 	detected := language.DetectionResult{
 		Languages: []checker.Language{checker.LangGo},
 		Primary:   checker.LangGo,
@@ -378,7 +378,7 @@ func main() { signal.Notify(make(chan os.Signal, 1), syscall.SIGTERM) }
 // TestGetChecks_MultiSourceDir tests that checks are created for each configured source_dir.
 func (suite *RegistryTestSuite) TestGetChecks_MultiSourceDir() {
 	cfg := config.DefaultConfig()
-	cfg.Language.Go.SourceDir = config.StringOrSlice{"api", "agent"}
+	cfg.Language.Go.SourceDir = config.SourceDirConfig{{Path: "api"}, {Path: "agent"}}
 
 	detected := language.DetectionResult{
 		Languages: []checker.Language{checker.LangGo},
@@ -387,6 +387,39 @@ func (suite *RegistryTestSuite) TestGetChecks_MultiSourceDir() {
 	checks := GetChecks(cfg, detected)
 
 	// Count how many go:build checks we have (should be 2, one per source_dir)
+	buildCount := 0
+	for _, check := range checks {
+		if check.Meta.ID == "go:build" {
+			buildCount++
+		}
+	}
+	suite.Equal(2, buildCount, "go:build should appear once per source_dir")
+}
+
+// TestGetChecks_SourceDirWithProfile tests that per-directory profiles filter checks.
+func (suite *RegistryTestSuite) TestGetChecks_SourceDirWithProfile() {
+	cfg := config.DefaultConfig()
+	cfg.Language.Go.SourceDir = config.SourceDirConfig{
+		{Path: "api", Disabled: nil},                    // no profile, all checks
+		{Path: "cli", Disabled: []string{"go:logging"}}, // cli profile disables go:logging
+	}
+
+	detected := language.DetectionResult{
+		Languages: []checker.Language{checker.LangGo},
+		Primary:   checker.LangGo,
+	}
+	checks := GetChecks(cfg, detected)
+
+	// Count go:logging checks — should only appear for "api", not "cli"
+	loggingCount := 0
+	for _, check := range checks {
+		if check.Meta.ID == "go:logging" {
+			loggingCount++
+		}
+	}
+	suite.Equal(1, loggingCount, "go:logging should appear once (for api only, filtered from cli)")
+
+	// go:build should appear twice (once per source_dir, not filtered)
 	buildCount := 0
 	for _, check := range checks {
 		if check.Meta.ID == "go:build" {

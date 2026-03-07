@@ -161,6 +161,14 @@ func runCheck(cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(os.Stderr, "Error loading config: %v\n", err)
 		os.Exit(1)
 	}
+	// Resolve per-directory profiles into disabled check lists
+	cfg.ResolveSourceDirProfiles(func(name string) []string {
+		if p, ok := profiles.Get(name); ok {
+			return p.Disabled
+		}
+		return nil
+	})
+
 	baseDisabled := append([]string{}, cfg.Checks.Disabled...)
 
 	// Apply target if specified (maturity level)

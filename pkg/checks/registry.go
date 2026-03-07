@@ -124,19 +124,23 @@ func GetChecks(cfg *config.Config, detected language.DetectionResult) []checker.
 
 	// Get checks for each detected language
 	for _, lang := range detected.Languages {
-		sourceDirs := cfg.GetSourceDirsForLang(string(lang))
-		if len(sourceDirs) == 0 {
+		entries := cfg.GetSourceDirEntriesForLang(string(lang))
+		if len(entries) == 0 {
 			// No source_dir configured, run checks from root
 			regs := getChecksForLanguage(lang, cfg)
 			registrations = append(registrations, regs...)
 		} else {
 			// Create a full set of checks per source_dir
-			for _, sourceDir := range sourceDirs {
+			for _, entry := range entries {
 				regs := getChecksForLanguage(lang, cfg)
+				// Filter out checks disabled by the directory's profile
+				if len(entry.Disabled) > 0 {
+					regs = filterByDisabledList(regs, entry.Disabled)
+				}
 				for i := range regs {
 					regs[i].Checker = &pathResolvingChecker{
 						checker:   regs[i].Checker,
-						sourceDir: sourceDir,
+						sourceDir: entry.Path,
 					}
 				}
 				registrations = append(registrations, regs...)
@@ -166,6 +170,24 @@ func GetChecks(cfg *config.Config, detected language.DetectionResult) []checker.
 	}
 
 	return enabled
+}
+
+// filterByDisabledList removes checks whose ID matches any entry in the disabled list.
+func filterByDisabledList(regs []checker.CheckRegistration, disabled []string) []checker.CheckRegistration {
+	var filtered []checker.CheckRegistration
+	for _, reg := range regs {
+		skip := false
+		for _, d := range disabled {
+			if config.MatchDisabled(reg.Meta.ID, d) {
+				skip = true
+				break
+			}
+		}
+		if !skip {
+			filtered = append(filtered, reg)
+		}
+	}
+	return filtered
 }
 
 // getChecksForLanguage returns check registrations for a specific language.
