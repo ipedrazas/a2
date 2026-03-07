@@ -30,6 +30,7 @@ var (
 	verbosity     int           // Verbosity level (0=normal, 1=failures, 2=all)
 	failFast      bool          // Cancel remaining checks on first critical failure (parallel mode)
 	dryRun        bool          // List checks without running them
+	forceInit     bool          // Force overwrite in profiles/targets init
 )
 
 var rootCmd = &cobra.Command{
@@ -127,6 +128,7 @@ func init() {
 	rootCmd.AddCommand(addCmd)
 
 	// Add init subcommands
+	profilesInitCmd.Flags().BoolVar(&forceInit, "force", false, "Overwrite existing profile files with latest built-in versions")
 	profilesCmd.AddCommand(profilesInitCmd)
 	targetsCmd.AddCommand(targetsInitCmd)
 
@@ -389,8 +391,12 @@ func runProfiles(cmd *cobra.Command, args []string) {
 }
 
 func runProfilesInit(cmd *cobra.Command, args []string) error {
-	fmt.Println("Initializing user profiles directory...")
-	return profiles.WriteBuiltInProfiles()
+	if forceInit {
+		fmt.Println("Updating user profiles directory with latest built-in profiles...")
+	} else {
+		fmt.Println("Initializing user profiles directory...")
+	}
+	return profiles.WriteBuiltInProfiles(forceInit)
 }
 
 func runTargets(cmd *cobra.Command, args []string) {

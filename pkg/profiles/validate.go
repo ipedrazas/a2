@@ -2,6 +2,7 @@ package profiles
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checks"
 	"github.com/ipedrazas/a2/pkg/config"
@@ -26,6 +27,11 @@ func ValidateProfile(p Profile, validCheckIDs map[string]bool, validIDList []str
 		}
 		seen[checkID] = true
 
+		// Skip wildcard patterns — they are valid pattern syntax, not literal check IDs
+		if strings.Contains(checkID, "*") {
+			continue
+		}
+
 		// Check if the check ID exists
 		if !validCheckIDs[checkID] {
 			result.Errors = append(result.Errors,
@@ -41,10 +47,26 @@ func ValidateProfile(p Profile, validCheckIDs map[string]bool, validIDList []str
 		}
 	}
 
-	// Warn if overriding a built-in profile
-	if _, isBuiltIn := BuiltInProfiles[p.Name]; isBuiltIn && p.Source == SourceUser {
+	// Warn if overriding a built-in profile and detect stale copies
+	if builtIn, isBuiltIn := BuiltInProfiles[p.Name]; isBuiltIn && p.Source == SourceUser {
 		result.Warnings = append(result.Warnings,
 			fmt.Sprintf("overrides built-in profile: %s", p.Name))
+
+		// Check for checks present in built-in but missing from user copy
+		userSet := make(map[string]bool)
+		for _, d := range p.Disabled {
+			userSet[d] = true
+		}
+		var missing []string
+		for _, d := range builtIn.Disabled {
+			if !userSet[d] {
+				missing = append(missing, d)
+			}
+		}
+		if len(missing) > 0 {
+			result.Warnings = append(result.Warnings,
+				fmt.Sprintf("missing %d check(s) from latest built-in: %v (run 'a2 profiles init --force' to update)", len(missing), missing))
+		}
 	}
 
 	return result

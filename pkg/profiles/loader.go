@@ -83,8 +83,9 @@ func LoadFromFile(path string) (*Profile, error) {
 }
 
 // WriteBuiltInProfiles writes all built-in profiles to the user config directory.
+// If force is true, existing files are overwritten.
 // This is used by the "profiles init" command.
-func WriteBuiltInProfiles() error {
+func WriteBuiltInProfiles(force bool) error {
 	dir, err := userconfig.EnsureDir(profilesSubdir)
 	if err != nil {
 		return fmt.Errorf("failed to create profiles directory: %w", err)
@@ -93,16 +94,22 @@ func WriteBuiltInProfiles() error {
 	for name, profile := range BuiltInProfiles {
 		path := filepath.Join(dir, name+".yaml")
 
-		// Don't overwrite existing files
-		if _, err := os.Stat(path); err == nil {
-			fmt.Printf("Skipping %s (already exists)\n", path)
-			continue
+		if !force {
+			// Don't overwrite existing files
+			if _, err := os.Stat(path); err == nil {
+				fmt.Printf("Skipping %s (already exists, use --force to overwrite)\n", path)
+				continue
+			}
 		}
 
 		if err := writeProfile(path, profile); err != nil {
 			return fmt.Errorf("failed to write profile %s: %w", name, err)
 		}
-		fmt.Printf("Created %s\n", path)
+		if force {
+			fmt.Printf("Updated %s\n", path)
+		} else {
+			fmt.Printf("Created %s\n", path)
+		}
 	}
 
 	return nil

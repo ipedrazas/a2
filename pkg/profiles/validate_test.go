@@ -1,6 +1,7 @@
 package profiles
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -131,6 +132,15 @@ func (suite *ValidateTestSuite) TestValidateProfile_OverridesBuiltIn() {
 	suite.Empty(result.Errors)
 	suite.NotEmpty(result.Warnings)
 	suite.Contains(result.Warnings[0], "overrides built-in profile: cli")
+	// Should also warn about missing checks from the built-in
+	hasStaleWarning := false
+	for _, w := range result.Warnings {
+		if strings.Contains(w, "missing") && strings.Contains(w, "from latest built-in") {
+			hasStaleWarning = true
+			break
+		}
+	}
+	suite.True(hasStaleWarning, "should warn about missing checks from built-in")
 }
 
 func (suite *ValidateTestSuite) TestValidateProfile_BuiltInNotWarning() {

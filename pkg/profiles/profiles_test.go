@@ -19,10 +19,11 @@ func (s *ProfilesTestSuite) TestGet_CLIProfile() {
 
 	// Verify server-related checks are disabled
 	s.Contains(profile.Disabled, "common:health")
-	s.Contains(profile.Disabled, "devops:k8s")
+	s.Contains(profile.Disabled, "devops:*")
 	s.Contains(profile.Disabled, "common:metrics")
 	s.Contains(profile.Disabled, "common:api_docs")
 	s.Contains(profile.Disabled, "common:tracing")
+	s.Contains(profile.Disabled, "*:logging")
 }
 
 func (s *ProfilesTestSuite) TestGet_APIProfile() {
