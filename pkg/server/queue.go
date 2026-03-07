@@ -44,7 +44,7 @@ func (q *JobQueue) Start(processor JobProcessor) error {
 	q.workerCancel = make([]context.CancelFunc, q.maxWorkers)
 
 	for i := 0; i < q.maxWorkers; i++ {
-		workerCtx, workerCancel := context.WithCancel(q.ctx)
+		workerCtx, workerCancel := context.WithCancel(q.ctx) // #nosec G118 - cancel stored in q.workerCancel and called in Stop()
 		q.workerCancel[i] = workerCancel
 
 		q.wg.Add(1)

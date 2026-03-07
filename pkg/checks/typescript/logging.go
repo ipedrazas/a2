@@ -120,7 +120,7 @@ func (c *LoggingCheck) countConsoleLog(path string) int {
 			}
 
 			// Read and scan file
-			content, err := os.ReadFile(filePath) // #nosec G304 - filePath is from controlled walk
+			content, err := os.ReadFile(filePath) // #nosec G304,G122 - filePath is from controlled walk
 			if err != nil {
 				return nil
 			}
