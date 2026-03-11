@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.25-alpine AS go-builder
+FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS go-builder
 
 # Build arguments with defaults
 ARG VERSION=dev
@@ -41,7 +41,7 @@ COPY ui/ .
 RUN npm run build
 
 # Final stage - minimal image
-# FROM golang:1.25-alpine
+# FROM golang:1.26-alpine
 
 FROM alpine:3.23
 # Install git (needed for cloning repos), ca-certificates
