@@ -200,18 +200,19 @@ func printResult(r checker.Result, verbosity VerbosityLevel) {
 		durationStyle.Render(durationStr),
 		durationStyle.Render("- "+r.ID),
 	)
-
-	// Print message (what) and reason (why) if present
-	if r.Message != "" {
-		fmt.Println(messageStyle.Render(r.Message))
-	}
-	if r.Reason != "" {
-		if r.Reason != r.Message {
-			reasonLine := r.Reason
-			if r.Message != "" {
-				reasonLine = "Reason: " + reasonLine
+	if verbosity > 1 {
+		// Print message (what) and reason (why) if present
+		if r.Message != "" {
+			fmt.Println(messageStyle.Render(r.Message))
+		}
+		if r.Reason != "" {
+			if r.Reason != r.Message {
+				reasonLine := r.Reason
+				if r.Message != "" {
+					reasonLine = "Reason: " + reasonLine
+				}
+				fmt.Println(messageStyle.Render(reasonLine))
 			}
-			fmt.Println(messageStyle.Render(reasonLine))
 		}
 	}
 
