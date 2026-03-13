@@ -19,130 +19,90 @@ type CoverageCheck struct {
 func (c *CoverageCheck) ID() string   { return "rust:coverage" }
 func (c *CoverageCheck) Name() string { return "Rust Coverage" }
 
-// Run checks for coverage tooling and reports.
+// Run runs coverage tools and checks that coverage meets the threshold.
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangRust)
+
+	threshold := c.Threshold
+	if threshold == 0 {
+		threshold = 80.0
+	}
 
 	// Check for Cargo.toml first
 	if !safepath.Exists(path, "Cargo.toml") {
 		return rb.Fail("No Cargo.toml found"), nil
 	}
 
-	// Look for coverage tools/config
-	var coverageTools []string
+	// Try to run cargo-tarpaulin
+	if checkutil.ToolAvailable("cargo-tarpaulin") {
+		result := checkutil.RunCommand(path, "cargo", "tarpaulin", "--skip-clean", "--out", "stdout")
+		output := result.CombinedOutput()
 
-	// Check for tarpaulin (cargo-tarpaulin)
-	if safepath.Exists(path, "tarpaulin.toml") || safepath.Exists(path, ".tarpaulin.toml") {
-		coverageTools = append(coverageTools, "tarpaulin")
-	} else if checkutil.ToolAvailable("cargo-tarpaulin") {
-		coverageTools = append(coverageTools, "tarpaulin")
-	}
-
-	// Check for llvm-cov config in Cargo.toml or installed binary
-	if content, err := safepath.ReadFile(path, "Cargo.toml"); err == nil {
-		if strings.Contains(string(content), "cargo-llvm-cov") ||
-			strings.Contains(string(content), "llvm-cov") {
-			coverageTools = append(coverageTools, "llvm-cov")
+		if !result.Success() {
+			return rb.WarnWithOutput("Could not measure coverage: cargo tarpaulin failed", output), nil
 		}
-	}
-	if !contains(coverageTools, "llvm-cov") && checkutil.ToolAvailable("cargo-llvm-cov") {
-		coverageTools = append(coverageTools, "llvm-cov")
-	}
 
-	// Check for coverage in CI configs
-	ciFiles := []string{".github/workflows/ci.yml", ".github/workflows/ci.yaml",
-		".github/workflows/rust.yml", ".github/workflows/rust.yaml",
-		".gitlab-ci.yml"}
-	for _, ciFile := range ciFiles {
-		if content, err := safepath.ReadFile(path, ciFile); err == nil {
-			contentLower := strings.ToLower(string(content))
-			if strings.Contains(contentLower, "tarpaulin") {
-				if !contains(coverageTools, "tarpaulin") {
-					coverageTools = append(coverageTools, "tarpaulin (CI)")
-				}
-			}
-			if strings.Contains(contentLower, "llvm-cov") || strings.Contains(contentLower, "cargo-llvm-cov") {
-				if !contains(coverageTools, "llvm-cov") {
-					coverageTools = append(coverageTools, "llvm-cov (CI)")
-				}
-			}
-			if strings.Contains(contentLower, "codecov") || strings.Contains(contentLower, "coveralls") {
-				coverageTools = append(coverageTools, "coverage reporting")
-			}
+		coverage := parseTarpaulinCoverage(result.Stdout)
+		if coverage < threshold {
+			return rb.WarnWithOutput(fmt.Sprintf("Coverage %.1f%% is below threshold %.1f%%", coverage, threshold), output), nil
 		}
+		return rb.PassWithOutput(fmt.Sprintf("Coverage: %.1f%%", coverage), output), nil
 	}
 
-	// Try to find coverage reports
-	coverage := c.findCoverageReports(path)
+	// Try to run cargo-llvm-cov
+	if checkutil.ToolAvailable("cargo-llvm-cov") {
+		result := checkutil.RunCommand(path, "cargo", "llvm-cov", "--summary-only")
+		output := result.CombinedOutput()
 
-	// Build result
-	if coverage >= 0 {
-		msg := fmt.Sprintf("Coverage %.1f%% (threshold %.1f%%)", coverage, c.Threshold)
-		if coverage >= c.Threshold {
-			return rb.Pass(msg), nil
+		if !result.Success() {
+			return rb.WarnWithOutput("Could not measure coverage: cargo llvm-cov failed", output), nil
 		}
-		return rb.Warn(msg), nil
+
+		coverage := parseLlvmCovCoverage(result.Stdout)
+		if coverage < threshold {
+			return rb.WarnWithOutput(fmt.Sprintf("Coverage %.1f%% is below threshold %.1f%%", coverage, threshold), output), nil
+		}
+		return rb.PassWithOutput(fmt.Sprintf("Coverage: %.1f%%", coverage), output), nil
 	}
-	if len(coverageTools) > 0 {
-		return rb.Pass("Coverage configured: " + strings.Join(coverageTools, ", ")), nil
-	}
-	return rb.Warn("No coverage tooling found (consider cargo-tarpaulin or cargo-llvm-cov)"), nil
+
+	return rb.Warn("No coverage tool available (install cargo-tarpaulin or cargo-llvm-cov)"), nil
 }
 
-// findCoverageReports looks for coverage report files and extracts percentage.
-func (c *CoverageCheck) findCoverageReports(path string) float64 {
-	// Check common coverage report locations
-	reportPaths := []string{
-		"target/tarpaulin/cobertura.xml",
-		"target/llvm-cov/html/index.html",
-		"coverage/cobertura.xml",
-		"coverage.xml",
-		"lcov.info",
+// parseTarpaulinCoverage extracts coverage percentage from cargo tarpaulin output.
+// Output typically ends with a line like: "85.00% coverage, 170/200 lines covered"
+func parseTarpaulinCoverage(output string) float64 {
+	re := regexp.MustCompile(`([\d.]+)%\s+coverage`)
+	matches := re.FindAllStringSubmatch(output, -1)
+	if len(matches) == 0 {
+		return 0
 	}
+	// Take the last match (the summary line)
+	last := matches[len(matches)-1]
+	if cov, err := strconv.ParseFloat(last[1], 64); err == nil {
+		return cov
+	}
+	return 0
+}
 
-	for _, reportPath := range reportPaths {
-		if content, err := safepath.ReadFile(path, reportPath); err == nil {
-			// Try to extract coverage percentage
-			if cov := extractCoverage(string(content)); cov >= 0 {
+// parseLlvmCovCoverage extracts coverage percentage from cargo llvm-cov output.
+// Output contains lines like: "TOTAL  1000  850  85.00%"
+func parseLlvmCovCoverage(output string) float64 {
+	// Match TOTAL line with percentage
+	re := regexp.MustCompile(`TOTAL\s+\d+\s+\d+\s+([\d.]+)%`)
+	if matches := re.FindStringSubmatch(output); len(matches) > 1 {
+		if cov, err := strconv.ParseFloat(matches[1], 64); err == nil {
+			return cov
+		}
+	}
+	// Fallback: match any percentage in the last lines
+	rePercent := regexp.MustCompile(`([\d.]+)%`)
+	lines := strings.Split(strings.TrimSpace(output), "\n")
+	for i := len(lines) - 1; i >= 0 && i >= len(lines)-5; i-- {
+		if matches := rePercent.FindStringSubmatch(lines[i]); len(matches) > 1 {
+			if cov, err := strconv.ParseFloat(matches[1], 64); err == nil {
 				return cov
 			}
 		}
 	}
-
-	return -1
-}
-
-// extractCoverage tries to extract coverage percentage from various formats.
-func extractCoverage(content string) float64 {
-	// Cobertura XML format: line-rate="0.85"
-	coberturaRe := regexp.MustCompile(`line-rate="([0-9.]+)"`)
-	if matches := coberturaRe.FindStringSubmatch(content); len(matches) > 1 {
-		if rate, err := strconv.ParseFloat(matches[1], 64); err == nil {
-			return rate * 100
-		}
-	}
-
-	// LCOV summary format: LF:100 LH:85 (lines found, lines hit)
-	lfRe := regexp.MustCompile(`LF:(\d+)`)
-	lhRe := regexp.MustCompile(`LH:(\d+)`)
-	lfMatches := lfRe.FindStringSubmatch(content)
-	lhMatches := lhRe.FindStringSubmatch(content)
-	if len(lfMatches) > 1 && len(lhMatches) > 1 {
-		lf, _ := strconv.ParseFloat(lfMatches[1], 64)
-		lh, _ := strconv.ParseFloat(lhMatches[1], 64)
-		if lf > 0 {
-			return (lh / lf) * 100
-		}
-	}
-
-	return -1
-}
-
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
+	return 0
 }
