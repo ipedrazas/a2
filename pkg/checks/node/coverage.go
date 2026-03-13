@@ -30,6 +30,8 @@ func (c *CoverageCheck) Name() string {
 	return "Node Coverage"
 }
 
+func (c *CoverageCheck) SetCoverageThreshold(t float64) { c.Threshold = t }
+
 // Run executes the coverage check.
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangNode)

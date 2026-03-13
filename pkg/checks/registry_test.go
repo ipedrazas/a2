@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/ipedrazas/a2/pkg/checker"
+	gocheck "github.com/ipedrazas/a2/pkg/checks/go"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/language"
 	"github.com/stretchr/testify/suite"
@@ -427,6 +428,54 @@ func (suite *RegistryTestSuite) TestGetChecks_SourceDirWithProfile() {
 		}
 	}
 	suite.Equal(2, buildCount, "go:build should appear once per source_dir")
+}
+
+// TestGetChecks_SourceDirWithCoverageThreshold tests that per-directory coverage thresholds
+// override the language-level threshold.
+func (suite *RegistryTestSuite) TestGetChecks_SourceDirWithCoverageThreshold() {
+	cfg := config.DefaultConfig()
+	cfg.Language.Go.CoverageThreshold = 80.0
+	cfg.Language.Go.SourceDir = config.SourceDirConfig{
+		{Path: "api", CoverageThreshold: 45},
+		{Path: "cli", CoverageThreshold: 25},
+	}
+
+	detected := language.DetectionResult{
+		Languages: []checker.Language{checker.LangGo},
+		Primary:   checker.LangGo,
+	}
+	checks := GetChecks(cfg, detected)
+
+	// Collect coverage checks and their thresholds via the pathResolvingChecker
+	type covInfo struct {
+		sourceDir string
+		threshold float64
+	}
+	var coverageChecks []covInfo
+	for _, check := range checks {
+		if check.Meta.ID == "go:coverage" {
+			prc, ok := check.Checker.(*pathResolvingChecker)
+			suite.Require().True(ok, "should be wrapped in pathResolvingChecker")
+			inner, ok := prc.checker.(checker.CoverageThresholdSetter)
+			suite.Require().True(ok, "inner checker should implement CoverageThresholdSetter")
+			// Access the concrete type to read the threshold
+			goCC := prc.checker.(*gocheck.CoverageCheck)
+			coverageChecks = append(coverageChecks, covInfo{
+				sourceDir: prc.sourceDir,
+				threshold: goCC.Threshold,
+			})
+			_ = inner // verify interface satisfaction
+		}
+	}
+
+	suite.Require().Len(coverageChecks, 2, "should have two go:coverage checks")
+	// Build a map since sort order may vary
+	thresholdByDir := make(map[string]float64)
+	for _, cc := range coverageChecks {
+		thresholdByDir[cc.sourceDir] = cc.threshold
+	}
+	suite.Equal(45.0, thresholdByDir["api"])
+	suite.Equal(25.0, thresholdByDir["cli"])
 }
 
 // TestRegistryTestSuite runs all the tests in the suite.

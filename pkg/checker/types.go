@@ -89,3 +89,9 @@ type Checker interface {
 	// Returns a Result and any error encountered during execution.
 	Run(path string) (Result, error)
 }
+
+// CoverageThresholdSetter is implemented by checks that support
+// a per-source-directory coverage threshold override.
+type CoverageThresholdSetter interface {
+	SetCoverageThreshold(float64)
+}

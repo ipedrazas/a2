@@ -137,6 +137,14 @@ func GetChecks(cfg *config.Config, detected language.DetectionResult) []checker.
 				if len(entry.Disabled) > 0 {
 					regs = filterByDisabledList(regs, entry.Disabled)
 				}
+				// Override coverage threshold if set per source_dir entry
+				if entry.CoverageThreshold > 0 {
+					for i := range regs {
+						if setter, ok := regs[i].Checker.(checker.CoverageThresholdSetter); ok {
+							setter.SetCoverageThreshold(entry.CoverageThreshold)
+						}
+					}
+				}
 				for i := range regs {
 					regs[i].Checker = &pathResolvingChecker{
 						checker:   regs[i].Checker,

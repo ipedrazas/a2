@@ -15,8 +15,9 @@ type CoverageCheck struct {
 	Threshold float64 // Minimum coverage percentage (default 80.0)
 }
 
-func (c *CoverageCheck) ID() string   { return "go:coverage" }
-func (c *CoverageCheck) Name() string { return "Go Coverage" }
+func (c *CoverageCheck) ID() string                     { return "go:coverage" }
+func (c *CoverageCheck) Name() string                   { return "Go Coverage" }
+func (c *CoverageCheck) SetCoverageThreshold(t float64) { c.Threshold = t }
 
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)

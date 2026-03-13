@@ -409,6 +409,31 @@ func (suite *ConfigTestSuite) TestResolveSourceDirProfiles_NoProfile() {
 	suite.Nil(cfg.Language.Go.SourceDir[1].Disabled)
 }
 
+// TestLoad_WithSourceDir_CoverageThreshold tests that coverage_threshold is parsed per source_dir entry.
+func (suite *ConfigTestSuite) TestLoad_WithSourceDir_CoverageThreshold() {
+	configContent := `
+language:
+  go:
+    coverage_threshold: 80
+    source_dir:
+      - path: api
+        profile: api
+        coverage_threshold: 45
+      - path: cli
+        profile: cli
+        coverage_threshold: 25
+`
+	suite.createTempFile(".a2.yaml", configContent)
+
+	cfg, err := Load(suite.tempDir)
+
+	suite.NoError(err)
+	suite.NotNil(cfg)
+	suite.Equal(80.0, cfg.Language.Go.CoverageThreshold)
+	suite.Equal(45.0, cfg.Language.Go.SourceDir[0].CoverageThreshold)
+	suite.Equal(25.0, cfg.Language.Go.SourceDir[1].CoverageThreshold)
+}
+
 // TestGetToolRunByDefault_NotConfigured tests that GetToolRunByDefault returns nil when no tool override.
 func (suite *ConfigTestSuite) TestGetToolRunByDefault_NotConfigured() {
 	cfg := DefaultConfig()

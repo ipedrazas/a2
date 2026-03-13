@@ -10,8 +10,9 @@ import (
 
 // SourceDirEntry represents a single source directory with an optional profile.
 type SourceDirEntry struct {
-	Path    string `yaml:"path"`
-	Profile string `yaml:"profile,omitempty"`
+	Path              string  `yaml:"path"`
+	Profile           string  `yaml:"profile,omitempty"`
+	CoverageThreshold float64 `yaml:"coverage_threshold,omitempty"`
 	// Disabled is populated at runtime by resolving the Profile name.
 	// It is not read from YAML.
 	Disabled []string `yaml:"-"`

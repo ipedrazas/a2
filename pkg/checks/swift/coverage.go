@@ -15,8 +15,9 @@ type CoverageCheck struct {
 	Threshold float64
 }
 
-func (c *CoverageCheck) ID() string   { return "swift:coverage" }
-func (c *CoverageCheck) Name() string { return "Swift Coverage" }
+func (c *CoverageCheck) ID() string                     { return "swift:coverage" }
+func (c *CoverageCheck) Name() string                   { return "Swift Coverage" }
+func (c *CoverageCheck) SetCoverageThreshold(t float64) { c.Threshold = t }
 
 // Run checks test coverage using swift test with coverage enabled.
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {

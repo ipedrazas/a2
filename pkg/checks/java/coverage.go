@@ -17,8 +17,9 @@ type CoverageCheck struct {
 	Threshold float64
 }
 
-func (c *CoverageCheck) ID() string   { return "java:coverage" }
-func (c *CoverageCheck) Name() string { return "Java Coverage" }
+func (c *CoverageCheck) ID() string                     { return "java:coverage" }
+func (c *CoverageCheck) Name() string                   { return "Java Coverage" }
+func (c *CoverageCheck) SetCoverageThreshold(t float64) { c.Threshold = t }
 
 // Run checks for JaCoCo coverage reports and validates against threshold.
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {

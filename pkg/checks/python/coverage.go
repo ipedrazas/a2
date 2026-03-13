@@ -19,6 +19,13 @@ type CoverageCheck struct {
 func (c *CoverageCheck) ID() string   { return "python:coverage" }
 func (c *CoverageCheck) Name() string { return "Python Coverage" }
 
+// SetCoverageThreshold overrides the coverage threshold for this check.
+func (c *CoverageCheck) SetCoverageThreshold(t float64) {
+	if c.Config != nil {
+		c.Config.CoverageThreshold = t
+	}
+}
+
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 

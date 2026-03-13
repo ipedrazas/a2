@@ -16,8 +16,9 @@ type CoverageCheck struct {
 	Threshold float64
 }
 
-func (c *CoverageCheck) ID() string   { return "rust:coverage" }
-func (c *CoverageCheck) Name() string { return "Rust Coverage" }
+func (c *CoverageCheck) ID() string                     { return "rust:coverage" }
+func (c *CoverageCheck) Name() string                   { return "Rust Coverage" }
+func (c *CoverageCheck) SetCoverageThreshold(t float64) { c.Threshold = t }
 
 // Run runs coverage tools and checks that coverage meets the threshold.
 func (c *CoverageCheck) Run(path string) (checker.Result, error) {
