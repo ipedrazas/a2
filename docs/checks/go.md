@@ -16,6 +16,7 @@ This document describes all Go-specific checks available in A2.
 | `go:deps` | Go Vulnerabilities | No | 230 | Scans for vulnerabilities with `govulncheck` |
 | `go:cyclomatic` | Go Complexity | No | 240 | Analyzes cyclomatic complexity of functions |
 | `go:logging` | Go Logging | No | 250 | Detects structured logging vs fmt.Print |
+| `go:deadcode` | Go Dead Code | No | 245 | Detects unreachable functions using deadcode |
 
 ---
 
@@ -152,6 +153,19 @@ Checks for proper structured logging practices instead of fmt.Print statements.
 - **Warn**: Uses fmt.Print for logging or no structured logger detected
 
 **Fix:** Use `log/slog` or other structured logging libraries.
+
+---
+
+## go:deadcode
+
+Detects unreachable functions using the `deadcode` static analysis tool from `golang.org/x/tools`.
+
+**Tool:** `deadcode` (`go install golang.org/x/tools/cmd/deadcode@latest`)
+
+**Status:**
+- **Pass**: No unreachable functions detected
+- **Warn**: Unreachable functions found
+- **Info**: deadcode not installed
 
 ---
 

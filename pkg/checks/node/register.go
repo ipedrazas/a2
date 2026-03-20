@@ -125,5 +125,17 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Suggestion:  "Consider using structured logging (e.g., pino, winston)",
 			},
 		},
+		{
+			Checker: &DeadcodeCheck{Config: nodeCfg},
+			Meta: checker.CheckMeta{
+				ID:          "node:deadcode",
+				Name:        "Node Dead Code",
+				Description: "Detects unused exports and dependencies using knip.",
+				Languages:   []checker.Language{checker.LangNode},
+				Critical:    false,
+				Order:       245,
+				Suggestion:  "Remove unused exports and dependencies",
+			},
+		},
 	}
 }

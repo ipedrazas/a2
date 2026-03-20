@@ -105,38 +105,38 @@ func main() {
 	s.NotEqual(checker.Fail, result.Status)
 }
 
-func (s *DuplicationCheckTestSuite) TestParseOutput_Valid() {
+func (s *DuplicationCheckTestSuite) TestParseReport_Valid() {
 	check := &DuplicationCheck{}
 
-	jsonOutput := `{"statistics":{"clones":3,"duplicatedLines":45,"sources":10,"percentage":12.5}}`
-	stats, err := check.parseOutput(jsonOutput)
+	jsonReport := `{"statistics":{"total":{"clones":3,"duplicatedLines":45,"sources":10,"percentage":12.5}}}`
+	stats, err := check.parseReport([]byte(jsonReport))
 
 	s.NoError(err)
 	s.Equal(3, stats.Clones)
-	s.Equal(45, stats.Duplicates)
+	s.Equal(45, stats.DuplicatedLines)
 	s.Equal(10, stats.Sources)
 	s.InDelta(12.5, stats.Percentage, 0.01)
 }
 
-func (s *DuplicationCheckTestSuite) TestParseOutput_Empty() {
+func (s *DuplicationCheckTestSuite) TestParseReport_Empty() {
 	check := &DuplicationCheck{}
 
-	_, err := check.parseOutput("")
+	_, err := check.parseReport([]byte(""))
 	s.Error(err)
 }
 
-func (s *DuplicationCheckTestSuite) TestParseOutput_InvalidJSON() {
+func (s *DuplicationCheckTestSuite) TestParseReport_InvalidJSON() {
 	check := &DuplicationCheck{}
 
-	_, err := check.parseOutput("not json")
+	_, err := check.parseReport([]byte("not json"))
 	s.Error(err)
 }
 
-func (s *DuplicationCheckTestSuite) TestParseOutput_NoDuplication() {
+func (s *DuplicationCheckTestSuite) TestParseReport_NoDuplication() {
 	check := &DuplicationCheck{}
 
-	jsonOutput := `{"statistics":{"clones":0,"duplicatedLines":0,"sources":5,"percentage":0}}`
-	stats, err := check.parseOutput(jsonOutput)
+	jsonReport := `{"statistics":{"total":{"clones":0,"duplicatedLines":0,"sources":5,"percentage":0}}}`
+	stats, err := check.parseReport([]byte(jsonReport))
 
 	s.NoError(err)
 	s.Equal(0, stats.Clones)

@@ -15,6 +15,7 @@ This document describes all TypeScript-specific checks available in A2.
 | `typescript:coverage` | TypeScript Coverage | No | 220 | Detects coverage tools (Jest, Vitest, c8, nyc) |
 | `typescript:deps` | TypeScript Vulnerabilities | No | 230 | Checks for vulnerabilities using npm/yarn/pnpm audit |
 | `typescript:logging` | TypeScript Logging | No | 250 | Detects logging libraries (winston, pino, tslog), warns on console.log |
+| `typescript:deadcode` | TypeScript Dead Code | No | 245 | Detects unused exports and dependencies using knip |
 
 ---
 
@@ -206,6 +207,19 @@ Checks for structured logging practices instead of console.log.
 **Status:**
 - **Pass**: Logging library found, no console.log calls
 - **Warn**: console.log found or no logging library detected
+
+---
+
+## typescript:deadcode
+
+Detects unused exports and dependencies using knip (or ts-prune as fallback).
+
+**Tool:** `knip` (`npm install -D knip`) or `ts-prune`
+
+**Status:**
+- **Pass**: No unused code detected
+- **Warn**: Unused exports or dependencies found
+- **Info**: knip not installed
 
 **Fix:** Use `winston`, `pino`, or `tslog` for structured logging.
 

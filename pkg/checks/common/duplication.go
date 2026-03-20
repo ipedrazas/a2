@@ -3,6 +3,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -16,17 +17,19 @@ type DuplicationCheck struct{}
 func (c *DuplicationCheck) ID() string   { return "common:duplication" }
 func (c *DuplicationCheck) Name() string { return "Code Duplication" }
 
-// jscpdStatistics represents the statistics section of jscpd JSON output.
-type jscpdStatistics struct {
-	Clones     int     `json:"clones"`
-	Duplicates int     `json:"duplicatedLines"`
-	Sources    int     `json:"sources"`
-	Percentage float64 `json:"percentage"`
+// jscpdTotalStats represents the total statistics in jscpd JSON output.
+type jscpdTotalStats struct {
+	Clones          int     `json:"clones"`
+	DuplicatedLines int     `json:"duplicatedLines"`
+	Sources         int     `json:"sources"`
+	Percentage      float64 `json:"percentage"`
 }
 
-// jscpdOutput represents the top-level jscpd JSON output.
-type jscpdOutput struct {
-	Statistics jscpdStatistics `json:"statistics"`
+// jscpdReport represents the jscpd JSON report file structure.
+type jscpdReport struct {
+	Statistics struct {
+		Total jscpdTotalStats `json:"total"`
+	} `json:"statistics"`
 }
 
 // Run checks for code duplication using jscpd or config file detection.
@@ -48,24 +51,34 @@ func (c *DuplicationCheck) Run(path string) (checker.Result, error) {
 	return rb.ToolNotInstalled("jscpd", "npm install -g jscpd"), nil
 }
 
-// runJscpd executes jscpd and parses the JSON output.
+// runJscpd executes jscpd and parses the JSON report file.
 func (c *DuplicationCheck) runJscpd(path string, rb *checkutil.ResultBuilder) (checker.Result, error) {
-	args := []string{"--reporters", "json", "--output", "/dev/null", "--silent", "."}
+	// jscpd requires a writable output directory for the JSON reporter
+	tmpDir, err := os.MkdirTemp("", "a2-jscpd-*")
+	if err != nil {
+		return rb.Warn("Failed to create temp dir for jscpd output"), nil
+	}
+	defer func() {
+		_ = os.RemoveAll(tmpDir)
+	}()
+
+	args := []string{"--reporters", "json", "--output", tmpDir, "--silent", "."}
 
 	result := checkutil.RunCommand(path, "jscpd", args...)
 	output := result.CombinedOutput()
 
-	// Try to parse JSON from stdout
-	stats, err := c.parseOutput(result.Stdout)
+	// Read the JSON report file that jscpd writes, scoped to tmpDir
+	reportData, err := safepath.ReadFile(tmpDir, "jscpd-report.json")
 	if err != nil {
-		// jscpd may exit non-zero when duplicates are found but still produce output
-		stats, err = c.parseOutput(output)
-		if err != nil {
-			if !result.Success() {
-				return rb.WarnWithOutput("jscpd failed: "+checkutil.TruncateMessage(result.Output(), 200), output), nil
-			}
-			return rb.Pass("No code duplication detected"), nil
+		if !result.Success() {
+			return rb.WarnWithOutput("jscpd failed: "+checkutil.TruncateMessage(result.Output(), 200), output), nil
 		}
+		return rb.Pass("No code duplication detected"), nil
+	}
+
+	stats, err := c.parseReport(reportData)
+	if err != nil {
+		return rb.WarnWithOutput("Failed to parse jscpd report: "+err.Error(), output), nil
 	}
 
 	if stats.Clones == 0 {
@@ -85,18 +98,13 @@ func (c *DuplicationCheck) runJscpd(path string, rb *checkutil.ResultBuilder) (c
 	return rb.PassWithOutput(msg, output), nil
 }
 
-// parseOutput attempts to parse jscpd JSON output.
-func (c *DuplicationCheck) parseOutput(output string) (*jscpdStatistics, error) {
-	if output == "" {
-		return nil, fmt.Errorf("empty output")
-	}
-
-	var result jscpdOutput
-	if err := json.Unmarshal([]byte(output), &result); err != nil {
+// parseReport parses the jscpd JSON report file contents.
+func (c *DuplicationCheck) parseReport(data []byte) (*jscpdTotalStats, error) {
+	var report jscpdReport
+	if err := json.Unmarshal(data, &report); err != nil {
 		return nil, err
 	}
-
-	return &result.Statistics, nil
+	return &report.Statistics.Total, nil
 }
 
 // findConfiguredTools checks for duplication tool configuration files.

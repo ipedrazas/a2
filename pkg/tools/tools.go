@@ -45,6 +45,18 @@ func Registry() []Tool {
 			},
 		},
 		{
+			Name:         "deadcode",
+			Description:  "Go unreachable code detector",
+			CheckCmd:     []string{"deadcode", "-help"},
+			Language:     checker.LangGo,
+			CheckIDs:     []string{"go:deadcode"},
+			Required:     false,
+			RunByDefault: true, // Fast analysis tool
+			Install: InstallCommands{
+				Go: "go install golang.org/x/tools/cmd/deadcode@latest",
+			},
+		},
+		{
 			Name:         "gocyclo",
 			Description:  "Go cyclomatic complexity analyzer",
 			CheckCmd:     []string{"gocyclo"},
@@ -120,6 +132,18 @@ func Registry() []Tool {
 			},
 		},
 		{
+			Name:         "vulture",
+			Description:  "Python dead code detector",
+			CheckCmd:     []string{"vulture", "--version"},
+			Language:     checker.LangPython,
+			CheckIDs:     []string{"python:deadcode"},
+			Required:     false,
+			RunByDefault: true, // Fast analysis tool
+			Install: InstallCommands{
+				Pip: "pip install vulture",
+			},
+		},
+		{
 			Name:         "radon",
 			Description:  "Python code complexity analyzer",
 			CheckCmd:     []string{"radon", "--version"},
@@ -155,6 +179,19 @@ func Registry() []Tool {
 			RunByDefault: true, // Formatter with good defaults
 			Install: InstallCommands{
 				Npm: "npm install -g prettier",
+			},
+		},
+		{
+			Name:         "knip",
+			Description:  "Dead code detector for JS/TS projects",
+			CheckCmd:     []string{"knip", "--version"},
+			Language:     checker.LangNode,
+			CheckIDs:     []string{"node:deadcode", "typescript:deadcode"},
+			Required:     false,
+			RunByDefault: true, // Fast analysis tool
+			Install: InstallCommands{
+				Npm:    "npm install -g knip",
+				Manual: "https://knip.dev",
 			},
 		},
 		{

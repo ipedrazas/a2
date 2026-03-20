@@ -228,25 +228,6 @@ func defaultChecks() []checker.CheckRegistration {
 	return GetChecks(cfg, detected)
 }
 
-// GetChecksForPath returns checks for a specific path with auto-detection.
-// Returns empty checks slice if no language is detected.
-func GetChecksForPath(path string, cfg *config.Config) ([]checker.CheckRegistration, language.DetectionResult) {
-	// Detect languages or use explicit config
-	var detected language.DetectionResult
-	if len(cfg.Language.Explicit) > 0 {
-		langs := make([]checker.Language, len(cfg.Language.Explicit))
-		for i, l := range cfg.Language.Explicit {
-			langs[i] = checker.Language(l)
-		}
-		detected = language.DetectWithOverride(path, langs)
-	} else {
-		// Auto-detect languages, checking configured source directories
-		detected = language.DetectWithSourceDirs(path, cfg.GetSourceDirs())
-	}
-
-	return GetChecks(cfg, detected), detected
-}
-
 // GetSuggestions returns a map of check ID to suggestion string.
 // This aggregates suggestions from all language check registrations.
 func GetSuggestions(cfg *config.Config) map[string]string {

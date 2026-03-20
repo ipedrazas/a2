@@ -35,3 +35,4 @@ go.work.sum
 .task/
 node_modules/
 a2-cache/
+report/

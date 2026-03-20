@@ -4,15 +4,12 @@
 package security
 
 import (
-	"bufio"
 	"encoding/base64"
 	"fmt"
 	"math"
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
 // File extensions by language
@@ -286,77 +283,6 @@ type Finding struct {
 // String returns a formatted representation of the finding.
 func (f Finding) String() string {
 	return fmt.Sprintf("%s in %s:%d", f.Description, f.File, f.Line)
-}
-
-// FileScanner handles scanning of files for security patterns.
-type FileScanner struct {
-	RootPath string
-}
-
-// NewFileScanner creates a new file scanner.
-func NewFileScanner(rootPath string) *FileScanner {
-	return &FileScanner{RootPath: rootPath}
-}
-
-// ScanFile scans a single file and returns lines matching the given patterns.
-func (fs *FileScanner) ScanFile(filePath string, patternGroups map[string][]*regexp.Regexp, language string) []Finding {
-	var findings []Finding
-
-	file, err := filepath.Abs(filePath)
-	if err != nil {
-		return findings
-	}
-
-	// Open file relative to root
-	relPath, err := filepath.Rel(fs.RootPath, file)
-	if err != nil {
-		return findings
-	}
-
-	// Use safepath to open the file
-	content, err := readFile(fs.RootPath, relPath)
-	if err != nil {
-		return findings
-	}
-
-	scanner := bufio.NewScanner(strings.NewReader(content))
-	lineNum := 0
-	for scanner.Scan() {
-		lineNum++
-		line := scanner.Text()
-
-		// Skip comment lines for most patterns
-		if language != "" && isCommentLine(line, language) {
-			continue
-		}
-
-		// Check each pattern group
-		for groupName, patterns := range patternGroups {
-			for _, pattern := range patterns {
-				if pattern.MatchString(line) {
-					findings = append(findings, Finding{
-						Type:        groupName,
-						File:        relPath,
-						Line:        lineNum,
-						Description: groupName,
-						Severity:    "high",
-					})
-					break // One match per line per group
-				}
-			}
-		}
-	}
-
-	return findings
-}
-
-// readFile reads a file relative to root path safely.
-func readFile(root, relPath string) (string, error) {
-	content, err := safepath.ReadFile(root, relPath)
-	if err != nil {
-		return "", err
-	}
-	return string(content), nil
 }
 
 // FormatFindings formats a slice of findings into a readable message.

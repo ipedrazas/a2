@@ -36,7 +36,7 @@
   - Tools: `go-mutesting` (Go), `mutmut` (Python), `Stryker` (JS/TS), `PIT` (Java)
   - Suggested check IDs: `*:mutation`
 
-- [ ] **Dead code / unused exports**
+- [x] **Dead code / unused exports**
   - Reduces cognitive load and attack surface
   - Tools: `deadcode` (Go), `vulture` (Python), `ts-prune` (TS), `unused`
   - Suggested check IDs: `*:deadcode`

@@ -1,0 +1,12 @@
+{
+  "threshold": 10,
+  "reporters": ["json"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/*.md",
+    "**/dist/**",
+    "**/.github/**",
+    "**/**_test.go"
+  ]
+}

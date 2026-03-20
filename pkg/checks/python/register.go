@@ -130,5 +130,17 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Suggestion:  "Consider using structured logging",
 			},
 		},
+		{
+			Checker: &DeadcodeCheck{},
+			Meta: checker.CheckMeta{
+				ID:          "python:deadcode",
+				Name:        "Python Dead Code",
+				Description: "Detects unused code (functions, variables, imports) using vulture.",
+				Languages:   []checker.Language{checker.LangPython},
+				Critical:    false,
+				Order:       245,
+				Suggestion:  "Remove unused code to improve maintainability",
+			},
+		},
 	}
 }

@@ -92,28 +92,3 @@ func (wm *WorkspaceManager) CleanupOld(maxAge time.Duration) (int, error) {
 
 	return count, nil
 }
-
-// ValidateWorkspacePath performs security validation of a workspace path.
-func ValidateWorkspacePath(baseDir, workspaceDir string) error {
-	absBase, err := filepath.Abs(baseDir)
-	if err != nil {
-		return fmt.Errorf("failed to resolve base directory: %w", err)
-	}
-
-	absWorkspace, err := filepath.Abs(workspaceDir)
-	if err != nil {
-		return fmt.Errorf("failed to resolve workspace directory: %w", err)
-	}
-
-	rel, err := filepath.Rel(absBase, absWorkspace)
-	if err != nil {
-		return fmt.Errorf("failed to compute relative path: %w", err)
-	}
-
-	// Check if the workspace is within the base directory
-	if strings.HasPrefix(rel, "..") {
-		return fmt.Errorf("security: workspace path escapes base directory")
-	}
-
-	return nil
-}

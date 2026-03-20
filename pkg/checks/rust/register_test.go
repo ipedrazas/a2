@@ -17,7 +17,7 @@ func (s *RegisterTestSuite) TestRegister_ReturnsAllChecks() {
 
 	checks := Register(cfg)
 
-	// Should have 8 Rust checks
+	// Should have 8 Rust checks (no deadcode — Rust compiler handles this)
 	s.Len(checks, 8)
 }
 

@@ -94,11 +94,6 @@ func (q *JobQueue) Enqueue(job *Job) error {
 	}
 }
 
-// RunningCount returns the approximate number of running jobs.
-func (q *JobQueue) RunningCount() int {
-	return len(q.jobChan)
-}
-
 // JobProcessor is the function that processes a single job.
 type JobProcessor func(ctx context.Context, job *Job) error
 

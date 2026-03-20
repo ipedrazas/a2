@@ -125,5 +125,17 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Suggestion:  "Consider using structured logging",
 			},
 		},
+		{
+			Checker: &DeadcodeCheck{Config: tsCfg},
+			Meta: checker.CheckMeta{
+				ID:          "typescript:deadcode",
+				Name:        "TypeScript Dead Code",
+				Description: "Detects unused exports and dependencies using knip.",
+				Languages:   []checker.Language{checker.LangTypeScript},
+				Critical:    false,
+				Order:       245,
+				Suggestion:  "Remove unused exports and dependencies",
+			},
+		},
 	}
 }

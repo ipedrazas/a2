@@ -2,10 +2,7 @@ package server
 
 import (
 	"fmt"
-	"net/url"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -81,11 +78,6 @@ func (gr *GitHubRepo) CloneURL() string {
 	return fmt.Sprintf("https://github.com/%s/%s.git", gr.Owner, gr.Repo)
 }
 
-// CloneBranch clones a specific branch if specified, otherwise default.
-func (gr *GitHubRepo) CloneBranch() string {
-	return gr.Branch
-}
-
 // Validate validates the GitHubRepo fields.
 func (gr *GitHubRepo) Validate() error {
 	if gr.Owner == "" {
@@ -132,44 +124,4 @@ func CloneRepository(repo *GitHubRepo, workspaceDir string) error {
 	}
 
 	return nil
-}
-
-// ValidateGitHubURL performs additional validation on parsed URLs.
-func ValidateGitHubURL(u *url.URL) error {
-	if u.Host != "github.com" {
-		return fmt.Errorf("only github.com is supported")
-	}
-
-	// Check for suspicious characters in path
-	if strings.Contains(u.Path, "..") {
-		return fmt.Errorf("path traversal detected")
-	}
-
-	return nil
-}
-
-// GetRepoPath returns the path where the repository was cloned.
-func GetRepoPath(workspaceDir string) string {
-	// For shallow clones, the repo is directly in the workspace directory
-	return workspaceDir
-}
-
-// CleanWorkspace removes the workspace directory.
-func CleanWorkspace(workspaceDir string) error {
-	// Security check: ensure we're not deleting something important
-	if workspaceDir == "" || workspaceDir == "/" || workspaceDir == "." {
-		return fmt.Errorf("refusing to delete unsafe path: %s", workspaceDir)
-	}
-
-	absPath, err := filepath.Abs(workspaceDir)
-	if err != nil {
-		return fmt.Errorf("failed to resolve workspace path: %w", err)
-	}
-
-	// Additional safety check
-	if !strings.Contains(absPath, "job-") {
-		return fmt.Errorf("workspace directory does not appear to be a job directory: %s", absPath)
-	}
-
-	return os.RemoveAll(absPath)
 }

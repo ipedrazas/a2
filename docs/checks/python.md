@@ -16,6 +16,7 @@ This document describes all Python-specific checks available in A2.
 | `python:deps` | Python Vulnerabilities | No | 230 | Scans for vulnerabilities |
 | `python:complexity` | Python Complexity | No | 240 | Analyzes cyclomatic complexity with radon |
 | `python:logging` | Python Logging | No | 250 | Detects structured logging vs print() |
+| `python:deadcode` | Python Dead Code | No | 245 | Detects unused code using vulture |
 
 ---
 
@@ -216,6 +217,19 @@ Checks for proper logging practices instead of print() statements.
 **Status:**
 - **Pass**: Uses logging module, no print() statements
 - **Warn**: Uses print() for logging or no logging module detected
+
+---
+
+## python:deadcode
+
+Detects unused code (functions, variables, imports) using vulture.
+
+**Tool:** `vulture` (`pip install vulture`)
+
+**Status:**
+- **Pass**: No unused code detected
+- **Warn**: Unused code items found
+- **Info**: vulture not installed
 
 **Fix:** Use the `logging` module or `structlog`/`loguru`.
 

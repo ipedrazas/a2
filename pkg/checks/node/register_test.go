@@ -19,7 +19,7 @@ func (suite *RegisterTestSuite) TestRegister_ReturnsAllChecks() {
 
 	checks := Register(cfg)
 
-	suite.Len(checks, 9)
+	suite.Len(checks, 10)
 }
 
 // TestRegister_CheckIDs tests that all check IDs are correct.
@@ -38,6 +38,7 @@ func (suite *RegisterTestSuite) TestRegister_CheckIDs() {
 		"node:coverage",
 		"node:deps",
 		"node:logging",
+		"node:deadcode",
 	}
 
 	for i, check := range checks {
@@ -63,6 +64,7 @@ func (suite *RegisterTestSuite) TestRegister_CriticalChecks() {
 	suite.False(checks[6].Meta.Critical, "node:coverage should not be critical")
 	suite.False(checks[7].Meta.Critical, "node:deps should not be critical")
 	suite.False(checks[8].Meta.Critical, "node:logging should not be critical")
+	suite.False(checks[9].Meta.Critical, "node:deadcode should not be critical")
 }
 
 // TestRegister_CheckOrder tests that checks are ordered correctly.
@@ -83,6 +85,7 @@ func (suite *RegisterTestSuite) TestRegister_CheckOrder() {
 	suite.Equal(220, checks[6].Meta.Order) // coverage
 	suite.Equal(230, checks[7].Meta.Order) // deps
 	suite.Equal(250, checks[8].Meta.Order) // logging
+	suite.Equal(245, checks[9].Meta.Order) // deadcode
 }
 
 // TestRegister_LanguageIsNode tests that all checks are for Node language.

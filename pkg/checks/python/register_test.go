@@ -17,8 +17,8 @@ func (s *RegisterTestSuite) TestRegister_ReturnsAllChecks() {
 
 	checks := Register(cfg)
 
-	// Should have 10 checks
-	s.Len(checks, 10)
+	// Should have 11 checks
+	s.Len(checks, 11)
 }
 
 func (s *RegisterTestSuite) TestRegister_CheckIDs() {
@@ -37,6 +37,7 @@ func (s *RegisterTestSuite) TestRegister_CheckIDs() {
 		"python:deps",
 		"python:complexity",
 		"python:logging",
+		"python:deadcode",
 	}
 
 	for i, check := range checks {
@@ -65,7 +66,7 @@ func (s *RegisterTestSuite) TestRegister_CheckOrder() {
 
 	checks := Register(cfg)
 
-	expectedOrders := []int{100, 110, 120, 200, 210, 215, 220, 230, 240, 250}
+	expectedOrders := []int{100, 110, 120, 200, 210, 215, 220, 230, 240, 250, 245}
 
 	for i, check := range checks {
 		s.Equal(expectedOrders[i], check.Meta.Order)
@@ -150,6 +151,7 @@ func (s *RegisterTestSuite) TestRegister_CheckNames() {
 		"Python Vulnerabilities",
 		"Python Complexity",
 		"Python Logging",
+		"Python Dead Code",
 	}
 
 	for i, check := range checks {

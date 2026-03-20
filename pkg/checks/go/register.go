@@ -140,5 +140,17 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Suggestion:  "Consider using structured logging (e.g., slog, zap)",
 			},
 		},
+		{
+			Checker: &DeadcodeCheck{},
+			Meta: checker.CheckMeta{
+				ID:          "go:deadcode",
+				Name:        "Go Dead Code",
+				Description: "Detects unreachable functions using the deadcode static analysis tool.",
+				Languages:   []checker.Language{checker.LangGo},
+				Critical:    false,
+				Order:       245,
+				Suggestion:  "Remove unreachable functions to reduce code size",
+			},
+		},
 	}
 }

@@ -51,10 +51,10 @@ Language-specific checks are documented in separate files:
 
 | Language | Checks | Documentation |
 |----------|--------|---------------|
-| Go | 10 | [Go Checks](checks/go.md) |
-| Python | 10 | [Python Checks](checks/python.md) |
-| Node.js | 9 | [Node.js Checks](checks/node.md) |
-| TypeScript | 9 | [TypeScript Checks](checks/typescript.md) |
+| Go | 11 | [Go Checks](checks/go.md) |
+| Python | 11 | [Python Checks](checks/python.md) |
+| Node.js | 10 | [Node.js Checks](checks/node.md) |
+| TypeScript | 10 | [TypeScript Checks](checks/typescript.md) |
 | Java | 8 | [Java Checks](checks/java.md) |
 | Rust | 8 | [Rust Checks](checks/rust.md) |
 
