@@ -32,7 +32,7 @@ var BuiltInTargets = map[string]Target{
 			"common:license", "common:sast", "common:changelog",
 			"common:precommit", "common:env", "common:contributing",
 			"common:secrets", "common:config_validation", "common:retry",
-			"common:editorconfig",
+			"common:editorconfig", "common:duplication",
 			// Go optional checks
 			"go:coverage", "go:deps", "go:cyclomatic", "go:logging", "go:race",
 			// Python optional checks

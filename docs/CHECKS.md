@@ -88,6 +88,7 @@ These checks apply to all projects regardless of language.
 | `common:config_validation` | Config Validation | No | 1110 | Detects config validation (Pydantic, Zod, Viper, etc.) |
 | `common:retry` | Retry/Resilience | No | 1120 | Detects retry libraries (tenacity, backoff, Resilience4j) |
 | `common:editorconfig` | Editor Config | No | 1130 | Detects editor configuration files |
+| `common:duplication` | Code Duplication | No | 1075 | Detects code duplication using jscpd |
 
 ---
 
@@ -574,6 +575,24 @@ Detects editor configuration files.
 **Status:**
 - **Pass**: Editor configuration found
 - **Warn**: No editor configuration found
+
+---
+
+### common:duplication
+
+Detects code duplication using jscpd copy/paste detection.
+
+**Tool:** [jscpd](https://github.com/kucherenko/jscpd) (`npm install -g jscpd`)
+
+**How it works:**
+1. If `jscpd` is installed: runs `jscpd --reporters json` and parses the output
+2. If not installed: checks for configuration files (`.jscpd.json`, `sonar-project.properties`, etc.)
+3. Falls back to Info status recommending installation
+
+**Status:**
+- **Pass**: No duplication detected, or duplication below 10%
+- **Warn**: Duplication percentage exceeds 10%
+- **Info**: jscpd not installed and no configuration found
 
 ---
 

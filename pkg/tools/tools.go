@@ -268,6 +268,19 @@ func Registry() []Tool {
 				Manual: "https://aquasecurity.github.io/trivy/latest/getting-started/installation/",
 			},
 		},
+		{
+			Name:         "jscpd",
+			Description:  "Copy/paste detector for source code",
+			CheckCmd:     []string{"jscpd", "--version"},
+			Language:     checker.LangCommon,
+			CheckIDs:     []string{"common:duplication"},
+			Required:     false,
+			RunByDefault: true, // Fast analysis tool
+			Install: InstallCommands{
+				Npm:    "npm install -g jscpd",
+				Manual: "https://github.com/kucherenko/jscpd",
+			},
+		},
 	}
 }
 

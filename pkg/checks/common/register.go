@@ -274,6 +274,18 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Suggestion:  "Add distributed tracing support",
 			},
 		},
+		{
+			Checker: &DuplicationCheck{},
+			Meta: checker.CheckMeta{
+				ID:          "common:duplication",
+				Name:        "Code Duplication",
+				Description: "Detects code duplication using jscpd to identify copy-paste patterns.",
+				Languages:   []checker.Language{checker.LangCommon},
+				Critical:    false,
+				Order:       1075,
+				Suggestion:  "Reduce code duplication by extracting shared logic",
+			},
+		},
 	}
 
 	// Add external checks from config
