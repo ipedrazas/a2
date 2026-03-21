@@ -54,6 +54,13 @@ jobs:
           go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
           go install github.com/kisielk/errcheck@latest
           go install github.com/zricethezav/gitleaks/v8@latest
+          go install golang.org/x/tools/cmd/deadcode@latest
+
+      - name: install A2 npm dependencies
+        uses: actions/setup-node@v6
+        with:
+          node-version: "25"
+        run: npm install -g jscpd
 
       - name: Install A2 Python dependencies
         run: |
