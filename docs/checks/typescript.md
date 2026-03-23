@@ -15,6 +15,7 @@ This document describes all TypeScript-specific checks available in A2.
 | `typescript:coverage` | TypeScript Coverage | No | 220 | Detects coverage tools (Jest, Vitest, c8, nyc) |
 | `typescript:deps` | TypeScript Vulnerabilities | No | 230 | Checks for vulnerabilities using npm/yarn/pnpm audit |
 | `typescript:logging` | TypeScript Logging | No | 250 | Detects logging libraries (winston, pino, tslog), warns on console.log |
+| `typescript:deps_freshness` | TypeScript Dependency Freshness | No | 235 | Checks for outdated packages |
 | `typescript:deadcode` | TypeScript Dead Code | No | 245 | Detects unused exports and dependencies using knip |
 
 ---
@@ -207,6 +208,16 @@ Checks for structured logging practices instead of console.log.
 **Status:**
 - **Pass**: Logging library found, no console.log calls
 - **Warn**: console.log found or no logging library detected
+
+---
+
+## typescript:deps_freshness
+
+Checks for outdated packages using `npm outdated --json` (or yarn/pnpm equivalent).
+
+**Status:**
+- **Pass**: All packages up to date, or fewer than 20 outdated
+- **Warn**: More than 20 outdated packages
 
 ---
 

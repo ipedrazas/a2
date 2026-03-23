@@ -16,6 +16,7 @@ This document describes all Go-specific checks available in A2.
 | `go:deps` | Go Vulnerabilities | No | 230 | Scans for vulnerabilities with `govulncheck` |
 | `go:cyclomatic` | Go Complexity | No | 240 | Analyzes cyclomatic complexity of functions |
 | `go:logging` | Go Logging | No | 250 | Detects structured logging vs fmt.Print |
+| `go:deps_freshness` | Go Dependency Freshness | No | 235 | Checks for outdated Go module dependencies |
 | `go:deadcode` | Go Dead Code | No | 245 | Detects unreachable functions using deadcode |
 
 ---
@@ -153,6 +154,16 @@ Checks for proper structured logging practices instead of fmt.Print statements.
 - **Warn**: Uses fmt.Print for logging or no structured logger detected
 
 **Fix:** Use `log/slog` or other structured logging libraries.
+
+---
+
+## go:deps_freshness
+
+Checks for outdated Go module dependencies using `go list -m -u all`.
+
+**Status:**
+- **Pass**: All dependencies up to date, or fewer than 20 outdated
+- **Warn**: More than 20 outdated dependencies
 
 ---
 

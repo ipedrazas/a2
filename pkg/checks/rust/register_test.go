@@ -17,8 +17,8 @@ func (s *RegisterTestSuite) TestRegister_ReturnsAllChecks() {
 
 	checks := Register(cfg)
 
-	// Should have 8 Rust checks (no deadcode — Rust compiler handles this)
-	s.Len(checks, 8)
+	// Should have 9 Rust checks (no deadcode — Rust compiler handles this)
+	s.Len(checks, 9)
 }
 
 func (s *RegisterTestSuite) TestRegister_CheckIDs() {
@@ -34,6 +34,7 @@ func (s *RegisterTestSuite) TestRegister_CheckIDs() {
 		"rust:lint",
 		"rust:coverage",
 		"rust:deps",
+		"rust:deps_freshness",
 		"rust:logging",
 	}
 
@@ -47,7 +48,7 @@ func (s *RegisterTestSuite) TestRegister_CheckOrder() {
 
 	checks := Register(cfg)
 
-	expectedOrders := []int{100, 110, 120, 200, 210, 220, 230, 250}
+	expectedOrders := []int{100, 110, 120, 200, 210, 220, 230, 235, 250}
 
 	for i, check := range checks {
 		s.Equal(expectedOrders[i], check.Meta.Order)

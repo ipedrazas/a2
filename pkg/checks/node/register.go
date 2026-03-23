@@ -126,6 +126,18 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
+			Checker: &DepsFreshnessCheck{Config: nodeCfg},
+			Meta: checker.CheckMeta{
+				ID:          "node:deps_freshness",
+				Name:        "Node Dependency Freshness",
+				Description: "Checks for outdated Node.js packages using npm/yarn/pnpm outdated.",
+				Languages:   []checker.Language{checker.LangNode},
+				Critical:    false,
+				Order:       235,
+				Suggestion:  "Run 'npm outdated' to review stale dependencies",
+			},
+		},
+		{
 			Checker: &DeadcodeCheck{Config: nodeCfg},
 			Meta: checker.CheckMeta{
 				ID:          "node:deadcode",

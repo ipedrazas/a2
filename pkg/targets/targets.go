@@ -34,17 +34,17 @@ var BuiltInTargets = map[string]Target{
 			"common:secrets", "common:config_validation", "common:retry",
 			"common:editorconfig", "common:duplication",
 			// Go optional checks
-			"go:coverage", "go:deps", "go:cyclomatic", "go:logging", "go:race", "go:deadcode",
+			"go:coverage", "go:deps", "go:cyclomatic", "go:logging", "go:race", "go:deadcode", "go:deps_freshness",
 			// Python optional checks
-			"python:coverage", "python:deps", "python:complexity", "python:logging", "python:deadcode",
+			"python:coverage", "python:deps", "python:complexity", "python:logging", "python:deadcode", "python:deps_freshness",
 			// Node.js optional checks
-			"node:coverage", "node:deps", "node:logging", "node:deadcode",
+			"node:coverage", "node:deps", "node:logging", "node:deadcode", "node:deps_freshness",
 			// Java optional checks
 			"java:coverage", "java:deps", "java:logging",
 			// Rust optional checks
 			"rust:coverage", "rust:deps", "rust:logging",
 			// TypeScript optional checks
-			"typescript:coverage", "typescript:deps", "typescript:logging", "typescript:deadcode",
+			"typescript:coverage", "typescript:deps", "typescript:logging", "typescript:deadcode", "typescript:deps_freshness",
 		},
 	},
 	"production": {

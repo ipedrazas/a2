@@ -25,7 +25,7 @@
   - High duplication is one of the strongest predictors of maintenance burden
   - Suggested check ID: `common:duplication`
 
-- [ ] **Dependency freshness / staleness**
+- [x] **Dependency freshness / staleness**
   - `*:deps` validates dependency management exists but doesn't check how outdated dependencies are
   - Tools: `npm outdated`, `pip list --outdated`, `go list -m -u all`, `cargo outdated`
   - Stale deps accumulate security risk and upgrade pain

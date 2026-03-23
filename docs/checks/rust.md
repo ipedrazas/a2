@@ -13,6 +13,7 @@ This document describes all Rust-specific checks available in A2.
 | `rust:lint` | Rust Clippy | No | 210 | Runs Clippy for linting and code quality (`cargo clippy`) |
 | `rust:coverage` | Rust Coverage | No | 220 | Detects coverage tools (tarpaulin, llvm-cov) and reports |
 | `rust:deps` | Rust Vulnerabilities | No | 230 | Checks for vulnerabilities using `cargo audit` or cargo-deny |
+| `rust:deps_freshness` | Rust Dependency Freshness | No | 235 | Checks for outdated crates using cargo-outdated |
 | `rust:logging` | Rust Logging | No | 250 | Detects logging crates (tracing, log, slog), warns on println! |
 
 ---
@@ -144,6 +145,19 @@ Checks for security vulnerabilities in dependencies.
 - **Warn**: Vulnerabilities detected or no audit tool installed
 
 **Recommendation:** Install cargo-audit (`cargo install cargo-audit`).
+
+---
+
+## rust:deps_freshness
+
+Checks for outdated Rust crate dependencies using `cargo-outdated`.
+
+**Tool:** `cargo-outdated` (`cargo install cargo-outdated`)
+
+**Status:**
+- **Pass**: All crates up to date, or fewer than 20 outdated
+- **Warn**: More than 20 outdated crates or cargo outdated failed
+- **Info**: cargo-outdated not installed
 
 ---
 

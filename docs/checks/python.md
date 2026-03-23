@@ -16,6 +16,7 @@ This document describes all Python-specific checks available in A2.
 | `python:deps` | Python Vulnerabilities | No | 230 | Scans for vulnerabilities |
 | `python:complexity` | Python Complexity | No | 240 | Analyzes cyclomatic complexity with radon |
 | `python:logging` | Python Logging | No | 250 | Detects structured logging vs print() |
+| `python:deps_freshness` | Python Dependency Freshness | No | 235 | Checks for outdated Python packages |
 | `python:deadcode` | Python Dead Code | No | 245 | Detects unused code using vulture |
 
 ---
@@ -217,6 +218,16 @@ Checks for proper logging practices instead of print() statements.
 **Status:**
 - **Pass**: Uses logging module, no print() statements
 - **Warn**: Uses print() for logging or no logging module detected
+
+---
+
+## python:deps_freshness
+
+Checks for outdated Python packages using `pip list --outdated`.
+
+**Status:**
+- **Pass**: All packages up to date, or fewer than 20 outdated
+- **Warn**: More than 20 outdated packages or pip command failed
 
 ---
 

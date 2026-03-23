@@ -19,7 +19,7 @@ func (suite *RegisterTestSuite) TestRegister_ReturnsAllChecks() {
 
 	checks := Register(cfg)
 
-	suite.Len(checks, 10)
+	suite.Len(checks, 11)
 }
 
 // TestRegister_CheckIDs tests that all check IDs are correct.
@@ -38,6 +38,7 @@ func (suite *RegisterTestSuite) TestRegister_CheckIDs() {
 		"node:coverage",
 		"node:deps",
 		"node:logging",
+		"node:deps_freshness",
 		"node:deadcode",
 	}
 
@@ -64,7 +65,8 @@ func (suite *RegisterTestSuite) TestRegister_CriticalChecks() {
 	suite.False(checks[6].Meta.Critical, "node:coverage should not be critical")
 	suite.False(checks[7].Meta.Critical, "node:deps should not be critical")
 	suite.False(checks[8].Meta.Critical, "node:logging should not be critical")
-	suite.False(checks[9].Meta.Critical, "node:deadcode should not be critical")
+	suite.False(checks[9].Meta.Critical, "node:deps_freshness should not be critical")
+	suite.False(checks[10].Meta.Critical, "node:deadcode should not be critical")
 }
 
 // TestRegister_CheckOrder tests that checks are ordered correctly.
@@ -79,13 +81,14 @@ func (suite *RegisterTestSuite) TestRegister_CheckOrder() {
 	suite.Equal(120, checks[2].Meta.Order)
 
 	// Non-critical checks should have order 200-250
-	suite.Equal(200, checks[3].Meta.Order) // format
-	suite.Equal(210, checks[4].Meta.Order) // lint
-	suite.Equal(215, checks[5].Meta.Order) // type
-	suite.Equal(220, checks[6].Meta.Order) // coverage
-	suite.Equal(230, checks[7].Meta.Order) // deps
-	suite.Equal(250, checks[8].Meta.Order) // logging
-	suite.Equal(245, checks[9].Meta.Order) // deadcode
+	suite.Equal(200, checks[3].Meta.Order)  // format
+	suite.Equal(210, checks[4].Meta.Order)  // lint
+	suite.Equal(215, checks[5].Meta.Order)  // type
+	suite.Equal(220, checks[6].Meta.Order)  // coverage
+	suite.Equal(230, checks[7].Meta.Order)  // deps
+	suite.Equal(250, checks[8].Meta.Order)  // logging
+	suite.Equal(235, checks[9].Meta.Order)  // deps_freshness
+	suite.Equal(245, checks[10].Meta.Order) // deadcode
 }
 
 // TestRegister_LanguageIsNode tests that all checks are for Node language.

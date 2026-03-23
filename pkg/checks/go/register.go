@@ -141,6 +141,18 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
+			Checker: &DepsFreshnessCheck{},
+			Meta: checker.CheckMeta{
+				ID:          "go:deps_freshness",
+				Name:        "Go Dependency Freshness",
+				Description: "Checks for outdated Go module dependencies using go list -m -u all.",
+				Languages:   []checker.Language{checker.LangGo},
+				Critical:    false,
+				Order:       235,
+				Suggestion:  "Run 'go get -u ./...' to update dependencies",
+			},
+		},
+		{
 			Checker: &DeadcodeCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "go:deadcode",

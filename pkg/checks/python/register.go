@@ -131,6 +131,18 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
+			Checker: &DepsFreshnessCheck{},
+			Meta: checker.CheckMeta{
+				ID:          "python:deps_freshness",
+				Name:        "Python Dependency Freshness",
+				Description: "Checks for outdated Python packages using pip list --outdated.",
+				Languages:   []checker.Language{checker.LangPython},
+				Critical:    false,
+				Order:       235,
+				Suggestion:  "Run 'pip list --outdated' to review stale dependencies",
+			},
+		},
+		{
 			Checker: &DeadcodeCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "python:deadcode",

@@ -17,8 +17,8 @@ func (s *RegisterTestSuite) TestRegister_ReturnsAllChecks() {
 
 	checks := Register(cfg)
 
-	// Should have 10 TypeScript checks
-	s.Len(checks, 10)
+	// Should have 11 TypeScript checks
+	s.Len(checks, 11)
 }
 
 func (s *RegisterTestSuite) TestRegister_CheckIDs() {
@@ -36,6 +36,7 @@ func (s *RegisterTestSuite) TestRegister_CheckIDs() {
 		"typescript:coverage",
 		"typescript:deps",
 		"typescript:logging",
+		"typescript:deps_freshness",
 		"typescript:deadcode",
 	}
 
@@ -49,7 +50,7 @@ func (s *RegisterTestSuite) TestRegister_CheckOrder() {
 
 	checks := Register(cfg)
 
-	expectedOrders := []int{100, 110, 120, 200, 210, 215, 220, 230, 250, 245}
+	expectedOrders := []int{100, 110, 120, 200, 210, 215, 220, 230, 250, 235, 245}
 
 	for i, check := range checks {
 		s.Equal(expectedOrders[i], check.Meta.Order)
@@ -71,7 +72,8 @@ func (s *RegisterTestSuite) TestRegister_CriticalChecks() {
 	s.False(checks[6].Meta.Critical, "coverage should not be critical")
 	s.False(checks[7].Meta.Critical, "deps should not be critical")
 	s.False(checks[8].Meta.Critical, "logging should not be critical")
-	s.False(checks[9].Meta.Critical, "deadcode should not be critical")
+	s.False(checks[9].Meta.Critical, "deps_freshness should not be critical")
+	s.False(checks[10].Meta.Critical, "deadcode should not be critical")
 }
 
 func (s *RegisterTestSuite) TestRegister_AllTypeScriptLanguage() {

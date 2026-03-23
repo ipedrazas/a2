@@ -126,6 +126,18 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
+			Checker: &DepsFreshnessCheck{Config: tsCfg},
+			Meta: checker.CheckMeta{
+				ID:          "typescript:deps_freshness",
+				Name:        "TypeScript Dependency Freshness",
+				Description: "Checks for outdated packages using npm/yarn/pnpm outdated.",
+				Languages:   []checker.Language{checker.LangTypeScript},
+				Critical:    false,
+				Order:       235,
+				Suggestion:  "Run 'npm outdated' to review stale dependencies",
+			},
+		},
+		{
 			Checker: &DeadcodeCheck{Config: tsCfg},
 			Meta: checker.CheckMeta{
 				ID:          "typescript:deadcode",

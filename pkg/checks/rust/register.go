@@ -99,6 +99,18 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
+			Checker: &DepsFreshnessCheck{},
+			Meta: checker.CheckMeta{
+				ID:          "rust:deps_freshness",
+				Name:        "Rust Dependency Freshness",
+				Description: "Checks for outdated Rust crate dependencies using cargo-outdated.",
+				Languages:   []checker.Language{checker.LangRust},
+				Critical:    false,
+				Order:       235,
+				Suggestion:  "Run 'cargo update' to update dependencies",
+			},
+		},
+		{
 			Checker: &LoggingCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "rust:logging",

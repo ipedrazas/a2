@@ -222,6 +222,18 @@ func Registry() []Tool {
 			},
 		},
 		{
+			Name:         "cargo-outdated",
+			Description:  "Rust dependency freshness checker",
+			CheckCmd:     []string{"cargo", "outdated", "--version"},
+			Language:     checker.LangRust,
+			CheckIDs:     []string{"rust:deps_freshness"},
+			Required:     false,
+			RunByDefault: true, // Fast analysis tool
+			Install: InstallCommands{
+				Cargo: "cargo install cargo-outdated",
+			},
+		},
+		{
 			Name:         "cargo-tarpaulin",
 			Description:  "Rust code coverage tool",
 			CheckCmd:     []string{"cargo", "tarpaulin", "--version"},

@@ -15,6 +15,7 @@ This document describes all Node.js-specific checks available in A2.
 | `node:coverage` | Node Coverage | No | 220 | Measures test coverage |
 | `node:deps` | Node Vulnerabilities | No | 230 | Scans for vulnerabilities |
 | `node:logging` | Node Logging | No | 250 | Detects structured logging vs console.log |
+| `node:deps_freshness` | Node Dependency Freshness | No | 235 | Checks for outdated Node.js packages |
 | `node:deadcode` | Node Dead Code | No | 245 | Detects unused exports and dependencies using knip |
 
 ---
@@ -199,6 +200,16 @@ Checks for proper structured logging practices instead of console.log.
 - **Warn**: Uses console.log for logging or no structured logger detected
 
 **Fix:** Use `winston`, `pino`, or another structured logging library.
+
+---
+
+## node:deps_freshness
+
+Checks for outdated Node.js packages using `npm outdated --json` (or yarn/pnpm equivalent).
+
+**Status:**
+- **Pass**: All packages up to date, or fewer than 20 outdated
+- **Warn**: More than 20 outdated packages
 
 ---
 
