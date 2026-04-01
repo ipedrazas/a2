@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 vars:
   BINARY: a2
@@ -16,7 +16,7 @@ tasks:
     desc: Show available tasks
     cmds:
       - task --list
-  
+
   dependencies:
     desc: Install dependencies
     cmds:
@@ -29,18 +29,18 @@ tasks:
       - go install github.com/kisielk/errcheck@latest
       - go install github.com/google/go-licenses/v2@latest
       - go get github.com/cucumber/godog/cmd/godog@latest
-      
+      - go install -v github.com/avito-tech/go-mutesting/...
 
   build:
     desc: Build the binary
     cmds:
       - go build -ldflags="-s -w -X github.com/ipedrazas/a2/pkg/version.Version={{.VERSION}} -X github.com/ipedrazas/a2/pkg/version.GitSHA={{.GITSHA}} -X github.com/ipedrazas/a2/pkg/version.BuildDate={{.BUILDDATE}}" -o dist/{{.BINARY}} .
     sources:
-      - '**/*.go'
+      - "**/*.go"
       - go.mod
       - go.sum
     generates:
-      - '{{.BINARY}}'
+      - "{{.BINARY}}"
 
   run:
     desc: Run a2 check on current directory

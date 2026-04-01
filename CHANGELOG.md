@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Naming consistency check** (`common:naming`) - Detects mixed file naming conventions:
+  - Classifies source files as snake_case, camelCase, PascalCase, kebab-case, or lowercase
+  - Detects naming convention enforcement tools (ESLint, Pylint, RuboCop, Checkstyle, Clippy)
+  - Pass when ≥90% of files follow the same convention or enforcement tool is configured
+  - Warns when mixed conventions detected with details on which conventions are used
+  - Skips test file suffixes/prefixes, non-code files, and common vendor directories
+
 ## [0.6.1] - 2026-02-24
 
 ### Changed

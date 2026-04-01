@@ -89,6 +89,7 @@ These checks apply to all projects regardless of language.
 | `common:retry` | Retry/Resilience | No | 1120 | Detects retry libraries (tenacity, backoff, Resilience4j) |
 | `common:editorconfig` | Editor Config | No | 1130 | Detects editor configuration files |
 | `common:duplication` | Code Duplication | No | 1075 | Detects code duplication using jscpd |
+| `common:naming` | Naming Consistency | No | 1080 | Checks file naming convention consistency |
 
 ---
 
@@ -596,6 +597,35 @@ Detects code duplication using jscpd copy/paste detection.
 
 ---
 
+### common:naming
+
+Checks file naming convention consistency across the project's source files.
+
+**Naming conventions detected:**
+- `snake_case` (e.g., `user_service.go`)
+- `camelCase` (e.g., `userService.js`)
+- `PascalCase` (e.g., `UserService.java`)
+- `kebab-case` (e.g., `user-service.ts`)
+- `lowercase` (e.g., `main.go`, single-word names)
+
+**Naming enforcement tools detected:**
+- ESLint: `@typescript-eslint/naming-convention` rule
+- Pylint: `naming-style` or `naming-convention` settings
+- RuboCop: `Naming/` cops
+- Checkstyle: `NamingConvention` or `MemberName` modules
+- Clippy: `clippy.toml` or `.clippy.toml`
+
+**Directories skipped:**
+- `node_modules`, `vendor`, `__pycache__`, `dist`, `build`, `target`, `.git`, `bin`, `obj`, `out`
+
+**Status:**
+- **Pass**: Naming convention enforcement configured, or ≥90% of files follow the same convention
+- **Warn**: Mixed naming conventions detected (dominant convention <90%)
+
+**Recommendation:** Adopt a consistent file naming convention and consider enforcing it with a linter rule.
+
+---
+
 ## Security Checks
 
 ### security:filesystem
@@ -747,9 +777,9 @@ external:
 | TypeScript | 9 |
 | Java | 8 |
 | Rust | 8 |
-| Common | 22 |
+| Common | 23 |
 | DevOps | 5 |
-| **Total** | **81** |
+| **Total** | **82** |
 
 **Critical checks** stop execution in sequential mode when they fail.
 **Non-critical checks** report warnings but allow other checks to continue.

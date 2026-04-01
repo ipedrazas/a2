@@ -286,6 +286,18 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Suggestion:  "Reduce code duplication by extracting shared logic",
 			},
 		},
+		{
+			Checker: &NamingCheck{},
+			Meta: checker.CheckMeta{
+				ID:          "common:naming",
+				Name:        "Naming Consistency",
+				Description: "Checks file naming convention consistency across the project.",
+				Languages:   []checker.Language{checker.LangCommon},
+				Critical:    false,
+				Order:       1080,
+				Suggestion:  "Adopt a consistent file naming convention across the project",
+			},
+		},
 	}
 
 	// Add external checks from config
