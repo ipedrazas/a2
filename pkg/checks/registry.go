@@ -107,13 +107,88 @@ var commonChecksUsingSourceDirs = map[string]bool{
 }
 
 // wrapCommonRegistrations wraps common checks that use source_dir with multiPathChecker.
+// Checks already scoped to a specific source_dir by per-language disabling
+// (pathResolvingChecker) are left untouched.
 func wrapCommonRegistrations(regs []checker.CheckRegistration, cfg *config.Config) []checker.CheckRegistration {
 	for i := range regs {
+		if _, scoped := regs[i].Checker.(*pathResolvingChecker); scoped {
+			continue
+		}
 		if commonChecksUsingSourceDirs[regs[i].Meta.ID] {
 			regs[i].Checker = &multiPathChecker{checker: regs[i].Checker, cfg: cfg}
 		}
 	}
 	return regs
+}
+
+// scopePerLanguage applies per-language disabled lists (checks.<lang>.disabled)
+// to language-agnostic checks (common, devops, security). These checks normally
+// run once at the repo root. When a check is disabled for only a subset of the
+// detected languages, it is re-scoped to run against the source_dir(s) of the
+// languages that still want it; when disabled for every detected language it is
+// dropped entirely. Checks unaffected by any per-language list are returned
+// unchanged, preserving the single-root-run behaviour.
+func scopePerLanguage(regs []checker.CheckRegistration, cfg *config.Config, detected language.DetectionResult) []checker.CheckRegistration {
+	if len(cfg.Checks.PerLanguage) == 0 || len(detected.Languages) == 0 {
+		return regs
+	}
+
+	var out []checker.CheckRegistration
+	for _, reg := range regs {
+		id := reg.Meta.ID
+
+		var enabledLangs []checker.Language
+		anyDisabled := false
+		for _, lang := range detected.Languages {
+			if cfg.IsCheckDisabledForOnlyLang(id, string(lang)) {
+				anyDisabled = true
+			} else {
+				enabledLangs = append(enabledLangs, lang)
+			}
+		}
+
+		if !anyDisabled {
+			// No per-language list touches this check: keep root behaviour.
+			out = append(out, reg)
+			continue
+		}
+		if len(enabledLangs) == 0 {
+			// Disabled for every detected language: drop it.
+			continue
+		}
+
+		// Run the check scoped to each still-enabled language's source_dir(s).
+		for _, path := range scopedPathsForLangs(cfg, enabledLangs) {
+			scoped := reg
+			if path != "" {
+				scoped.Checker = &pathResolvingChecker{checker: reg.Checker, sourceDir: path}
+			}
+			out = append(out, scoped)
+		}
+	}
+	return out
+}
+
+// scopedPathsForLangs returns the deduplicated set of source_dir paths for the
+// given languages. A language with no configured source_dir contributes the
+// repo root (empty string).
+func scopedPathsForLangs(cfg *config.Config, langs []checker.Language) []string {
+	seen := make(map[string]bool)
+	var paths []string
+	for _, lang := range langs {
+		dirs := cfg.GetSourceDirsForLang(string(lang))
+		if len(dirs) == 0 {
+			dirs = []string{""}
+		}
+		for _, d := range dirs {
+			if seen[d] {
+				continue
+			}
+			seen[d] = true
+			paths = append(paths, d)
+		}
+	}
+	return paths
 }
 
 // GetChecks returns checks for detected languages based on configuration.
@@ -124,15 +199,24 @@ func GetChecks(cfg *config.Config, detected language.DetectionResult) []checker.
 
 	// Get checks for each detected language
 	for _, lang := range detected.Languages {
+		// Per-language disabled list (checks.<lang>.disabled) applies to every
+		// check run in this language's context.
+		langDisabled := cfg.Checks.PerLanguage[string(lang)]
 		entries := cfg.GetSourceDirEntriesForLang(string(lang))
 		if len(entries) == 0 {
 			// No source_dir configured, run checks from root
 			regs := getChecksForLanguage(lang, cfg)
+			if len(langDisabled) > 0 {
+				regs = filterByDisabledList(regs, langDisabled)
+			}
 			registrations = append(registrations, regs...)
 		} else {
 			// Create a full set of checks per source_dir
 			for _, entry := range entries {
 				regs := getChecksForLanguage(lang, cfg)
+				if len(langDisabled) > 0 {
+					regs = filterByDisabledList(regs, langDisabled)
+				}
 				// Filter out checks disabled by the directory's profile
 				if len(entry.Disabled) > 0 {
 					regs = filterByDisabledList(regs, entry.Disabled)
@@ -157,11 +241,14 @@ func GetChecks(cfg *config.Config, detected language.DetectionResult) []checker.
 	}
 
 	// Add devops checks (language-agnostic, root path)
-	registrations = append(registrations, devopscheck.Register(cfg)...)
+	registrations = append(registrations, scopePerLanguage(devopscheck.Register(cfg), cfg, detected)...)
 	// Add security checks (language-agnostic, root path)
-	registrations = append(registrations, securitycheck.Register(cfg)...)
-	// Add common checks (language-agnostic, root path; some run on source_dirs too)
-	registrations = append(registrations, wrapCommonRegistrations(common.Register(cfg), cfg)...)
+	registrations = append(registrations, scopePerLanguage(securitycheck.Register(cfg), cfg, detected)...)
+	// Add common checks (language-agnostic, root path; some run on source_dirs too).
+	// Per-language scoping runs first so checks disabled for a subset of languages
+	// run only against the still-enabled languages' source_dirs; multi-path
+	// wrapping then applies to any check left running once at the repo root.
+	registrations = append(registrations, wrapCommonRegistrations(scopePerLanguage(common.Register(cfg), cfg, detected), cfg)...)
 
 	// Sort by order (critical checks first)
 	sort.Slice(registrations, func(i, j int) bool {

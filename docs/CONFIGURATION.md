@@ -284,3 +284,65 @@ a2 check --skip="*:tests" --skip="*:license"
 - Wildcards work with both `.a2.yaml` configuration and `--skip` CLI flags
 - Aliases (e.g., `tests` -> `go:tests`) continue to work alongside wildcards
 - Invalid patterns with multiple wildcards (e.g., `*:*:*`) are treated as non-matching
+
+---
+
+## Per-Language Disabling
+
+The top-level `checks.disabled` list applies to **all** languages. In a
+monorepo you often want a check to apply to one language but not another — for
+example, requiring metrics instrumentation in a Go backend but not in a
+TypeScript frontend.
+
+Add a language-keyed block under `checks:` with its own `disabled:` list. The
+same wildcard and alias rules apply.
+
+```yaml
+checks:
+  disabled:            # applies to every language
+    - go:logging
+    - "devops:*"
+  typescript:
+    disabled:          # applies only when TypeScript is active
+      - common:metrics
+  go:
+    disabled:
+      - common:tracing
+```
+
+Valid language keys are: `go`, `python`, `node`, `java`, `rust`, `typescript`,
+`swift`. An unknown key (e.g. a typo like `typscript`) is rejected with an error.
+
+### How language-agnostic checks are scoped
+
+Most `common:*`, `devops:*`, and `security:*` checks normally run **once at the
+repo root**. When you disable such a check for only *some* of the detected
+languages, A2 re-scopes it instead of dropping it:
+
+- It runs against the `source_dir`(s) of the languages that **still** want it.
+- It is skipped for the languages where it is disabled.
+- If it is disabled for **every** detected language, it is removed entirely.
+- If no per-language list mentions it, it keeps running once at the root.
+
+This means per-language disabling of common checks is most useful alongside
+per-language `source_dir` configuration, so each check runs against the right
+subtree:
+
+```yaml
+language:
+  go:
+    source_dir: backend
+  typescript:
+    source_dir: frontend
+
+checks:
+  typescript:
+    disabled:
+      - common:metrics   # metrics required in backend/ (go), skipped for frontend/ (ts)
+```
+
+With the above, `common:metrics` runs only in `backend/` (where it finds the Go
+Prometheus dependency and passes) and is not evaluated against `frontend/`.
+
+> Language-specific checks (e.g. `go:logging`, `typescript:tests`) are simply
+> removed for that language when listed in its block.

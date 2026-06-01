@@ -313,19 +313,25 @@ func buildSkippedChecks(cfg *config.Config, detected language.DetectionResult, e
 	for _, p := range baseDisabled {
 		sources = append(sources, disabledSource{pattern: p, reason: "config"})
 	}
+	// Per-language disabled lists (checks.<lang>.disabled). Only languages that
+	// were actually detected can cause a check to be fully skipped.
+	for _, lang := range detected.Languages {
+		for _, p := range cfg.Checks.PerLanguage[string(lang)] {
+			sources = append(sources, disabledSource{pattern: p, reason: "config (" + string(lang) + ")"})
+		}
+	}
 
 	var skipped []output.SkipInfo
 	for _, reg := range allRegs {
 		if !isApplicableForDetected(reg.Meta.Languages, detected.Languages) {
 			continue
 		}
+		// A check still present in the enabled set (e.g. disabled for one
+		// language but still scoped to another) is not reported as skipped.
 		if _, ok := enabledIDs[reg.Meta.ID]; ok {
 			continue
 		}
-		if !cfg.IsCheckDisabled(reg.Meta.ID) {
-			continue
-		}
-		reason := "disabled"
+		reason := ""
 		pattern := ""
 		for _, src := range sources {
 			if config.MatchDisabled(reg.Meta.ID, src.pattern) {
@@ -333,6 +339,10 @@ func buildSkippedChecks(cfg *config.Config, detected language.DetectionResult, e
 				pattern = src.pattern
 				break
 			}
+		}
+		if reason == "" {
+			// Not removed by any disable source we know about.
+			continue
 		}
 		skipped = append(skipped, output.SkipInfo{
 			ID:      reg.Meta.ID,

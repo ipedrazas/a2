@@ -478,6 +478,104 @@ func (suite *RegistryTestSuite) TestGetChecks_SourceDirWithCoverageThreshold() {
 	suite.Equal(25.0, thresholdByDir["cli"])
 }
 
+// TestGetChecks_PerLanguageDisablesLanguageCheck verifies that a per-language
+// disabled list filters that language's own checks (checks.go.disabled).
+func (suite *RegistryTestSuite) TestGetChecks_PerLanguageDisablesLanguageCheck() {
+	cfg := config.DefaultConfig()
+	cfg.Checks.PerLanguage = map[string][]string{
+		"go": {"go:logging"},
+	}
+	detected := language.DetectionResult{
+		Languages: []checker.Language{checker.LangGo},
+		Primary:   checker.LangGo,
+	}
+	checks := GetChecks(cfg, detected)
+
+	for _, c := range checks {
+		if c.Meta.ID == "go:logging" {
+			suite.Fail("go:logging should be disabled for go via per-language list")
+		}
+	}
+}
+
+// TestGetChecks_PerLanguageScopesCommonCheck verifies that disabling a common
+// check for one language (but not another) re-scopes it to the still-enabled
+// language's source_dir instead of dropping it entirely.
+func (suite *RegistryTestSuite) TestGetChecks_PerLanguageScopesCommonCheck() {
+	cfg := config.DefaultConfig()
+	cfg.Language.Go.SourceDir = config.SourceDirConfig{{Path: "backend"}}
+	cfg.Language.TypeScript.SourceDir = config.SourceDirConfig{{Path: "frontend"}}
+	// Disable metrics for typescript only.
+	cfg.Checks.PerLanguage = map[string][]string{
+		"typescript": {"common:metrics"},
+	}
+	detected := language.DetectionResult{
+		Languages: []checker.Language{checker.LangGo, checker.LangTypeScript},
+		Primary:   checker.LangGo,
+	}
+	checks := GetChecks(cfg, detected)
+
+	var metrics []checker.CheckRegistration
+	for _, c := range checks {
+		if c.Meta.ID == "common:metrics" {
+			metrics = append(metrics, c)
+		}
+	}
+	// Still present (go wants it), exactly once, scoped to backend/.
+	suite.Require().Len(metrics, 1, "common:metrics should run once, scoped to go")
+	prc, ok := metrics[0].Checker.(*pathResolvingChecker)
+	suite.Require().True(ok, "scoped common:metrics should be a pathResolvingChecker")
+	suite.Equal("backend", prc.sourceDir)
+}
+
+// TestGetChecks_PerLanguageDropsCommonWhenAllDisabled verifies that a common
+// check disabled for every detected language is removed entirely.
+func (suite *RegistryTestSuite) TestGetChecks_PerLanguageDropsCommonWhenAllDisabled() {
+	cfg := config.DefaultConfig()
+	cfg.Checks.PerLanguage = map[string][]string{
+		"go":         {"common:metrics"},
+		"typescript": {"common:metrics"},
+	}
+	detected := language.DetectionResult{
+		Languages: []checker.Language{checker.LangGo, checker.LangTypeScript},
+		Primary:   checker.LangGo,
+	}
+	checks := GetChecks(cfg, detected)
+
+	for _, c := range checks {
+		if c.Meta.ID == "common:metrics" {
+			suite.Fail("common:metrics should be dropped when disabled for all detected languages")
+		}
+	}
+}
+
+// TestGetChecks_PerLanguageUnaffectedCommonRunsAtRoot verifies that common
+// checks not touched by any per-language list keep their single-root behaviour
+// even when per-language lists exist for other checks.
+func (suite *RegistryTestSuite) TestGetChecks_PerLanguageUnaffectedCommonRunsAtRoot() {
+	cfg := config.DefaultConfig()
+	cfg.Language.Go.SourceDir = config.SourceDirConfig{{Path: "backend"}}
+	cfg.Checks.PerLanguage = map[string][]string{
+		"typescript": {"common:metrics"},
+	}
+	detected := language.DetectionResult{
+		Languages: []checker.Language{checker.LangGo, checker.LangTypeScript},
+		Primary:   checker.LangGo,
+	}
+	checks := GetChecks(cfg, detected)
+
+	var found bool
+	for _, c := range checks {
+		if c.Meta.ID == "common:license" {
+			found = true
+			// Not re-scoped to a source_dir: still the raw checker.
+			_, scoped := c.Checker.(*pathResolvingChecker)
+			suite.False(scoped, "common:license should still run at root, not scoped")
+		}
+	}
+	suite.True(found, "common:license should be present")
+}
+
 // TestRegistryTestSuite runs all the tests in the suite.
 func TestRegistryTestSuite(t *testing.T) {
 	suite.Run(t, new(RegistryTestSuite))

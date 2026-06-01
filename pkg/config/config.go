@@ -221,11 +221,73 @@ type FileSystemConfig struct {
 }
 
 // ChecksConfig configures which checks to run.
+//
+// It accepts a global disabled list plus optional per-language overrides:
+//
+//	checks:
+//	  disabled:            # applies to all languages
+//	    - go:logging
+//	  typescript:
+//	    disabled:          # applies only when the typescript language is active
+//	      - common:metrics
+//	  go:
+//	    disabled:
+//	      - common:tracing
 type ChecksConfig struct {
-	// Disabled is a list of check IDs or wildcard patterns to skip.
-	// Wildcard patterns (*:logging, node:*, *:*) must be quoted in YAML
-	// (e.g. "*:logging") because unquoted * is YAML's alias character.
-	Disabled []string `yaml:"disabled"`
+	// Disabled is a list of check IDs or wildcard patterns to skip for all
+	// languages. Wildcard patterns (*:logging, node:*, *:*) must be quoted in
+	// YAML (e.g. "*:logging") because unquoted * is YAML's alias character.
+	Disabled []string `yaml:"-"`
+	// PerLanguage maps a language identifier (go, typescript, ...) to the list
+	// of check IDs/patterns disabled only for that language. Populated from the
+	// language-keyed sub-blocks under `checks:`.
+	PerLanguage map[string][]string `yaml:"-"`
+}
+
+// knownLanguages is the set of language identifiers accepted as keys under
+// `checks:` for per-language disabled lists.
+var knownLanguages = map[string]bool{
+	"go":         true,
+	"python":     true,
+	"node":       true,
+	"java":       true,
+	"rust":       true,
+	"typescript": true,
+	"swift":      true,
+}
+
+// UnmarshalYAML implements yaml.Unmarshaler so `checks:` can hold both a global
+// `disabled:` list and per-language sub-blocks (e.g. `typescript: {disabled: [...]}`).
+func (c *ChecksConfig) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind != yaml.MappingNode {
+		return fmt.Errorf("checks must be a mapping with a 'disabled' list and/or per-language blocks")
+	}
+	for i := 0; i+1 < len(value.Content); i += 2 {
+		key := value.Content[i].Value
+		val := value.Content[i+1]
+		switch {
+		case key == "disabled":
+			if err := val.Decode(&c.Disabled); err != nil {
+				return err
+			}
+		case knownLanguages[key]:
+			var sub struct {
+				Disabled []string `yaml:"disabled"`
+			}
+			if err := val.Decode(&sub); err != nil {
+				return err
+			}
+			if len(sub.Disabled) > 0 {
+				if c.PerLanguage == nil {
+					c.PerLanguage = make(map[string][]string)
+				}
+				c.PerLanguage[key] = sub.Disabled
+			}
+		default:
+			return fmt.Errorf("unknown key %q under 'checks' (expected 'disabled' or one of the languages: go, python, node, java, rust, typescript, swift)", key)
+		}
+	}
+	return nil
 }
 
 // DefaultConfig returns the default configuration.
@@ -413,6 +475,31 @@ func (c *Config) GetSourceDirs() map[string][]string {
 // IsCheckDisabled returns true if the given check ID is disabled.
 func (c *Config) IsCheckDisabled(checkID string) bool {
 	for _, disabled := range c.Checks.Disabled {
+		if MatchDisabled(checkID, disabled) {
+			return true
+		}
+	}
+	return false
+}
+
+// IsCheckDisabledForLang returns true if the check is disabled either globally
+// or specifically for the given language.
+func (c *Config) IsCheckDisabledForLang(checkID, lang string) bool {
+	if c.IsCheckDisabled(checkID) {
+		return true
+	}
+	for _, disabled := range c.Checks.PerLanguage[lang] {
+		if MatchDisabled(checkID, disabled) {
+			return true
+		}
+	}
+	return false
+}
+
+// IsCheckDisabledForOnlyLang returns true if the check is disabled by the
+// per-language list for lang (ignoring the global disabled list).
+func (c *Config) IsCheckDisabledForOnlyLang(checkID, lang string) bool {
+	for _, disabled := range c.Checks.PerLanguage[lang] {
 		if MatchDisabled(checkID, disabled) {
 			return true
 		}
