@@ -6,8 +6,10 @@ A2 is configured via a `.a2.yaml` file in your project root. You can generate on
 
 - [Generating Configuration](#generating-configuration)
 - [Configuration Examples](#configuration-examples)
+- [Source Directories](#source-directories)
 - [External Checks](#external-checks)
 - [Wildcard Patterns](#wildcard-patterns)
+- [Per-Language Disabling](#per-language-disabling)
 
 ---
 
@@ -165,25 +167,115 @@ checks:
 
 ### Multi-Language Project (Monorepo)
 
+In a monorepo, each language usually lives in one or more subdirectories rather
+than at the repo root. List every component directory under that language's
+`source_dir` (see [Source Directories](#source-directories) for the full
+syntax). For example, three Go components and two TypeScript components:
+
 ```yaml
 # Explicit language selection (overrides auto-detect)
 language:
   explicit:
     - go
-    - python
     - typescript
   go:
+    source_dir:           # a list — one entry per Go component
+      - services/api
+      - services/worker
+      - cmd/cli
     coverage_threshold: 80
-  python:
-    coverage_threshold: 70
-    linter: ruff
   typescript:
+    source_dir:           # a list — one entry per TypeScript component
+      - web/app
+      - web/admin
     coverage_threshold: 75
 
 files:
   required:
     - README.md
 ```
+
+Each listed directory is treated as an independent root for that language's
+checks (build, tests, coverage, format, …).
+
+---
+
+## Source Directories
+
+By default A2 runs each language's checks from the repository root. When a
+language's code lives in one or more subdirectories — common in monorepos — set
+`source_dir` under that language so checks run against the right subtree(s).
+
+`source_dir` is **not** limited to a single path. It accepts three forms:
+
+### 1. Single path
+
+```yaml
+language:
+  go:
+    source_dir: backend
+```
+
+### 2. List of paths
+
+Use a list when a language has multiple components. Each path becomes an
+independent root for that language's checks.
+
+```yaml
+language:
+  go:
+    source_dir:
+      - services/api
+      - services/worker
+      - cmd/cli
+  typescript:
+    source_dir:
+      - web/app
+      - web/admin
+```
+
+The inline form `source_dir: [services/api, services/worker]` is equivalent.
+
+### 3. List of objects (per-directory profile / threshold)
+
+Use the object form when individual components need different rules. Each entry
+is a `{path, profile, coverage_threshold}` object, where `profile` and
+`coverage_threshold` are optional.
+
+```yaml
+language:
+  go:
+    coverage_threshold: 80        # language-wide default
+    source_dir:
+      - path: services/api
+        profile: api              # api component: keep all operational checks
+      - path: services/worker
+        profile: api
+        coverage_threshold: 60    # override just for this directory
+      - path: pkg/shared
+        profile: library          # library component: skip server/devops checks
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `path` | yes | Subdirectory containing the component's code |
+| `profile` | no | Name of a profile whose `disabled` list is applied to **this directory only** |
+| `coverage_threshold` | no | Per-directory coverage threshold, overriding the language-wide value |
+
+**Profiles** are the same ones used by `a2 add --profile`. Built-in profiles are
+`cli`, `api`, `library`, and `desktop`; you can also define your own (run
+`a2 profiles` to list them). Attaching a profile to a directory disables that profile's checks
+for that directory without affecting the others — so a `library` package and an
+`api` service can live in the same language block with different rules.
+
+> Each language's `source_dir` is independent: Go can use the object form while
+> TypeScript uses a plain list. Within a *single* `source_dir`, however, all
+> entries must use the same form — either all bare paths or all `{path: ...}`
+> objects, not a mix of the two.
+
+You can pair `source_dir` with [Per-Language Disabling](#per-language-disabling)
+so that repo-wide `common:*` / `devops:*` checks are re-scoped to the correct
+subtree per language.
 
 ---
 
