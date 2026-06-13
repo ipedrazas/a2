@@ -43,6 +43,7 @@ external:
     command: golangci-lint
     args: ["run", "./..."]
     severity: warn
+    speed: slow
 
 # This check is an order of magnitude slower than the others
   # Optional source_dir: run the command in a subdir (e.g. when Go code lives in backend/)
@@ -51,6 +52,7 @@ external:
     command: gosec
     args: ["./..."]
     severity: fail
+    speed: slow
     # source_dir: backend   # uncomment if Go code is in backend/
 
   # - id: secrets
@@ -64,12 +66,14 @@ external:
     command: errcheck
     args: ["-ignoretests", "./..."]
     severity: warn
+    speed: slow
 
   - id: go:staticcheck
     name: Static Analysis
     command: staticcheck
     args: ["./..."]
     severity: warn
+    speed: slow
   
   # - id: go:golicense
   #   name: Go License

@@ -3,3 +3,12 @@ repos:
     rev: v8.24.2
     hooks:
       - id: gitleaks
+  - repo: local
+    hooks:
+      - id: a2-quick
+        name: a2 quick checks
+        # Fast static checks only; the full suite runs in CI.
+        entry: a2 check --quick
+        language: system
+        pass_filenames: false
+        always_run: true

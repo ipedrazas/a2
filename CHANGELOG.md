@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Parallel runner unified on a bounded worker pool.** Both the default and
+  `--fail-fast` paths now cap concurrency at `GOMAXPROCS` (configurable via
+  `execution.concurrency`), replacing the previous unbounded goroutine-per-check
+  stampede that could oversubscribe CPU/memory and slow large runs.
+- **Per-check `--timeout` now defaults to `3m`** (previously `0` = no timeout),
+  so a single wedged tool can no longer hang the whole run. Pass `--timeout=0`
+  to restore the old unbounded behavior.
+
+### Added
+- **`a2 check --quick` (alias `--fast`)** runs only fast, static/IO-light checks
+  (format, lint, file-existence, regex/config scans), skipping builds, tests,
+  coverage/race runs, and network/dependency scans. Built for the inner loop and
+  pre-commit; the full suite still runs by default and in CI. Built-in checks are
+  classified via a new `Speed` field on `CheckMeta`; external checks can opt in
+  with `speed: slow` in `.a2.yaml`. The GitHub Action gains a `quick` input and
+  a pre-commit hook running `a2 check --quick` is included.
+- **`execution.concurrency`** config option to cap the parallel worker pool
+  (default: `GOMAXPROCS`).
+- **`ERROR` and `SKIP` check statuses.** Internal failures (tool crash, panic,
+  timeout) are now reported as `ERROR` ("a2 couldn't evaluate this") instead of
+  being conflated with a code `FAIL`, and fail-fast cancellations are reported
+  as `SKIP`. Both are excluded from the maturity score and do not, on their own,
+  fail the suite. Surfaced in pretty, JSON (`errored`/`skipped` summary fields),
+  and TOON output.
+
+### Removed
+- **Web UI and server mode removed.** The `a2 server` command, the React UI
+  (`ui/`), the HTTP API, job queue, GitHub webhook/cloning, and the
+  `docs/SERVER.md` / `docker-compose.yml` files have been deleted. `a2` is now a
+  terminal-first CLI only. The `gorilla/mux` and `google/uuid` dependencies are
+  gone. **Migration:** run checks with the `a2` CLI directly (e.g. in CI via the
+  GitHub Action or pre-commit hook) instead of hosting the server.
+
 ### Added
 - **Naming consistency check** (`common:naming`) - Detects mixed file naming conventions:
   - Classifies source files as snake_case, camelCase, PascalCase, kebab-case, or lowercase

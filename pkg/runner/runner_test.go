@@ -276,22 +276,24 @@ func (suite *RunnerTestSuite) TestRunSuite_InternalError() {
 		},
 	}
 
-	// Use sequential mode to test abort behavior
+	// Use sequential mode. An internal error is reported as Errored, which is
+	// not a code failure, so it does not abort the run — all 3 checks run.
 	result := testRunSuiteSequential("/test/path", toRegistrations(checks))
 
-	suite.Equal(2, result.TotalChecks()) // Only 2 checks ran (aborted after check2 error)
-	suite.Equal(1, result.Passed)
+	suite.Equal(3, result.TotalChecks())
+	suite.Equal(2, result.Passed)
 	suite.Equal(0, result.Warnings)
-	suite.Equal(1, result.Failed)
-	suite.True(result.Aborted)
-	suite.False(result.Success())
-	suite.Len(result.Results, 2)
+	suite.Equal(0, result.Failed)
+	suite.Equal(1, result.Errored)
+	suite.False(result.Aborted)
+	suite.True(result.Success())
+	suite.Len(result.Results, 3)
 
-	// Verify the error was converted to a Fail result
+	// Verify the error was converted to an Errored result
 	suite.Equal("check1", result.Results[0].ID)
 	suite.Equal("check2", result.Results[1].ID)
 	suite.False(result.Results[1].Passed)
-	suite.Equal(checker.Fail, result.Results[1].Status)
+	suite.Equal(checker.Errored, result.Results[1].Status)
 	suite.Contains(result.Results[1].Reason, "Internal error")
 }
 
@@ -569,7 +571,7 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelFailFastCancelsRemaining() {
 
 	cancelled := 0
 	for _, res := range result.Results {
-		if res.Status == checker.Info && res.Message == "Cancelled" {
+		if res.Status == checker.Skipped {
 			cancelled++
 		}
 	}
@@ -752,13 +754,14 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelWithError() {
 	suite.Equal(3, result.TotalChecks()) // All 3 checks ran in parallel
 	suite.Equal(2, result.Passed)
 	suite.Equal(0, result.Warnings)
-	suite.Equal(1, result.Failed)
-	suite.True(result.Aborted)
-	suite.False(result.Success())
+	suite.Equal(0, result.Failed)
+	suite.Equal(1, result.Errored)
+	suite.False(result.Aborted)
+	suite.True(result.Success())
 
-	// Verify the error was converted to a Fail result
+	// Verify the error was converted to an Errored result
 	suite.False(result.Results[1].Passed)
-	suite.Equal(checker.Fail, result.Results[1].Status)
+	suite.Equal(checker.Errored, result.Results[1].Status)
 	suite.Contains(result.Results[1].Reason, "Internal error")
 }
 
@@ -1109,8 +1112,10 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutExceeded() {
 
 	suite.Equal(1, result.TotalChecks())
 	suite.Equal(0, result.Passed)
-	suite.Equal(1, result.Failed)
-	suite.False(result.Success())
+	suite.Equal(0, result.Failed)
+	suite.Equal(1, result.Errored) // A timeout means a2 could not evaluate the check
+	suite.True(result.Success())   // ...so it does not, on its own, fail the suite
+	suite.Equal(checker.Errored, result.Results[0].Status)
 	suite.Contains(result.Results[0].Reason, "timed out")
 	suite.Equal("check1", result.Results[0].ID)
 	suite.Equal("Check 1", result.Results[0].Name)
@@ -1169,11 +1174,14 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutSequential() {
 		Timeout:  20 * time.Millisecond,
 	})
 
-	// First check passes, second times out (causing abort in sequential mode)
-	suite.Equal(2, result.TotalChecks())
-	suite.Equal(1, result.Passed)
-	suite.Equal(1, result.Failed)
-	suite.True(result.Aborted) // Should abort because timeout produces a Fail result
+	// A timeout produces an Errored result, which does not abort the run, so all
+	// three checks run: check1 and check3 pass, check2 times out.
+	suite.Equal(3, result.TotalChecks())
+	suite.Equal(2, result.Passed)
+	suite.Equal(0, result.Failed)
+	suite.Equal(1, result.Errored)
+	suite.False(result.Aborted)
+	suite.Equal(checker.Errored, result.Results[1].Status)
 	suite.Contains(result.Results[1].Reason, "timed out")
 }
 
@@ -1245,15 +1253,16 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryParallel() {
 
 	suite.Equal(3, result.TotalChecks()) // All 3 checks should have results
 	suite.Equal(2, result.Passed)
-	suite.Equal(1, result.Failed)
-	suite.True(result.Aborted)
-	suite.False(result.Success())
+	suite.Equal(0, result.Failed)
+	suite.Equal(1, result.Errored)
+	suite.False(result.Aborted)
+	suite.True(result.Success())
 
-	// Verify the panicking check was converted to a Fail result
+	// Verify the panicking check was converted to an Errored result
 	suite.Equal("check2", result.Results[1].ID)
 	suite.Equal("Panicking Check", result.Results[1].Name)
 	suite.False(result.Results[1].Passed)
-	suite.Equal(checker.Fail, result.Results[1].Status)
+	suite.Equal(checker.Errored, result.Results[1].Status)
 	suite.Contains(result.Results[1].Reason, "panicked")
 	suite.Contains(result.Results[1].Reason, "something went wrong")
 
@@ -1276,7 +1285,9 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithError() {
 
 	suite.Equal(1, result.TotalChecks())
 	suite.Equal(0, result.Passed)
-	suite.Equal(1, result.Failed)
+	suite.Equal(0, result.Failed)
+	suite.Equal(1, result.Errored)
+	suite.Equal(checker.Errored, result.Results[0].Status)
 	suite.Contains(result.Results[0].Reason, "panicked")
 	suite.Contains(result.Results[0].Reason, "error panic value")
 }
@@ -1295,7 +1306,8 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithUnknownValue() {
 
 	suite.Equal(1, result.TotalChecks())
 	suite.Equal(0, result.Passed)
-	suite.Equal(1, result.Failed)
+	suite.Equal(0, result.Failed)
+	suite.Equal(1, result.Errored)
 	suite.Contains(result.Results[0].Reason, "panicked unexpectedly")
 }
 
@@ -1328,9 +1340,11 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithTimeout() {
 
 	suite.Equal(2, result.TotalChecks())
 	suite.Equal(1, result.Passed)
-	suite.Equal(1, result.Failed)
+	suite.Equal(0, result.Failed)
+	suite.Equal(1, result.Errored)
 
 	// Verify the panicking check was recovered
+	suite.Equal(checker.Errored, result.Results[1].Status)
 	suite.Contains(result.Results[1].Reason, "panicked")
 	suite.Contains(result.Results[1].Reason, "timeout test panic")
 }
@@ -1367,18 +1381,19 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoverySequential() {
 		},
 	}
 
-	// Sequential mode should recover from panic but abort
+	// Sequential mode recovers from the panic. A panic becomes an Errored
+	// result, which does not abort the run, so all three checks run.
 	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{
 		Parallel: false,
 		Timeout:  1 * time.Second,
 	})
 
-	// Panic recovery converts to Fail, which aborts in sequential mode
-	suite.Equal(2, result.TotalChecks()) // Only 2 ran (aborted after panic)
-	suite.Equal(1, result.Passed)
-	suite.Equal(1, result.Failed)
-	suite.True(result.Aborted)
-
+	suite.Equal(3, result.TotalChecks())
+	suite.Equal(2, result.Passed)
+	suite.Equal(0, result.Failed)
+	suite.Equal(1, result.Errored)
+	suite.False(result.Aborted)
+	suite.Equal(checker.Errored, result.Results[1].Status)
 	suite.Contains(result.Results[1].Reason, "panicked")
 }
 

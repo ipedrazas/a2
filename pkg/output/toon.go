@@ -57,6 +57,8 @@ func TOON(result runner.SuiteResult, detected language.DetectionResult, verbosit
 	enc.writeKeyValue("warnings", enc.formatNumber(float64(result.Warnings)))
 	enc.writeKeyValue("failed", enc.formatNumber(float64(result.Failed)))
 	enc.writeKeyValue("info", enc.formatNumber(float64(result.Info)))
+	enc.writeKeyValue("errored", enc.formatNumber(float64(result.Errored)))
+	enc.writeKeyValue("skipped", enc.formatNumber(float64(result.Skipped)))
 	enc.writeKeyValue("score", enc.formatNumber(calculateScore(result)))
 	enc.writeKeyValue("total_duration_ms", enc.formatNumber(float64(result.TotalDuration.Milliseconds())))
 	enc.indent--

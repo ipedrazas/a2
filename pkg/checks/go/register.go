@@ -36,6 +36,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &BuildCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "go:build",
+				Speed:       checker.SpeedSlow,
 				Name:        "Go Build",
 				Description: "Compiles the project using 'go build ./...' to verify all packages build without errors.",
 				Languages:   []checker.Language{checker.LangGo},
@@ -48,6 +49,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &TestsCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "go:tests",
+				Speed:       checker.SpeedSlow,
 				Name:        "Go Tests",
 				Description: "Runs the test suite using 'go test ./...' to verify all tests pass.",
 				Languages:   []checker.Language{checker.LangGo},
@@ -60,6 +62,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &RaceCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "go:race",
+				Speed:       checker.SpeedSlow,
 				Name:        "Go Race Detection",
 				Description: "Runs tests with the -race flag to detect data races between goroutines.",
 				Languages:   []checker.Language{checker.LangGo},
@@ -84,6 +87,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &VetCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "go:vet",
+				Speed:       checker.SpeedSlow,
 				Name:        "Go Vet",
 				Description: "Runs 'go vet' static analysis to find common programming mistakes.",
 				Languages:   []checker.Language{checker.LangGo},
@@ -96,6 +100,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &CoverageCheck{Threshold: coverageThreshold},
 			Meta: checker.CheckMeta{
 				ID:          "go:coverage",
+				Speed:       checker.SpeedSlow,
 				Name:        "Go Coverage",
 				Description: "Measures test coverage and verifies it meets the configured threshold.",
 				Languages:   []checker.Language{checker.LangGo},
@@ -108,6 +113,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DepsCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "go:deps",
+				Speed:       checker.SpeedSlow,
 				Name:        "Go Vulnerabilities",
 				Description: "Scans dependencies for known vulnerabilities using 'govulncheck'.",
 				Languages:   []checker.Language{checker.LangGo},
@@ -144,6 +150,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DepsFreshnessCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "go:deps_freshness",
+				Speed:       checker.SpeedSlow,
 				Name:        "Go Dependency Freshness",
 				Description: "Checks for outdated Go module dependencies using go list -m -u all.",
 				Languages:   []checker.Language{checker.LangGo},
@@ -156,6 +163,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DeadcodeCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "go:deadcode",
+				Speed:       checker.SpeedSlow,
 				Name:        "Go Dead Code",
 				Description: "Detects unreachable functions using the deadcode static analysis tool.",
 				Languages:   []checker.Language{checker.LangGo},

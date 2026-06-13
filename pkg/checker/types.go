@@ -25,10 +25,12 @@ func AllLanguages() []Language {
 type Status int
 
 const (
-	Pass Status = iota // Pass: Check passed, no issues
-	Warn               // Warn: Something is wrong, but not critical
-	Fail               // Fail: Critical failure, stops execution (the Veto)
-	Info               // Info: Informational only, does not affect maturity score
+	Pass    Status = iota // Pass: Check passed, no issues
+	Warn                  // Warn: Something is wrong, but not critical
+	Fail                  // Fail: Critical failure, stops execution (the Veto)
+	Info                  // Info: Informational only, does not affect maturity score
+	Errored               // Errored: a2 could not evaluate the check (tool crash, panic, timeout). Excluded from score.
+	Skipped               // Skipped: the check was not run (e.g. cancelled by fail-fast). Excluded from score.
 )
 
 func (s Status) String() string {
@@ -41,6 +43,10 @@ func (s Status) String() string {
 		return "FAIL"
 	case Info:
 		return "INFO"
+	case Errored:
+		return "ERROR"
+	case Skipped:
+		return "SKIP"
 	default:
 		return "UNKNOWN"
 	}
@@ -59,6 +65,16 @@ type Result struct {
 	RawOutput string        // Full command output for verbose display
 }
 
+// Speed indicates the relative cost of a check.
+// Fast checks are static/IO-light (format, lint, file existence, regex scans);
+// Slow checks spawn builds, tests, coverage/race runs, or network/heavy scans.
+type Speed int
+
+const (
+	SpeedFast Speed = iota // Static / IO-light. Included in --quick runs. (zero value)
+	SpeedSlow              // Spawns builds/tests/network. Excluded from --quick runs.
+)
+
 // CheckMeta provides metadata about a check for registration.
 type CheckMeta struct {
 	ID          string     // Unique identifier (e.g., "go:build", "python:tests")
@@ -69,6 +85,7 @@ type CheckMeta struct {
 	Optional    bool       // If true, Warn results are converted to Info (excluded from score)
 	Order       int        // Execution priority (lower = first)
 	Suggestion  string     // Recommendation shown when check fails (e.g., "Run 'go fmt' to fix")
+	Speed       Speed      // Relative cost; SpeedSlow checks are skipped by --quick (default SpeedFast)
 }
 
 // CheckRegistration combines a Checker with its metadata.

@@ -187,6 +187,14 @@ func printResult(r checker.Result, verbosity VerbosityLevel) {
 		symbol = "ℹ"
 		status = "INFO"
 		style = infoStyle
+	case checker.Errored:
+		symbol = "⚠"
+		status = "ERROR"
+		style = warnStyle
+	case checker.Skipped:
+		symbol = "○"
+		status = "SKIP"
+		style = infoStyle
 	}
 
 	// Format duration

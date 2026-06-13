@@ -55,7 +55,9 @@ type Estimation struct {
 	Warnings    int      // Number of warnings
 	Failed      int      // Number of failed checks
 	Info        int      // Number of informational checks (excluded from score)
-	Total       int      // Total number of scored checks (excludes Info)
+	Errored     int      // Number of checks a2 could not evaluate (excluded from score)
+	Skipped     int      // Number of checks that were not run (excluded from score)
+	Total       int      // Total number of scored checks (excludes Info/Errored/Skipped)
 	Suggestions []string // Recommendations for improvement
 }
 
@@ -75,6 +77,8 @@ func Estimate(result runner.SuiteResult) Estimation {
 		Warnings: result.Warnings,
 		Failed:   result.Failed,
 		Info:     result.Info,
+		Errored:  result.Errored,
+		Skipped:  result.Skipped,
 		Total:    scoredTotal,
 	}
 

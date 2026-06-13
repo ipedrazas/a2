@@ -30,6 +30,7 @@ var (
 	verbosity     int           // Verbosity level (0=normal, 1=failures, 2=all)
 	failFast      bool          // Cancel remaining checks on first critical failure (parallel mode)
 	dryRun        bool          // List checks without running them
+	quick         bool          // Run only fast (static/IO-light) checks
 	forceInit     bool          // Force overwrite in profiles/targets init
 )
 
@@ -117,10 +118,12 @@ func init() {
 	checkCmd.Flags().StringSliceVar(&skippedChecks, "skip", nil, "Checks to skip (e.g., --skip=license,k8s)")
 	checkCmd.Flags().StringVar(&profile, "profile", "", "Application profile (cli, api, library, desktop)")
 	checkCmd.Flags().StringVar(&target, "target", "", "Maturity target (poc, production)")
-	checkCmd.Flags().DurationVar(&timeout, "timeout", 0, "Timeout for each individual check (e.g., 30s, 1m). 0 means no timeout")
+	checkCmd.Flags().DurationVar(&timeout, "timeout", 3*time.Minute, "Timeout for each individual check (e.g., 30s, 1m). 0 means no timeout")
 	checkCmd.Flags().CountVarP(&verbosity, "verbose", "v", "Increase verbosity (-v for failures, -vv for all)")
 	checkCmd.Flags().BoolVar(&failFast, "fail-fast", false, "Cancel remaining checks on first critical failure (parallel mode only)")
 	checkCmd.Flags().BoolVar(&dryRun, "dry-run", false, "List checks without running them")
+	checkCmd.Flags().BoolVar(&quick, "quick", false, "Run only fast static checks (skip builds/tests/scans)")
+	checkCmd.Flags().BoolVar(&quick, "fast", false, "Alias for --quick")
 	rootCmd.AddCommand(checkCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(profilesCmd)
@@ -228,6 +231,10 @@ func runCheck(cmd *cobra.Command, args []string) error {
 
 	// Get the list of checks to run
 	registrations := checks.GetChecks(cfg, detected)
+	// --quick/--fast is an orthogonal filter: keep only fast static checks.
+	if quick {
+		registrations = checks.FilterFast(registrations)
+	}
 	skipped := buildSkippedChecks(cfg, detected, registrations, baseDisabled, targetDisabled, profileDisabled, skippedChecks, target, profile)
 
 	if dryRun {
@@ -246,10 +253,11 @@ func runCheck(cmd *cobra.Command, args []string) error {
 
 	// Run the suite with configured execution options
 	opts := runner.RunSuiteOptions{
-		Parallel:   cfg.Execution.Parallel,
-		FailFast:   failFast,
-		Timeout:    timeout,
-		OnProgress: progressFunc,
+		Parallel:    cfg.Execution.Parallel,
+		FailFast:    failFast,
+		Timeout:     timeout,
+		Concurrency: cfg.Execution.Concurrency,
+		OnProgress:  progressFunc,
 	}
 	result := runner.RunSuiteWithOptions(path, registrations, opts)
 

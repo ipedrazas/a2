@@ -30,6 +30,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &BuildCheck{Config: &cfg.Language.Java},
 			Meta: checker.CheckMeta{
 				ID:          "java:build",
+				Speed:       checker.SpeedSlow,
 				Name:        "Java Build",
 				Description: "Compiles the project using Maven or Gradle to verify it builds without errors.",
 				Languages:   []checker.Language{checker.LangJava},
@@ -42,6 +43,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &TestsCheck{Config: &cfg.Language.Java},
 			Meta: checker.CheckMeta{
 				ID:          "java:tests",
+				Speed:       checker.SpeedSlow,
 				Name:        "Java Tests",
 				Description: "Runs the test suite using Maven or Gradle to verify all tests pass.",
 				Languages:   []checker.Language{checker.LangJava},
@@ -78,6 +80,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &CoverageCheck{Threshold: coverageThreshold},
 			Meta: checker.CheckMeta{
 				ID:          "java:coverage",
+				Speed:       checker.SpeedSlow,
 				Name:        "Java Coverage",
 				Description: "Measures test coverage using JaCoCo and verifies it meets the configured threshold.",
 				Languages:   []checker.Language{checker.LangJava},
@@ -90,6 +93,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DepsCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "java:deps",
+				Speed:       checker.SpeedSlow,
 				Name:        "Java Dependencies",
 				Description: "Scans dependencies for known vulnerabilities using OWASP Dependency-Check.",
 				Languages:   []checker.Language{checker.LangJava},

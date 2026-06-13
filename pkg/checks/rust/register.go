@@ -30,6 +30,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &BuildCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "rust:build",
+				Speed:       checker.SpeedSlow,
 				Name:        "Rust Build",
 				Description: "Compiles the project using 'cargo build' to verify it builds without errors.",
 				Languages:   []checker.Language{checker.LangRust},
@@ -42,6 +43,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &TestsCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "rust:tests",
+				Speed:       checker.SpeedSlow,
 				Name:        "Rust Tests",
 				Description: "Runs the test suite using 'cargo test' to verify all tests pass.",
 				Languages:   []checker.Language{checker.LangRust},
@@ -66,6 +68,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &LintCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "rust:lint",
+				Speed:       checker.SpeedSlow,
 				Name:        "Rust Clippy",
 				Description: "Runs Clippy linter to catch common mistakes and improve code quality.",
 				Languages:   []checker.Language{checker.LangRust},
@@ -78,6 +81,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &CoverageCheck{Threshold: coverageThreshold},
 			Meta: checker.CheckMeta{
 				ID:          "rust:coverage",
+				Speed:       checker.SpeedSlow,
 				Name:        "Rust Coverage",
 				Description: "Measures test coverage using cargo-tarpaulin and verifies it meets the threshold.",
 				Languages:   []checker.Language{checker.LangRust},
@@ -90,6 +94,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DepsCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "rust:deps",
+				Speed:       checker.SpeedSlow,
 				Name:        "Rust Vulnerabilities",
 				Description: "Scans dependencies for known vulnerabilities using cargo-audit.",
 				Languages:   []checker.Language{checker.LangRust},
@@ -102,6 +107,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DepsFreshnessCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "rust:deps_freshness",
+				Speed:       checker.SpeedSlow,
 				Name:        "Rust Dependency Freshness",
 				Description: "Checks for outdated Rust crate dependencies using cargo-outdated.",
 				Languages:   []checker.Language{checker.LangRust},

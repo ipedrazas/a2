@@ -125,7 +125,6 @@ external:
 More details:
 - [Checks reference](docs/CHECKS.md)
 - [Configuration](docs/CONFIGURATION.md)
-- [Server mode](docs/SERVER.md)
 
 ## CI/CD
 

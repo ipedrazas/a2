@@ -23,14 +23,3 @@ Suggestion for allowlist structure (conceptual)
 	- optionally path prefixes for especially sensitive domains
 
 - Avoid raw IP allowlists unless you truly hit fixed IPs; domains are more stable.
-
-
-## Firecraker execution (WIP)
-
-When running `a2` as a web service, we need to isolate the execution since it's untrusted code.
-
-Is essence, the web service should get the github repo, send it to a queue that a firecracker executor consumes and runs it in a microvm:
-
-- git clone
-- a2 check -v --f json
-

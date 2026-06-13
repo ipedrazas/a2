@@ -26,6 +26,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &BuildCheck{Config: pythonCfg},
 			Meta: checker.CheckMeta{
 				ID:          "python:build",
+				Speed:       checker.SpeedSlow,
 				Name:        "Python Build",
 				Description: "Builds the Python package to verify it can be installed correctly.",
 				Languages:   []checker.Language{checker.LangPython},
@@ -38,6 +39,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &TestsCheck{Config: pythonCfg},
 			Meta: checker.CheckMeta{
 				ID:          "python:tests",
+				Speed:       checker.SpeedSlow,
 				Name:        "Python Tests",
 				Description: "Runs the test suite using pytest or unittest to verify all tests pass.",
 				Languages:   []checker.Language{checker.LangPython},
@@ -74,6 +76,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &TypeCheck{Config: pythonCfg},
 			Meta: checker.CheckMeta{
 				ID:          "python:type",
+				Speed:       checker.SpeedSlow,
 				Name:        "Python Type Check",
 				Description: "Runs static type checking using mypy or pyright to catch type errors.",
 				Languages:   []checker.Language{checker.LangPython},
@@ -86,6 +89,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &CoverageCheck{Config: pythonCfg},
 			Meta: checker.CheckMeta{
 				ID:          "python:coverage",
+				Speed:       checker.SpeedSlow,
 				Name:        "Python Coverage",
 				Description: "Measures test coverage and verifies it meets the configured threshold.",
 				Languages:   []checker.Language{checker.LangPython},
@@ -98,6 +102,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DepsCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "python:deps",
+				Speed:       checker.SpeedSlow,
 				Name:        "Python Vulnerabilities",
 				Description: "Scans dependencies for known vulnerabilities using pip-audit or safety.",
 				Languages:   []checker.Language{checker.LangPython},
@@ -134,6 +139,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DepsFreshnessCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "python:deps_freshness",
+				Speed:       checker.SpeedSlow,
 				Name:        "Python Dependency Freshness",
 				Description: "Checks for outdated Python packages using pip list --outdated.",
 				Languages:   []checker.Language{checker.LangPython},
@@ -146,6 +152,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DeadcodeCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "python:deadcode",
+				Speed:       checker.SpeedSlow,
 				Name:        "Python Dead Code",
 				Description: "Detects unused code (functions, variables, imports) using vulture.",
 				Languages:   []checker.Language{checker.LangPython},
