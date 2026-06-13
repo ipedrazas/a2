@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **`a2 add` renamed to `a2 init`** (the universal scaffolding verb); `add`
+  still works as a hidden alias. `a2 check` now prints a one-line nudge pointing
+  at `a2 init` when no `.a2.yaml` is present, and the "no language detected"
+  error suggests `a2 init`/`--lang`.
+- **`a2 init` generates a richer config.** The template is now an active,
+  inline-annotated baseline (files, coverage, execution, and checks blocks are
+  live; language and external checks are commented examples) instead of a mostly
+  commented-out stub.
+- **`a2 list checks` shows descriptions by default** (pass `--compact` to hide
+  them) and tags `[slow]` checks. Failed/warned checks in pretty output now show
+  `→ why: <description> · run: a2 explain <id>`, and `a2 explain` prints each
+  check's speed and a link to its docs page.
 - **Parallel runner unified on a bounded worker pool.** Both the default and
   `--fail-fast` paths now cap concurrency at `GOMAXPROCS` (configurable via
   `execution.concurrency`), replacing the previous unbounded goroutine-per-check

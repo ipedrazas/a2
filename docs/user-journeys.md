@@ -149,7 +149,7 @@ a2 check
 **Step 1: Initialize Configuration**
 ```bash
 cd ~/my-api-project
-a2 add -i
+a2 init -i
 ```
 
 **Interactive Prompts**:

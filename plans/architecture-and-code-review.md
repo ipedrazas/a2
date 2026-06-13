@@ -29,10 +29,21 @@ _Review date: 2026-06-13_
   into Slow via `speed: slow`. Mirrored in the GitHub Action (`quick` input) and
   a new `a2 check --quick` pre-commit hook. Slow checks already schedule first
   via their low `Order`, so longest-pole-first is satisfied.
-- [ ] #4 Rename `a2 add` → `a2 init` + first-run nudge (7.1)
-- [ ] #5 Surface description + `a2 explain` hint on failures (7.2)
-- [ ] #7 `a2 list checks` shows descriptions by default (7.2)
-- [ ] #8 Richer generated `.a2.yaml` template (7.1)
+- [x] **#4 Rename `a2 add` → `a2 init` + first-run nudge** (7.1) — command is now
+  `init` with `add` as a hidden Cobra alias. `a2 check` prints a one-line stderr
+  nudge when no `.a2.yaml` is present (pretty mode only); the "no language"
+  error now points at `a2 init`/`--lang`. README/docs updated to `a2 init`.
+- [x] **#5 Surface description + `a2 explain` hint on failures** (7.2) — pretty
+  output appends `→ why: <Description> · run: a2 explain <id>` under every
+  FAIL/WARN, always (not just `-v`).
+- [x] **#7 `a2 list checks` shows descriptions by default** (7.2) — descriptions
+  print by default (`--compact` hides them, `--explain` kept as a hidden no-op);
+  added `[slow]` markers; `a2 explain` now prints Speed + a docs URL.
+- [x] **#8 Richer generated `.a2.yaml` template** (7.1) — `ToYAML` emits an
+  active, inline-annotated baseline (files/coverage/execution/checks active,
+  language + external commented) instead of the old all-commented `{}` dump;
+  added a round-trip test. Onboarding "Getting started" 4-command path added to
+  README.
 - [ ] #9 Move `os.Exit` out of `RunE`; return errors (3.2)
 - [ ] #10 Extract repeated check boilerplate into `checkutil` helpers (3.3)
 - [ ] #11 Data-driven security patterns (`//go:embed`) (3.3)

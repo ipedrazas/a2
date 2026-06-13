@@ -13,6 +13,7 @@ import (
 	"github.com/ipedrazas/a2/pkg/output"
 	"github.com/ipedrazas/a2/pkg/profiles"
 	"github.com/ipedrazas/a2/pkg/runner"
+	"github.com/ipedrazas/a2/pkg/safepath"
 	"github.com/ipedrazas/a2/pkg/targets"
 	"github.com/ipedrazas/a2/pkg/userconfig"
 	"github.com/ipedrazas/a2/pkg/version"
@@ -166,6 +167,11 @@ func runCheck(cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(os.Stderr, "Error loading config: %v\n", err)
 		os.Exit(1)
 	}
+	// First-run nudge: if there's no .a2.yaml, point users at `a2 init`.
+	// Printed to stderr and only in pretty mode so json/toon output stays clean.
+	if format == "pretty" && !dryRun && !safepath.Exists(path, ".a2.yaml") {
+		fmt.Fprintln(os.Stderr, "No .a2.yaml found — running with defaults. Run 'a2 init' to customize thresholds and checks.")
+	}
 	// Resolve per-directory profiles into disabled check lists
 	cfg.ResolveSourceDirProfiles(func(name string) []string {
 		if p, ok := profiles.Get(name); ok {
@@ -226,7 +232,7 @@ func runCheck(cmd *cobra.Command, args []string) error {
 
 	// Exit with error if no language detected
 	if len(detected.Languages) == 0 {
-		return fmt.Errorf("no supported language detected. Supported languages: go, python, node, java, rust, typescript, swift. Use --lang to specify explicitly")
+		return fmt.Errorf("no supported language detected (supported: go, python, node, java, rust, typescript, swift).\nUse --lang to specify explicitly, or run 'a2 init' to scaffold a config")
 	}
 
 	// Get the list of checks to run

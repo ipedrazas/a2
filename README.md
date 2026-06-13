@@ -12,6 +12,20 @@ a2 check --profile=api
 a2 check -f toon
 ```
 
+## Getting started
+
+The 4-command happy path:
+
+```bash
+a2 init            # scaffold an annotated .a2.yaml (optional — defaults work too)
+a2 check           # run the full suite (use --quick for fast static checks only)
+a2 doctor          # see which optional external tools are missing
+a2 explain go:race # learn what any check does and how to fix it
+```
+
+`a2 check` works with no config at all — `a2 init` just lets you customize
+thresholds and which checks run.
+
 ## Why use `a2`?
 
 Teams use prompts, `.cursorrules`, and agent skills to describe intent. But prompts are not deterministic.
@@ -90,7 +104,9 @@ Use `a2` when you want to:
 ## Common commands
 
 ```bash
+a2 init
 a2 check
+a2 check --quick
 a2 check -v
 a2 check --lang go,python
 a2 check --profile=library

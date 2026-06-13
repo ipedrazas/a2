@@ -10,7 +10,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var listExplain bool
+var (
+	listExplain bool
+	listCompact bool
+)
 
 var listCmd = &cobra.Command{
 	Use:   "list",
@@ -24,15 +27,22 @@ var listChecksCmd = &cobra.Command{
 	Short:   "List all available checks",
 	Long: `List all available checks that a2 can run.
 
-Shows check IDs (for use with --skip), names, and which language they apply to.
-Checks marked as [critical] will cause the run to fail if they don't pass.`,
+Shows check IDs (for use with --skip), names, descriptions, and which language
+they apply to. Checks marked as [critical] will fail the run if they don't pass;
+checks marked as [slow] are skipped by 'a2 check --quick'.
+
+Pass --compact to hide descriptions.`,
 	Run: runListChecks,
 }
 
 func init() {
 	rootCmd.AddCommand(listCmd)
 	listCmd.AddCommand(listChecksCmd)
-	listChecksCmd.Flags().BoolVar(&listExplain, "explain", false, "Show detailed descriptions for each check")
+	// Descriptions are shown by default; --compact hides them. --explain is kept
+	// as a hidden no-op for backward compatibility.
+	listChecksCmd.Flags().BoolVar(&listCompact, "compact", false, "Hide check descriptions (IDs and names only)")
+	listChecksCmd.Flags().BoolVar(&listExplain, "explain", false, "Deprecated: descriptions are shown by default")
+	_ = listChecksCmd.Flags().MarkHidden("explain")
 }
 
 func runListChecks(cmd *cobra.Command, args []string) {
@@ -80,12 +90,15 @@ func runListChecks(cmd *cobra.Command, args []string) {
 		fmt.Printf("%s:\n", langName)
 
 		for _, reg := range regs {
-			critical := ""
+			tags := ""
 			if reg.Meta.Critical {
-				critical = " [critical]"
+				tags += " [critical]"
 			}
-			fmt.Printf("  %-25s %s%s\n", reg.Meta.ID, reg.Meta.Name, critical)
-			if listExplain && reg.Meta.Description != "" {
+			if reg.Meta.Speed == checker.SpeedSlow {
+				tags += " [slow]"
+			}
+			fmt.Printf("  %-25s %s%s\n", reg.Meta.ID, reg.Meta.Name, tags)
+			if !listCompact && reg.Meta.Description != "" {
 				fmt.Printf("    %s\n", reg.Meta.Description)
 			}
 		}
