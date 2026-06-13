@@ -44,14 +44,14 @@ Example:
   a2 explain go:race
   a2 explain common:health`,
 	Args: cobra.ExactArgs(1),
-	Run:  runExplain,
+	RunE: runExplain,
 }
 
 func init() {
 	rootCmd.AddCommand(explainCmd)
 }
 
-func runExplain(cmd *cobra.Command, args []string) {
+func runExplain(cmd *cobra.Command, args []string) error {
 	checkID := args[0]
 	cfg := config.DefaultConfig()
 	allRegs := checks.GetAllCheckRegistrations(cfg)
@@ -90,11 +90,10 @@ func runExplain(cmd *cobra.Command, args []string) {
 
 			fmt.Printf("Docs:         %s\n", docReference(reg.Meta.ID))
 
-			return
+			return nil
 		}
 	}
 
-	fmt.Fprintf(os.Stderr, "Unknown check ID: %s\n", checkID)
 	fmt.Fprintf(os.Stderr, "Use 'a2 list checks' to see all available check IDs.\n")
-	os.Exit(1)
+	return fmt.Errorf("unknown check ID: %s", checkID)
 }

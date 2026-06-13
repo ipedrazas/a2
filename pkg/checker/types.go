@@ -63,6 +63,7 @@ type Result struct {
 	Language  Language      // Which language this check applies to
 	Duration  time.Duration // How long the check took to execute
 	RawOutput string        // Full command output for verbose display
+	Critical  bool          // Set by the runner from CheckMeta; weights the maturity score
 }
 
 // Speed indicates the relative cost of a check.

@@ -44,10 +44,26 @@ _Review date: 2026-06-13_
   language + external commented) instead of the old all-commented `{}` dump;
   added a round-trip test. Onboarding "Getting started" 4-command path added to
   README.
-- [ ] #9 Move `os.Exit` out of `RunE`; return errors (3.2)
-- [ ] #10 Extract repeated check boilerplate into `checkutil` helpers (3.3)
-- [ ] #11 Data-driven security patterns (`//go:embed`) (3.3)
-- [ ] #12 Score weighting for critical checks (4)
+- [x] **#9 Move `os.Exit` out of `RunE`; return errors** (3.2) — `runCheck`,
+  `runSingleCheck`, `runExplain`, and both validate commands now return errors
+  instead of calling `os.Exit`. `Execute()` owns the exit code, sets
+  `SilenceErrors`/`SilenceUsage`, and prints real errors; a shared `errSilent`
+  sentinel handles "exit 1, already reported" (failed checks). `explain`/the
+  validate cmds converted from `Run` to `RunE`.
+- [x] **#10 Extract repeated check boilerplate into `checkutil` helpers** (3.3) —
+  added `checkutil.FirstExisting` / `AnyExists` (first/any config file that
+  exists), `CountMatches` (regex finding count), and `FallbackChain` (tool →
+  config → regex priority), with table tests. Adopted in representative checks
+  (python format/build) to shrink existence ladders and count loops; available
+  for incremental adoption elsewhere (deliberately not a blind sweep).
+- [ ] #11 Data-driven security patterns (`//go:embed`) (3.3) — **deferred** to a
+  dedicated effort (security-detection refactor; needs golden-file parity tests).
+- [x] **#12 Score weighting for critical checks** (4) — Critical checks now count
+  `2×` toward the maturity score via `SuiteResult.WeightedTally()`, so the score
+  reflects risk rather than a flat pass ratio. The runner stamps `Critical` onto
+  each `checker.Result`; maturity/json/toon/pretty all use the weighted score.
+  Reduces exactly to the old ratio when no checks are Critical (existing tests
+  unchanged); added weighting tests in runner + maturity.
 
 This document captures an architecture review, a code review, and a prioritized
 list of improvements for `a2`. It also contains a concrete plan to **remove the

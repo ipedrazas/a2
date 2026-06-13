@@ -278,14 +278,13 @@ func printStatus(result runner.SuiteResult) {
 }
 
 func printScore(result runner.SuiteResult) {
-	// Use ScoredChecks to exclude Info from score calculation
+	// Show raw passed/scored counts, but a risk-weighted percentage (Critical
+	// checks count more) so the headline number reflects severity.
 	scoredTotal := result.ScoredChecks()
 	passed := result.Passed
-
-	// Calculate percentage
 	var pct float64
 	if scoredTotal > 0 {
-		pct = float64(passed) / float64(scoredTotal) * 100
+		pct = calculateScore(result)
 	}
 
 	fmt.Println()

@@ -141,10 +141,10 @@ func statusToString(s checker.Status) string {
 }
 
 func calculateScore(result runner.SuiteResult) float64 {
-	// Use ScoredChecks to exclude Info from score calculation
-	scoredTotal := result.ScoredChecks()
-	if scoredTotal == 0 {
+	// Critical checks are weighted more heavily so the score reflects risk.
+	passed, scored := result.WeightedTally()
+	if scored == 0 {
 		return 100.0
 	}
-	return float64(result.Passed) / float64(scoredTotal) * 100
+	return passed / scored * 100
 }

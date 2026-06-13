@@ -78,12 +78,14 @@ func poolSize(opts RunSuiteOptions, n int) int {
 }
 
 // applyOptional converts a Warn result to Info for optional checks so that
-// optional checks never drag down the maturity score.
+// optional checks never drag down the maturity score, and stamps the result
+// with the check's Critical flag so scoring can weight it.
 func applyOptional(meta checker.CheckMeta, res checker.Result) checker.Result {
 	if meta.Optional && res.Status == checker.Warn {
 		res.Status = checker.Info
 		res.Passed = true
 	}
+	res.Critical = meta.Critical
 	return res
 }
 
@@ -326,6 +328,32 @@ func (s *SuiteResult) TotalChecks() int {
 // This excludes Info, Errored, and Skipped status checks which do not score.
 func (s *SuiteResult) ScoredChecks() int {
 	return s.Passed + s.Warnings + s.Failed
+}
+
+// criticalWeight is how much more a Critical check counts toward the maturity
+// score than an ordinary check, so the score reflects risk rather than a flat
+// pass ratio.
+const criticalWeight = 2.0
+
+// WeightedTally returns the weighted passed and scored totals, where Critical
+// checks count criticalWeight times as much as ordinary checks. Info, Errored,
+// and Skipped results are excluded, matching ScoredChecks. When no Critical
+// checks are present this reduces exactly to the raw passed/scored ratio.
+func (s *SuiteResult) WeightedTally() (passed, scored float64) {
+	for _, r := range s.Results {
+		w := 1.0
+		if r.Critical {
+			w = criticalWeight
+		}
+		switch r.Status {
+		case checker.Pass:
+			passed += w
+			scored += w
+		case checker.Warn, checker.Fail:
+			scored += w
+		}
+	}
+	return passed, scored
 }
 
 // Success returns true if no checks failed (warnings are allowed).

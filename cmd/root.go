@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -96,7 +97,7 @@ Checks for:
 - Unknown check IDs (typos or invalid references)
 - Duplicate disabled check IDs
 - Profiles that override built-in profiles`,
-	Run: runProfilesValidate,
+	RunE: runProfilesValidate,
 }
 
 var targetsValidateCmd = &cobra.Command{
@@ -108,7 +109,7 @@ Checks for:
 - Unknown check IDs (typos or invalid references)
 - Duplicate disabled check IDs
 - Targets that override built-in targets`,
-	Run: runTargetsValidate,
+	RunE: runTargetsValidate,
 }
 
 func init() {
@@ -141,13 +142,26 @@ func init() {
 	targetsCmd.AddCommand(targetsValidateCmd)
 }
 
+// errSilent signals that a command failed and the exit code should be 1, but the
+// reason has already been reported to the user (e.g. a printed check report), so
+// Execute must not print anything further.
+var errSilent = errors.New("")
+
 func Execute() {
 	// Initialize user profiles and targets
 	// Errors are non-fatal; we'll just use built-in definitions
 	_ = profiles.Init()
 	_ = targets.Init()
 
+	// We own error reporting and the exit code here rather than letting Cobra
+	// print errors, so commands can return errors instead of calling os.Exit.
+	rootCmd.SilenceErrors = true
+	rootCmd.SilenceUsage = true
+
 	if err := rootCmd.Execute(); err != nil {
+		if !errors.Is(err, errSilent) {
+			fmt.Fprintln(os.Stderr, "Error:", err)
+		}
 		os.Exit(1)
 	}
 }
@@ -164,8 +178,7 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	// Load configuration
 	cfg, err := config.Load(path)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error loading config: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("loading config: %w", err)
 	}
 	// First-run nudge: if there's no .a2.yaml, point users at `a2 init`.
 	// Printed to stderr and only in pretty mode so json/toon output stays clean.
@@ -290,9 +303,10 @@ func runCheck(cmd *cobra.Command, args []string) error {
 		return outputErr
 	}
 
-	// Exit with code 1 if checks failed
+	// Exit with code 1 if checks failed. The report was already printed, so use
+	// the silent sentinel to avoid an extra error line.
 	if !success {
-		os.Exit(1)
+		return errSilent
 	}
 
 	return nil
@@ -450,7 +464,7 @@ func runTargetsInit(cmd *cobra.Command, args []string) error {
 	return targets.WriteBuiltInTargets()
 }
 
-func runProfilesValidate(cmd *cobra.Command, args []string) {
+func runProfilesValidate(cmd *cobra.Command, args []string) error {
 	results := profiles.ValidateAllUserProfiles()
 
 	if len(results) == 0 {
@@ -458,14 +472,13 @@ func runProfilesValidate(cmd *cobra.Command, args []string) {
 		fmt.Println()
 		fmt.Println("User profiles are stored in ~/.config/a2/profiles/")
 		fmt.Println("Run 'a2 profiles init' to create sample profiles.")
-		return
+		return nil
 	}
 
 	hasErrors := false
 	for name, result := range results {
 		if name == "_error" {
-			fmt.Printf("Error: %s\n", result.Errors[0])
-			os.Exit(1)
+			return fmt.Errorf("%s", result.Errors[0])
 		}
 
 		fmt.Printf("Profile: %s\n", name)
@@ -485,11 +498,12 @@ func runProfilesValidate(cmd *cobra.Command, args []string) {
 	}
 
 	if hasErrors {
-		os.Exit(1)
+		return errSilent
 	}
+	return nil
 }
 
-func runTargetsValidate(cmd *cobra.Command, args []string) {
+func runTargetsValidate(cmd *cobra.Command, args []string) error {
 	results := targets.ValidateAllUserTargets()
 
 	if len(results) == 0 {
@@ -497,14 +511,13 @@ func runTargetsValidate(cmd *cobra.Command, args []string) {
 		fmt.Println()
 		fmt.Println("User targets are stored in ~/.config/a2/targets/")
 		fmt.Println("Run 'a2 targets init' to create sample targets.")
-		return
+		return nil
 	}
 
 	hasErrors := false
 	for name, result := range results {
 		if name == "_error" {
-			fmt.Printf("Error: %s\n", result.Errors[0])
-			os.Exit(1)
+			return fmt.Errorf("%s", result.Errors[0])
 		}
 
 		fmt.Printf("Target: %s\n", name)
@@ -524,6 +537,7 @@ func runTargetsValidate(cmd *cobra.Command, args []string) {
 	}
 
 	if hasErrors {
-		os.Exit(1)
+		return errSilent
 	}
+	return nil
 }

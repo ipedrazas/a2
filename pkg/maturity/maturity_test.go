@@ -225,6 +225,35 @@ func (s *MaturityTestSuite) TestEstimate_InfoWithFailures() {
 	s.Equal(10, est.Total) // Only scored checks
 }
 
+// TestEstimate_CriticalWeighting verifies the score weights Critical checks more
+// heavily, so the same pass count yields a different score depending on whether
+// the failure is critical.
+func (s *MaturityTestSuite) TestEstimate_CriticalWeighting() {
+	// One ordinary pass + one critical failure. Raw ratio is 50%, but the
+	// critical failure (weight 2) pulls the weighted score down to 1/3 ≈ 33%.
+	critFail := runner.SuiteResult{
+		Results: []checker.Result{
+			{Status: checker.Pass, Passed: true},
+			{Status: checker.Fail, Critical: true},
+		},
+		Passed: 1,
+		Failed: 1,
+	}
+	s.InDelta(33.33, Estimate(critFail).Score, 0.5)
+
+	// One critical pass + one ordinary failure. Raw ratio is still 50%, but the
+	// critical pass (weight 2) lifts the weighted score to 2/3 ≈ 67%.
+	critPass := runner.SuiteResult{
+		Results: []checker.Result{
+			{Status: checker.Pass, Passed: true, Critical: true},
+			{Status: checker.Fail},
+		},
+		Passed: 1,
+		Failed: 1,
+	}
+	s.InDelta(66.67, Estimate(critPass).Score, 0.5)
+}
+
 func TestMaturityTestSuite(t *testing.T) {
 	suite.Run(t, new(MaturityTestSuite))
 }

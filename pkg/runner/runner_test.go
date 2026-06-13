@@ -1411,6 +1411,49 @@ func (suite *RunnerTestSuite) TestFormatPanicMessage() {
 	suite.Equal("Check panicked unexpectedly", formatPanicMessage(struct{}{}))
 }
 
+// TestWeightedTally verifies that Critical checks count more toward the score.
+func (suite *RunnerTestSuite) TestWeightedTally() {
+	// No critical checks: weighted tally equals the raw ratio (2/4).
+	plain := SuiteResult{Results: []checker.Result{
+		{Status: checker.Pass},
+		{Status: checker.Pass},
+		{Status: checker.Warn},
+		{Status: checker.Fail},
+	}}
+	p, s := plain.WeightedTally()
+	suite.Equal(2.0, p)
+	suite.Equal(4.0, s)
+
+	// A failing critical check (weight 2) drags the score below the raw 1/2.
+	critFail := SuiteResult{Results: []checker.Result{
+		{Status: checker.Pass},                 // weight 1, passed
+		{Status: checker.Fail, Critical: true}, // weight 2, scored only
+	}}
+	p, s = critFail.WeightedTally()
+	suite.Equal(1.0, p)
+	suite.Equal(3.0, s) // 1/3 ≈ 33% (raw would be 50%)
+
+	// A passing critical check lifts the score above the raw 1/2.
+	critPass := SuiteResult{Results: []checker.Result{
+		{Status: checker.Pass, Critical: true}, // weight 2, passed
+		{Status: checker.Fail},                 // weight 1, scored only
+	}}
+	p, s = critPass.WeightedTally()
+	suite.Equal(2.0, p)
+	suite.Equal(3.0, s) // 2/3 ≈ 67% (raw would be 50%)
+
+	// Info/Errored/Skipped are excluded from the weighted tally.
+	withExcluded := SuiteResult{Results: []checker.Result{
+		{Status: checker.Pass, Critical: true},
+		{Status: checker.Info},
+		{Status: checker.Errored},
+		{Status: checker.Skipped},
+	}}
+	p, s = withExcluded.WeightedTally()
+	suite.Equal(2.0, p)
+	suite.Equal(2.0, s)
+}
+
 // TestProgressCallback_Parallel tests that progress callback is called for each check in parallel mode.
 func (suite *RunnerTestSuite) TestProgressCallback_Parallel() {
 	var callCount int32

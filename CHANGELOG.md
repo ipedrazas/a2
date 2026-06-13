@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Maturity score now weights Critical checks more heavily** (2× ordinary
+  checks), so the score reflects risk rather than a flat pass ratio. Projects
+  with no Critical checks see no change. JSON/TOON `score` and the pretty
+  percentage all use the weighted value; the `X/Y checks passed` count stays raw.
+- **Commands return errors instead of calling `os.Exit`.** `Execute()` now owns
+  the exit code and error reporting (`check`, `run`, `explain`, and the
+  profiles/targets `validate` commands), which makes them unit-testable and lets
+  deferred cleanup run. User-visible behavior (exit codes, messages) is
+  unchanged.
 - **`a2 add` renamed to `a2 init`** (the universal scaffolding verb); `add`
   still works as a hidden alias. `a2 check` now prints a one-line nudge pointing
   at `a2 init` when no `.a2.yaml` is present, and the "no language detected"

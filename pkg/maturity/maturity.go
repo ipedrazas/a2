@@ -69,7 +69,11 @@ func Estimate(result runner.SuiteResult) Estimation {
 		return Estimation{Level: PoC, Score: 0, Info: result.Info}
 	}
 
-	score := float64(result.Passed) / float64(scoredTotal) * 100
+	// Critical checks are weighted more heavily so the score reflects risk,
+	// not just a flat pass ratio. Falls back to the raw ratio when no checks
+	// are marked Critical.
+	weightedPassed, weightedScored := result.WeightedTally()
+	score := weightedPassed / weightedScored * 100
 
 	est := Estimation{
 		Score:    score,
