@@ -30,6 +30,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &BuildCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "swift:build",
+				Speed:       checker.SpeedSlow,
 				Name:        "Swift Build",
 				Description: "Compiles the project using 'swift build' to verify it builds without errors.",
 				Languages:   []checker.Language{checker.LangSwift},
@@ -42,6 +43,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &TestsCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "swift:tests",
+				Speed:       checker.SpeedSlow,
 				Name:        "Swift Tests",
 				Description: "Runs the test suite using 'swift test' to verify all tests pass.",
 				Languages:   []checker.Language{checker.LangSwift},
@@ -78,6 +80,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &CoverageCheck{Threshold: coverageThreshold},
 			Meta: checker.CheckMeta{
 				ID:          "swift:coverage",
+				Speed:       checker.SpeedSlow,
 				Name:        "Swift Coverage",
 				Description: "Measures test coverage and verifies it meets the configured threshold.",
 				Languages:   []checker.Language{checker.LangSwift},
@@ -90,6 +93,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DepsCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "swift:deps",
+				Speed:       checker.SpeedSlow,
 				Name:        "Swift Vulnerabilities",
 				Description: "Reviews Swift Package Manager dependencies for potential issues.",
 				Languages:   []checker.Language{checker.LangSwift},

@@ -40,6 +40,8 @@ type JSONSummary struct {
 	Warnings        int     `json:"warnings"`
 	Failed          int     `json:"failed"`
 	Info            int     `json:"info"`
+	Errored         int     `json:"errored"`
+	Skipped         int     `json:"skipped"`
 	Score           float64 `json:"score"`
 	TotalDurationMs int64   `json:"total_duration_ms"` // Total duration in milliseconds
 }
@@ -72,6 +74,8 @@ func JSON(result runner.SuiteResult, detected language.DetectionResult, verbosit
 			Warnings:        result.Warnings,
 			Failed:          result.Failed,
 			Info:            result.Info,
+			Errored:         result.Errored,
+			Skipped:         result.Skipped,
 			Score:           calculateScore(result),
 			TotalDurationMs: result.TotalDuration.Milliseconds(),
 		},
@@ -127,16 +131,20 @@ func statusToString(s checker.Status) string {
 		return "fail"
 	case checker.Info:
 		return "info"
+	case checker.Errored:
+		return "errored"
+	case checker.Skipped:
+		return "skipped"
 	default:
 		return "unknown"
 	}
 }
 
 func calculateScore(result runner.SuiteResult) float64 {
-	// Use ScoredChecks to exclude Info from score calculation
-	scoredTotal := result.ScoredChecks()
-	if scoredTotal == 0 {
+	// Critical checks are weighted more heavily so the score reflects risk.
+	passed, scored := result.WeightedTally()
+	if scored == 0 {
 		return 100.0
 	}
-	return float64(result.Passed) / float64(scoredTotal) * 100
+	return passed / scored * 100
 }

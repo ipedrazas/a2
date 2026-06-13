@@ -183,6 +183,9 @@ type SwiftLanguageConfig struct {
 // ExecutionConfig configures how checks are executed.
 type ExecutionConfig struct {
 	Parallel bool `yaml:"parallel"`
+	// Concurrency caps how many checks run at once in parallel mode.
+	// 0 (the default) uses GOMAXPROCS.
+	Concurrency int `yaml:"concurrency,omitempty"`
 }
 
 // ExternalCheck defines a custom external check.
@@ -193,6 +196,7 @@ type ExternalCheck struct {
 	Args      []string `yaml:"args"`
 	Severity  string   `yaml:"severity"`             // "warn" or "fail"
 	SourceDir string   `yaml:"source_dir,omitempty"` // Subdirectory to run the command in (like language source_dir)
+	Speed     string   `yaml:"speed,omitempty"`      // "slow" excludes this check from --quick runs (default: fast)
 }
 
 // CoverageConfig configures the coverage check.

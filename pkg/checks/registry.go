@@ -267,6 +267,19 @@ func GetChecks(cfg *config.Config, detected language.DetectionResult) []checker.
 	return enabled
 }
 
+// FilterFast returns only the fast (static/IO-light) checks, dropping any
+// SpeedSlow check that spawns builds/tests/network work. It is an orthogonal
+// filter applied on top of profile/target/skip selection for --quick runs.
+func FilterFast(regs []checker.CheckRegistration) []checker.CheckRegistration {
+	filtered := make([]checker.CheckRegistration, 0, len(regs))
+	for _, reg := range regs {
+		if reg.Meta.Speed == checker.SpeedFast {
+			filtered = append(filtered, reg)
+		}
+	}
+	return filtered
+}
+
 // filterByDisabledList removes checks whose ID matches any entry in the disabled list.
 func filterByDisabledList(regs []checker.CheckRegistration, disabled []string) []checker.CheckRegistration {
 	var filtered []checker.CheckRegistration

@@ -33,6 +33,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &BuildCheck{Config: nodeCfg},
 			Meta: checker.CheckMeta{
 				ID:          "node:build",
+				Speed:       checker.SpeedSlow,
 				Name:        "Node Build",
 				Description: "Runs the build script to verify the project compiles without errors.",
 				Languages:   []checker.Language{checker.LangNode},
@@ -45,6 +46,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &TestsCheck{Config: nodeCfg},
 			Meta: checker.CheckMeta{
 				ID:          "node:tests",
+				Speed:       checker.SpeedSlow,
 				Name:        "Node Tests",
 				Description: "Runs the test suite using the configured test runner to verify all tests pass.",
 				Languages:   []checker.Language{checker.LangNode},
@@ -81,6 +83,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &TypeCheck{Config: nodeCfg},
 			Meta: checker.CheckMeta{
 				ID:          "node:type",
+				Speed:       checker.SpeedSlow,
 				Name:        "TypeScript Type Check",
 				Description: "Runs TypeScript compiler to check for type errors in the codebase.",
 				Languages:   []checker.Language{checker.LangNode},
@@ -93,6 +96,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &CoverageCheck{Config: nodeCfg, Threshold: coverageThreshold},
 			Meta: checker.CheckMeta{
 				ID:          "node:coverage",
+				Speed:       checker.SpeedSlow,
 				Name:        "Node Coverage",
 				Description: "Measures test coverage and verifies it meets the configured threshold.",
 				Languages:   []checker.Language{checker.LangNode},
@@ -105,6 +109,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DepsCheck{Config: nodeCfg},
 			Meta: checker.CheckMeta{
 				ID:          "node:deps",
+				Speed:       checker.SpeedSlow,
 				Name:        "Node Vulnerabilities",
 				Description: "Scans dependencies for known vulnerabilities using npm audit.",
 				Languages:   []checker.Language{checker.LangNode},
@@ -129,6 +134,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DepsFreshnessCheck{Config: nodeCfg},
 			Meta: checker.CheckMeta{
 				ID:          "node:deps_freshness",
+				Speed:       checker.SpeedSlow,
 				Name:        "Node Dependency Freshness",
 				Description: "Checks for outdated Node.js packages using npm/yarn/pnpm outdated.",
 				Languages:   []checker.Language{checker.LangNode},
@@ -141,6 +147,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DeadcodeCheck{Config: nodeCfg},
 			Meta: checker.CheckMeta{
 				ID:          "node:deadcode",
+				Speed:       checker.SpeedSlow,
 				Name:        "Node Dead Code",
 				Description: "Detects unused exports and dependencies using knip.",
 				Languages:   []checker.Language{checker.LangNode},

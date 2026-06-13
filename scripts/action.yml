@@ -22,6 +22,10 @@ inputs:
     description: 'Fail the action if there are warnings'
     required: false
     default: 'false'
+  quick:
+    description: 'Run only fast static checks (skip builds/tests/scans)'
+    required: false
+    default: 'false'
 
 outputs:
   score:
@@ -52,9 +56,14 @@ runs:
         A2_PATH: ${{ inputs.path }}
         A2_FORMAT: ${{ inputs.format }}
         A2_FAIL_ON_WARNING: ${{ inputs.fail-on-warning }}
+        A2_QUICK: ${{ inputs.quick }}
       run: |
         set +e
-        OUTPUT=$(a2 check "$A2_PATH" --format json)
+        QUICK_FLAG=""
+        if [ "$A2_QUICK" = "true" ]; then
+          QUICK_FLAG="--quick"
+        fi
+        OUTPUT=$(a2 check "$A2_PATH" --format json $QUICK_FLAG)
         EXIT_CODE=$?
         echo "$OUTPUT"
 
@@ -71,7 +80,7 @@ runs:
         echo "success=$SUCCESS" >> $GITHUB_OUTPUT
 
         # Pretty output for logs
-        a2 check "$A2_PATH" --format "$A2_FORMAT" || true
+        a2 check "$A2_PATH" --format "$A2_FORMAT" $QUICK_FLAG || true
 
         # Determine exit code
         if [ "$A2_FAIL_ON_WARNING" = "true" ] && [ "$WARNINGS" -gt 0 ]; then

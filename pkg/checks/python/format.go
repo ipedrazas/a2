@@ -1,6 +1,7 @@
 package pythoncheck
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -8,6 +9,9 @@ import (
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
+
+// wouldReformatRe matches one "would reformat" notice (ruff/black) per file.
+var wouldReformatRe = regexp.MustCompile(`(?i)would reformat`)
 
 // FormatCheck verifies that Python code is properly formatted.
 type FormatCheck struct {
@@ -51,13 +55,7 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 		}
 
 		// Count unformatted files
-		lines := strings.Split(result.Output(), "\n")
-		fileCount := 0
-		for _, line := range lines {
-			if strings.Contains(line, "would reformat") || strings.Contains(line, "Would reformat") {
-				fileCount++
-			}
-		}
+		fileCount := checkutil.CountMatches(wouldReformatRe, result.Output())
 
 		if fileCount > 0 {
 			return rb.WarnWithOutput(cmdDesc+": "+checkutil.PluralizeCount(fileCount, "file", "files")+" need formatting", output), nil
@@ -75,7 +73,7 @@ func (c *FormatCheck) detectFormatter(path string) string {
 	}
 
 	// Auto-detect based on config files
-	if safepath.Exists(path, "ruff.toml") || safepath.Exists(path, ".ruff.toml") {
+	if checkutil.AnyExists(path, "ruff.toml", ".ruff.toml") {
 		return "ruff"
 	}
 	if safepath.Exists(path, ".black.toml") || safepath.Exists(path, "pyproject.toml") {

@@ -28,18 +28,19 @@ var (
 )
 
 var addCmd = &cobra.Command{
-	Use:   "add",
-	Short: "Generate a .a2.yaml configuration file",
-	Long: `Generate a .a2.yaml configuration file for your project.
+	Use:     "init",
+	Aliases: []string{"add"},
+	Short:   "Create a .a2.yaml configuration file",
+	Long: `Create a .a2.yaml configuration file for your project.
 
 Two modes are available:
   - Interactive mode (-i): Guided prompts to configure all options
   - Non-interactive mode: Pass flags directly to generate the config
 
 Examples:
-  a2 add -i                                    # Interactive mode
-  a2 add --profile cli --target poc            # CLI app for PoC
-  a2 add --lang go,python --coverage 90        # Multi-language with 90% coverage`,
+  a2 init -i                                    # Interactive mode
+  a2 init --profile cli --target poc            # CLI app for PoC
+  a2 init --lang go,python --coverage 90        # Multi-language with 90% coverage`,
 	RunE: runAdd,
 }
 

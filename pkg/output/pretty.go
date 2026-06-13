@@ -131,8 +131,9 @@ func Pretty(result runner.SuiteResult, path string, detected language.DetectionR
 	printTopIssues(result)
 
 	// Results
+	meta := buildCheckMeta()
 	for _, r := range result.Results {
-		printResult(r, verbosity)
+		printResult(r, verbosity, meta[r.ID])
 	}
 
 	// Skipped checks (verbose only)
@@ -166,7 +167,7 @@ func Pretty(result runner.SuiteResult, path string, detected language.DetectionR
 	return result.Success(), nil
 }
 
-func printResult(r checker.Result, verbosity VerbosityLevel) {
+func printResult(r checker.Result, verbosity VerbosityLevel, meta checkMeta) {
 	var symbol, status string
 	var style lipgloss.Style
 
@@ -186,6 +187,14 @@ func printResult(r checker.Result, verbosity VerbosityLevel) {
 	case checker.Info:
 		symbol = "ℹ"
 		status = "INFO"
+		style = infoStyle
+	case checker.Errored:
+		symbol = "⚠"
+		status = "ERROR"
+		style = warnStyle
+	case checker.Skipped:
+		symbol = "○"
+		status = "SKIP"
 		style = infoStyle
 	}
 
@@ -214,6 +223,16 @@ func printResult(r checker.Result, verbosity VerbosityLevel) {
 				fmt.Println(messageStyle.Render(reasonLine))
 			}
 		}
+	}
+
+	// On failures and warnings, surface why the check matters and how to learn
+	// more, so users don't have to go hunting for the docs.
+	if r.Status == checker.Fail || r.Status == checker.Warn {
+		hint := fmt.Sprintf("→ why: %s · run: a2 explain %s", meta.description, r.ID)
+		if meta.description == "" {
+			hint = fmt.Sprintf("→ run: a2 explain %s for details", r.ID)
+		}
+		fmt.Println(messageStyle.Render(hint))
 	}
 
 	// Print raw output based on verbosity level
@@ -259,14 +278,13 @@ func printStatus(result runner.SuiteResult) {
 }
 
 func printScore(result runner.SuiteResult) {
-	// Use ScoredChecks to exclude Info from score calculation
+	// Show raw passed/scored counts, but a risk-weighted percentage (Critical
+	// checks count more) so the headline number reflects severity.
 	scoredTotal := result.ScoredChecks()
 	passed := result.Passed
-
-	// Calculate percentage
 	var pct float64
 	if scoredTotal > 0 {
-		pct = float64(passed) / float64(scoredTotal) * 100
+		pct = calculateScore(result)
 	}
 
 	fmt.Println()
@@ -396,9 +414,10 @@ func printTopIssues(result runner.SuiteResult) {
 }
 
 type checkMeta struct {
-	critical   bool
-	order      int
-	suggestion string
+	critical    bool
+	order       int
+	suggestion  string
+	description string
 }
 
 func buildCheckMeta() map[string]checkMeta {
@@ -407,9 +426,10 @@ func buildCheckMeta() map[string]checkMeta {
 	meta := make(map[string]checkMeta, len(all))
 	for _, reg := range all {
 		meta[reg.Meta.ID] = checkMeta{
-			critical:   reg.Meta.Critical,
-			order:      reg.Meta.Order,
-			suggestion: reg.Meta.Suggestion,
+			critical:    reg.Meta.Critical,
+			order:       reg.Meta.Order,
+			suggestion:  reg.Meta.Suggestion,
+			description: reg.Meta.Description,
 		}
 	}
 	return meta

@@ -1,6 +1,8 @@
 package common
 
 import (
+	"strings"
+
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/config"
 )
@@ -96,6 +98,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &SASTCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "common:sast",
+				Speed:       checker.SpeedSlow,
 				Name:        "SAST Security Scanning",
 				Description: "Runs static application security testing using semgrep.",
 				Languages:   []checker.Language{checker.LangCommon},
@@ -278,6 +281,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DuplicationCheck{},
 			Meta: checker.CheckMeta{
 				ID:          "common:duplication",
+				Speed:       checker.SpeedSlow,
 				Name:        "Code Duplication",
 				Description: "Detects code duplication using jscpd to identify copy-paste patterns.",
 				Languages:   []checker.Language{checker.LangCommon},
@@ -300,6 +304,15 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 		},
 	}
 
+	// externalSpeed maps the optional "speed" field on an external check to a
+	// checker.Speed, defaulting to fast so external checks run in --quick.
+	externalSpeed := func(s string) checker.Speed {
+		if strings.EqualFold(s, "slow") {
+			return checker.SpeedSlow
+		}
+		return checker.SpeedFast
+	}
+
 	// Add external checks from config
 	for _, ext := range cfg.External {
 		registrations = append(registrations, checker.CheckRegistration{
@@ -317,6 +330,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Languages: []checker.Language{checker.LangCommon},
 				Critical:  ext.Severity == "fail",
 				Order:     1000, // External checks run last
+				Speed:     externalSpeed(ext.Speed),
 			},
 		})
 	}

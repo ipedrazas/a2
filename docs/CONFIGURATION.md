@@ -1,6 +1,6 @@
 # A2 Configuration Reference
 
-A2 is configured via a `.a2.yaml` file in your project root. You can generate one with `a2 add` (use `-i` for interactive mode).
+A2 is configured via a `.a2.yaml` file in your project root. You can generate one with `a2 init` (use `-i` for interactive mode).
 
 ## Table of Contents
 
@@ -20,7 +20,7 @@ A2 is configured via a `.a2.yaml` file in your project root. You can generate on
 Run with `-i` flag for guided prompts:
 
 ```bash
-a2 add -i
+a2 init -i
 ```
 
 This will prompt you for:
@@ -38,19 +38,19 @@ Pass options directly via flags:
 
 ```bash
 # Basic usage
-a2 add --profile cli --target poc
+a2 init --profile cli --target poc
 
 # With language and coverage
-a2 add --lang go,python --coverage 90
+a2 init --lang go,python --coverage 90
 
 # Custom required files
-a2 add --files README.md,LICENSE,CHANGELOG.md
+a2 init --files README.md,LICENSE,CHANGELOG.md
 
 # Overwrite existing config
-a2 add --profile api --force
+a2 init --profile api --force
 
 # Custom output path
-a2 add --output custom-config.yaml
+a2 init --output custom-config.yaml
 ```
 
 ### Available Flags
@@ -262,7 +262,7 @@ language:
 | `profile` | no | Name of a profile whose `disabled` list is applied to **this directory only** |
 | `coverage_threshold` | no | Per-directory coverage threshold, overriding the language-wide value |
 
-**Profiles** are the same ones used by `a2 add --profile`. Built-in profiles are
+**Profiles** are the same ones used by `a2 init --profile`. Built-in profiles are
 `cli`, `api`, `library`, and `desktop`; you can also define your own (run
 `a2 profiles` to list them). Attaching a profile to a directory disables that profile's checks
 for that directory without affecting the others — so a `library` package and an

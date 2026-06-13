@@ -81,9 +81,10 @@ func runSingleCheck(cmd *cobra.Command, args []string) error {
 		outputRunResultPretty(result, found.Meta)
 	}
 
-	// Exit with error if check failed
+	// Exit with code 1 if the check failed. The result was already printed, so
+	// use the silent sentinel to avoid an extra error line.
 	if result.Status == checker.Fail {
-		os.Exit(1)
+		return errSilent
 	}
 
 	return nil

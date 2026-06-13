@@ -55,7 +55,9 @@ type Estimation struct {
 	Warnings    int      // Number of warnings
 	Failed      int      // Number of failed checks
 	Info        int      // Number of informational checks (excluded from score)
-	Total       int      // Total number of scored checks (excludes Info)
+	Errored     int      // Number of checks a2 could not evaluate (excluded from score)
+	Skipped     int      // Number of checks that were not run (excluded from score)
+	Total       int      // Total number of scored checks (excludes Info/Errored/Skipped)
 	Suggestions []string // Recommendations for improvement
 }
 
@@ -67,7 +69,11 @@ func Estimate(result runner.SuiteResult) Estimation {
 		return Estimation{Level: PoC, Score: 0, Info: result.Info}
 	}
 
-	score := float64(result.Passed) / float64(scoredTotal) * 100
+	// Critical checks are weighted more heavily so the score reflects risk,
+	// not just a flat pass ratio. Falls back to the raw ratio when no checks
+	// are marked Critical.
+	weightedPassed, weightedScored := result.WeightedTally()
+	score := weightedPassed / weightedScored * 100
 
 	est := Estimation{
 		Score:    score,
@@ -75,6 +81,8 @@ func Estimate(result runner.SuiteResult) Estimation {
 		Warnings: result.Warnings,
 		Failed:   result.Failed,
 		Info:     result.Info,
+		Errored:  result.Errored,
+		Skipped:  result.Skipped,
 		Total:    scoredTotal,
 	}
 

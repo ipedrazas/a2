@@ -5,10 +5,34 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checks"
 	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/spf13/cobra"
 )
+
+// docsBaseURL is the canonical location of the checks reference docs.
+const docsBaseURL = "https://github.com/ipedrazas/a2/blob/main/docs"
+
+// languagesWithDocs are the languages that have a dedicated docs/checks/<lang>.md page.
+var languagesWithDocs = map[string]bool{
+	"go": true, "python": true, "node": true,
+	"java": true, "rust": true, "typescript": true,
+}
+
+// docReference returns a URL pointing at the documentation for a check ID.
+// Language checks (e.g. "go:race") link to docs/checks/<lang>.md#<anchor>;
+// everything else links to the top-level docs/CHECKS.md.
+func docReference(id string) string {
+	lang, _, ok := strings.Cut(id, ":")
+	if ok && languagesWithDocs[lang] {
+		// GitHub heading anchors lowercase the text and drop the colon:
+		// "## go:race" -> "#gorace".
+		anchor := strings.ReplaceAll(id, ":", "")
+		return fmt.Sprintf("%s/checks/%s.md#%s", docsBaseURL, lang, anchor)
+	}
+	return docsBaseURL + "/CHECKS.md"
+}
 
 var explainCmd = &cobra.Command{
 	Use:   "explain CHECK_ID",
@@ -20,14 +44,14 @@ Example:
   a2 explain go:race
   a2 explain common:health`,
 	Args: cobra.ExactArgs(1),
-	Run:  runExplain,
+	RunE: runExplain,
 }
 
 func init() {
 	rootCmd.AddCommand(explainCmd)
 }
 
-func runExplain(cmd *cobra.Command, args []string) {
+func runExplain(cmd *cobra.Command, args []string) error {
 	checkID := args[0]
 	cfg := config.DefaultConfig()
 	allRegs := checks.GetAllCheckRegistrations(cfg)
@@ -58,11 +82,18 @@ func runExplain(cmd *cobra.Command, args []string) {
 				fmt.Printf("Suggestion:   %s\n", reg.Meta.Suggestion)
 			}
 
-			return
+			if reg.Meta.Speed == checker.SpeedSlow {
+				fmt.Printf("Speed:        Slow (skipped by 'a2 check --quick')\n")
+			} else {
+				fmt.Printf("Speed:        Fast (runs in 'a2 check --quick')\n")
+			}
+
+			fmt.Printf("Docs:         %s\n", docReference(reg.Meta.ID))
+
+			return nil
 		}
 	}
 
-	fmt.Fprintf(os.Stderr, "Unknown check ID: %s\n", checkID)
 	fmt.Fprintf(os.Stderr, "Use 'a2 list checks' to see all available check IDs.\n")
-	os.Exit(1)
+	return fmt.Errorf("unknown check ID: %s", checkID)
 }

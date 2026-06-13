@@ -4,7 +4,6 @@ import (
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
-	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
 // BuildCheck verifies that Python dependencies can be installed.
@@ -50,11 +49,11 @@ func (c *BuildCheck) detectPackageManager(path string) string {
 		return c.Config.PackageManager
 	}
 
-	// Auto-detect based on lock files
-	if safepath.Exists(path, "poetry.lock") {
+	// Auto-detect based on lock files (most specific first).
+	if checkutil.AnyExists(path, "poetry.lock") {
 		return "poetry"
 	}
-	if safepath.Exists(path, "Pipfile.lock") || safepath.Exists(path, "Pipfile") {
+	if checkutil.AnyExists(path, "Pipfile.lock", "Pipfile") {
 		return "pipenv"
 	}
 	return "pip"

@@ -33,6 +33,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &BuildCheck{Config: tsCfg},
 			Meta: checker.CheckMeta{
 				ID:          "typescript:build",
+				Speed:       checker.SpeedSlow,
 				Name:        "TypeScript Build",
 				Description: "Compiles the project to verify it builds without errors.",
 				Languages:   []checker.Language{checker.LangTypeScript},
@@ -45,6 +46,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &TestsCheck{Config: tsCfg},
 			Meta: checker.CheckMeta{
 				ID:          "typescript:tests",
+				Speed:       checker.SpeedSlow,
 				Name:        "TypeScript Tests",
 				Description: "Runs the test suite using the configured test runner to verify all tests pass.",
 				Languages:   []checker.Language{checker.LangTypeScript},
@@ -81,6 +83,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &TypeCheck{Config: tsCfg},
 			Meta: checker.CheckMeta{
 				ID:          "typescript:type",
+				Speed:       checker.SpeedSlow,
 				Name:        "TypeScript Type Check",
 				Description: "Runs the TypeScript compiler to verify all types are correct.",
 				Languages:   []checker.Language{checker.LangTypeScript},
@@ -93,6 +96,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &CoverageCheck{Config: tsCfg, Threshold: coverageThreshold},
 			Meta: checker.CheckMeta{
 				ID:          "typescript:coverage",
+				Speed:       checker.SpeedSlow,
 				Name:        "TypeScript Coverage",
 				Description: "Measures test coverage and verifies it meets the configured threshold.",
 				Languages:   []checker.Language{checker.LangTypeScript},
@@ -105,6 +109,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DepsCheck{Config: tsCfg},
 			Meta: checker.CheckMeta{
 				ID:          "typescript:deps",
+				Speed:       checker.SpeedSlow,
 				Name:        "TypeScript Vulnerabilities",
 				Description: "Scans dependencies for known vulnerabilities using npm audit.",
 				Languages:   []checker.Language{checker.LangTypeScript},
@@ -129,6 +134,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DepsFreshnessCheck{Config: tsCfg},
 			Meta: checker.CheckMeta{
 				ID:          "typescript:deps_freshness",
+				Speed:       checker.SpeedSlow,
 				Name:        "TypeScript Dependency Freshness",
 				Description: "Checks for outdated packages using npm/yarn/pnpm outdated.",
 				Languages:   []checker.Language{checker.LangTypeScript},
@@ -141,6 +147,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			Checker: &DeadcodeCheck{Config: tsCfg},
 			Meta: checker.CheckMeta{
 				ID:          "typescript:deadcode",
+				Speed:       checker.SpeedSlow,
 				Name:        "TypeScript Dead Code",
 				Description: "Detects unused exports and dependencies using knip.",
 				Languages:   []checker.Language{checker.LangTypeScript},
