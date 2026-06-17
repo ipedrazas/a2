@@ -64,6 +64,7 @@ type Result struct {
 	Duration  time.Duration // How long the check took to execute
 	RawOutput string        // Full command output for verbose display
 	Critical  bool          // Set by the runner from CheckMeta; weights the maturity score
+	SourceDir string        // Directory the check ran in (empty means repo root); set for source_dir-scoped checks
 }
 
 // Speed indicates the relative cost of a check.

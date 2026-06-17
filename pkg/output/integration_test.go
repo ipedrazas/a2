@@ -146,7 +146,7 @@ func (suite *IntegrationTestSuite) TestTOON_IntegrationOutput() {
 
 	// Verify TOON structure
 	suite.Contains(output, "languages[1]: go")
-	suite.Contains(output, "results[5]{name,id,passed,status,message,reason,language,duration_ms}:")
+	suite.Contains(output, "results[5]{name,id,source_dir,passed,status,message,reason,language,duration_ms}:")
 	suite.Contains(output, "summary:")
 	suite.Contains(output, "total: 4")
 	suite.Contains(output, "passed: 2")
@@ -159,8 +159,8 @@ func (suite *IntegrationTestSuite) TestTOON_IntegrationOutput() {
 	suite.Contains(output, "success: false")
 
 	// Verify result rows (note: IDs with colons are quoted in TOON format)
-	suite.Contains(output, "Go Build,\"go:build\",true,pass,Build successful,Build successful,go,150")
-	suite.Contains(output, "Go Tests,\"go:tests\",true,pass,All tests passed,All tests passed,go,2500")
+	suite.Contains(output, "Go Build,\"go:build\",\"\",true,pass,Build successful,Build successful,go,150")
+	suite.Contains(output, "Go Tests,\"go:tests\",\"\",true,pass,All tests passed,All tests passed,go,2500")
 }
 
 // TestPretty_IntegrationOutput tests the Pretty formatter produces readable output.
@@ -229,7 +229,7 @@ func (suite *IntegrationTestSuite) TestTOON_EmptyResults() {
 	})
 
 	suite.Contains(output, "languages[0]:")
-	suite.Contains(output, "results[0]{name,id,passed,status,message,reason,language,duration_ms}:")
+	suite.Contains(output, "results[0]{name,id,source_dir,passed,status,message,reason,language,duration_ms}:")
 	suite.Contains(output, "score: 100")
 	suite.Contains(output, "success: true")
 }

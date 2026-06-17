@@ -40,7 +40,11 @@ func (p *pathResolvingChecker) Run(path string) (checker.Result, error) {
 	if p.sourceDir != "" {
 		actualPath = filepath.Join(path, p.sourceDir)
 	}
-	return p.checker.Run(actualPath)
+	res, err := p.checker.Run(actualPath)
+	// Record which source_dir this check ran in so output can disambiguate
+	// the same check running across multiple directories (monorepos).
+	res.SourceDir = p.sourceDir
+	return res, err
 }
 
 // multiPathChecker runs a common check on the repo root and each configured

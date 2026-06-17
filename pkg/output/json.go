@@ -20,6 +20,7 @@ type JSONResult struct {
 	Reason     string `json:"reason,omitempty"`
 	Language   string `json:"language,omitempty"`
 	DurationMs int64  `json:"duration_ms"`          // Duration in milliseconds
+	SourceDir  string `json:"source_dir,omitempty"` // Directory the check ran in (for source_dir-scoped checks)
 	RawOutput  string `json:"raw_output,omitempty"` // Full command output (with -v or -vv)
 }
 
@@ -98,6 +99,7 @@ func JSON(result runner.SuiteResult, detected language.DetectionResult, verbosit
 			Reason:     r.Reason,
 			Language:   string(r.Language),
 			DurationMs: r.Duration.Milliseconds(),
+			SourceDir:  r.SourceDir,
 		}
 
 		// Include raw output based on verbosity level

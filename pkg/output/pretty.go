@@ -201,13 +201,20 @@ func printResult(r checker.Result, verbosity VerbosityLevel, meta checkMeta) {
 	// Format duration
 	durationStr := formatDuration(r.Duration)
 
+	// Append the source directory when the check is scoped to one, so the
+	// same check running across multiple source_dirs can be told apart.
+	idSuffix := "- " + r.ID
+	if r.SourceDir != "" {
+		idSuffix += " in " + r.SourceDir
+	}
+
 	// Print the check result with duration and ID
 	fmt.Printf("%s %s %s %s %s\n",
 		style.Render(symbol),
 		style.Render(status),
 		r.Name,
 		durationStyle.Render(durationStr),
-		durationStyle.Render("- "+r.ID),
+		durationStyle.Render(idSuffix),
 	)
 	if verbosity > 1 {
 		// Print message (what) and reason (why) if present
@@ -403,11 +410,15 @@ func printTopIssues(result runner.SuiteResult) {
 		if detail != "" {
 			detail = " - " + detail
 		}
+		idLabel := issue.result.ID
+		if issue.result.SourceDir != "" {
+			idLabel += " in " + issue.result.SourceDir
+		}
 		fmt.Printf("%s %s%s %s\n",
 			style.Render(symbol),
 			issue.name,
 			detail,
-			durationStyle.Render("("+issue.result.ID+")"),
+			durationStyle.Render("("+idLabel+")"),
 		)
 	}
 	fmt.Println()
