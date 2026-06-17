@@ -59,6 +59,61 @@ func (suite *ConfigTestSuite) TestLoad_NoConfigFile() {
 	suite.Equal([]string{"README.md", "LICENSE"}, cfg.Files.Required)
 }
 
+// TestLoadDiscover_FindsParentConfig verifies that LoadDiscover walks up the
+// directory tree to find a .a2.yaml, so targeting a subdirectory honours the
+// project's root config instead of falling back to defaults.
+func (suite *ConfigTestSuite) TestLoadDiscover_FindsParentConfig() {
+	suite.createTempFile(".a2.yaml", "language:\n  go:\n    coverage_threshold: 40\n")
+	subDir := filepath.Join(suite.tempDir, "controlplane")
+	suite.NoError(os.MkdirAll(subDir, 0o755))
+
+	cfg, err := LoadDiscover(subDir)
+
+	suite.NoError(err)
+	suite.NotNil(cfg)
+	suite.Equal(40.0, cfg.Language.Go.CoverageThreshold)
+}
+
+// TestLoadDiscover_NoConfigFallsBackToDefaults verifies that LoadDiscover
+// returns the default config when no .a2.yaml exists up the tree.
+func (suite *ConfigTestSuite) TestLoadDiscover_NoConfigFallsBackToDefaults() {
+	subDir := filepath.Join(suite.tempDir, "controlplane")
+	suite.NoError(os.MkdirAll(subDir, 0o755))
+
+	cfg, err := LoadDiscover(subDir)
+
+	suite.NoError(err)
+	suite.NotNil(cfg)
+	suite.Equal(80.0, cfg.Coverage.Threshold)
+}
+
+// TestSourceDirEntryForPath_MatchesConfiguredDir verifies that an entry is
+// resolved when the target path points at a configured source_dir, so single
+// check runs can pick up that directory's per-entry overrides.
+func (suite *ConfigTestSuite) TestSourceDirEntryForPath_MatchesConfiguredDir() {
+	cfg := DefaultConfig()
+	cfg.Language.Go.SourceDir = SourceDirConfig{
+		{Path: "./controlplane", CoverageThreshold: 20},
+		{Path: "./nodeagent"},
+	}
+
+	entry := cfg.SourceDirEntryForPath("go", suite.tempDir, filepath.Join(suite.tempDir, "controlplane"))
+
+	suite.NotNil(entry)
+	suite.Equal(20.0, entry.CoverageThreshold)
+}
+
+// TestSourceDirEntryForPath_NoMatch verifies that a path outside the configured
+// source dirs returns nil so the language-wide settings apply.
+func (suite *ConfigTestSuite) TestSourceDirEntryForPath_NoMatch() {
+	cfg := DefaultConfig()
+	cfg.Language.Go.SourceDir = SourceDirConfig{{Path: "./controlplane"}}
+
+	entry := cfg.SourceDirEntryForPath("go", suite.tempDir, filepath.Join(suite.tempDir, "other"))
+
+	suite.Nil(entry)
+}
+
 // TestLoad_ValidConfig tests that Load parses a valid YAML config file.
 func (suite *ConfigTestSuite) TestLoad_ValidConfig() {
 	configContent := `

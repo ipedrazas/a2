@@ -40,8 +40,10 @@ func runSingleCheck(cmd *cobra.Command, args []string) error {
 		path = args[1]
 	}
 
-	// Load configuration
-	cfg, err := config.Load(path)
+	// Load configuration. Discover .a2.yaml in parent directories so running a
+	// check against a subdirectory (e.g. `a2 run go:coverage ./controlplane`)
+	// honours the project's root config, matching `a2 check`.
+	cfg, err := config.LoadDiscover(path)
 	if err != nil {
 		return fmt.Errorf("error loading config: %w", err)
 	}
@@ -63,6 +65,11 @@ func runSingleCheck(cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(os.Stderr, "Use 'a2 list checks' to see all available check IDs.\n")
 		return fmt.Errorf("unknown check ID: %s", checkID)
 	}
+
+	// Apply per-source_dir overrides when running against a configured
+	// directory, so `a2 run` matches `a2 check` (e.g. a directory-specific
+	// coverage_threshold instead of the language-wide one).
+	applySourceDirOverrides(found, cfg, config.FindConfigDir(path), path)
 
 	// Run the check
 	start := time.Now()
@@ -88,6 +95,23 @@ func runSingleCheck(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+// applySourceDirOverrides applies any per-source_dir configuration that matches
+// the directory being run against, mirroring the behaviour of `a2 check`.
+// Currently this covers the per-entry coverage threshold override.
+func applySourceDirOverrides(reg *checker.CheckRegistration, cfg *config.Config, configDir, path string) {
+	for _, lang := range reg.Meta.Languages {
+		entry := cfg.SourceDirEntryForPath(string(lang), configDir, path)
+		if entry == nil {
+			continue
+		}
+		if entry.CoverageThreshold > 0 {
+			if setter, ok := reg.Checker.(checker.CoverageThresholdSetter); ok {
+				setter.SetCoverageThreshold(entry.CoverageThreshold)
+			}
+		}
+	}
 }
 
 func outputRunResultPretty(result checker.Result, meta checker.CheckMeta) {

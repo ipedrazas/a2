@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/safepath"
@@ -386,6 +388,40 @@ func Load(path string) (*Config, error) {
 	return cfg, nil
 }
 
+// LoadDiscover loads configuration for the given path, searching parent
+// directories for a .a2.yaml when one isn't present in path itself.
+//
+// This lets commands that target a subdirectory (e.g. `a2 run go:coverage
+// ./controlplane`) honour the project's root .a2.yaml the same way `a2 check`
+// does, instead of silently falling back to defaults. If no .a2.yaml is found
+// anywhere up the tree, the default configuration is returned.
+func LoadDiscover(path string) (*Config, error) {
+	if dir := FindConfigDir(path); dir != "" {
+		return Load(dir)
+	}
+	return Load(path)
+}
+
+// FindConfigDir walks up from start looking for the first directory that
+// contains a .a2.yaml file. Returns "" if none is found before reaching the
+// filesystem root.
+func FindConfigDir(start string) string {
+	dir, err := filepath.Abs(start)
+	if err != nil {
+		return ""
+	}
+	for {
+		if _, err := os.Stat(filepath.Join(dir, ".a2.yaml")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return ""
+		}
+		dir = parent
+	}
+}
+
 // checkAliases maps old check IDs to new language-prefixed IDs for backward compatibility.
 // Also maps short names to full IDs for convenience with --skip flag.
 var checkAliases = map[string]string{
@@ -446,6 +482,30 @@ func (c *Config) GetSourceDirEntriesForLang(lang string) []SourceDirEntry {
 	default:
 		return nil
 	}
+}
+
+// SourceDirEntryForPath returns the configured source_dir entry for lang whose
+// directory matches targetPath, or nil when none matches. Entry paths are
+// resolved relative to configDir (the directory the config was loaded from) and
+// targetPath relative to the working directory, so a check run against a
+// subdirectory (e.g. `a2 run go:coverage ./controlplane`) can pick up that
+// directory's per-entry overrides the same way `a2 check` does.
+func (c *Config) SourceDirEntryForPath(lang, configDir, targetPath string) *SourceDirEntry {
+	targetAbs, err := filepath.Abs(targetPath)
+	if err != nil {
+		return nil
+	}
+	entries := c.GetSourceDirEntriesForLang(lang)
+	for i := range entries {
+		entryPath := entries[i].Path
+		if !filepath.IsAbs(entryPath) {
+			entryPath = filepath.Join(configDir, entryPath)
+		}
+		if entryAbs, err := filepath.Abs(entryPath); err == nil && entryAbs == targetAbs {
+			return &entries[i]
+		}
+	}
+	return nil
 }
 
 // GetSourceDirs returns a map of all configured source directory paths.
