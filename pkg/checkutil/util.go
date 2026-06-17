@@ -16,6 +16,26 @@ type ResultBuilder struct {
 	name     string
 	id       string
 	language checker.Language
+	command  string // last command recorded via RunCommand/RecordCommand, for display
+}
+
+// RunCommand runs a command via the package-level RunCommand and records the
+// executed command line (with working dir) so any Result built afterwards
+// reports exactly what a2 ran. Use this instead of checkutil.RunCommand inside
+// a check's Run method whenever a ResultBuilder is in scope.
+func (b *ResultBuilder) RunCommand(dir, name string, args ...string) *CommandResult {
+	res := RunCommand(dir, name, args...)
+	b.RecordCommand(res)
+	return res
+}
+
+// RecordCommand records the command from an already-executed CommandResult so
+// the next Result built by this builder reports it. Use this when the command
+// is run indirectly (e.g. via a shared helper) rather than through b.RunCommand.
+func (b *ResultBuilder) RecordCommand(res *CommandResult) {
+	if res != nil {
+		b.command = res.DisplayCommand()
+	}
 }
 
 // NewResultBuilder creates a new ResultBuilder for a checker.
@@ -65,6 +85,7 @@ func (b *ResultBuilder) Pass(reason string) checker.Result {
 		Message:  ShortMessage(reason),
 		Reason:   reason,
 		Language: b.language,
+		Command:  b.command,
 	}
 }
 
@@ -79,6 +100,7 @@ func (b *ResultBuilder) Fail(reason string) checker.Result {
 		Message:  ShortMessage(reason),
 		Reason:   reason,
 		Language: b.language,
+		Command:  b.command,
 	}
 }
 
@@ -93,6 +115,7 @@ func (b *ResultBuilder) Warn(reason string) checker.Result {
 		Message:  ShortMessage(reason),
 		Reason:   reason,
 		Language: b.language,
+		Command:  b.command,
 	}
 }
 
@@ -107,6 +130,7 @@ func (b *ResultBuilder) Info(reason string) checker.Result {
 		Message:  ShortMessage(reason),
 		Reason:   reason,
 		Language: b.language,
+		Command:  b.command,
 	}
 }
 
@@ -141,6 +165,7 @@ func (b *ResultBuilder) PassWithOutput(reason, rawOutput string) checker.Result 
 		Reason:    reason,
 		Language:  b.language,
 		RawOutput: rawOutput,
+		Command:   b.command,
 	}
 }
 
@@ -155,6 +180,7 @@ func (b *ResultBuilder) FailWithOutput(reason, rawOutput string) checker.Result 
 		Reason:    reason,
 		Language:  b.language,
 		RawOutput: rawOutput,
+		Command:   b.command,
 	}
 }
 
@@ -169,6 +195,7 @@ func (b *ResultBuilder) WarnWithOutput(reason, rawOutput string) checker.Result 
 		Reason:    reason,
 		Language:  b.language,
 		RawOutput: rawOutput,
+		Command:   b.command,
 	}
 }
 
@@ -209,6 +236,40 @@ type CommandResult struct {
 	Stderr   string
 	ExitCode int
 	Err      error
+
+	// Command is the command line that was executed (e.g. "govulncheck ./...").
+	// Dir is the working directory it ran in (empty or "." means the repo root).
+	// These let a2 surface exactly what it executed so failures are reproducible.
+	Command string
+	Dir     string
+}
+
+// DisplayCommand returns a copy-pasteable representation of the command,
+// prefixed with a `cd` into the working directory when the command did not
+// run at the repo root. Example: "cd nodeagent && govulncheck ./...".
+func (r *CommandResult) DisplayCommand() string {
+	if r.Command == "" {
+		return ""
+	}
+	if r.Dir != "" && r.Dir != "." {
+		return fmt.Sprintf("cd %s && %s", r.Dir, r.Command)
+	}
+	return r.Command
+}
+
+// formatCommandLine renders a command and its arguments as a single shell-like
+// string, quoting any token that contains whitespace so it stays copy-pasteable.
+func formatCommandLine(name string, args ...string) string {
+	parts := make([]string, 0, len(args)+1)
+	parts = append(parts, name)
+	for _, a := range args {
+		if strings.ContainsAny(a, " \t") {
+			parts = append(parts, fmt.Sprintf("%q", a))
+		} else {
+			parts = append(parts, a)
+		}
+	}
+	return strings.Join(parts, " ")
 }
 
 // Output returns stderr if non-empty, otherwise stdout (trimmed).
@@ -244,9 +305,11 @@ func RunCommand(dir, name string, args ...string) *CommandResult {
 	err := cmd.Run()
 
 	result := &CommandResult{
-		Stdout: stdout.String(),
-		Stderr: stderr.String(),
-		Err:    err,
+		Stdout:  stdout.String(),
+		Stderr:  stderr.String(),
+		Err:     err,
+		Command: formatCommandLine(name, args...),
+		Dir:     dir,
 	}
 
 	// Extract exit code if available

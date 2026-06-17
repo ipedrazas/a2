@@ -65,6 +65,7 @@ type Result struct {
 	RawOutput string        // Full command output for verbose display
 	Critical  bool          // Set by the runner from CheckMeta; weights the maturity score
 	SourceDir string        // Directory the check ran in (empty means repo root); set for source_dir-scoped checks
+	Command   string        // The actual command a2 executed (e.g. "cd nodeagent && govulncheck ./..."); empty for checks that don't shell out
 }
 
 // Speed indicates the relative cost of a check.
@@ -88,6 +89,7 @@ type CheckMeta struct {
 	Order       int        // Execution priority (lower = first)
 	Suggestion  string     // Recommendation shown when check fails (e.g., "Run 'go fmt' to fix")
 	Speed       Speed      // Relative cost; SpeedSlow checks are skipped by --quick (default SpeedFast)
+	Command     string     // Representative command template the check runs (e.g. "govulncheck ./..."); shown by `a2 explain`. Empty for checks that don't shell out.
 }
 
 // CheckRegistration combines a Checker with its metadata.

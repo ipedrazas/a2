@@ -30,18 +30,18 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 
 	switch formatter {
 	case "ruff":
-		result = runPythonCommand(path, "ruff", "format", "--check", ".")
+		result = runPythonCommand(rb, path, "ruff", "format", "--check", ".")
 		cmdDesc = "ruff format"
 	case "black":
-		result = runPythonCommand(path, "black", "--check", ".")
+		result = runPythonCommand(rb, path, "black", "--check", ".")
 		cmdDesc = "black"
 	default:
 		// Try ruff first, fall back to black
 		if pythonToolAvailable(path, "ruff") {
-			result = runPythonCommand(path, "ruff", "format", "--check", ".")
+			result = runPythonCommand(rb, path, "ruff", "format", "--check", ".")
 			cmdDesc = "ruff format"
 		} else if pythonToolAvailable(path, "black") {
-			result = runPythonCommand(path, "black", "--check", ".")
+			result = runPythonCommand(rb, path, "black", "--check", ".")
 			cmdDesc = "black"
 		} else {
 			return rb.Pass("No formatter installed (install ruff or black)"), nil

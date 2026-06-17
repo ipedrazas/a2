@@ -27,7 +27,7 @@ func (c *DepsFreshnessCheck) Run(path string) (checker.Result, error) {
 
 	pm := c.detectPackageManager(path)
 
-	result := checkutil.RunCommand(path, pm, "outdated", "--json")
+	result := rb.RunCommand(path, pm, "outdated", "--json")
 	output := result.CombinedOutput()
 
 	// npm outdated exits with code 1 when outdated packages exist

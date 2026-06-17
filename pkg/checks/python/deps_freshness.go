@@ -30,7 +30,7 @@ func (c *DepsFreshnessCheck) Run(path string) (checker.Result, error) {
 		return rb.ToolNotInstalled("pip", ""), nil
 	}
 
-	result := runPythonCommand(path, "pip", "list", "--outdated", "--format=columns")
+	result := runPythonCommand(rb, path, "pip", "list", "--outdated", "--format=columns")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

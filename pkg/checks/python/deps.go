@@ -22,10 +22,10 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 	var cmdDesc string
 
 	if pythonToolAvailable(path, "pip-audit") {
-		result = runPythonCommand(path, "pip-audit")
+		result = runPythonCommand(rb, path, "pip-audit")
 		cmdDesc = "pip-audit"
 	} else if pythonToolAvailable(path, "safety") {
-		result = runPythonCommand(path, "safety", "check")
+		result = runPythonCommand(rb, path, "safety", "check")
 		cmdDesc = "safety"
 	} else {
 		return rb.Pass("No vulnerability scanner installed (install pip-audit or safety)"), nil

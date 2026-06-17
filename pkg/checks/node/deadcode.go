@@ -62,9 +62,9 @@ func (c *DeadcodeCheck) runKnip(path string, rb *checkutil.ResultBuilder) (check
 	var result *checkutil.CommandResult
 
 	if checkutil.ToolAvailable("knip") {
-		result = checkutil.RunCommand(path, "knip", "--no-progress")
+		result = rb.RunCommand(path, "knip", "--no-progress")
 	} else {
-		result = checkutil.RunCommand(path, "npx", "knip", "--no-progress")
+		result = rb.RunCommand(path, "npx", "knip", "--no-progress")
 	}
 
 	output := result.CombinedOutput()
@@ -97,7 +97,7 @@ func (c *DeadcodeCheck) runKnip(path string, rb *checkutil.ResultBuilder) (check
 
 // runTsPrune executes ts-prune as a fallback.
 func (c *DeadcodeCheck) runTsPrune(path string, rb *checkutil.ResultBuilder) (checker.Result, error) {
-	result := checkutil.RunCommand(path, "ts-prune")
+	result := rb.RunCommand(path, "ts-prune")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

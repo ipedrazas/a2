@@ -30,7 +30,7 @@ func (c *DepsFreshnessCheck) Run(path string) (checker.Result, error) {
 		return rb.ToolNotInstalled("cargo-outdated", "cargo install cargo-outdated"), nil
 	}
 
-	result := checkutil.RunCommand(path, "cargo", "outdated", "--root-deps-only")
+	result := rb.RunCommand(path, "cargo", "outdated", "--root-deps-only")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

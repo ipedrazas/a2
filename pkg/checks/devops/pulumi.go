@@ -32,7 +32,7 @@ func (c *PulumiCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run pulumi validate
-	result := checkutil.RunCommand(path, "pulumi", "validate", "--offline")
+	result := rb.RunCommand(path, "pulumi", "validate", "--offline")
 
 	if result.Success() {
 		return rb.Pass("pulumi validate passed"), nil

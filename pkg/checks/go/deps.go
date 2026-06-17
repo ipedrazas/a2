@@ -22,7 +22,7 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 		return rb.ToolNotInstalled("govulncheck", "go install golang.org/x/vuln/cmd/govulncheck@latest"), nil
 	}
 
-	result := checkutil.RunCommand(path, "govulncheck", "./...")
+	result := rb.RunCommand(path, "govulncheck", "./...")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

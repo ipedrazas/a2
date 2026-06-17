@@ -104,6 +104,41 @@ func (s *UtilTestSuite) TestRunCommand_Success() {
 	assert.Equal(s.T(), 0, result.ExitCode)
 }
 
+func (s *UtilTestSuite) TestRunCommand_RecordsCommandAndDir() {
+	result := RunCommand(".", "echo", "hello", "world")
+	assert.Equal(s.T(), "echo hello world", result.Command)
+	assert.Equal(s.T(), ".", result.Dir)
+}
+
+func (s *UtilTestSuite) TestRunCommand_QuotesArgsWithSpaces() {
+	result := RunCommand("", "echo", "two words")
+	assert.Equal(s.T(), `echo "two words"`, result.Command)
+}
+
+func (s *UtilTestSuite) TestDisplayCommand_RootHasNoCdPrefix() {
+	for _, dir := range []string{"", "."} {
+		r := &CommandResult{Command: "govulncheck ./...", Dir: dir}
+		assert.Equal(s.T(), "govulncheck ./...", r.DisplayCommand())
+	}
+}
+
+func (s *UtilTestSuite) TestDisplayCommand_SubdirAddsCdPrefix() {
+	r := &CommandResult{Command: "govulncheck ./...", Dir: "nodeagent"}
+	assert.Equal(s.T(), "cd nodeagent && govulncheck ./...", r.DisplayCommand())
+}
+
+func (s *UtilTestSuite) TestDisplayCommand_EmptyCommand() {
+	r := &CommandResult{Dir: "nodeagent"}
+	assert.Equal(s.T(), "", r.DisplayCommand())
+}
+
+func (s *UtilTestSuite) TestResultBuilder_RunCommandRecordsOntoResult() {
+	rb := NewResultBuilder(&mockChecker{id: "demo:cmd", name: "Demo"}, checker.LangGo)
+	rb.RunCommand("nodeagent", "echo", "hi")
+	res := rb.Warn("something")
+	assert.Equal(s.T(), "cd nodeagent && echo hi", res.Command)
+}
+
 func (s *UtilTestSuite) TestRunCommand_Failure() {
 	result := RunCommand(".", "ls", "/nonexistent/path/that/does/not/exist")
 	assert.False(s.T(), result.Success())

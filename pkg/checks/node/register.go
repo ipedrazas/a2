@@ -40,6 +40,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    true,
 				Order:       110,
 				Suggestion:  "Fix build errors before continuing",
+				Command:     "npm ci --dry-run",
 			},
 		},
 		{
@@ -141,6 +142,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       235,
 				Suggestion:  "Run 'npm outdated' to review stale dependencies",
+				Command:     "npm outdated --json",
 			},
 		},
 		{
@@ -154,6 +156,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       245,
 				Suggestion:  "Remove unused exports and dependencies",
+				Command:     "knip --no-progress",
 			},
 		},
 	}

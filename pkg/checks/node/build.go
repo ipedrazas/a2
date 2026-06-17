@@ -44,16 +44,16 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 	var result *checkutil.CommandResult
 	switch pm {
 	case "pnpm":
-		result = checkutil.RunCommand(path, "pnpm", "install", "--frozen-lockfile", "--dry-run")
+		result = rb.RunCommand(path, "pnpm", "install", "--frozen-lockfile", "--dry-run")
 	case "yarn":
-		result = checkutil.RunCommand(path, "yarn", "install", "--check-files")
+		result = rb.RunCommand(path, "yarn", "install", "--check-files")
 	case "bun":
-		result = checkutil.RunCommand(path, "bun", "install", "--dry-run")
+		result = rb.RunCommand(path, "bun", "install", "--dry-run")
 	default: // npm
 		if safepath.Exists(path, "package-lock.json") {
-			result = checkutil.RunCommand(path, "npm", "ci", "--dry-run")
+			result = rb.RunCommand(path, "npm", "ci", "--dry-run")
 		} else {
-			result = checkutil.RunCommand(path, "npm", "install", "--dry-run")
+			result = rb.RunCommand(path, "npm", "install", "--dry-run")
 		}
 	}
 

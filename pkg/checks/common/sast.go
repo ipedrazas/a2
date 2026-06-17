@@ -102,7 +102,7 @@ func (c *SASTCheck) runSemgrep(path, configPath string, rb *checkutil.ResultBuil
 		args = []string{"scan", "--config", "auto", "--quiet", "--json", "."}
 	}
 
-	result := checkutil.RunCommand(path, "semgrep", args...)
+	result := rb.RunCommand(path, "semgrep", args...)
 
 	if result.Success() {
 		return rb.Pass(fmt.Sprintf("semgrep: No issues detected (%s)", configMsg)), nil

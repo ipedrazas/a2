@@ -34,7 +34,7 @@ func (c *TypeCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run mypy
-	result := runPythonCommand(path, "mypy", ".", "--ignore-missing-imports")
+	result := runPythonCommand(rb, path, "mypy", ".", "--ignore-missing-imports")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

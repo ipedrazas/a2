@@ -38,6 +38,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to restore the old unbounded behavior.
 
 ### Added
+- **Checks now surface the exact command a2 runs**, so a check result is
+  reproducible by hand. `a2 explain <id>` prints a `Command:` line with the
+  command template for tool-based checks (e.g. `govulncheck ./...`). `a2 run`
+  and verbose `a2 check -v`/`-vv` print the *resolved* command including its
+  working directory (e.g. `$ cd nodeagent && govulncheck ./...`), and JSON/TOON
+  output gain a `command` field. This makes it obvious when a check disagrees
+  with a manual run because it executes inside a `source_dir` (cwd) rather than
+  via a tool flag like `-C`, or via `uv run`/`poetry run`.
 - **`a2 check --quick` (alias `--fast`)** runs only fast, static/IO-light checks
   (format, lint, file-existence, regex/config scans), skipping builds, tests,
   coverage/race runs, and network/dependency scans. Built for the inner loop and

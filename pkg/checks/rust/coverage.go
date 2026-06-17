@@ -36,7 +36,7 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 
 	// Try to run cargo-tarpaulin
 	if checkutil.ToolAvailable("cargo-tarpaulin") {
-		result := checkutil.RunCommand(path, "cargo", "tarpaulin", "--skip-clean", "--out", "stdout")
+		result := rb.RunCommand(path, "cargo", "tarpaulin", "--skip-clean", "--out", "stdout")
 		output := result.CombinedOutput()
 
 		if !result.Success() {
@@ -52,7 +52,7 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 
 	// Try to run cargo-llvm-cov
 	if checkutil.ToolAvailable("cargo-llvm-cov") {
-		result := checkutil.RunCommand(path, "cargo", "llvm-cov", "--summary-only")
+		result := rb.RunCommand(path, "cargo", "llvm-cov", "--summary-only")
 		output := result.CombinedOutput()
 
 		if !result.Success() {

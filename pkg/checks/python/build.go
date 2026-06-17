@@ -23,13 +23,13 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 
 	switch pm {
 	case "poetry":
-		result = checkutil.RunCommand(path, "poetry", "check")
+		result = rb.RunCommand(path, "poetry", "check")
 		cmdDesc = "poetry check"
 	case "pipenv":
-		result = checkutil.RunCommand(path, "pipenv", "check")
+		result = rb.RunCommand(path, "pipenv", "check")
 		cmdDesc = "pipenv check"
 	default:
-		result = checkutil.RunCommand(path, "pip", "--version")
+		result = rb.RunCommand(path, "pip", "--version")
 		cmdDesc = "pip --version"
 	}
 

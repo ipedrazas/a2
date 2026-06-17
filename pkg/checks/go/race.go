@@ -16,7 +16,7 @@ func (c *RaceCheck) Name() string { return "Go Race Detection" }
 func (c *RaceCheck) Run(path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
-	result := checkutil.RunCommand(path, "go", "test", "-race", "-short", "./...")
+	result := rb.RunCommand(path, "go", "test", "-race", "-short", "./...")
 	output := result.CombinedOutput()
 
 	// Check for race conditions in output

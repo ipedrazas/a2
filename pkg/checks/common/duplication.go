@@ -64,7 +64,7 @@ func (c *DuplicationCheck) runJscpd(path string, rb *checkutil.ResultBuilder) (c
 
 	args := []string{"--reporters", "json", "--output", tmpDir, "--silent", "."}
 
-	result := checkutil.RunCommand(path, "jscpd", args...)
+	result := rb.RunCommand(path, "jscpd", args...)
 	output := result.CombinedOutput()
 
 	// Read the JSON report file that jscpd writes, scoped to tmpDir

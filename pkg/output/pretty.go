@@ -242,10 +242,19 @@ func printResult(r checker.Result, verbosity VerbosityLevel, meta checkMeta) {
 		fmt.Println(messageStyle.Render(hint))
 	}
 
+	// Surface command output (and the exact command run) based on verbosity.
+	shouldShowOutput := verbosity == VerbosityAll ||
+		(verbosity == VerbosityFailures && (r.Status == checker.Fail || r.Status == checker.Warn))
+
+	// Show the exact command a2 executed so failures are reproducible. This is
+	// the most reliable way to see why a check disagrees with a manual run
+	// (e.g. it ran in a source_dir, or via uv/poetry).
+	if shouldShowOutput && r.Command != "" {
+		fmt.Println(messageStyle.Render("$ " + r.Command))
+	}
+
 	// Print raw output based on verbosity level
 	if r.RawOutput != "" {
-		shouldShowOutput := verbosity == VerbosityAll ||
-			(verbosity == VerbosityFailures && (r.Status == checker.Fail || r.Status == checker.Warn))
 		if shouldShowOutput {
 			fmt.Println(rawOutputHeaderStyle.Render("--- Output ---"))
 			// Indent each line of raw output

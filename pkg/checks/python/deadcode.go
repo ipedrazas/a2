@@ -30,7 +30,7 @@ func (c *DeadcodeCheck) Run(path string) (checker.Result, error) {
 		return rb.ToolNotInstalled("vulture", "pip install vulture"), nil
 	}
 
-	result := runPythonCommand(path, "vulture", ".")
+	result := runPythonCommand(rb, path, "vulture", ".")
 	output := result.CombinedOutput()
 
 	if result.Success() {

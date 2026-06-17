@@ -82,6 +82,11 @@ func runExplain(cmd *cobra.Command, args []string) error {
 				fmt.Printf("Suggestion:   %s\n", reg.Meta.Suggestion)
 			}
 
+			if reg.Meta.Command != "" {
+				fmt.Printf("Command:      %s\n", reg.Meta.Command)
+				fmt.Printf("              (run inside each configured source_dir; see the exact command with 'a2 run %s -v')\n", reg.Meta.ID)
+			}
+
 			if reg.Meta.Speed == checker.SpeedSlow {
 				fmt.Printf("Speed:        Slow (skipped by 'a2 check --quick')\n")
 			} else {

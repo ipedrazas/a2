@@ -34,7 +34,7 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 		threshold = c.Config.CoverageThreshold
 	}
 
-	result := runPythonCommand(path, "pytest", "--cov=.", "--cov-report=term-missing", "-q")
+	result := runPythonCommand(rb, path, "pytest", "--cov=.", "--cov-report=term-missing", "-q")
 	output := result.CombinedOutput()
 
 	// Check if pytest or pytest-cov is not installed

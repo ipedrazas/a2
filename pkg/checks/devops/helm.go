@@ -35,7 +35,7 @@ func (c *HelmCheck) Run(path string) (checker.Result, error) {
 	var warnings []string
 	var passed []string
 	for _, chart := range charts {
-		result := checkutil.RunCommand(filepath.Dir(chart), "helm", "lint", filepath.Dir(chart))
+		result := rb.RunCommand(filepath.Dir(chart), "helm", "lint", filepath.Dir(chart))
 		if result.Success() {
 			passed = append(passed, chart)
 		} else {

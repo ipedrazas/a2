@@ -59,7 +59,7 @@ func (c *DockerfileCheck) runTrivy(path, dockerfile string, rb *checkutil.Result
 	// Run trivy config scan on the Dockerfile
 	args := []string{"config", "--exit-code", "0", "--format", "json", dockerfile}
 
-	result := checkutil.RunCommand(path, "trivy", args...)
+	result := rb.RunCommand(path, "trivy", args...)
 	output := result.CombinedOutput()
 
 	// Check for .dockerignore

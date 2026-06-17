@@ -27,21 +27,21 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 
 	switch linter {
 	case "ruff":
-		result = runPythonCommand(path, "ruff", "check", ".")
+		result = runPythonCommand(rb, path, "ruff", "check", ".")
 		cmdDesc = "ruff"
 	case "flake8":
-		result = runPythonCommand(path, "flake8", ".")
+		result = runPythonCommand(rb, path, "flake8", ".")
 		cmdDesc = "flake8"
 	case "pylint":
-		result = runPythonCommand(path, "pylint", ".", "--output-format=text")
+		result = runPythonCommand(rb, path, "pylint", ".", "--output-format=text")
 		cmdDesc = "pylint"
 	default:
 		// Try ruff first, fall back to flake8
 		if pythonToolAvailable(path, "ruff") {
-			result = runPythonCommand(path, "ruff", "check", ".")
+			result = runPythonCommand(rb, path, "ruff", "check", ".")
 			cmdDesc = "ruff"
 		} else if pythonToolAvailable(path, "flake8") {
-			result = runPythonCommand(path, "flake8", ".")
+			result = runPythonCommand(rb, path, "flake8", ".")
 			cmdDesc = "flake8"
 		} else {
 			return rb.Pass("No linter installed (install ruff or flake8)"), nil

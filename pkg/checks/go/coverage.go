@@ -27,7 +27,7 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 		threshold = 80.0 // Default threshold
 	}
 
-	result := checkutil.RunCommand(path, "go", "test", "-cover", "./...")
+	result := rb.RunCommand(path, "go", "test", "-cover", "./...")
 	output := result.CombinedOutput()
 
 	// Check for no test files

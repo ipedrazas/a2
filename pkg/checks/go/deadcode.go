@@ -21,7 +21,7 @@ func (c *DeadcodeCheck) Run(path string) (checker.Result, error) {
 		return rb.ToolNotInstalled("deadcode", "go install golang.org/x/tools/cmd/deadcode@latest"), nil
 	}
 
-	result := checkutil.RunCommand(path, "deadcode", "-test", "./...")
+	result := rb.RunCommand(path, "deadcode", "-test", "./...")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

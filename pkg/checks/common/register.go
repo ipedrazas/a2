@@ -32,6 +32,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       910,
 				Suggestion:  "Add Dockerfile for containerization",
+				Command:     "trivy config --exit-code 0 --format json <dockerfile>",
 			},
 		},
 		{
@@ -68,6 +69,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       940,
 				Suggestion:  "Remove or secure detected secrets",
+				Command:     "gitleaks detect --no-git -v .",
 			},
 		},
 		{
@@ -105,6 +107,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       955,
 				Suggestion:  "Fix security issues found by SAST scanning",
+				Command:     "semgrep scan --config auto --quiet --json .",
 			},
 		},
 		{
@@ -288,6 +291,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       1075,
 				Suggestion:  "Reduce code duplication by extracting shared logic",
+				Command:     "jscpd --reporters json --silent .",
 			},
 		},
 		{

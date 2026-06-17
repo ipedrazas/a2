@@ -33,7 +33,7 @@ func (c *AnsibleCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run ansible-lint
-	result := checkutil.RunCommand(path, "ansible-lint", ".")
+	result := rb.RunCommand(path, "ansible-lint", ".")
 
 	if result.Success() {
 		return rb.Pass("ansible-lint passed"), nil

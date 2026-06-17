@@ -17,7 +17,7 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
 	// Run gofmt -l to list files that need formatting
-	result := checkutil.RunCommand(path, "gofmt", "-l", ".")
+	result := rb.RunCommand(path, "gofmt", "-l", ".")
 
 	// gofmt returns non-zero if there's an error (not just unformatted files)
 	if result.Err != nil && result.Stderr != "" {

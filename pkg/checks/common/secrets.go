@@ -76,7 +76,7 @@ func (c *SecretsCheck) runGitleaks(path, configFile string, rb *checkutil.Result
 		configMsg = "using " + configFile
 	}
 
-	result := checkutil.RunCommand(path, "gitleaks", args...)
+	result := rb.RunCommand(path, "gitleaks", args...)
 
 	if result.Success() {
 		return rb.Pass(fmt.Sprintf("gitleaks: No secrets detected (%s)", configMsg)), nil

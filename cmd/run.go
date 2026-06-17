@@ -151,6 +151,11 @@ func outputRunResultPretty(result checker.Result, meta checker.CheckMeta) {
 		fmt.Printf("\nSuggestion: %s\n", meta.Suggestion)
 	}
 
+	// Print the exact command a2 executed so the result is reproducible.
+	if result.Command != "" {
+		fmt.Printf("\n$ %s\n", result.Command)
+	}
+
 	// Print raw output if available
 	if result.RawOutput != "" {
 		fmt.Printf("\n--- Output ---\n")
@@ -168,6 +173,9 @@ func outputRunResultJSON(result checker.Result) {
 	fmt.Printf("  \"reason\": %q,\n", result.Reason)
 	fmt.Printf("  \"language\": %q,\n", result.Language)
 	fmt.Printf("  \"duration_ms\": %d", result.Duration.Milliseconds())
+	if result.Command != "" {
+		fmt.Printf(",\n  \"command\": %q", result.Command)
+	}
 	if result.RawOutput != "" {
 		fmt.Printf(",\n  \"raw_output\": %q", result.RawOutput)
 	}

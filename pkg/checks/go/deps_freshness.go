@@ -18,7 +18,7 @@ func (c *DepsFreshnessCheck) Run(path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
 	// go list -m -u all shows modules with available updates
-	result := checkutil.RunCommand(path, "go", "list", "-m", "-u", "all")
+	result := rb.RunCommand(path, "go", "list", "-m", "-u", "all")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

@@ -43,6 +43,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    true,
 				Order:       110,
 				Suggestion:  "Fix build errors before continuing",
+				Command:     "go build ./...",
 			},
 		},
 		{
@@ -56,6 +57,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    true,
 				Order:       120,
 				Suggestion:  "Fix failing tests before continuing",
+				Command:     "go test ./...",
 			},
 		},
 		{
@@ -69,6 +71,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       125,
 				Suggestion:  "Fix race conditions detected by -race flag",
+				Command:     "go test -race -short ./...",
 			},
 		},
 		{
@@ -81,6 +84,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       200,
 				Suggestion:  "Run 'gofmt -w .' to format code",
+				Command:     "gofmt -l .",
 			},
 		},
 		{
@@ -94,6 +98,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       210,
 				Suggestion:  "Fix issues reported by 'go vet ./...'",
+				Command:     "go vet ./...",
 			},
 		},
 		{
@@ -107,6 +112,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       220,
 				Suggestion:  "Add more tests to improve coverage",
+				Command:     "go test -cover ./...",
 			},
 		},
 		{
@@ -120,6 +126,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       230,
 				Suggestion:  "Update dependencies to fix vulnerabilities",
+				Command:     "govulncheck ./...",
 			},
 		},
 		{
@@ -157,6 +164,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       235,
 				Suggestion:  "Run 'go get -u ./...' to update dependencies",
+				Command:     "go list -m -u all",
 			},
 		},
 		{
@@ -170,6 +178,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       245,
 				Suggestion:  "Remove unreachable functions to reduce code size",
+				Command:     "deadcode -test ./...",
 			},
 		},
 	}

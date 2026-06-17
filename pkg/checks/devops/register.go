@@ -18,6 +18,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       950,
 				Suggestion:  "Fix terraform validation errors",
+				Command:     "terraform validate",
 			},
 		},
 		{
@@ -30,6 +31,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       960,
 				Suggestion:  "Fix ansible-lint issues",
+				Command:     "ansible-lint .",
 			},
 		},
 		{
@@ -42,6 +44,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       970,
 				Suggestion:  "Fix pulumi validation errors",
+				Command:     "pulumi validate --offline",
 			},
 		},
 		{
@@ -54,6 +57,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       980,
 				Suggestion:  "Fix helm lint issues",
+				Command:     "helm lint <chart-dir>",
 			},
 		},
 		{

@@ -16,7 +16,7 @@ func (c *TestsCheck) Name() string { return "Go Tests" }
 func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
-	result := checkutil.RunCommand(path, "go", "test", "./...")
+	result := rb.RunCommand(path, "go", "test", "./...")
 	output := result.CombinedOutput()
 
 	// Check if it's "no test files" which is not a failure

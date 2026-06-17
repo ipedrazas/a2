@@ -37,12 +37,12 @@ func (c *TerraformCheck) Run(path string) (checker.Result, error) {
 	if !hasDotTerraform {
 		// Try to run terraform init, but don't fail if it fails
 		// Some repos might need backend config or credentials
-		_ = checkutil.RunCommand(path, "terraform", "init", "-backend=false")
+		_ = rb.RunCommand(path, "terraform", "init", "-backend=false")
 		// Silently ignore init failures - terraform validate might still work
 	}
 
 	// Run terraform validate
-	result := checkutil.RunCommand(path, "terraform", "validate")
+	result := rb.RunCommand(path, "terraform", "validate")
 
 	if result.Success() {
 		return rb.Pass("terraform validate passed"), nil

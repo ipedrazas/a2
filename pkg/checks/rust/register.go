@@ -88,6 +88,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       220,
 				Suggestion:  "Add more tests to improve coverage",
+				Command:     "cargo tarpaulin --skip-clean --out stdout",
 			},
 		},
 		{
@@ -114,6 +115,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       235,
 				Suggestion:  "Run 'cargo update' to update dependencies",
+				Command:     "cargo outdated --root-deps-only",
 			},
 		},
 		{

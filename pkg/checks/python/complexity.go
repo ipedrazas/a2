@@ -55,7 +55,7 @@ func (c *ComplexityCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run radon cc with show-complexity flag
-	result := runPythonCommand(path, "radon", "cc", "-s", ".")
+	result := runPythonCommand(rb, path, "radon", "cc", "-s", ".")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

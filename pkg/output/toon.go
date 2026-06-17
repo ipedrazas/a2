@@ -125,7 +125,7 @@ func (e *toonEncoder) writeResultsArray(results []checker.Result, verbosity Verb
 	// Use tabular format: results[N]{fields}:
 	// Include raw_output field when verbosity > 0
 	if verbosity > VerbosityNormal {
-		fmt.Fprintf(&e.builder, "results[%d]{name,id,source_dir,passed,status,message,reason,language,duration_ms,raw_output}:\n", len(results))
+		fmt.Fprintf(&e.builder, "results[%d]{name,id,source_dir,passed,status,message,reason,language,duration_ms,command,raw_output}:\n", len(results))
 	} else {
 		fmt.Fprintf(&e.builder, "results[%d]{name,id,source_dir,passed,status,message,reason,language,duration_ms}:\n", len(results))
 	}
@@ -145,8 +145,9 @@ func (e *toonEncoder) writeResultsArray(results []checker.Result, verbosity Verb
 			e.formatNumber(float64(r.Duration.Milliseconds())),
 		}
 
-		// Include raw output based on verbosity level
+		// Include the executed command and raw output based on verbosity level
 		if verbosity > VerbosityNormal {
+			row = append(row, e.encodeStringForArray(r.Command, ','))
 			rawOutput := ""
 			if r.RawOutput != "" {
 				shouldInclude := verbosity == VerbosityAll ||

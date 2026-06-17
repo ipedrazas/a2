@@ -33,6 +33,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    true,
 				Order:       110,
 				Suggestion:  "Fix build errors before continuing",
+				Command:     "poetry check",
 			},
 		},
 		{
@@ -46,6 +47,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    true,
 				Order:       120,
 				Suggestion:  "Fix failing tests before continuing",
+				Command:     "pytest -v --tb=short",
 			},
 		},
 		{
@@ -58,6 +60,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       200,
 				Suggestion:  "Run formatter (black/ruff) to format code",
+				Command:     "ruff format --check .",
 			},
 		},
 		{
@@ -70,6 +73,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       210,
 				Suggestion:  "Fix linting issues",
+				Command:     "ruff check .",
 			},
 		},
 		{
@@ -83,6 +87,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       215,
 				Suggestion:  "Fix type errors reported by mypy/pyright",
+				Command:     "mypy . --ignore-missing-imports",
 			},
 		},
 		{
@@ -96,6 +101,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       220,
 				Suggestion:  "Add more tests to improve coverage",
+				Command:     "pytest --cov=. --cov-report=term-missing -q",
 			},
 		},
 		{
@@ -109,6 +115,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       230,
 				Suggestion:  "Update dependencies to fix vulnerabilities",
+				Command:     "pip-audit",
 			},
 		},
 		{
@@ -121,6 +128,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       240,
 				Suggestion:  "Refactor complex functions to reduce complexity",
+				Command:     "radon cc -s .",
 			},
 		},
 		{
@@ -146,6 +154,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       235,
 				Suggestion:  "Run 'pip list --outdated' to review stale dependencies",
+				Command:     "pip list --outdated --format=columns",
 			},
 		},
 		{
@@ -159,6 +168,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       245,
 				Suggestion:  "Remove unused code to improve maintainability",
+				Command:     "vulture .",
 			},
 		},
 	}

@@ -9,10 +9,14 @@ import (
 
 // runPythonCommand runs a command within the project's Python environment.
 // It detects uv, poetry, or local virtualenvs and wraps the command accordingly.
-func runPythonCommand(projectPath, command string, args ...string) *checkutil.CommandResult {
+// The executed command is recorded on rb so the resulting check Result reports
+// exactly what a2 ran (e.g. "uv run mypy . --ignore-missing-imports").
+func runPythonCommand(rb *checkutil.ResultBuilder, projectPath, command string, args ...string) *checkutil.CommandResult {
 	name, prefix := resolvePythonEnv(projectPath, command)
 	allArgs := append(prefix, args...)
-	return checkutil.RunCommand(projectPath, name, allArgs...)
+	res := checkutil.RunCommand(projectPath, name, allArgs...)
+	rb.RecordCommand(res)
+	return res
 }
 
 // pythonToolAvailable checks if a Python tool is available for a project,

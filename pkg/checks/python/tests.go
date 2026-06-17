@@ -25,11 +25,11 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	var collectResult *checkutil.CommandResult
 	switch runner {
 	case "pytest":
-		collectResult = runPythonCommand(path, "pytest", "--collect-only", "-q")
+		collectResult = runPythonCommand(rb, path, "pytest", "--collect-only", "-q")
 	case "unittest":
-		collectResult = runPythonCommand(path, "python", "-m", "unittest", "discover", "--list")
+		collectResult = runPythonCommand(rb, path, "python", "-m", "unittest", "discover", "--list")
 	default:
-		collectResult = runPythonCommand(path, "pytest", "--collect-only", "-q")
+		collectResult = runPythonCommand(rb, path, "pytest", "--collect-only", "-q")
 	}
 
 	// Check if test runner is not installed
@@ -51,11 +51,11 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	var testResult *checkutil.CommandResult
 	switch runner {
 	case "pytest":
-		testResult = runPythonCommand(path, "pytest", "-v", "--tb=short")
+		testResult = runPythonCommand(rb, path, "pytest", "-v", "--tb=short")
 	case "unittest":
-		testResult = runPythonCommand(path, "python", "-m", "unittest", "discover", "-v")
+		testResult = runPythonCommand(rb, path, "python", "-m", "unittest", "discover", "-v")
 	default:
-		testResult = runPythonCommand(path, "pytest", "-v", "--tb=short")
+		testResult = runPythonCommand(rb, path, "pytest", "-v", "--tb=short")
 	}
 
 	testOutput := testResult.CombinedOutput()
