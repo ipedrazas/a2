@@ -34,6 +34,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 		"bunyan",
 		"log4js",
 		"loglevel",
+		"loglayer",
 		"signale",
 	}
 

@@ -39,6 +39,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 			"bunyan":        "Bunyan",
 			"log4js":        "Log4js",
 			"loglevel":      "LogLevel",
+			"loglayer":      "LogLayer",
 			"signale":       "Signale",
 			"tslog":         "tslog",
 			"@sentry/node":  "Sentry",
