@@ -40,9 +40,14 @@ var explainCmd = &cobra.Command{
 	Long: `Display comprehensive information about what a check does, why it matters,
 and how to fix issues when they arise.
 
+CHECK_ID may be an exact ID or a wildcard pattern, in which case every
+matching check is explained.
+
 Example:
   a2 explain go:race
-  a2 explain common:health`,
+  a2 explain common:health
+  a2 explain 'security:*'
+  a2 explain '*:tests'`,
 	Args: cobra.ExactArgs(1),
 	RunE: runExplain,
 }
@@ -52,53 +57,68 @@ func init() {
 }
 
 func runExplain(cmd *cobra.Command, args []string) error {
-	checkID := args[0]
+	pattern := args[0]
 	cfg := config.DefaultConfig()
 	allRegs := checks.GetAllCheckRegistrations(cfg)
 
+	var matched []checker.CheckRegistration
 	for _, reg := range allRegs {
-		if reg.Meta.ID == checkID {
-			fmt.Printf("Check ID:     %s\n", reg.Meta.ID)
-			fmt.Printf("Name:         %s\n", reg.Meta.Name)
-
-			if reg.Meta.Description != "" {
-				fmt.Printf("Description:  %s\n", reg.Meta.Description)
-			}
-
-			// Format languages
-			langs := make([]string, len(reg.Meta.Languages))
-			for i, l := range reg.Meta.Languages {
-				langs[i] = string(l)
-			}
-			fmt.Printf("Languages:    %s\n", strings.Join(langs, ", "))
-
-			if reg.Meta.Critical {
-				fmt.Printf("Critical:     Yes (failure stops execution)\n")
-			} else {
-				fmt.Printf("Critical:     No\n")
-			}
-
-			if reg.Meta.Suggestion != "" {
-				fmt.Printf("Suggestion:   %s\n", reg.Meta.Suggestion)
-			}
-
-			if reg.Meta.Command != "" {
-				fmt.Printf("Command:      %s\n", reg.Meta.Command)
-				fmt.Printf("              (run inside each configured source_dir; see the exact command with 'a2 run %s -v')\n", reg.Meta.ID)
-			}
-
-			if reg.Meta.Speed == checker.SpeedSlow {
-				fmt.Printf("Speed:        Slow (skipped by 'a2 check --quick')\n")
-			} else {
-				fmt.Printf("Speed:        Fast (runs in 'a2 check --quick')\n")
-			}
-
-			fmt.Printf("Docs:         %s\n", docReference(reg.Meta.ID))
-
-			return nil
+		if config.MatchPattern(reg.Meta.ID, pattern) {
+			matched = append(matched, reg)
 		}
 	}
 
-	fmt.Fprintf(os.Stderr, "Use 'a2 list checks' to see all available check IDs.\n")
-	return fmt.Errorf("unknown check ID: %s", checkID)
+	if len(matched) == 0 {
+		fmt.Fprintf(os.Stderr, "Use 'a2 list checks' to see all available check IDs.\n")
+		return fmt.Errorf("no checks match: %s", pattern)
+	}
+
+	for i, reg := range matched {
+		if i > 0 {
+			fmt.Println()
+		}
+		explainCheck(reg)
+	}
+
+	return nil
+}
+
+// explainCheck prints the detailed explanation for a single check.
+func explainCheck(reg checker.CheckRegistration) {
+	fmt.Printf("Check ID:     %s\n", reg.Meta.ID)
+	fmt.Printf("Name:         %s\n", reg.Meta.Name)
+
+	if reg.Meta.Description != "" {
+		fmt.Printf("Description:  %s\n", reg.Meta.Description)
+	}
+
+	// Format languages
+	langs := make([]string, len(reg.Meta.Languages))
+	for i, l := range reg.Meta.Languages {
+		langs[i] = string(l)
+	}
+	fmt.Printf("Languages:    %s\n", strings.Join(langs, ", "))
+
+	if reg.Meta.Critical {
+		fmt.Printf("Critical:     Yes (failure stops execution)\n")
+	} else {
+		fmt.Printf("Critical:     No\n")
+	}
+
+	if reg.Meta.Suggestion != "" {
+		fmt.Printf("Suggestion:   %s\n", reg.Meta.Suggestion)
+	}
+
+	if reg.Meta.Command != "" {
+		fmt.Printf("Command:      %s\n", reg.Meta.Command)
+		fmt.Printf("              (run inside each configured source_dir; see the exact command with 'a2 run %s -v')\n", reg.Meta.ID)
+	}
+
+	if reg.Meta.Speed == checker.SpeedSlow {
+		fmt.Printf("Speed:        Slow (skipped by 'a2 check --quick')\n")
+	} else {
+		fmt.Printf("Speed:        Fast (runs in 'a2 check --quick')\n")
+	}
+
+	fmt.Printf("Docs:         %s\n", docReference(reg.Meta.ID))
 }

@@ -4,6 +4,14 @@ import (
 	"strings"
 )
 
+// MatchPattern reports whether checkID matches a wildcard pattern.
+// It is the exported entry point for the same matching used to disable
+// checks, so callers (e.g. `a2 explain`) can resolve patterns like
+// "security:*" consistently. See matchesPattern for the supported syntax.
+func MatchPattern(checkID string, pattern string) bool {
+	return matchesPattern(checkID, pattern)
+}
+
 // matchesPattern checks if a checkID matches a wildcard pattern.
 // Patterns:
 //   - "*:suffix"  matches anything ending with ":suffix" (e.g., "*:tests" matches "go:tests", "node:tests")
