@@ -16,6 +16,9 @@ import (
 // ObfuscationCheck detects code obfuscation patterns and encoded strings.
 type ObfuscationCheck struct {
 	Patterns map[string][]*regexp.Regexp
+	// Allowlist contains rules to suppress known-safe findings.
+	Allowlist []string
+	allow     allowlist
 }
 
 // ID returns the unique identifier for this check.
@@ -35,6 +38,9 @@ func (c *ObfuscationCheck) Run(path string) (checker.Result, error) {
 	// Initialize patterns if not already done
 	if c.Patterns == nil {
 		c.Patterns = c.getPatterns()
+	}
+	if c.allow.empty() {
+		c.allow = newAllowlist(c.Allowlist)
 	}
 
 	// Scan all source files
@@ -267,13 +273,16 @@ func (c *ObfuscationCheck) scanFile(root, filePath string, language string, patt
 
 		// Check for high-entropy strings
 		if c.hasHighEntropyString(trimmed) {
-			findings = append(findings, Finding{
+			finding := Finding{
 				Type:        "obfuscation",
 				File:        relPath,
 				Line:        lineNum,
 				Description: "high-entropy string (possible encoded data)",
 				Severity:    "high",
-			})
+			}
+			if !c.allow.allows(finding, line) {
+				findings = append(findings, finding)
+			}
 			continue
 		}
 
@@ -282,13 +291,16 @@ func (c *ObfuscationCheck) scanFile(root, filePath string, language string, patt
 			if pattern.MatchString(line) {
 				// Extract matched pattern for better reporting
 				match := pattern.FindString(line)
-				findings = append(findings, Finding{
+				finding := Finding{
 					Type:        "obfuscation",
 					File:        relPath,
 					Line:        lineNum,
 					Description: fmt.Sprintf("obfuscation pattern: %s", c.sanitizeMatch(match)),
 					Severity:    "high",
-				})
+				}
+				if !c.allow.allows(finding, line) {
+					findings = append(findings, finding)
+				}
 				break // One finding per line
 			}
 		}

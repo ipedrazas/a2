@@ -90,6 +90,8 @@ type CheckMeta struct {
 	Suggestion  string     // Recommendation shown when check fails (e.g., "Run 'go fmt' to fix")
 	Speed       Speed      // Relative cost; SpeedSlow checks are skipped by --quick (default SpeedFast)
 	Command     string     // Representative command template the check runs (e.g. "govulncheck ./..."); shown by `a2 explain`. Empty for checks that don't shell out.
+	Detail      string     // Long-form: what it detects, what patterns/conditions trigger it, and why it matters. Shown by `a2 explain`.
+	FixPrompt   string     // Copy-paste remediation prompt for an AI, for checks with no fix command. Shown by `a2 explain`.
 }
 
 // CheckRegistration combines a Checker with its metadata.

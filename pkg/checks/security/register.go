@@ -14,7 +14,9 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 	}
 	registrations := []checker.CheckRegistration{
 		{
-			Checker: &ObfuscationCheck{},
+			Checker: &ObfuscationCheck{
+				Allowlist: cfg.Security.Obfuscation.Allow,
+			},
 			Meta: checker.CheckMeta{
 				ID:          "security:obfuscation",
 				Name:        "Code Obfuscation Detection",
@@ -26,7 +28,9 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
-			Checker: &ShellInjectionCheck{},
+			Checker: &ShellInjectionCheck{
+				Allowlist: cfg.Security.ShellInjection.Allow,
+			},
 			Meta: checker.CheckMeta{
 				ID:          "security:shell_injection",
 				Name:        "Shell Injection Detection",
@@ -52,7 +56,9 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 			},
 		},
 		{
-			Checker: &NetworkCheck{},
+			Checker: &NetworkCheck{
+				Allowlist: cfg.Security.Network.Allow,
+			},
 			Meta: checker.CheckMeta{
 				ID:          "security:network",
 				Name:        "Network Exfiltration Detection",

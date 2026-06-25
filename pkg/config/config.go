@@ -213,7 +213,10 @@ type FilesConfig struct {
 
 // SecurityConfig configures security-related checks.
 type SecurityConfig struct {
-	Filesystem FileSystemConfig `yaml:"filesystem,omitempty"`
+	Filesystem     FileSystemConfig `yaml:"filesystem,omitempty"`
+	Obfuscation    ScanAllowConfig  `yaml:"obfuscation,omitempty"`
+	ShellInjection ScanAllowConfig  `yaml:"shell_injection,omitempty"`
+	Network        ScanAllowConfig  `yaml:"network,omitempty"`
 }
 
 // FileSystemConfig configures the filesystem security check.
@@ -223,6 +226,16 @@ type FileSystemConfig struct {
 	// - "pkg/checks/common/k8s.go:94"
 	// - "pkg/checks/common/k8s.go:os.ReadDir(chartsDir)"
 	// - "pkg/checks/common/**"
+	Allow []string `yaml:"allow,omitempty"`
+}
+
+// ScanAllowConfig configures the false-positive allowlist for a security scan
+// check (obfuscation, shell_injection, network). Rules use the same grammar as
+// security.filesystem.allow:
+//   - "internal/loader.go:42"          (file:line)
+//   - "internal/loader.go:exec.Command" (file:match, wildcards allowed)
+//   - "internal/generated/**"          (file)
+type ScanAllowConfig struct {
 	Allow []string `yaml:"allow,omitempty"`
 }
 
@@ -315,6 +328,9 @@ func DefaultConfig() *Config {
 			Filesystem: FileSystemConfig{
 				Allow: []string{},
 			},
+			Obfuscation:    ScanAllowConfig{Allow: []string{}},
+			ShellInjection: ScanAllowConfig{Allow: []string{}},
+			Network:        ScanAllowConfig{Allow: []string{}},
 		},
 		Language: LanguageConfig{
 			AutoDetect: true,

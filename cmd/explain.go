@@ -34,6 +34,12 @@ func docReference(id string) string {
 	return docsBaseURL + "/CHECKS.md"
 }
 
+// indentBlock prepends the given indent to every line after the first, so a
+// multi-line field aligns under its label in the explain output.
+func indentBlock(s, indent string) string {
+	return strings.ReplaceAll(s, "\n", "\n"+indent)
+}
+
 var explainCmd = &cobra.Command{
 	Use:   "explain CHECK_ID",
 	Short: "Show detailed explanation of a check",
@@ -92,6 +98,10 @@ func explainCheck(reg checker.CheckRegistration) {
 		fmt.Printf("Description:  %s\n", reg.Meta.Description)
 	}
 
+	if reg.Meta.Detail != "" {
+		fmt.Printf("Detail:       %s\n", indentBlock(reg.Meta.Detail, "              "))
+	}
+
 	// Format languages
 	langs := make([]string, len(reg.Meta.Languages))
 	for i, l := range reg.Meta.Languages {
@@ -112,6 +122,14 @@ func explainCheck(reg checker.CheckRegistration) {
 	if reg.Meta.Command != "" {
 		fmt.Printf("Command:      %s\n", reg.Meta.Command)
 		fmt.Printf("              (run inside each configured source_dir; see the exact command with 'a2 run %s -v')\n", reg.Meta.ID)
+	} else {
+		// Scan checks don't shell out; their findings (file:line) live in the
+		// per-check output, which 'a2 run' surfaces in full.
+		fmt.Printf("Where:        → To see exact files & lines:  a2 run %s\n", reg.Meta.ID)
+	}
+
+	if reg.Meta.FixPrompt != "" {
+		fmt.Printf("Fix prompt:   %s\n", indentBlock(reg.Meta.FixPrompt, "              "))
 	}
 
 	if reg.Meta.Speed == checker.SpeedSlow {

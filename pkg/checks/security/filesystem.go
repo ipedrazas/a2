@@ -13,12 +13,6 @@ import (
 	"github.com/ipedrazas/a2/pkg/safepath"
 )
 
-type allowRule struct {
-	filePattern string
-	line        int
-	matchText   string
-}
-
 var (
 	goSafeJoinRE        = regexp.MustCompile(`^\s*([a-zA-Z_]\w*)\s*,\s*[a-zA-Z_]\w*\s*(?:=|:=)\s*safepath\.SafeJoin\s*\(`)
 	goSafeJoinSingleRE  = regexp.MustCompile(`^\s*([a-zA-Z_]\w*)\s*(?:=|:=)\s*safepath\.SafeJoin\s*\(`)
@@ -43,8 +37,8 @@ var (
 type FileSystemCheck struct {
 	Patterns map[string][]*regexp.Regexp
 	// Allowlist contains rules to suppress known-safe findings.
-	Allowlist  []string
-	allowRules []allowRule
+	Allowlist []string
+	allow     allowlist
 }
 
 // ID returns the unique identifier for this check.
@@ -64,8 +58,8 @@ func (c *FileSystemCheck) Run(path string) (checker.Result, error) {
 	if c.Patterns == nil {
 		c.Patterns = c.getPatterns()
 	}
-	if c.allowRules == nil {
-		c.allowRules = c.compileAllowRules()
+	if c.allow.empty() {
+		c.allow = newAllowlist(c.Allowlist)
 	}
 
 	findings := c.scanDirectory(path)
@@ -309,7 +303,7 @@ func (c *FileSystemCheck) scanFile(root, filePath string, language string, patte
 						Description: fmt.Sprintf("writes to system directory: %s", c.sanitizeMatch(match)),
 						Severity:    "high",
 					}
-					if !c.isAllowedFinding(finding, line) {
+					if !c.allow.allows(finding, line) {
 						findings = append(findings, finding)
 					}
 					break
@@ -322,7 +316,7 @@ func (c *FileSystemCheck) scanFile(root, filePath string, language string, patte
 					Description: fmt.Sprintf("potentially unsafe file write: %s", c.sanitizeMatch(match)),
 					Severity:    "medium",
 				}
-				if !c.isAllowedFinding(finding, line) {
+				if !c.allow.allows(finding, line) {
 					findings = append(findings, finding)
 				}
 				break
@@ -385,132 +379,6 @@ func (c *FileSystemCheck) isSystemPathMatch(match string) bool {
 		strings.Contains(match, "/root") ||
 		strings.Contains(match, "/sys") ||
 		strings.Contains(match, "/proc")
-}
-
-func (c *FileSystemCheck) compileAllowRules() []allowRule {
-	if len(c.Allowlist) == 0 {
-		return nil
-	}
-	var rules []allowRule
-	for _, raw := range c.Allowlist {
-		trimmed := strings.TrimSpace(raw)
-		if trimmed == "" {
-			continue
-		}
-		parts := strings.SplitN(trimmed, ":", 2)
-		if len(parts) == 1 {
-			rules = append(rules, allowRule{
-				filePattern: filepath.ToSlash(strings.TrimSpace(parts[0])),
-			})
-			continue
-		}
-		filePattern := filepath.ToSlash(strings.TrimSpace(parts[0]))
-		matchPart := strings.TrimSpace(parts[1])
-		if filePattern == "" {
-			filePattern = "*"
-		}
-		if matchPart == "" {
-			rules = append(rules, allowRule{filePattern: filePattern})
-			continue
-		}
-		if isAllDigits(matchPart) {
-			rules = append(rules, allowRule{
-				filePattern: filePattern,
-				line:        atoiSafe(matchPart),
-			})
-			continue
-		}
-		rules = append(rules, allowRule{
-			filePattern: filePattern,
-			matchText:   matchPart,
-		})
-	}
-	return rules
-}
-
-func (c *FileSystemCheck) isAllowedFinding(f Finding, line string) bool {
-	if len(c.allowRules) == 0 {
-		return false
-	}
-	for _, rule := range c.allowRules {
-		filePattern := rule.filePattern
-		if filePattern == "" {
-			filePattern = "*"
-		}
-		if !wildcardMatch(f.File, filePattern) {
-			continue
-		}
-		if rule.line > 0 {
-			if f.Line == rule.line {
-				return true
-			}
-			continue
-		}
-		if rule.matchText == "" {
-			return true
-		}
-		if matchText(line, f, rule.matchText) {
-			return true
-		}
-	}
-	return false
-}
-
-func matchText(line string, f Finding, pattern string) bool {
-	if strings.Contains(pattern, "*") || strings.Contains(pattern, "?") {
-		return wildcardMatch(line, pattern) || wildcardMatch(f.Description, pattern) || wildcardMatch(f.String(), pattern)
-	}
-	return strings.Contains(line, pattern) || strings.Contains(f.Description, pattern) || strings.Contains(f.String(), pattern)
-}
-
-func wildcardMatch(value, pattern string) bool {
-	if pattern == "" {
-		return value == ""
-	}
-	if pattern == "*" {
-		return true
-	}
-	var b strings.Builder
-	b.WriteString("^")
-	for _, r := range pattern {
-		switch r {
-		case '*':
-			b.WriteString(".*")
-		case '?':
-			b.WriteString(".")
-		case '.', '+', '(', ')', '[', ']', '{', '}', '^', '$', '|', '\\':
-			b.WriteString("\\")
-			b.WriteRune(r)
-		default:
-			b.WriteRune(r)
-		}
-	}
-	b.WriteString("$")
-	re, err := regexp.Compile(b.String())
-	if err != nil {
-		return false
-	}
-	return re.MatchString(value)
-}
-
-func isAllDigits(s string) bool {
-	if s == "" {
-		return false
-	}
-	for _, r := range s {
-		if r < '0' || r > '9' {
-			return false
-		}
-	}
-	return true
-}
-
-func atoiSafe(s string) int {
-	n := 0
-	for _, r := range s {
-		n = n*10 + int(r-'0')
-	}
-	return n
 }
 
 // formatFindings formats findings into a readable message.

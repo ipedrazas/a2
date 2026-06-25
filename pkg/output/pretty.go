@@ -216,7 +216,12 @@ func printResult(r checker.Result, verbosity VerbosityLevel, meta checkMeta) {
 		durationStyle.Render(durationStr),
 		durationStyle.Render(idSuffix),
 	)
-	if verbosity > 1 {
+	// Surface the message (what) and reason (why) for failing/warning checks at
+	// -v, and for all checks at -vv. Findings carry file:line locations in the
+	// message, so showing them at -v answers "where" without needing a2 run.
+	showMessage := verbosity == VerbosityAll ||
+		(verbosity == VerbosityFailures && (r.Status == checker.Fail || r.Status == checker.Warn))
+	if showMessage {
 		// Print message (what) and reason (why) if present
 		if r.Message != "" {
 			fmt.Println(messageStyle.Render(r.Message))

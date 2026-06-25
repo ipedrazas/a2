@@ -106,6 +106,80 @@ func (suite *PrettyTestSuite) TestPrintResult_NoMessage() {
 	suite.Contains(output, "Check Without Message")
 }
 
+// TestPrintResult_FailShowsMessageAtV asserts that a failing check's message
+// (which carries file:line findings) is surfaced at -v, answering "where".
+func (suite *PrettyTestSuite) TestPrintResult_FailShowsMessageAtV() {
+	result := checker.Result{
+		Name:    "Obfuscation",
+		ID:      "security:obfuscation",
+		Passed:  false,
+		Status:  checker.Fail,
+		Message: "main.go:42: suspicious base64 decode",
+		Reason:  "obfuscated code detected",
+	}
+
+	output := captureStdout(func() {
+		printResult(result, VerbosityFailures, checkMeta{})
+	})
+
+	suite.Contains(output, "main.go:42: suspicious base64 decode")
+	suite.Contains(output, "obfuscated code detected")
+}
+
+// TestPrintResult_PassHidesMessageAtV asserts that a passing check's message is
+// NOT shown at -v (only failing/warning checks surface their findings there).
+func (suite *PrettyTestSuite) TestPrintResult_PassHidesMessageAtV() {
+	result := checker.Result{
+		Name:    "Passing Check",
+		ID:      "ok",
+		Passed:  true,
+		Status:  checker.Pass,
+		Message: "scanned 12 files, no findings",
+	}
+
+	output := captureStdout(func() {
+		printResult(result, VerbosityFailures, checkMeta{})
+	})
+
+	suite.NotContains(output, "scanned 12 files, no findings")
+}
+
+// TestPrintResult_PassShowsMessageAtVV asserts that -vv still shows messages for
+// all checks, including passing ones.
+func (suite *PrettyTestSuite) TestPrintResult_PassShowsMessageAtVV() {
+	result := checker.Result{
+		Name:    "Passing Check",
+		ID:      "ok",
+		Passed:  true,
+		Status:  checker.Pass,
+		Message: "scanned 12 files, no findings",
+	}
+
+	output := captureStdout(func() {
+		printResult(result, VerbosityAll, checkMeta{})
+	})
+
+	suite.Contains(output, "scanned 12 files, no findings")
+}
+
+// TestPrintResult_FailHidesMessageAtNormal asserts that the default verbosity
+// does not surface the message, preserving the terse default output.
+func (suite *PrettyTestSuite) TestPrintResult_FailHidesMessageAtNormal() {
+	result := checker.Result{
+		Name:    "Obfuscation",
+		ID:      "security:obfuscation",
+		Passed:  false,
+		Status:  checker.Fail,
+		Message: "main.go:42: suspicious base64 decode",
+	}
+
+	output := captureStdout(func() {
+		printResult(result, VerbosityNormal, checkMeta{})
+	})
+
+	suite.NotContains(output, "main.go:42: suspicious base64 decode")
+}
+
 // TestPrintStatus_AllPassed tests printStatus when all checks pass.
 func (suite *PrettyTestSuite) TestPrintStatus_AllPassed() {
 	result := runner.SuiteResult{

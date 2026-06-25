@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/ipedrazas/a2/pkg/checker"
 )
 
 // captureStdout runs fn and returns everything it wrote to os.Stdout.
@@ -66,6 +68,71 @@ func TestRunExplain_Wildcard(t *testing.T) {
 		if strings.HasPrefix(line, "Check ID:") && !strings.Contains(line, "security:") {
 			t.Errorf("wildcard matched a non-security check: %q", line)
 		}
+	}
+}
+
+// TestExplainCheck_CommandBased asserts a check that shells out renders its
+// Command and not the scan-check "Where" pointer.
+func TestExplainCheck_CommandBased(t *testing.T) {
+	reg := checker.CheckRegistration{
+		Meta: checker.CheckMeta{
+			ID:        "go:vet",
+			Name:      "Go Vet",
+			Languages: []checker.Language{checker.LangGo},
+			Command:   "go vet ./...",
+		},
+	}
+	out := captureStdout(t, func() { explainCheck(reg) })
+
+	if !strings.Contains(out, "Command:      go vet ./...") {
+		t.Errorf("expected Command line, got:\n%s", out)
+	}
+	if strings.Contains(out, "Where:") {
+		t.Errorf("command-based check must not render a Where pointer, got:\n%s", out)
+	}
+}
+
+// TestExplainCheck_ScanCheck asserts a scan check (no Command) renders Detail,
+// the 'a2 run <id>' pointer, and FixPrompt.
+func TestExplainCheck_ScanCheck(t *testing.T) {
+	reg := checker.CheckRegistration{
+		Meta: checker.CheckMeta{
+			ID:        "security:obfuscation",
+			Name:      "Code Obfuscation Detection",
+			Languages: []checker.Language{checker.LangCommon},
+			Critical:  true,
+			Detail:    "Flags base64-encoded payloads and eval-of-decoded-string patterns.",
+			FixPrompt: "Review the flagged lines and rewrite any dynamically decoded code.",
+		},
+	}
+	out := captureStdout(t, func() { explainCheck(reg) })
+
+	if !strings.Contains(out, "Detail:") || !strings.Contains(out, "base64-encoded payloads") {
+		t.Errorf("expected Detail line, got:\n%s", out)
+	}
+	if !strings.Contains(out, "a2 run security:obfuscation") {
+		t.Errorf("expected 'a2 run' pointer, got:\n%s", out)
+	}
+	if !strings.Contains(out, "Fix prompt:") || !strings.Contains(out, "dynamically decoded code") {
+		t.Errorf("expected Fix prompt line, got:\n%s", out)
+	}
+}
+
+// TestExplainCheck_MultilineDetailIndented asserts multi-line Detail/FixPrompt
+// fields are indented to align under their label.
+func TestExplainCheck_MultilineDetailIndented(t *testing.T) {
+	reg := checker.CheckRegistration{
+		Meta: checker.CheckMeta{
+			ID:        "security:network",
+			Name:      "Network",
+			Languages: []checker.Language{checker.LangCommon},
+			Detail:    "line one\nline two",
+		},
+	}
+	out := captureStdout(t, func() { explainCheck(reg) })
+
+	if !strings.Contains(out, "\n              line two") {
+		t.Errorf("expected continuation line indented under label, got:\n%s", out)
 	}
 }
 

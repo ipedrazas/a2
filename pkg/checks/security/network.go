@@ -18,6 +18,9 @@ import (
 type NetworkCheck struct {
 	Patterns    map[string][]*regexp.Regexp
 	SafeDomains map[string]bool
+	// Allowlist contains rules to suppress known-safe findings.
+	Allowlist []string
+	allow     allowlist
 }
 
 // ID returns the unique identifier for this check.
@@ -40,6 +43,9 @@ func (c *NetworkCheck) Run(path string) (checker.Result, error) {
 	}
 	if c.SafeDomains == nil {
 		c.SafeDomains = c.getSafeDomains()
+	}
+	if c.allow.empty() {
+		c.allow = newAllowlist(c.Allowlist)
 	}
 
 	// Scan all source files
@@ -357,13 +363,16 @@ func (c *NetworkCheck) scanFile(root, filePath string, language string, patterns
 
 				// Extract matched pattern for better reporting
 				match := pattern.FindString(line)
-				findings = append(findings, Finding{
+				finding := Finding{
 					Type:        "network",
 					File:        relPath,
 					Line:        lineNum,
 					Description: fmt.Sprintf("suspicious network operation: %s", c.sanitizeMatch(match)),
 					Severity:    "medium",
-				})
+				}
+				if !c.allow.allows(finding, line) {
+					findings = append(findings, finding)
+				}
 				break // One finding per line
 			}
 		}

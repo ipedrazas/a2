@@ -335,6 +335,135 @@ func main() {
 	suite.Contains(result.Reason, "obfuscation")
 }
 
+// shellInjectionSource is shared by the shell-injection allowlist tests.
+const shellInjectionSource = `package main
+
+import (
+	"os/exec"
+	"fmt"
+)
+
+func main() {
+	userInput := "some command"
+	cmd := exec.Command("sh", "-c", userInput)
+	fmt.Println(cmd)
+}
+`
+
+// TestShellInjectionCheck_Run_AllowlistSuppresses verifies a matching allowlist
+// rule suppresses the finding so the check passes.
+func (suite *SecurityTestSuite) TestShellInjectionCheck_Run_AllowlistSuppresses() {
+	suite.createTempFile("main.go", shellInjectionSource)
+
+	check := &ShellInjectionCheck{
+		Allowlist: []string{"main.go:exec.Command"},
+	}
+	result, err := check.Run(suite.tempDir)
+
+	suite.NoError(err)
+	suite.True(result.Passed)
+	suite.Equal(checker.Pass, result.Status)
+}
+
+// TestShellInjectionCheck_Run_AllowlistNonMatchingStillFails verifies a rule
+// that does not match the finding leaves the check failing.
+func (suite *SecurityTestSuite) TestShellInjectionCheck_Run_AllowlistNonMatchingStillFails() {
+	suite.createTempFile("main.go", shellInjectionSource)
+
+	check := &ShellInjectionCheck{
+		Allowlist: []string{"other.go:exec.Command"},
+	}
+	result, err := check.Run(suite.tempDir)
+
+	suite.NoError(err)
+	suite.False(result.Passed)
+	suite.Equal(checker.Fail, result.Status)
+}
+
+// networkSource is shared by the network allowlist tests.
+const networkSource = `package main
+
+import (
+	"net/http"
+	"fmt"
+)
+
+func main() {
+	userURL := "http://suspicious-domain.com/data"
+	resp, _ := http.Get(userURL)
+	fmt.Println(resp)
+}
+`
+
+// TestNetworkCheck_Run_AllowlistSuppresses verifies a matching allowlist rule
+// suppresses the finding so the check passes.
+func (suite *SecurityTestSuite) TestNetworkCheck_Run_AllowlistSuppresses() {
+	suite.createTempFile("main.go", networkSource)
+
+	check := &NetworkCheck{
+		Allowlist: []string{"main.go:suspicious-domain.com"},
+	}
+	result, err := check.Run(suite.tempDir)
+
+	suite.NoError(err)
+	suite.True(result.Passed)
+	suite.Equal(checker.Pass, result.Status)
+}
+
+// TestNetworkCheck_Run_AllowlistNonMatchingStillWarns verifies a non-matching
+// rule leaves the check warning (network findings are Warn by default).
+func (suite *SecurityTestSuite) TestNetworkCheck_Run_AllowlistNonMatchingStillWarns() {
+	suite.createTempFile("main.go", networkSource)
+
+	check := &NetworkCheck{
+		Allowlist: []string{"main.go:1"},
+	}
+	result, err := check.Run(suite.tempDir)
+
+	suite.NoError(err)
+	suite.False(result.Passed)
+	suite.Equal(checker.Warn, result.Status)
+}
+
+// obfuscationSource is shared by the obfuscation allowlist tests.
+const obfuscationSource = `package main
+
+func main() {
+	encoded := "SGVsbG8gV29ybGQgV2l0aCBIaWdoIEVudHJvcHkSGVsbG8gV29ybGQgV2l0aCBIaWdoIEVudHJvcHk="
+	println(encoded)
+}
+`
+
+// TestObfuscationCheck_Run_AllowlistSuppresses verifies a matching allowlist
+// rule suppresses the finding so the check passes.
+func (suite *SecurityTestSuite) TestObfuscationCheck_Run_AllowlistSuppresses() {
+	suite.createTempFile("main.go", obfuscationSource)
+
+	check := &ObfuscationCheck{
+		Allowlist: []string{"main.go:SGVsbG8gV29ybGQ"},
+	}
+	result, err := check.Run(suite.tempDir)
+
+	suite.NoError(err)
+	suite.True(result.Passed)
+	suite.Equal(checker.Pass, result.Status)
+}
+
+// TestObfuscationCheck_Run_AllowlistNonMatchingStillFails verifies a rule that
+// does not match the finding leaves the check failing.
+func (suite *SecurityTestSuite) TestObfuscationCheck_Run_AllowlistNonMatchingStillFails() {
+	suite.createTempFile("main.go", obfuscationSource)
+
+	check := &ObfuscationCheck{
+		Allowlist: []string{"main.go:1"},
+	}
+	result, err := check.Run(suite.tempDir)
+
+	suite.NoError(err)
+	suite.False(result.Passed)
+	suite.Equal(checker.Fail, result.Status)
+}
+
 // TestRegister tests that Register returns all expected checks.
 func (suite *SecurityTestSuite) TestRegister() {
 	regs := Register(nil)

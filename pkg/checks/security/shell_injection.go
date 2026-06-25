@@ -16,6 +16,9 @@ import (
 // ShellInjectionCheck detects dangerous shell/code execution patterns.
 type ShellInjectionCheck struct {
 	Patterns map[string][]*regexp.Regexp
+	// Allowlist contains rules to suppress known-safe findings.
+	Allowlist []string
+	allow     allowlist
 }
 
 // ID returns the unique identifier for this check.
@@ -35,6 +38,9 @@ func (c *ShellInjectionCheck) Run(path string) (checker.Result, error) {
 	// Initialize patterns if not already done
 	if c.Patterns == nil {
 		c.Patterns = c.getPatterns()
+	}
+	if c.allow.empty() {
+		c.allow = newAllowlist(c.Allowlist)
 	}
 
 	// Scan all source files
@@ -270,13 +276,16 @@ func (c *ShellInjectionCheck) scanFile(root, filePath string, language string, p
 			if pattern.MatchString(line) {
 				// Extract the function name for better reporting
 				match := pattern.FindString(line)
-				findings = append(findings, Finding{
+				finding := Finding{
 					Type:        "shell_injection",
 					File:        relPath,
 					Line:        lineNum,
 					Description: fmt.Sprintf("%s detected (%s)", language, match),
 					Severity:    "critical",
-				})
+				}
+				if !c.allow.allows(finding, line) {
+					findings = append(findings, finding)
+				}
 				break // One finding per line
 			}
 		}
