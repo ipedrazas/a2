@@ -68,11 +68,11 @@ func (c *SecretsCheck) findGitleaksConfig(path string) string {
 
 // runGitleaks executes gitleaks and returns the result.
 func (c *SecretsCheck) runGitleaks(path, configFile string, rb *checkutil.ResultBuilder) (checker.Result, error) {
-	args := []string{"detect", "--no-git", "-v", "."}
+	args := []string{"detect", "--staged", "--redact=10", "-v", "."}
 	configMsg := "default rules"
 
 	if configFile != "" {
-		args = []string{"detect", "--no-git", "-v", "--config", configFile, "."}
+		args = []string{"detect", "--staged", "--redact=10", "-v", "--config", configFile, "."}
 		configMsg = "using " + configFile
 	}
 
