@@ -114,6 +114,7 @@ Checks for:
 
 func init() {
 	rootCmd.Version = version.Version
+	rootCmd.PersistentFlags().Bool("help-json", false, "Output help as JSON for AI agent consumption")
 	checkCmd.Flags().StringVarP(&format, "format", "f", "pretty", "Output format: pretty, json, or toon")
 	checkCmd.Flags().StringVar(&outputFormat, "output", "", "Output format (alias for --format): pretty, json, or toon")
 	checkCmd.Flags().StringSliceVarP(&languages, "lang", "l", nil, "Languages to check (go, python). Auto-detects if not specified.")
@@ -157,6 +158,8 @@ func Execute() {
 	// print errors, so commands can return errors instead of calling os.Exit.
 	rootCmd.SilenceErrors = true
 	rootCmd.SilenceUsage = true
+
+	checkHelpJSON()
 
 	if err := rootCmd.Execute(); err != nil {
 		if !errors.Is(err, errSilent) {
