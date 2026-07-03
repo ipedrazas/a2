@@ -37,6 +37,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    true,
 				Order:       110,
 				Suggestion:  "Fix build errors before continuing",
+				Command:     "swift build",
 			},
 		},
 		{
@@ -50,6 +51,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    true,
 				Order:       120,
 				Suggestion:  "Fix failing tests before continuing",
+				Command:     "swift test",
 			},
 		},
 		{
@@ -62,6 +64,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       200,
 				Suggestion:  "Run SwiftFormat or swift-format to format code",
+				Command:     "swift-format lint --recursive .",
 			},
 		},
 		{
@@ -74,6 +77,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       210,
 				Suggestion:  "Fix SwiftLint warnings",
+				Command:     "swiftlint lint --quiet",
 			},
 		},
 		{
@@ -87,6 +91,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       220,
 				Suggestion:  "Add more tests to improve coverage",
+				Command:     "swift test --enable-code-coverage",
 			},
 		},
 		{

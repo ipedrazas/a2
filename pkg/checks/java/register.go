@@ -37,6 +37,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    true,
 				Order:       110,
 				Suggestion:  "Fix build errors before continuing",
+				Command:     "mvn compile -DskipTests",
 			},
 		},
 		{
@@ -50,6 +51,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    true,
 				Order:       120,
 				Suggestion:  "Fix failing tests before continuing",
+				Command:     "mvn test",
 			},
 		},
 		{

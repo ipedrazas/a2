@@ -40,6 +40,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    true,
 				Order:       110,
 				Suggestion:  "Fix build errors before continuing",
+				Command:     "npm run build",
 			},
 		},
 		{
@@ -53,6 +54,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    true,
 				Order:       120,
 				Suggestion:  "Fix failing tests before continuing",
+				Command:     "npm test",
 			},
 		},
 		{
@@ -65,6 +67,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       200,
 				Suggestion:  "Run formatter (prettier/biome) to format code",
+				Command:     "npx prettier --check .",
 			},
 		},
 		{
@@ -77,6 +80,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       210,
 				Suggestion:  "Fix linting issues",
+				Command:     "npx eslint . --ext .ts,.tsx",
 			},
 		},
 		{
@@ -90,6 +94,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    true, // Type checking is critical for TypeScript
 				Order:       215,
 				Suggestion:  "Fix TypeScript type errors",
+				Command:     "npx tsc --noEmit",
 			},
 		},
 		{
@@ -103,6 +108,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       220,
 				Suggestion:  "Add more tests to improve coverage",
+				Command:     "npx jest --coverage --coverageReporters=text-summary --passWithNoTests",
 			},
 		},
 		{
@@ -116,6 +122,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       230,
 				Suggestion:  "Update dependencies to fix vulnerabilities",
+				Command:     "npm audit --audit-level=high",
 			},
 		},
 		{

@@ -37,6 +37,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    true,
 				Order:       110,
 				Suggestion:  "Fix build errors before continuing",
+				Command:     "cargo check --quiet",
 			},
 		},
 		{
@@ -50,6 +51,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    true,
 				Order:       120,
 				Suggestion:  "Fix failing tests before continuing",
+				Command:     "cargo test --quiet",
 			},
 		},
 		{
@@ -62,6 +64,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       200,
 				Suggestion:  "Run 'cargo fmt' to format code",
+				Command:     "cargo fmt --check",
 			},
 		},
 		{
@@ -75,6 +78,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       210,
 				Suggestion:  "Fix clippy warnings",
+				Command:     "cargo clippy --quiet -- -D warnings",
 			},
 		},
 		{
@@ -102,6 +106,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Critical:    false,
 				Order:       230,
 				Suggestion:  "Update dependencies to fix vulnerabilities",
+				Command:     "cargo audit --quiet",
 			},
 		},
 		{
