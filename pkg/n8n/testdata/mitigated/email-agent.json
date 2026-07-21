@@ -23,7 +23,8 @@
     },
     {
       "parameters": {
-        "promptType": "auto",
+        "promptType": "define",
+        "text": "=Triage this email.\nSubject: {{ $json.subject }}\nBody: {{ $json.textPlain }}",
         "options": {
           "systemMessage": "You are an inbox assistant. Read the incoming email, look up context in the CRM sheet, and draft a summary for the support team. Never send email or modify records."
         }

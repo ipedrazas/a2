@@ -10,6 +10,7 @@ import (
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
+	"github.com/ipedrazas/a2/pkg/n8n"
 )
 
 const (
@@ -19,6 +20,10 @@ const (
 	malformedDir   = "../../n8n/testdata/malformed"
 	duplicationDir = "../../n8n/testdata/duplication"
 )
+
+func defaultClassifier() *n8n.Classifier {
+	return n8n.NewClassifier(nil, nil, nil)
+}
 
 // allCheckers builds every n8n check with default config.
 func allCheckers(t *testing.T) []checker.Checker {
@@ -61,6 +66,10 @@ func TestChecksAcrossFixtures(t *testing.T) {
 		{&InlineAuthCheck{}, cleanDir, checker.Pass, "", ""},
 		{&SecretsCheck{}, cleanDir, checker.Pass, "no hardcoded secrets", ""},
 		{&DuplicationCheck{MinSequence: 5}, cleanDir, checker.Pass, "", ""},
+		{&WebhookAuthCheck{classifier: defaultClassifier()}, cleanDir, checker.Pass, "all 1 webhook trigger(s) require authentication", ""},
+		{&AgentInjectionCheck{classifier: defaultClassifier()}, cleanDir, checker.Pass, "", ""},
+		{&AgentToolsCheck{classifier: defaultClassifier()}, cleanDir, checker.Info, "not applicable: no AI agent", ""},
+		{&PiiToAICheck{}, cleanDir, checker.Info, "not applicable: no AI nodes", ""},
 
 		// vulnerable estate: the demo failures.
 		{&ErrorWorkflowCheck{FailRatio: 0.5}, vulnerableDir, checker.Fail, "2 of 3 active workflows have no error workflow", "lead-webhook.json · Lead Capture"},
@@ -75,6 +84,24 @@ func TestChecksAcrossFixtures(t *testing.T) {
 		{&SecretsCheck{}, vulnerableDir, checker.Fail, "2 hardcoded secret(s)", "value redacted"},
 		{&SecretsCheck{}, vulnerableDir, checker.Fail, "", "lead-webhook.json · Lead Capture · HTTP Request — openai-style key"},
 
+		// the traversal differentiators: critical, with named paths.
+		{&WebhookAuthCheck{classifier: defaultClassifier()}, vulnerableDir, checker.Fail,
+			"1 unauthenticated webhook(s) can trigger external writes",
+			"Webhook → Set → HTTP Request → Create HubSpot Contact [operation create]"},
+		{&WebhookAuthCheck{classifier: defaultClassifier()}, vulnerableDir, checker.Fail,
+			"", "Webhook → Set → HTTP Request [HTTP POST]"},
+		{&AgentInjectionCheck{classifier: defaultClassifier()}, vulnerableDir, checker.Fail,
+			"1 untrusted-input path(s) reach agents with write-capable tools",
+			"untrusted input path: Email Trigger (IMAP) → AI Agent — agent holds write-capable tools: Send Email (gmailTool — operation send)"},
+		{&AgentToolsCheck{classifier: defaultClassifier()}, vulnerableDir, checker.Warn,
+			"1 of 1 agent(s) hold write-capable tools",
+			"Send Email — gmailTool — write (operation send)"},
+		{&AgentToolsCheck{classifier: defaultClassifier()}, vulnerableDir, checker.Warn,
+			"", "Look Up CRM Sheet — googleSheetsTool — read (operation getAll)"},
+		{&PiiToAICheck{}, vulnerableDir, checker.Warn,
+			"1 AI input(s) carry PII-suggestive fields or the full payload",
+			"full $json passthrough into AI input at parameters.text"},
+
 		// duplication estate: one copied sequence, reported once.
 		{&DuplicationCheck{MinSequence: 5}, duplicationDir, checker.Warn, "1 duplicated node sequence(s)", "httpRequest → code → if → set → slack"},
 		{&DuplicationCheck{MinSequence: 5}, duplicationDir, checker.Warn, "", "invoice-alerts.json · Invoice Alerts"},
@@ -87,6 +114,10 @@ func TestChecksAcrossFixtures(t *testing.T) {
 		{&InlineAuthCheck{}, mitigatedDir, checker.Pass, "", ""},
 		{&SilentFailuresCheck{}, mitigatedDir, checker.Pass, "", ""},
 		{&SecretsCheck{}, mitigatedDir, checker.Pass, "", ""},
+		{&WebhookAuthCheck{classifier: defaultClassifier()}, mitigatedDir, checker.Pass, "require authentication", ""},
+		{&AgentInjectionCheck{classifier: defaultClassifier()}, mitigatedDir, checker.Pass, "no untrusted input reaches AI nodes with write-capable tools", ""},
+		{&AgentToolsCheck{classifier: defaultClassifier()}, mitigatedDir, checker.Pass, "read-only tools throughout", "Fetch Original Email — gmailTool — read"},
+		{&PiiToAICheck{}, mitigatedDir, checker.Pass, "no PII-suggestive fields", ""},
 	}
 
 	for _, tt := range tests {

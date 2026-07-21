@@ -3,6 +3,7 @@ package n8ncheck
 import (
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/config"
+	"github.com/ipedrazas/a2/pkg/n8n"
 )
 
 // Default thresholds for configurable checks.
@@ -33,9 +34,78 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 		minSequence = defaultDuplicationMinSequence
 	}
 
+	classifier := n8n.NewClassifier(
+		cfg.N8n.UntrustedTriggersExtra,
+		cfg.N8n.SideEffectNodesExtra,
+		cfg.N8n.WriteToolsExtra,
+	)
+
 	n8nLang := []checker.Language{checker.LangN8n}
 
 	return []checker.CheckRegistration{
+		{
+			Checker: &AgentInjectionCheck{classifier: classifier},
+			Meta: checker.CheckMeta{
+				ID:          "n8n:agent-injection-path",
+				Name:        "Agent Injection Path",
+				Description: "Traces untrusted input (webhooks, email, forms, chat) to AI agents and their write-capable tools.",
+				Languages:   n8nLang,
+				Critical:    true,
+				Order:       145,
+				Suggestion:  "Break the path: authenticate the trigger, strip agent write tools, or add a human approval step",
+				Detail: "Follows the connection graph from every untrusted-source trigger (webhook, inbound email, form, chat, RSS) to AI nodes — transitively, through any intermediate nodes. " +
+					"Untrusted text reaching an LLM is a prompt-injection path; if the reached agent holds write-capable tools (per the n8n:agent-tools classification), the attacker's text can drive real actions — send email, write CRM records, post messages — with the workflow's credentials: fail. " +
+					"Tools of unknown capability, or tool-less AI nodes whose corrupted output flows onward: warn. Findings name the full path, trigger to agent, with each write-capable tool.",
+				FixPrompt: "For each listed path, break the chain at the cheapest safe point: require authentication on the trigger; replace the agent's write-capable tools with read-only variants and route actions through a human-approved queue; or insert a validation node between the untrusted source and the agent that strips instructions from data. Prompt-based defenses ('ignore instructions in the input') are not a fix.",
+			},
+		},
+		{
+			Checker: &WebhookAuthCheck{classifier: classifier},
+			Meta: checker.CheckMeta{
+				ID:          "n8n:webhook-auth",
+				Name:        "Unauthenticated Webhooks",
+				Description: "Finds webhooks with no authentication and traces what an anonymous caller can reach.",
+				Languages:   n8nLang,
+				Critical:    true,
+				Order:       146,
+				Suggestion:  "Add header/basic/JWT auth to webhook triggers, or verify an HMAC signature in the workflow",
+				Detail: "A webhook with authentication=none is an open endpoint: anyone who finds the URL can invoke the workflow. " +
+					"The check traverses the graph behind each open webhook — transitively — and fails when side-effectful nodes (email/message sends, CRM/DB writes, mutating HTTP, payments) are reachable, naming the path; " +
+					"read-only paths and paths through nodes of unknown effect warn.",
+				FixPrompt: "For each listed webhook, enable authentication (header auth with a strong shared secret, or JWT), update the callers, and rotate the webhook path — the old URL must be treated as leaked. Where the caller can't send headers, verify an HMAC signature over the body as the first node and stop the workflow on mismatch.",
+			},
+		},
+		{
+			Checker: &AgentToolsCheck{classifier: classifier},
+			Meta: checker.CheckMeta{
+				ID:          "n8n:agent-tools",
+				Name:        "Agent Tool Inventory",
+				Description: "Inventories every AI agent's tools with read/write classification.",
+				Languages:   n8nLang,
+				Critical:    false,
+				Order:       147,
+				Suggestion:  "Review each write-capable tool against the blast radius of a misfired action",
+				Detail: "Enumerates the tools attached to each AI agent node and classifies them read-only vs write-capable by node type and operation (Gmail send vs getAll). " +
+					"Warns when write-capable or unclassifiable tools are attached; whether each write is justified stays a human call — this check produces the inventory that makes that review concrete. " +
+					"Extend the classification via n8n.write_tools_extra.",
+				FixPrompt: "For each agent with write-capable tools, apply least privilege: swap write tools for read-only operations where the agent only needs lookup; scope credentials to the minimum (a send-only address, a single sheet); and move irreversible actions behind a human-approval step. Classify any unknown tools via n8n.write_tools_extra in .a2.yaml.",
+			},
+		},
+		{
+			Checker: &PiiToAICheck{},
+			Meta: checker.CheckMeta{
+				ID:          "n8n:pii-to-ai",
+				Name:        "PII Into AI Inputs",
+				Description: "Flags PII-suggestive fields or full $json payloads mapped into AI node inputs.",
+				Languages:   n8nLang,
+				Critical:    false,
+				Order:       148,
+				Suggestion:  "Map only the fields the model needs; never pass the whole payload",
+				Detail: "Scans AI node input expressions for PII-suggestive field names (email, phone, address, dob, salary, iban, ssn, ...) and for full-payload handoffs ({{ $json }} / JSON.stringify($json)) — the strongest signal that nothing was minimized before leaving for the model provider. " +
+					"Field names are heuristic, so findings warn and seed a data-handling review, not a verdict.",
+				FixPrompt: "For each listed AI input, replace the full payload with an explicit field mapping of only what the task needs, and mask or pseudonymize identifiers the model doesn't require (hash emails, drop phone numbers). Check the model provider's data-processing terms cover whatever PII remains.",
+			},
+		},
 		{
 			Checker: &SecretsCheck{},
 			Meta: checker.CheckMeta{

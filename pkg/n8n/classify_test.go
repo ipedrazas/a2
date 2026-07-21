@@ -121,3 +121,35 @@ func TestCapabilityString(t *testing.T) {
 		t.Error("Capability.String() mismatch")
 	}
 }
+
+func TestClassifierExtras(t *testing.T) {
+	c := NewClassifier(
+		[]string{"acme.customTrigger"},
+		[]string{"acme.crmWriter"},
+		[]string{"acme.crmTool:update", "acme.dangerTool"},
+	)
+
+	if !c.IsUntrustedTrigger(node("acme.customTrigger", nil)) {
+		t.Error("extra untrusted trigger not recognized")
+	}
+	if !c.IsUntrustedTrigger(node("n8n-nodes-base.webhook", nil)) {
+		t.Error("built-in table must still apply")
+	}
+
+	if effect, _ := c.ClassifySideEffect(node("acme.crmWriter", nil)); effect != EffectWrite {
+		t.Error("extra side-effect node not classified as write")
+	}
+
+	if capability, _ := c.ClassifyToolCapability(node("acme.crmTool", map[string]any{"operation": "update"})); capability != CapWrite {
+		t.Error("type:operation extra not classified as write")
+	}
+	if capability, _ := c.ClassifyToolCapability(node("acme.crmTool", map[string]any{"operation": "get"})); capability == CapWrite {
+		t.Error("non-listed operation must not become write via extras")
+	}
+	if capability, _ := c.ClassifyToolCapability(node("acme.dangerTool", nil)); capability != CapWrite {
+		t.Error("bare-type extra must make every operation write-capable")
+	}
+	if capability, _ := c.ClassifyToolCapability(node("n8n-nodes-base.gmailTool", map[string]any{"operation": "send"})); capability != CapWrite {
+		t.Error("built-in tool classification must still apply")
+	}
+}

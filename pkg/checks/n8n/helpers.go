@@ -185,6 +185,16 @@ func workflowLabel(wf *n8n.WorkflowFile) string {
 	return wf.Path
 }
 
+// renderPath renders the main-flow path between two nodes as
+// "A → B → C" — the readable injection/exposure path shown in findings.
+func renderPath(g *n8n.Graph, from, to string) string {
+	path := g.PathTo(from, to, n8n.ConnMain)
+	if path == nil {
+		return from + " → … → " + to
+	}
+	return strings.Join(path, " → ")
+}
+
 // isExpression reports whether an n8n parameter value is an expression
 // (starts with "=") rather than a literal.
 func isExpression(value string) bool {

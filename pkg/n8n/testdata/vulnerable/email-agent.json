@@ -23,7 +23,8 @@
     },
     {
       "parameters": {
-        "promptType": "auto",
+        "promptType": "define",
+        "text": "=Handle this incoming email and take the appropriate action:\n\n{{ $json }}",
         "options": {
           "systemMessage": "You are an inbox assistant. Read the incoming email and take the appropriate action: reply to the sender, or look up context in the CRM sheet."
         }

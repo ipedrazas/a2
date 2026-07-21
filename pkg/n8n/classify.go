@@ -284,6 +284,76 @@ func classifyOperation(n *Node) (Effect, string) {
 	return EffectUnknown, "unrecognized operation " + op
 }
 
+// Classifier applies the built-in classification tables extended with
+// user-supplied entries from .a2.yaml (n8n.untrusted_triggers_extra,
+// n8n.side_effect_nodes_extra, n8n.write_tools_extra).
+type Classifier struct {
+	untrustedExtra  map[string]bool
+	sideEffectExtra map[string]bool
+	// writeToolsExtra maps node type -> allowed operations; an empty set
+	// means every operation of that type is write-capable.
+	writeToolsExtra map[string]map[string]bool
+}
+
+// NewClassifier builds a classifier from config extension lists. Write-tool
+// entries are "nodeType" or "nodeType:operation".
+func NewClassifier(untrustedExtra, sideEffectExtra, writeToolsExtra []string) *Classifier {
+	c := &Classifier{
+		untrustedExtra:  map[string]bool{},
+		sideEffectExtra: map[string]bool{},
+		writeToolsExtra: map[string]map[string]bool{},
+	}
+	for _, t := range untrustedExtra {
+		c.untrustedExtra[t] = true
+	}
+	for _, t := range sideEffectExtra {
+		c.sideEffectExtra[t] = true
+	}
+	for _, entry := range writeToolsExtra {
+		nodeType, op, hasOp := strings.Cut(entry, ":")
+		if c.writeToolsExtra[nodeType] == nil {
+			c.writeToolsExtra[nodeType] = map[string]bool{}
+		}
+		if hasOp {
+			c.writeToolsExtra[nodeType][strings.ToLower(op)] = true
+		}
+	}
+	return c
+}
+
+// IsUntrustedTrigger is IsUntrustedTrigger plus configured extras.
+func (c *Classifier) IsUntrustedTrigger(n *Node) bool {
+	return IsUntrustedTrigger(n) || c.untrustedExtra[n.Type]
+}
+
+// ClassifySideEffect is ClassifySideEffect plus configured extras.
+func (c *Classifier) ClassifySideEffect(n *Node) (Effect, string) {
+	if c.sideEffectExtra[n.Type] {
+		return EffectWrite, "configured as side-effectful (n8n.side_effect_nodes_extra)"
+	}
+	return ClassifySideEffect(n)
+}
+
+// ClassifyToolCapability is ClassifyToolCapability plus configured extras.
+func (c *Classifier) ClassifyToolCapability(n *Node) (Capability, string) {
+	if ops, ok := c.writeToolsExtra[n.Type]; ok {
+		if len(ops) == 0 {
+			return CapWrite, "configured as write-capable (n8n.write_tools_extra)"
+		}
+		if op, hasOp := n.StringParam("operation"); hasOp && ops[strings.ToLower(op)] {
+			return CapWrite, "operation " + op + " configured as write-capable (n8n.write_tools_extra)"
+		}
+	}
+	return ClassifyToolCapability(n)
+}
+
+// WalkParams visits every string value in the node's parameters with its
+// path (e.g. "parameters.options.systemMessage") and label; see
+// walkStrings for the {name, value} pair labelling rule.
+func (n *Node) WalkParams(fn func(path, label, value string)) {
+	walkStrings("parameters", "", n.Parameters, fn)
+}
+
 // classifyHTTPMethod classifies an HTTP node by its method parameter
 // (mutating methods are writes; n8n defaults to GET when absent).
 func classifyHTTPMethod(n *Node) (Effect, string) {

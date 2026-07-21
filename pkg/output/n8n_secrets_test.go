@@ -24,8 +24,12 @@ const vulnerableFixtures = "../n8n/testdata/vulnerable"
 // itself fails.
 func TestN8nSecretsAbsentFromJSONOutput(t *testing.T) {
 	regs := n8ncheck.Register(config.DefaultConfig())
+	// Parallel matches how `a2 check` runs (config default) and avoids the
+	// sequential runner's veto-abort on the first critical failure, so every
+	// check's output is present to scan.
 	result := runner.RunSuiteWithOptions(vulnerableFixtures, regs, runner.RunSuiteOptions{
-		Timeout: time.Minute,
+		Parallel: true,
+		Timeout:  time.Minute,
 	})
 
 	detected := language.DetectionResult{

@@ -38,6 +38,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to restore the old unbounded behavior.
 
 ### Added
+- **n8n traversal checks: injection paths, open webhooks, agent tooling.**
+  `n8n:agent-injection-path` (critical) follows the connection graph from
+  every untrusted-source trigger (webhook, inbound email, form, chat, RSS)
+  to AI nodes — transitively — and fails when the reached agent holds
+  write-capable tools, naming the full path and each tool
+  (`Email Trigger (IMAP) → AI Agent — write-capable tools: Send Email
+  (gmailTool — operation send)`); tool-less or unknown-capability cases
+  warn. `n8n:webhook-auth` (critical) finds webhooks with
+  authentication=none and fails when side-effectful nodes (sends, DB/CRM
+  writes, mutating HTTP, payments) are reachable behind them, path named;
+  read-only exposure warns. `n8n:agent-tools` inventories every agent's
+  tools with read/write classification (warns on write-capable or
+  unclassifiable tools). `n8n:pii-to-ai` flags PII-suggestive fields and
+  full `{{ $json }}` passthroughs mapped into AI inputs. Classification
+  tables extend via `n8n.untrusted_triggers_extra`,
+  `n8n.side_effect_nodes_extra`, and `n8n.write_tools_extra`
+  (`nodeType` or `nodeType:operation`).
 - **`n8n:secrets` and `n8n:duplication` checks.** `n8n:secrets` (critical)
   scans node parameters, Code node source, and pinned data for known key
   formats (sk-, ghp_, xoxb-, AKIA, AIza, JWTs, private key blocks) and for
