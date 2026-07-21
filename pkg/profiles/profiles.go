@@ -63,6 +63,27 @@ var BuiltInProfiles = map[string]Profile{
 			"common:api_docs",    // API docs via code docs
 		},
 	},
+	"n8n": {
+		Name:        "n8n",
+		Description: "n8n workflow audit - run only the n8n:* checks against a directory of workflow exports",
+		// Subtractive by design: a2 profiles disable checks, so running
+		// "only n8n" means disabling every other domain. Language and
+		// language-agnostic checks are irrelevant to a directory of
+		// exported workflow JSON.
+		Disabled: []string{
+			"go:*",
+			"python:*",
+			"node:*",
+			"typescript:*",
+			"java:*",
+			"rust:*",
+			"swift:*",
+			"common:*",
+			"devops:*",
+			"security:*",
+			"file_exists", // Required Files (standalone ID, not domain-prefixed)
+		},
+	},
 	"desktop": {
 		Name:        "desktop",
 		Description: "Desktop application - focus on user-facing quality",

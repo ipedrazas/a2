@@ -38,6 +38,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to restore the old unbounded behavior.
 
 ### Added
+- **`n8n` profile and docs.** `a2 check --profile=n8n ./workflows` runs only
+  the `n8n:*` suite (the profile disables every other domain), so a directory
+  of workflow exports audits cleanly without language/common/security noise.
+  New `docs/N8N.md` walkthrough, an n8n section in `docs/CHECKS.md`, a
+  commented `n8n:` block in `a2 init` output, and README coverage. `a2 init`'s
+  generated config documents the n8n thresholds.
 - **n8n traversal checks: injection paths, open webhooks, agent tooling.**
   `n8n:agent-injection-path` (critical) follows the connection graph from
   every untrusted-source trigger (webhook, inbound email, form, chat, RSS)

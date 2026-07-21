@@ -93,8 +93,9 @@ Use `a2` when you want to:
 ## Features
 
 - **8 supported languages**: Go, Python, Node.js, TypeScript, Java, Rust, Swift
-- **80+ built-in checks**
-- **Profiles**: CLI, API, Library, Desktop
+- **n8n workflow auditing**: static security/reliability analysis of exported n8n workflows ([docs](docs/N8N.md))
+- **90+ built-in checks**
+- **Profiles**: CLI, API, Library, Desktop, n8n
 - **Targets**: PoC or Production
 - **Maturity scoring**
 - **JSON and TOON output**

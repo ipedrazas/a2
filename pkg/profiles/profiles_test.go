@@ -1,8 +1,10 @@
 package profiles
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/ipedrazas/a2/pkg/config"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -86,7 +88,7 @@ func (s *ProfilesTestSuite) TestGet_UnknownProfile() {
 
 func (s *ProfilesTestSuite) TestList_ReturnsAllProfiles() {
 	profiles := List()
-	s.Len(profiles, 4)
+	s.Len(profiles, 5)
 
 	// Verify all profiles are present (now sorted alphabetically)
 	names := make([]string, len(profiles))
@@ -97,15 +99,40 @@ func (s *ProfilesTestSuite) TestList_ReturnsAllProfiles() {
 	s.Contains(names, "api")
 	s.Contains(names, "library")
 	s.Contains(names, "desktop")
+	s.Contains(names, "n8n")
 }
 
 func (s *ProfilesTestSuite) TestNames_ReturnsAllNames() {
 	names := Names()
-	s.Len(names, 4)
+	s.Len(names, 5)
 	s.Contains(names, "cli")
 	s.Contains(names, "api")
 	s.Contains(names, "library")
 	s.Contains(names, "desktop")
+	s.Contains(names, "n8n")
+}
+
+// TestN8nProfile_RunsOnlyN8nChecks verifies the n8n profile disables every
+// non-n8n domain, so `a2 check --profile=n8n` runs exactly the n8n suite.
+func (s *ProfilesTestSuite) TestN8nProfile_RunsOnlyN8nChecks() {
+	profile, ok := Get("n8n")
+	s.True(ok)
+	s.Equal("n8n", profile.Name)
+
+	validCheckIDs, _ := GetValidCheckIDs()
+	for id := range validCheckIDs {
+		if strings.HasPrefix(id, "n8n:") {
+			continue
+		}
+		matched := false
+		for _, pattern := range profile.Disabled {
+			if config.MatchDisabled(id, pattern) {
+				matched = true
+				break
+			}
+		}
+		s.Truef(matched, "n8n profile must disable non-n8n check %q", id)
+	}
 }
 
 func (s *ProfilesTestSuite) TestCLIProfile_KeepsCodeQualityChecks() {

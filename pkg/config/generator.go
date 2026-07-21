@@ -119,7 +119,17 @@ func ToYAML(cfg *Config, opts GeneratorOptions) ([]byte, error) {
 	buf.WriteString("#     command: golangci-lint\n")
 	buf.WriteString("#     args: [\"run\", \"./...\"]\n")
 	buf.WriteString("#     severity: warn    # warn | fail\n")
-	buf.WriteString("#     speed: slow       # slow checks are skipped by 'a2 check --quick'\n")
+	buf.WriteString("#     speed: slow       # slow checks are skipped by 'a2 check --quick'\n\n")
+
+	// n8n workflow audit settings: commented example (only relevant when the
+	// repo contains exported n8n workflows). See docs/N8N.md.
+	buf.WriteString("# n8n workflow audit thresholds (only used when n8n exports are present).\n")
+	buf.WriteString("# n8n:\n")
+	buf.WriteString("#   code_node_line_limit: 80          # flag Code nodes longer than this\n")
+	buf.WriteString("#   naming_regex: \"\"                   # convention regex; empty = detect default names\n")
+	buf.WriteString("#   error_workflow_fail_ratio: 0.5    # fail below this error-workflow coverage\n")
+	buf.WriteString("#   duplication_min_sequence: 5       # minimum copied-sequence length to report\n")
+	buf.WriteString("#   write_tools_extra: []             # extra write-capable tools (\"type\" or \"type:operation\")\n")
 
 	return buf.Bytes(), nil
 }

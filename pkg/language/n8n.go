@@ -56,7 +56,7 @@ func detectN8nIndicators(path string) []string {
 				continue
 			}
 			inspected++
-			data, err := os.ReadFile(filepath.Join(dir, e.Name()))
+			data, err := os.ReadFile(filepath.Join(dir, e.Name())) // #nosec G304,G122 - path is from a controlled directory scan
 			if err != nil {
 				continue
 			}

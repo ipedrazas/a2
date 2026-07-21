@@ -9,6 +9,7 @@ This document describes all checks available in A2, organized by category.
 - [Common Checks](#common-checks)
 - [DevOps Checks](#devops-checks)
 - [Security Checks](#security-checks)
+- [n8n Workflow Checks](#n8n-workflow-checks)
 - [External Checks](#external-checks)
 - [Configuration Reference](#configuration-reference)
 
@@ -656,6 +657,202 @@ security:
 
 ---
 
+## n8n Workflow Checks
+
+Static analysis of exported [n8n](https://n8n.io) workflow JSON. a2 detects a
+directory as an n8n project when it contains workflow exports (JSON with a
+top-level `nodes` array and `connections` object) in the target directory or
+one level below. No workflow execution, no n8n API, no credentials — only the
+exported files are read, so results are deterministic and reproducible.
+
+Point a2 at a directory of exports and run only these checks with the `n8n`
+profile:
+
+```bash
+a2 check ./workflows --profile=n8n
+```
+
+See [N8N.md](N8N.md) for a full walkthrough. All n8n checks are static (fast),
+and unparseable exports degrade the affected check to an **error** status —
+never a silent pass.
+
+### n8n:secrets
+
+Scans node parameters, Code node source, and pinned data for hardcoded secret
+material: known key formats (`sk-`, `ghp_`, `xoxb-`, `AKIA`, `AIza`, JWTs,
+private key blocks) and high-entropy literals in auth-named fields. Values are
+redacted at detection — findings name the workflow, node, and field path only,
+never the secret.
+
+**Status:**
+- **Pass**: No secrets detected
+- **Warn**: High-entropy candidate(s) in auth fields need human review
+- **Fail**: Confirmed hardcoded secret(s) detected
+
+### n8n:agent-injection-path
+
+Traces untrusted-source triggers (webhook, inbound email, form, chat, RSS)
+through the connection graph to AI nodes. Fails when the reached agent holds
+write-capable tools — an attacker's injected text can drive real actions with
+the workflow's credentials. Findings name the full path and the tools.
+
+**Status:**
+- **Pass**: No untrusted input reaches AI nodes with write-capable tools
+- **Warn**: Untrusted input reaches a tool-less or unknown-capability AI node
+- **Fail**: Untrusted input reaches an agent with write-capable tools
+
+### n8n:webhook-auth
+
+Finds webhook triggers with `authentication: none` and traverses the graph
+behind them. Fails when side-effectful nodes (sends, DB/CRM writes, mutating
+HTTP, payments) are reachable; read-only exposure warns. Findings name the path.
+
+**Status:**
+- **Pass**: All webhook triggers require authentication
+- **Warn**: Unauthenticated webhook with no side effects reachable
+- **Fail**: Unauthenticated webhook can trigger external writes
+
+### n8n:agent-tools
+
+Inventories every AI agent's attached tools with read/write classification (by
+node type and operation, e.g. Gmail `send` vs `getAll`). Warns when
+write-capable or unclassifiable tools are attached; the inventory is emitted as
+detail.
+
+**Status:**
+- **Pass**: Agents present, read-only tools throughout
+- **Warn**: An agent holds write-capable or unclassifiable tools
+- **Info**: Not applicable — no AI agent nodes
+
+### n8n:pii-to-ai
+
+Flags PII-suggestive field names (email, phone, address, dob, salary, iban,
+ssn, …) and full-payload handoffs (`{{ $json }}`, `JSON.stringify($json)`)
+mapped into AI node inputs. Field names are heuristic — findings seed a
+data-handling review.
+
+**Status:**
+- **Pass**: No PII-suggestive fields or full payloads mapped into AI inputs
+- **Warn**: AI input carries PII-suggestive fields or the full payload
+
+### n8n:error-workflow
+
+Verifies active workflows set `settings.errorWorkflow`, so a failed execution
+alerts someone instead of dying silently. Reports the coverage ratio.
+
+**Status:**
+- **Pass**: All active workflows have an error workflow
+- **Warn**: Coverage below 100%
+- **Fail**: Coverage below `error_workflow_fail_ratio` (default 0.5)
+
+### n8n:silent-failures
+
+Finds nodes with `continueOnFail` / `onError: continueRegularOutput` (failures
+merge into normal output) or an `onError: continueErrorOutput` whose error
+output is unconnected — failures that leave no trace.
+
+**Status:**
+- **Pass**: No nodes swallow failures inline
+- **Warn**: Node(s) swallow failures without a connected error branch
+
+### n8n:retry-config
+
+Flags external-call nodes (HTTP, DB, SaaS) with no retry, and estates where
+every retry sits on the untouched defaults (`maxTries=3`, `wait=1000ms`).
+Emits the retry-setting distribution as detail.
+
+**Status:**
+- **Pass**: All external-call nodes have retry configured
+- **Warn**: Node(s) without retry, or uniform default retries
+- **Info**: Not applicable — no external-call nodes
+
+### n8n:timeouts
+
+Flags HTTP Request nodes without an explicit timeout in workflows whose trigger
+implies a caller is waiting (webhook, form, chat).
+
+**Status:**
+- **Pass**: All in-scope HTTP nodes set a timeout
+- **Warn**: In-scope HTTP node(s) without a timeout
+- **Info**: Not applicable — no HTTP nodes in caller-waiting workflows
+
+### n8n:code-node-bulk
+
+Flags Code/Function nodes over the line threshold (default 80) or embedding
+HTTP calls (`fetch`, `axios`, `urllib`). Reports per-node line counts.
+
+**Status:**
+- **Pass**: No oversized Code nodes and no embedded HTTP calls
+- **Warn**: Oversized Code node(s) or embedded HTTP call(s)
+
+### n8n:pinned-data
+
+Flags `pinData` left on active workflows — test fixtures live in production.
+
+**Status:**
+- **Pass**: No active workflow carries pinned data
+- **Warn**: Active workflow(s) carry pinned test data
+
+### n8n:naming
+
+Measures workflow and node name compliance against a convention regex
+(`n8n.naming_regex`), or, without one, detects untouched n8n default names
+(`My workflow`, `Webhook1`, `Code2`).
+
+**Status:**
+- **Pass**: All names comply
+- **Warn**: Non-compliant / default names found
+- **Info**: Not applicable — no named workflows or nodes
+
+### n8n:inline-auth
+
+Flags HTTP nodes carrying literal auth material in header/query parameters
+instead of referencing an n8n credential. Findings name the parameter, never
+the value.
+
+**Status:**
+- **Pass**: No HTTP nodes carry literal auth parameters
+- **Warn**: HTTP parameter(s) carry literal auth material
+
+### n8n:duplication
+
+Reports order-preserving node-type sequences (≥5 nodes, configurable) copied
+across workflow files, with a parameter-shape similarity score — each cluster
+is a sub-workflow candidate.
+
+**Status:**
+- **Pass**: No duplicated node sequences across workflows
+- **Warn**: Duplicated node sequence(s) found
+
+### n8n:in-git
+
+Verifies workflow exports are tracked in a git repository — automation that
+only lives in the n8n instance has no history, review, or rollback.
+
+**Status:**
+- **Pass**: All workflow files are tracked in git
+- **Warn**: Files untracked, or not a git repository
+- **Info**: Not applicable — no workflow exports found
+
+### Configuration
+
+```yaml
+n8n:
+  code_node_line_limit: 80          # n8n:code-node-bulk threshold
+  naming_regex: ""                  # n8n:naming; empty = default-name detection
+  error_workflow_fail_ratio: 0.5    # n8n:error-workflow fail threshold
+  duplication_min_sequence: 5       # n8n:duplication minimum sequence length
+  untrusted_triggers_extra: []      # extra untrusted trigger node types
+  side_effect_nodes_extra: []       # extra side-effectful node types
+  write_tools_extra: []             # extra write-capable tools ("type" or "type:operation")
+
+checks:
+  n8n:
+    disabled: []                    # per-domain disable list (e.g. n8n:naming)
+```
+
+---
+
 ## External Checks
 
 External checks allow you to run custom commands as quality checks.
@@ -779,7 +976,8 @@ external:
 | Rust | 8 |
 | Common | 23 |
 | DevOps | 5 |
-| **Total** | **82** |
+| n8n | 15 |
+| **Total** | **97** |
 
 **Critical checks** stop execution in sequential mode when they fail.
 **Non-critical checks** report warnings but allow other checks to continue.

@@ -122,7 +122,7 @@ func LoadDir(dir string) (*Bundle, error) {
 			})
 			return nil
 		}
-		data, err := os.ReadFile(path)
+		data, err := os.ReadFile(path) // #nosec G304,G122 - path is from a controlled WalkDir over the scan directory
 		if err != nil {
 			return err
 		}
