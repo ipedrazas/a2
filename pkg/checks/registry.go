@@ -10,6 +10,7 @@ import (
 	devopscheck "github.com/ipedrazas/a2/pkg/checks/devops"
 	gocheck "github.com/ipedrazas/a2/pkg/checks/go"
 	javacheck "github.com/ipedrazas/a2/pkg/checks/java"
+	n8ncheck "github.com/ipedrazas/a2/pkg/checks/n8n"
 	nodecheck "github.com/ipedrazas/a2/pkg/checks/node"
 	pythoncheck "github.com/ipedrazas/a2/pkg/checks/python"
 	rustcheck "github.com/ipedrazas/a2/pkg/checks/rust"
@@ -319,6 +320,8 @@ func getChecksForLanguage(lang checker.Language, cfg *config.Config) []checker.C
 		return typescriptcheck.Register(cfg)
 	case checker.LangSwift:
 		return swiftcheck.Register(cfg)
+	case checker.LangN8n:
+		return n8ncheck.Register(cfg)
 	default:
 		return nil
 	}
@@ -361,6 +364,7 @@ func GetAllCheckRegistrations(cfg *config.Config) []checker.CheckRegistration {
 	allRegs = append(allRegs, rustcheck.Register(cfg)...)
 	allRegs = append(allRegs, typescriptcheck.Register(cfg)...)
 	allRegs = append(allRegs, swiftcheck.Register(cfg)...)
+	allRegs = append(allRegs, n8ncheck.Register(cfg)...)
 	allRegs = append(allRegs, devopscheck.Register(cfg)...)
 	allRegs = append(allRegs, securitycheck.Register(cfg)...)
 	allRegs = append(allRegs, wrapCommonRegistrations(common.Register(cfg), cfg)...)

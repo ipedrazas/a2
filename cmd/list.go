@@ -66,6 +66,7 @@ func runListChecks(cmd *cobra.Command, args []string) {
 		checker.LangJava,
 		checker.LangRust,
 		checker.LangSwift,
+		checker.LangN8n,
 		checker.LangCommon,
 	}
 
@@ -121,6 +122,7 @@ func formatLanguageName(lang checker.Language) string {
 		checker.LangJava:       "Java",
 		checker.LangRust:       "Rust",
 		checker.LangSwift:      "Swift",
+		checker.LangN8n:        "n8n (workflow exports)",
 		checker.LangCommon:     "Common (language-agnostic)",
 	}
 	if name, ok := names[lang]; ok {

@@ -87,6 +87,13 @@ func Detect(path string) DetectionResult {
 		}
 	}
 
+	// n8n is detected by file content (the export shape), not by a known
+	// filename, so it gets its own pass after the indicator-file languages.
+	if found := detectN8nIndicators(path); len(found) > 0 {
+		result.Languages = append(result.Languages, checker.LangN8n)
+		result.Indicators[checker.LangN8n] = found
+	}
+
 	// Set primary language and multi-lang flag
 	result.MultiLang = len(result.Languages) > 1
 	if len(result.Languages) > 0 {
@@ -158,6 +165,25 @@ func DetectWithSourceDirs(path string, sourceDirs map[string][]string) Detection
 			result.Languages = append(result.Languages, lang)
 			result.Indicators[lang] = found
 		}
+	}
+
+	// n8n detection is content-based and scoped like the other languages:
+	// configured n8n source_dirs, or the root when none are set.
+	n8nDirs, ok := sourceDirs[string(checker.LangN8n)]
+	if !ok || len(n8nDirs) == 0 {
+		n8nDirs = []string{""}
+	}
+	var n8nFound []string
+	for _, dir := range n8nDirs {
+		checkPath := path
+		if dir != "" {
+			checkPath = filepath.Join(path, dir)
+		}
+		n8nFound = append(n8nFound, detectN8nIndicators(checkPath)...)
+	}
+	if len(n8nFound) > 0 {
+		result.Languages = append(result.Languages, checker.LangN8n)
+		result.Indicators[checker.LangN8n] = n8nFound
 	}
 
 	// Set primary language and multi-lang flag

@@ -96,10 +96,37 @@ type Config struct {
 	Files     FilesConfig           `yaml:"files"`
 	Checks    ChecksConfig          `yaml:"checks"`
 	Security  SecurityConfig        `yaml:"security,omitempty"`
+	N8n       N8nConfig             `yaml:"n8n,omitempty"`
 	External  []ExternalCheck       `yaml:"external"`
 	Execution ExecutionConfig       `yaml:"execution"`
 	Language  LanguageConfig        `yaml:"language"`
 	Tools     map[string]ToolConfig `yaml:"tools,omitempty"`
+}
+
+// N8nConfig configures the n8n workflow checks (n8n:*).
+type N8nConfig struct {
+	// CodeNodeLineLimit is the line count above which a Code node is flagged
+	// by n8n:code-node-bulk. Default 80.
+	CodeNodeLineLimit int `yaml:"code_node_line_limit,omitempty"`
+	// NamingRegex, when set, is the naming convention workflow and node
+	// names are checked against by n8n:naming. When empty, the check falls
+	// back to detecting n8n default names ("My workflow", "Webhook1", ...).
+	NamingRegex string `yaml:"naming_regex,omitempty"`
+	// ErrorWorkflowFailRatio is the error-workflow coverage ratio below
+	// which n8n:error-workflow fails instead of warns. Default 0.5.
+	ErrorWorkflowFailRatio float64 `yaml:"error_workflow_fail_ratio,omitempty"`
+	// DuplicationMinSequence is the minimum shared node-sequence length
+	// n8n:duplication reports. Default 5.
+	DuplicationMinSequence int `yaml:"duplication_min_sequence,omitempty"`
+	// UntrustedTriggersExtra extends the built-in table of trigger node
+	// types treated as carrying untrusted input.
+	UntrustedTriggersExtra []string `yaml:"untrusted_triggers_extra,omitempty"`
+	// SideEffectNodesExtra extends the built-in table of node types treated
+	// as side-effectful (entries are node types).
+	SideEffectNodesExtra []string `yaml:"side_effect_nodes_extra,omitempty"`
+	// WriteToolsExtra extends the built-in write-capable tool table.
+	// Entries are "nodeType" or "nodeType:operation".
+	WriteToolsExtra []string `yaml:"write_tools_extra,omitempty"`
 }
 
 // ToolConfig allows per-tool configuration overrides.
@@ -273,6 +300,7 @@ var knownLanguages = map[string]bool{
 	"rust":       true,
 	"typescript": true,
 	"swift":      true,
+	"n8n":        true,
 }
 
 // UnmarshalYAML implements yaml.Unmarshaler so `checks:` can hold both a global
@@ -303,7 +331,7 @@ func (c *ChecksConfig) UnmarshalYAML(value *yaml.Node) error {
 				c.PerLanguage[key] = sub.Disabled
 			}
 		default:
-			return fmt.Errorf("unknown key %q under 'checks' (expected 'disabled' or one of the languages: go, python, node, java, rust, typescript, swift)", key)
+			return fmt.Errorf("unknown key %q under 'checks' (expected 'disabled' or one of the languages: go, python, node, java, rust, typescript, swift, n8n)", key)
 		}
 	}
 	return nil

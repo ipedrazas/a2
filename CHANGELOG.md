@@ -38,6 +38,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to restore the old unbounded behavior.
 
 ### Added
+- **New `n8n` check domain: audit exported n8n workflows.** a2 now detects
+  directories containing n8n workflow exports (JSON with a `nodes` array and
+  `connections` object, in the target directory or one level down) as an
+  `n8n` domain — alongside languages, or standalone. Nine checks ship in this
+  first batch: `n8n:error-workflow` (critical: active workflows without an
+  error workflow, fails below 50% coverage), `n8n:silent-failures`
+  (continueOnFail/unwired error outputs), `n8n:retry-config` (external-call
+  nodes without retries, untouched-default detection), `n8n:timeouts` (HTTP
+  nodes without timeouts while a caller waits), `n8n:code-node-bulk`
+  (oversized Code nodes, embedded HTTP calls), `n8n:pinned-data` (test data
+  pinned on active workflows), `n8n:naming` (convention regex or
+  default-name detection), `n8n:inline-auth` (literal auth headers instead
+  of credential references), and `n8n:in-git` (exports not under version
+  control). Configurable via a new `n8n:` section in `.a2.yaml`
+  (`code_node_line_limit`, `naming_regex`, `error_workflow_fail_ratio`, ...)
+  and a `checks.n8n.disabled` list. Unparseable exports degrade checks to an
+  error status — never a silent pass — and check output never contains
+  secret values, only their locations.
 - **`pkg/n8n`: parsing layer for n8n workflow audits** (groundwork for the
   upcoming `n8n:*` check domain). Defensively parses exported n8n workflow
   JSON (unknown node types retained, structural surprises recorded as parse

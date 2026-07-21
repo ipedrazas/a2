@@ -117,7 +117,7 @@ func init() {
 	rootCmd.PersistentFlags().Bool("help-json", false, "Output help as JSON for AI agent consumption")
 	checkCmd.Flags().StringVarP(&format, "format", "f", "pretty", "Output format: pretty, json, or toon")
 	checkCmd.Flags().StringVar(&outputFormat, "output", "", "Output format (alias for --format): pretty, json, or toon")
-	checkCmd.Flags().StringSliceVarP(&languages, "lang", "l", nil, "Languages to check (go, python). Auto-detects if not specified.")
+	checkCmd.Flags().StringSliceVarP(&languages, "lang", "l", nil, "Languages to check (go, python, ..., n8n). Auto-detects if not specified.")
 	checkCmd.Flags().StringSliceVar(&skippedChecks, "skip", nil, "Checks to skip (e.g., --skip=license,k8s)")
 	checkCmd.Flags().StringVar(&profile, "profile", "", "Application profile (cli, api, library, desktop)")
 	checkCmd.Flags().StringVar(&target, "target", "", "Maturity target (poc, production)")
@@ -248,7 +248,7 @@ func runCheck(cmd *cobra.Command, args []string) error {
 
 	// Exit with error if no language detected
 	if len(detected.Languages) == 0 {
-		return fmt.Errorf("no supported language detected (supported: go, python, node, java, rust, typescript, swift).\nUse --lang to specify explicitly, or run 'a2 init' to scaffold a config")
+		return fmt.Errorf("no supported language detected (supported: go, python, node, java, rust, typescript, swift, n8n).\nUse --lang to specify explicitly, or run 'a2 init' to scaffold a config")
 	}
 
 	// Get the list of checks to run

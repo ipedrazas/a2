@@ -13,10 +13,12 @@ const (
 	LangRust       Language = "rust"
 	LangTypeScript Language = "typescript"
 	LangSwift      Language = "swift"
+	LangN8n        Language = "n8n"    // n8n workflow exports (domain, not a programming language)
 	LangCommon     Language = "common" // Language-agnostic checks
 )
 
-// AllLanguages returns all supported language identifiers (excluding common).
+// AllLanguages returns all supported programming-language identifiers
+// (excluding common and the n8n domain, which has no toolchain).
 func AllLanguages() []Language {
 	return []Language{LangGo, LangPython, LangNode, LangJava, LangRust, LangTypeScript, LangSwift}
 }
