@@ -1,0 +1,159 @@
+{
+  "name": "Inbox Assistant",
+  "id": "mit-wf-002",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "mailbox": "INBOX",
+        "postProcessAction": "read",
+        "options": {}
+      },
+      "id": "24000000-0000-4000-8000-000000000001",
+      "name": "Email Trigger (IMAP)",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "credentials": {
+        "imap": {
+          "id": "cred-imap-1",
+          "name": "Support Inbox"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "auto",
+        "options": {
+          "systemMessage": "You are an inbox assistant. Read the incoming email, look up context in the CRM sheet, and draft a summary for the support team. Never send email or modify records."
+        }
+      },
+      "id": "24000000-0000-4000-8000-000000000002",
+      "name": "Triage Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "model": {"__rl": true, "value": "gpt-4o", "mode": "list"},
+        "options": {}
+      },
+      "id": "24000000-0000-4000-8000-000000000003",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [140, 200],
+      "credentials": {
+        "openAiApi": {
+          "id": "cred-openai-1",
+          "name": "OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "documentId": {"__rl": true, "value": "fixture-crm-sheet", "mode": "id"},
+        "sheetName": {"__rl": true, "value": "Accounts", "mode": "name"},
+        "options": {}
+      },
+      "id": "24000000-0000-4000-8000-000000000004",
+      "name": "Look Up CRM Sheet",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [300, 200],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "cred-sheets-1",
+          "name": "Reporting Google Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $fromAI('messageId', 'The message id to fetch') }}",
+        "options": {}
+      },
+      "id": "24000000-0000-4000-8000-000000000005",
+      "name": "Fetch Original Email",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [460, 200],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cred-gmail-1",
+          "name": "Support Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "postMessage",
+        "channel": "#support-triage",
+        "text": "={{ $json.output }}",
+        "otherOptions": {}
+      },
+      "id": "24000000-0000-4000-8000-000000000006",
+      "name": "Post Triage Summary",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [440, 0],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "slackApi": {
+          "id": "cred-slack-1",
+          "name": "Ops Slack Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {"node": "Triage Agent", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "Triage Agent": {
+      "main": [
+        [
+          {"node": "Post Triage Summary", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {"node": "Triage Agent", "type": "ai_languageModel", "index": 0}
+        ]
+      ]
+    },
+    "Look Up CRM Sheet": {
+      "ai_tool": [
+        [
+          {"node": "Triage Agent", "type": "ai_tool", "index": 0}
+        ]
+      ]
+    },
+    "Fetch Original Email": {
+      "ai_tool": [
+        [
+          {"node": "Triage Agent", "type": "ai_tool", "index": 0}
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "error-handler-wf-002"
+  },
+  "pinData": {},
+  "versionId": "bbbbbbb1-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  "meta": {"instanceId": "fixtureinstance0000000000000000000000000000000000000000000000000"},
+  "tags": []
+}

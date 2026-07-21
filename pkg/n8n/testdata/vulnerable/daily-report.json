@@ -1,0 +1,84 @@
+{
+  "name": "Daily KPI Report",
+  "id": "vuln-wf-003",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {"field": "days", "daysInterval": 1}
+          ]
+        }
+      },
+      "id": "e5000000-0000-4000-8000-000000000001",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "url": "https://metrics.example.test/api/kpis",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "e5000000-0000-4000-8000-000000000002",
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [200, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "cred-metrics-1",
+          "name": "Metrics API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {"__rl": true, "value": "fixture-kpi-sheet", "mode": "id"},
+        "sheetName": {"__rl": true, "value": "Daily", "mode": "name"},
+        "columns": {"mappingMode": "autoMapInputData"},
+        "options": {}
+      },
+      "id": "e5000000-0000-4000-8000-000000000003",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [400, 0],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "cred-sheets-1",
+          "name": "Reporting Google Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {"node": "HTTP Request1", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {"node": "Google Sheets", "type": "main", "index": 0}
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "err-handler-wf-vuln"
+  },
+  "pinData": {},
+  "versionId": "77777777-7777-4777-8777-777777777777",
+  "meta": {"instanceId": "fixtureinstance0000000000000000000000000000000000000000000000000"},
+  "tags": []
+}

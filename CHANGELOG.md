@@ -38,6 +38,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to restore the old unbounded behavior.
 
 ### Added
+- **`pkg/n8n`: parsing layer for n8n workflow audits** (groundwork for the
+  upcoming `n8n:*` check domain). Defensively parses exported n8n workflow
+  JSON (unknown node types retained, structural surprises recorded as parse
+  issues rather than dropped), loads a directory into a content-hashed
+  bundle, builds a directed connection graph with transitive reachability
+  across main and error outputs (including agent tool attachment via
+  `ai_tool` connections), and ships data-driven classification tables for
+  untrusted triggers, side-effectful nodes, AI/agent nodes, and read- vs
+  write-capable agent tools. No user-facing checks yet.
 - **Checks now surface the exact command a2 runs**, so a check result is
   reproducible by hand. `a2 explain <id>` prints a `Command:` line with the
   command template for tool-based checks (e.g. `govulncheck ./...`). `a2 run`

@@ -1,0 +1,134 @@
+{
+  "name": "Lead Capture",
+  "id": "vuln-wf-001",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "44444444-4444-4444-8444-444444444444"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000002",
+      "name": "Set",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [200, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.enrich.test/v1/contact",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer sk-FAKE0000000000000000000000000000000000000000"
+            },
+            {
+              "name": "X-Aws-Access-Key",
+              "value": "AKIAFAKE0000000EXMPL"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "={{ $json.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000003",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [400, 0]
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "create",
+        "email": "={{ $json.email }}",
+        "additionalFields": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000004",
+      "name": "Create HubSpot Contact",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.1,
+      "position": [600, 0],
+      "credentials": {
+        "hubspotApi": {
+          "id": "cred-hubspot-1",
+          "name": "HubSpot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {"node": "Set", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "Set": {
+      "main": [
+        [
+          {"node": "HTTP Request", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {"node": "Create HubSpot Contact", "type": "main", "index": 0}
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "body": {
+            "email": "test@example.test",
+            "name": "Pinned Test Lead"
+          }
+        }
+      }
+    ]
+  },
+  "versionId": "55555555-5555-4555-8555-555555555555",
+  "meta": {"instanceId": "fixtureinstance0000000000000000000000000000000000000000000000000"},
+  "tags": []
+}

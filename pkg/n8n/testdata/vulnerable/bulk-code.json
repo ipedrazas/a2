@@ -1,0 +1,89 @@
+{
+  "name": "My workflow",
+  "id": "vuln-wf-004",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "f6000000-0000-4000-8000-000000000001",
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Consolidate raw order items into per-customer summaries\nconst summaries = {};\nconst errors = [];\nconst FIELD_1 = 'field_1';\nconst FIELD_2 = 'field_2';\nconst FIELD_3 = 'field_3';\nconst FIELD_4 = 'field_4';\nconst FIELD_5 = 'field_5';\nconst FIELD_6 = 'field_6';\nconst FIELD_7 = 'field_7';\nconst FIELD_8 = 'field_8';\nconst FIELD_9 = 'field_9';\nconst FIELD_10 = 'field_10';\nconst FIELD_11 = 'field_11';\nconst FIELD_12 = 'field_12';\nconst FIELD_13 = 'field_13';\nconst FIELD_14 = 'field_14';\nconst FIELD_15 = 'field_15';\nconst FIELD_16 = 'field_16';\nconst FIELD_17 = 'field_17';\nconst FIELD_18 = 'field_18';\nconst FIELD_19 = 'field_19';\nconst FIELD_20 = 'field_20';\nconst FIELD_21 = 'field_21';\nconst FIELD_22 = 'field_22';\nconst FIELD_23 = 'field_23';\nconst FIELD_24 = 'field_24';\nfor (const item of items) {\n  const row = item.json;\n  const key = row.customer_id;\n  if (!key) {\n    errors.push({ reason: 'missing customer_id', row });\n    continue;\n  }\n  if (!summaries[key]) {\n    summaries[key] = { customer_id: key, total: 0, orders: 0, skus: [] };\n  }\n  if (row[FIELD_1] !== undefined) summaries[key][FIELD_1] = row[FIELD_1];\n  if (row[FIELD_2] !== undefined) summaries[key][FIELD_2] = row[FIELD_2];\n  if (row[FIELD_3] !== undefined) summaries[key][FIELD_3] = row[FIELD_3];\n  if (row[FIELD_4] !== undefined) summaries[key][FIELD_4] = row[FIELD_4];\n  if (row[FIELD_5] !== undefined) summaries[key][FIELD_5] = row[FIELD_5];\n  if (row[FIELD_6] !== undefined) summaries[key][FIELD_6] = row[FIELD_6];\n  if (row[FIELD_7] !== undefined) summaries[key][FIELD_7] = row[FIELD_7];\n  if (row[FIELD_8] !== undefined) summaries[key][FIELD_8] = row[FIELD_8];\n  if (row[FIELD_9] !== undefined) summaries[key][FIELD_9] = row[FIELD_9];\n  if (row[FIELD_10] !== undefined) summaries[key][FIELD_10] = row[FIELD_10];\n  if (row[FIELD_11] !== undefined) summaries[key][FIELD_11] = row[FIELD_11];\n  if (row[FIELD_12] !== undefined) summaries[key][FIELD_12] = row[FIELD_12];\n  if (row[FIELD_13] !== undefined) summaries[key][FIELD_13] = row[FIELD_13];\n  if (row[FIELD_14] !== undefined) summaries[key][FIELD_14] = row[FIELD_14];\n  if (row[FIELD_15] !== undefined) summaries[key][FIELD_15] = row[FIELD_15];\n  if (row[FIELD_16] !== undefined) summaries[key][FIELD_16] = row[FIELD_16];\n  if (row[FIELD_17] !== undefined) summaries[key][FIELD_17] = row[FIELD_17];\n  if (row[FIELD_18] !== undefined) summaries[key][FIELD_18] = row[FIELD_18];\n  if (row[FIELD_19] !== undefined) summaries[key][FIELD_19] = row[FIELD_19];\n  if (row[FIELD_20] !== undefined) summaries[key][FIELD_20] = row[FIELD_20];\n  if (row[FIELD_21] !== undefined) summaries[key][FIELD_21] = row[FIELD_21];\n  if (row[FIELD_22] !== undefined) summaries[key][FIELD_22] = row[FIELD_22];\n  if (row[FIELD_23] !== undefined) summaries[key][FIELD_23] = row[FIELD_23];\n  if (row[FIELD_24] !== undefined) summaries[key][FIELD_24] = row[FIELD_24];\n  summaries[key].total += Number(row.amount || 0);\n  summaries[key].orders += 1;\n  if (row.sku) summaries[key].skus.push(row.sku);\n}\n// Enrich each summary with the loyalty tier from the loyalty service\nfor (const key of Object.keys(summaries)) {\n  const res = await fetch('https://loyalty.example.test/api/tier/' + key);\n  const tier = await res.json();\n  summaries[key].tier = tier.name;\n}\nconst check_1 = Object.values(summaries).filter(s => s[FIELD_1] !== undefined).length;\nconst check_2 = Object.values(summaries).filter(s => s[FIELD_2] !== undefined).length;\nconst check_3 = Object.values(summaries).filter(s => s[FIELD_3] !== undefined).length;\nconst check_4 = Object.values(summaries).filter(s => s[FIELD_4] !== undefined).length;\nconst check_5 = Object.values(summaries).filter(s => s[FIELD_5] !== undefined).length;\nconst check_6 = Object.values(summaries).filter(s => s[FIELD_6] !== undefined).length;\nconst check_7 = Object.values(summaries).filter(s => s[FIELD_7] !== undefined).length;\nconst check_8 = Object.values(summaries).filter(s => s[FIELD_8] !== undefined).length;\nconst check_9 = Object.values(summaries).filter(s => s[FIELD_9] !== undefined).length;\nconst check_10 = Object.values(summaries).filter(s => s[FIELD_10] !== undefined).length;\nconst check_11 = Object.values(summaries).filter(s => s[FIELD_11] !== undefined).length;\nconst check_12 = Object.values(summaries).filter(s => s[FIELD_12] !== undefined).length;\nconst check_13 = Object.values(summaries).filter(s => s[FIELD_13] !== undefined).length;\nconst check_14 = Object.values(summaries).filter(s => s[FIELD_14] !== undefined).length;\nconst check_15 = Object.values(summaries).filter(s => s[FIELD_15] !== undefined).length;\nconst check_16 = Object.values(summaries).filter(s => s[FIELD_16] !== undefined).length;\nconst check_17 = Object.values(summaries).filter(s => s[FIELD_17] !== undefined).length;\nconst check_18 = Object.values(summaries).filter(s => s[FIELD_18] !== undefined).length;\nconst check_19 = Object.values(summaries).filter(s => s[FIELD_19] !== undefined).length;\nconst check_20 = Object.values(summaries).filter(s => s[FIELD_20] !== undefined).length;\nconst check_21 = Object.values(summaries).filter(s => s[FIELD_21] !== undefined).length;\nconst check_22 = Object.values(summaries).filter(s => s[FIELD_22] !== undefined).length;\nconst check_23 = Object.values(summaries).filter(s => s[FIELD_23] !== undefined).length;\nconst check_24 = Object.values(summaries).filter(s => s[FIELD_24] !== undefined).length;\nconst out = Object.values(summaries).map(s => ({ json: s }));\nif (check_1 > 0) out.forEach(o => o.json['has_' + FIELD_1] = true);\nif (check_2 > 0) out.forEach(o => o.json['has_' + FIELD_2] = true);\nif (check_3 > 0) out.forEach(o => o.json['has_' + FIELD_3] = true);\nif (check_4 > 0) out.forEach(o => o.json['has_' + FIELD_4] = true);\nif (check_5 > 0) out.forEach(o => o.json['has_' + FIELD_5] = true);\nif (check_6 > 0) out.forEach(o => o.json['has_' + FIELD_6] = true);\nif (check_7 > 0) out.forEach(o => o.json['has_' + FIELD_7] = true);\nif (check_8 > 0) out.forEach(o => o.json['has_' + FIELD_8] = true);\nif (check_9 > 0) out.forEach(o => o.json['has_' + FIELD_9] = true);\nif (check_10 > 0) out.forEach(o => o.json['has_' + FIELD_10] = true);\nif (check_11 > 0) out.forEach(o => o.json['has_' + FIELD_11] = true);\nif (check_12 > 0) out.forEach(o => o.json['has_' + FIELD_12] = true);\nif (check_13 > 0) out.forEach(o => o.json['has_' + FIELD_13] = true);\nif (check_14 > 0) out.forEach(o => o.json['has_' + FIELD_14] = true);\nif (check_15 > 0) out.forEach(o => o.json['has_' + FIELD_15] = true);\nif (check_16 > 0) out.forEach(o => o.json['has_' + FIELD_16] = true);\nif (check_17 > 0) out.forEach(o => o.json['has_' + FIELD_17] = true);\nif (check_18 > 0) out.forEach(o => o.json['has_' + FIELD_18] = true);\nif (check_19 > 0) out.forEach(o => o.json['has_' + FIELD_19] = true);\nif (check_20 > 0) out.forEach(o => o.json['has_' + FIELD_20] = true);\nif (check_21 > 0) out.forEach(o => o.json['has_' + FIELD_21] = true);\nif (check_22 > 0) out.forEach(o => o.json['has_' + FIELD_22] = true);\nif (check_23 > 0) out.forEach(o => o.json['has_' + FIELD_23] = true);\nif (check_24 > 0) out.forEach(o => o.json['has_' + FIELD_24] = true);\nif (errors.length) out.push({ json: { _errors: errors } });\nreturn out;"
+      },
+      "id": "f6000000-0000-4000-8000-000000000002",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "reports@example.test",
+        "toEmail": "ops@example.test",
+        "subject": "Order summaries",
+        "text": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "f6000000-0000-4000-8000-000000000003",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        400,
+        0
+      ],
+      "continueOnFail": true,
+      "credentials": {
+        "smtp": {
+          "id": "cred-smtp-1",
+          "name": "Reports SMTP"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "versionId": "88888888-8888-4888-8888-888888888888",
+  "meta": {
+    "instanceId": "fixtureinstance0000000000000000000000000000000000000000000000000"
+  },
+  "tags": []
+}

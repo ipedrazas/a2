@@ -9,4 +9,7 @@ title = "a2 gitleaks config"
   # Allow test files with fake secrets for testing the secrets detection check
   paths = [
     '''pkg/checks/common/secrets_test\.go''',
+    # n8n workflow fixtures contain deliberately fake keys (sk-FAKE..., AKIAFAKE...)
+    # that must still trigger the n8n:secrets detection patterns.
+    '''pkg/n8n/testdata/.*''',
   ]

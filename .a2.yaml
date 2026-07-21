@@ -82,6 +82,11 @@ external:
   #   severity: warn
 
 security:
+  obfuscation:
+    allow:
+      # n8n workflow fixtures: realistic export blobs (instance ids, fake keys)
+      # that must survive as-is to exercise the n8n checks.
+      - "pkg/n8n/testdata/**"
   filesystem:
     allow:
       - "pkg/checks/devops/k8s.go"

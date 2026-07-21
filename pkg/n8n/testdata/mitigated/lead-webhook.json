@@ -1,0 +1,134 @@
+{
+  "name": "Lead Capture",
+  "id": "mit-wf-001",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "13000000-0000-4000-8000-000000000001",
+      "name": "Lead Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "99999999-9999-4999-8999-999999999999",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "cred-header-2",
+          "name": "Lead Webhook HMAC Secret"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "13000000-0000-4000-8000-000000000002",
+      "name": "Normalize Lead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [200, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.enrich.test/v1/contact",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "={{ $json.email }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "13000000-0000-4000-8000-000000000003",
+      "name": "Enrich Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [400, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "cred-enrich-1",
+          "name": "Enrichment API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "create",
+        "email": "={{ $json.email }}",
+        "additionalFields": {}
+      },
+      "id": "13000000-0000-4000-8000-000000000004",
+      "name": "Create HubSpot Contact",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.1,
+      "position": [600, 0],
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 1500,
+      "credentials": {
+        "hubspotApi": {
+          "id": "cred-hubspot-1",
+          "name": "HubSpot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Lead Webhook": {
+      "main": [
+        [
+          {"node": "Normalize Lead", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "Normalize Lead": {
+      "main": [
+        [
+          {"node": "Enrich Contact", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "Enrich Contact": {
+      "main": [
+        [
+          {"node": "Create HubSpot Contact", "type": "main", "index": 0}
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "error-handler-wf-002"
+  },
+  "pinData": {},
+  "versionId": "aaaaaaa1-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "meta": {"instanceId": "fixtureinstance0000000000000000000000000000000000000000000000000"},
+  "tags": []
+}

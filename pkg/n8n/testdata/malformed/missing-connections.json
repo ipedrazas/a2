@@ -1,0 +1,33 @@
+{
+  "name": "No Connections Export",
+  "id": "mal-wf-003",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "orphan"
+      },
+      "id": "57000000-0000-4000-8000-000000000001",
+      "name": "Orphan Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "resource": "contact"
+      },
+      "id": "57000000-0000-4000-8000-000000000002",
+      "name": "Create Contact",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.1,
+      "position": [200, 0]
+    }
+  ],
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

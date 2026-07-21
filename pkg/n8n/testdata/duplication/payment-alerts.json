@@ -1,0 +1,149 @@
+{
+  "name": "Payment Alerts",
+  "id": "dup-wf-002",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {"field": "minutes", "minutesInterval": 30}
+          ]
+        }
+      },
+      "id": "8a000000-0000-4000-8000-000000000001",
+      "name": "Every 30 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "url": "https://billing.example.test/api/payments?status=failed",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {"timeout": 10000}
+      },
+      "id": "8a000000-0000-4000-8000-000000000002",
+      "name": "Fetch Failed Payments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [200, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {"id": "cred-billing-1", "name": "Billing API Key"}
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const rows = items.map(i => i.json);\nconst flagged = rows.filter(r => r.retry_count > 2);\nreturn flagged.map(r => ({ json: { id: r.id, amount: r.amount, customer: r.customer_name } }));"
+      },
+      "id": "8a000000-0000-4000-8000-000000000003",
+      "name": "Flag Repeated Failures",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [400, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "typeValidation": "strict"},
+          "conditions": [
+            {
+              "leftValue": "={{ $json.amount }}",
+              "rightValue": 500,
+              "operator": {"type": "number", "operation": "gt"}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8a000000-0000-4000-8000-000000000004",
+      "name": "Material Amount?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [600, 0]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "f1", "name": "summary", "value": "=Payment {{ $json.id }}: {{ $json.amount }} ({{ $json.customer }})", "type": "string"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "8a000000-0000-4000-8000-000000000005",
+      "name": "Build Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [800, -50]
+    },
+    {
+      "parameters": {
+        "operation": "postMessage",
+        "channel": "#finance-alerts",
+        "text": "={{ $json.summary }}",
+        "otherOptions": {}
+      },
+      "id": "8a000000-0000-4000-8000-000000000006",
+      "name": "Alert Finance",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1000, -50],
+      "credentials": {
+        "slackApi": {"id": "cred-slack-1", "name": "Ops Slack Bot"}
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "billing@example.test",
+        "toEmail": "finance@example.test",
+        "subject": "=Failed payment digest ({{ $items().length }} items)",
+        "text": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "8a000000-0000-4000-8000-000000000007",
+      "name": "Email Digest",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1200, -50],
+      "credentials": {
+        "smtp": {"id": "cred-smtp-1", "name": "Reports SMTP"}
+      }
+    }
+  ],
+  "connections": {
+    "Every 30 Minutes": {
+      "main": [[{"node": "Fetch Failed Payments", "type": "main", "index": 0}]]
+    },
+    "Fetch Failed Payments": {
+      "main": [[{"node": "Flag Repeated Failures", "type": "main", "index": 0}]]
+    },
+    "Flag Repeated Failures": {
+      "main": [[{"node": "Material Amount?", "type": "main", "index": 0}]]
+    },
+    "Material Amount?": {
+      "main": [
+        [{"node": "Build Summary", "type": "main", "index": 0}],
+        []
+      ]
+    },
+    "Build Summary": {
+      "main": [[{"node": "Alert Finance", "type": "main", "index": 0}]]
+    },
+    "Alert Finance": {
+      "main": [[{"node": "Email Digest", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "error-handler-wf-003"
+  },
+  "pinData": {},
+  "tags": []
+}

@@ -1,0 +1,132 @@
+{
+  "name": "Inbox Assistant",
+  "id": "vuln-wf-002",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "mailbox": "INBOX",
+        "postProcessAction": "read",
+        "options": {}
+      },
+      "id": "d4000000-0000-4000-8000-000000000001",
+      "name": "Email Trigger (IMAP)",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "credentials": {
+        "imap": {
+          "id": "cred-imap-1",
+          "name": "Support Inbox"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "auto",
+        "options": {
+          "systemMessage": "You are an inbox assistant. Read the incoming email and take the appropriate action: reply to the sender, or look up context in the CRM sheet."
+        }
+      },
+      "id": "d4000000-0000-4000-8000-000000000002",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "model": {"__rl": true, "value": "gpt-4o", "mode": "list"},
+        "options": {}
+      },
+      "id": "d4000000-0000-4000-8000-000000000003",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [140, 200],
+      "credentials": {
+        "openAiApi": {
+          "id": "cred-openai-1",
+          "name": "OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $fromAI('to', 'Recipient email address') }}",
+        "subject": "={{ $fromAI('subject', 'Email subject') }}",
+        "message": "={{ $fromAI('body', 'Email body') }}",
+        "options": {}
+      },
+      "id": "d4000000-0000-4000-8000-000000000004",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [300, 200],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cred-gmail-1",
+          "name": "Support Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "documentId": {"__rl": true, "value": "fixture-crm-sheet", "mode": "id"},
+        "sheetName": {"__rl": true, "value": "Accounts", "mode": "name"},
+        "options": {}
+      },
+      "id": "d4000000-0000-4000-8000-000000000005",
+      "name": "Look Up CRM Sheet",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [460, 200],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "cred-sheets-1",
+          "name": "Reporting Google Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {"node": "AI Agent", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {"node": "AI Agent", "type": "ai_languageModel", "index": 0}
+        ]
+      ]
+    },
+    "Send Email": {
+      "ai_tool": [
+        [
+          {"node": "AI Agent", "type": "ai_tool", "index": 0}
+        ]
+      ]
+    },
+    "Look Up CRM Sheet": {
+      "ai_tool": [
+        [
+          {"node": "AI Agent", "type": "ai_tool", "index": 0}
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "versionId": "66666666-6666-4666-8666-666666666666",
+  "meta": {"instanceId": "fixtureinstance0000000000000000000000000000000000000000000000000"},
+  "tags": []
+}

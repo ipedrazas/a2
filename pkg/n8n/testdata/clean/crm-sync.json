@@ -1,0 +1,125 @@
+{
+  "name": "CRM Contact Sync",
+  "id": "clean-wf-002",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {"field": "hours", "hoursInterval": 6}
+          ]
+        }
+      },
+      "id": "b2000000-0000-4000-8000-000000000001",
+      "name": "Every 6 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example-crm.test/v2/contacts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "b2000000-0000-4000-8000-000000000002",
+      "name": "Fetch CRM Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [200, 0],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "cred-crm-api-1",
+          "name": "CRM API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "email",
+              "value": "={{ $json.properties.email }}",
+              "type": "string"
+            },
+            {
+              "id": "f2",
+              "name": "company",
+              "value": "={{ $json.properties.company }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2000000-0000-4000-8000-000000000003",
+      "name": "Normalize Contact Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [400, 0]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {"__rl": true, "value": "fixture-sheet-id", "mode": "id"},
+        "sheetName": {"__rl": true, "value": "Contacts", "mode": "name"},
+        "columns": {"mappingMode": "autoMapInputData"},
+        "options": {}
+      },
+      "id": "b2000000-0000-4000-8000-000000000004",
+      "name": "Append To Contact Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [600, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "cred-sheets-1",
+          "name": "Reporting Google Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every 6 Hours": {
+      "main": [
+        [
+          {"node": "Fetch CRM Contacts", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "Fetch CRM Contacts": {
+      "main": [
+        [
+          {"node": "Normalize Contact Fields", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "Normalize Contact Fields": {
+      "main": [
+        [
+          {"node": "Append To Contact Sheet", "type": "main", "index": 0}
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "error-handler-wf-001"
+  },
+  "pinData": {},
+  "versionId": "33333333-3333-4333-8333-333333333333",
+  "meta": {"instanceId": "fixtureinstance0000000000000000000000000000000000000000000000000"},
+  "tags": []
+}

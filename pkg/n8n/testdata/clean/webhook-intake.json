@@ -1,0 +1,155 @@
+{
+  "name": "Lead Intake",
+  "id": "clean-wf-001",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-intake",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000001",
+      "name": "Lead Intake Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "11111111-1111-4111-8111-111111111111",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "cred-header-1",
+          "name": "Lead Intake Shared Secret"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "typeValidation": "strict"},
+          "conditions": [
+            {
+              "leftValue": "={{ $json.body.email }}",
+              "rightValue": "",
+              "operator": {"type": "string", "operation": "notEmpty"}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000002",
+      "name": "Validate Payload",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [200, 0]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": {"__rl": true, "value": "public", "mode": "list"},
+        "table": {"__rl": true, "value": "leads", "mode": "list"},
+        "columns": {"mappingMode": "autoMapInputData"},
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000003",
+      "name": "Save Lead",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [400, -100],
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "postgres": {
+          "id": "cred-pg-1",
+          "name": "CRM Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\"status\": \"rejected\"} }}",
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000004",
+      "name": "Reject Invalid Payload",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [400, 100]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\"status\": \"ok\"} }}",
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000005",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [600, -150]
+    },
+    {
+      "parameters": {
+        "operation": "postMessage",
+        "channel": "#lead-intake-alerts",
+        "text": "=Lead save failed: {{ $json.error.message }}",
+        "otherOptions": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000006",
+      "name": "Notify Failures",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [600, -50],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "slackApi": {
+          "id": "cred-slack-1",
+          "name": "Ops Slack Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Lead Intake Webhook": {
+      "main": [
+        [
+          {"node": "Validate Payload", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "Validate Payload": {
+      "main": [
+        [
+          {"node": "Save Lead", "type": "main", "index": 0}
+        ],
+        [
+          {"node": "Reject Invalid Payload", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "Save Lead": {
+      "main": [
+        [
+          {"node": "Respond Success", "type": "main", "index": 0}
+        ],
+        [
+          {"node": "Notify Failures", "type": "main", "index": 0}
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "error-handler-wf-001"
+  },
+  "pinData": {},
+  "versionId": "22222222-2222-4222-8222-222222222222",
+  "meta": {"instanceId": "fixtureinstance0000000000000000000000000000000000000000000000000"},
+  "tags": []
+}

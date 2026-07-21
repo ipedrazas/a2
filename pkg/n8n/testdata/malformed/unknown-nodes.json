@@ -1,0 +1,41 @@
+{
+  "name": "Future Nodes",
+  "id": "mal-wf-002",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "46000000-0000-4000-8000-000000000001",
+      "name": "Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "gadget": {
+          "nested": [1, 2, {"deep": true}],
+          "mode": "quantum"
+        }
+      },
+      "id": "46000000-0000-4000-8000-000000000002",
+      "name": "Mystery",
+      "type": "acme.futureWidget",
+      "typeVersion": "3",
+      "position": [200, 0]
+    }
+  ],
+  "connections": {
+    "Trigger": {
+      "main": [
+        [
+          {"node": "Mystery", "type": "main", "index": 0}
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}
