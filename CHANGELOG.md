@@ -38,6 +38,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to restore the old unbounded behavior.
 
 ### Added
+- **`n8n:secrets` and `n8n:duplication` checks.** `n8n:secrets` (critical)
+  scans node parameters, Code node source, and pinned data for known key
+  formats (sk-, ghp_, xoxb-, AKIA, AIza, JWTs, private key blocks) and for
+  high-entropy literals in auth-named fields (warn candidates). Matched
+  values are redacted at detection time — results carry workflow, node, and
+  field path only, and a test asserts fixture secrets never appear in
+  `-f json` output. `n8n:duplication` linearizes each workflow's main flow
+  and reports order-preserving node-type sequences (≥5 nodes, configurable
+  via `n8n.duplication_min_sequence`) copied across workflow files, with a
+  parameter-shape similarity score per cluster — each cluster a sub-workflow
+  candidate.
 - **New `n8n` check domain: audit exported n8n workflows.** a2 now detects
   directories containing n8n workflow exports (JSON with a `nodes` array and
   `connections` object, in the target directory or one level down) as an

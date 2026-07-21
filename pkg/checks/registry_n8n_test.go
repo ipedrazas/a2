@@ -10,6 +10,8 @@ import (
 
 // expectedN8nChecks are the Phase 2 n8n check IDs.
 var expectedN8nChecks = []string{
+	"n8n:secrets",
+	"n8n:duplication",
 	"n8n:error-workflow",
 	"n8n:silent-failures",
 	"n8n:retry-config",

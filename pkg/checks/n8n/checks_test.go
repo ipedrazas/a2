@@ -13,10 +13,11 @@ import (
 )
 
 const (
-	cleanDir      = "../../n8n/testdata/clean"
-	vulnerableDir = "../../n8n/testdata/vulnerable"
-	mitigatedDir  = "../../n8n/testdata/mitigated"
-	malformedDir  = "../../n8n/testdata/malformed"
+	cleanDir       = "../../n8n/testdata/clean"
+	vulnerableDir  = "../../n8n/testdata/vulnerable"
+	mitigatedDir   = "../../n8n/testdata/mitigated"
+	malformedDir   = "../../n8n/testdata/malformed"
+	duplicationDir = "../../n8n/testdata/duplication"
 )
 
 // allCheckers builds every n8n check with default config.
@@ -58,6 +59,8 @@ func TestChecksAcrossFixtures(t *testing.T) {
 		{&PinnedDataCheck{}, cleanDir, checker.Pass, "", ""},
 		{&NamingCheck{}, cleanDir, checker.Pass, "comply", ""},
 		{&InlineAuthCheck{}, cleanDir, checker.Pass, "", ""},
+		{&SecretsCheck{}, cleanDir, checker.Pass, "no hardcoded secrets", ""},
+		{&DuplicationCheck{MinSequence: 5}, cleanDir, checker.Pass, "", ""},
 
 		// vulnerable estate: the demo failures.
 		{&ErrorWorkflowCheck{FailRatio: 0.5}, vulnerableDir, checker.Fail, "2 of 3 active workflows have no error workflow", "lead-webhook.json · Lead Capture"},
@@ -69,6 +72,12 @@ func TestChecksAcrossFixtures(t *testing.T) {
 		{&PinnedDataCheck{}, vulnerableDir, checker.Warn, "1 active workflow carry pinned test data", "pinned test data on 1 node(s): Webhook"},
 		{&NamingCheck{}, vulnerableDir, checker.Warn, "non-compliant", "untouched default name"},
 		{&InlineAuthCheck{}, vulnerableDir, checker.Warn, "2 HTTP parameter(s)", `literal value in header "Authorization"`},
+		{&SecretsCheck{}, vulnerableDir, checker.Fail, "2 hardcoded secret(s)", "value redacted"},
+		{&SecretsCheck{}, vulnerableDir, checker.Fail, "", "lead-webhook.json · Lead Capture · HTTP Request — openai-style key"},
+
+		// duplication estate: one copied sequence, reported once.
+		{&DuplicationCheck{MinSequence: 5}, duplicationDir, checker.Warn, "1 duplicated node sequence(s)", "httpRequest → code → if → set → slack"},
+		{&DuplicationCheck{MinSequence: 5}, duplicationDir, checker.Warn, "", "invoice-alerts.json · Invoice Alerts"},
 
 		// mitigated estate: the vulnerable shapes, fixed.
 		{&ErrorWorkflowCheck{FailRatio: 0.5}, mitigatedDir, checker.Pass, "", ""},
@@ -77,6 +86,7 @@ func TestChecksAcrossFixtures(t *testing.T) {
 		{&PinnedDataCheck{}, mitigatedDir, checker.Pass, "", ""},
 		{&InlineAuthCheck{}, mitigatedDir, checker.Pass, "", ""},
 		{&SilentFailuresCheck{}, mitigatedDir, checker.Pass, "", ""},
+		{&SecretsCheck{}, mitigatedDir, checker.Pass, "", ""},
 	}
 
 	for _, tt := range tests {

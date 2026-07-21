@@ -9,6 +9,7 @@ import (
 const (
 	defaultCodeNodeLineLimit      = 80
 	defaultErrorWorkflowFailRatio = 0.5
+	defaultDuplicationMinSequence = 5
 )
 
 // Register returns all n8n check registrations. All checks parse exported
@@ -27,9 +28,30 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 		failRatio = defaultErrorWorkflowFailRatio
 	}
 
+	minSequence := cfg.N8n.DuplicationMinSequence
+	if minSequence <= 0 {
+		minSequence = defaultDuplicationMinSequence
+	}
+
 	n8nLang := []checker.Language{checker.LangN8n}
 
 	return []checker.CheckRegistration{
+		{
+			Checker: &SecretsCheck{},
+			Meta: checker.CheckMeta{
+				ID:          "n8n:secrets",
+				Name:        "Hardcoded Secrets",
+				Description: "Scans node parameters, Code node source, and pinned data for hardcoded secret material.",
+				Languages:   n8nLang,
+				Critical:    true,
+				Order:       149,
+				Suggestion:  "Move secrets into the n8n credential store and rotate any exposed values",
+				Detail: "Matches known key formats (sk-, ghp_, xoxb-, AKIA, AIza, JWTs, private key blocks) anywhere in node parameters — including Code node source and pinned data — as confirmed findings (fail), " +
+					"and flags high-entropy literals in auth-named fields as candidates for human review (warn). " +
+					"Values are redacted at detection time: results name the workflow, node, and field path, never the secret itself.",
+				FixPrompt: "For each finding: rotate the exposed credential immediately (it ships with every export of this workflow), create an n8n credential of the right type, reference it from the node, and remove the literal. Then add secret scanning to the export pipeline so new literals are caught before commit.",
+			},
+		},
 		{
 			Checker: &ErrorWorkflowCheck{FailRatio: failRatio},
 			Meta: checker.CheckMeta{
@@ -167,6 +189,21 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 					"Checks that the export directory is a git work tree and every workflow file is tracked. " +
 					"If producing a versioned export for this audit was itself the hard part, that is the finding.",
 				FixPrompt: "Initialize (or choose) a git repository for the workflow exports, commit the listed files, and set up a recurring export-and-commit job (n8n CLI or API) so the repository stays the reviewable source of truth.",
+			},
+		},
+		{
+			Checker: &DuplicationCheck{MinSequence: minSequence},
+			Meta: checker.CheckMeta{
+				ID:          "n8n:duplication",
+				Name:        "Cross-Workflow Duplication",
+				Description: "Reports node sequences copied across workflows — sub-workflow candidates.",
+				Languages:   n8nLang,
+				Critical:    false,
+				Order:       159,
+				Suggestion:  "Extract duplicated sequences into a shared sub-workflow (Execute Workflow)",
+				Detail: "Linearizes each workflow's main flow and finds order-preserving node-type sequences of length ≥5 (configurable via n8n.duplication_min_sequence) shared across workflow files, with a parameter-shape similarity score per cluster. " +
+					"Every copy is a divergence risk: a fix applied to one instance and forgotten in the others. The check informs a refactoring conversation; it does not gate.",
+				FixPrompt: "For each cluster, extract the shared sequence into a sub-workflow invoked via Execute Workflow, parameterize the differences (URLs, channels, field names) as inputs, and replace each occurrence with a call — so the logic has one home and one fix path.",
 			},
 		},
 	}
