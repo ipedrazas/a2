@@ -36,3 +36,7 @@ go.work.sum
 node_modules/
 a2-cache/
 report/
+
+# n8n-audit working docs stay private; only the plan is public
+plans/n8n-audit/*
+!plans/n8n-audit/PLAN.md
