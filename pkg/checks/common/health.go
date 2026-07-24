@@ -70,10 +70,11 @@ func (c *HealthCheck) Run(path string) (checker.Result, error) {
 			return nil // Skip files we can't access
 		}
 
-		// Skip directories and hidden paths
+		// Skip directories and hidden paths — but never the walk root itself
+		// (path "." has Name() "." and would match the dot-prefix skip).
 		if info.IsDir() {
 			name := info.Name()
-			if strings.HasPrefix(name, ".") || name == "node_modules" || name == "vendor" || name == "__pycache__" {
+			if filePath != path && (strings.HasPrefix(name, ".") || name == "node_modules" || name == "vendor" || name == "__pycache__") {
 				return filepath.SkipDir
 			}
 			return nil

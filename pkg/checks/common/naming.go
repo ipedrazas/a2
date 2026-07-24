@@ -171,7 +171,8 @@ func (c *NamingCheck) analyzeFileNames(path string) map[namingConvention]int {
 
 		if info.IsDir() {
 			name := info.Name()
-			if strings.HasPrefix(name, ".") || skipDirs[name] {
+			// Never skip the walk root itself (path "." has Name() ".").
+			if filePath != path && (strings.HasPrefix(name, ".") || skipDirs[name]) {
 				return filepath.SkipDir
 			}
 			return nil

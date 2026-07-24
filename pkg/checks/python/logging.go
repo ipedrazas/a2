@@ -46,10 +46,11 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 			return nil
 		}
 
-		// Skip directories
+		// Skip directories — but never the walk root itself (path "." has
+		// Name() "." and would match the dot-prefix skip).
 		if info.IsDir() {
 			name := info.Name()
-			if strings.HasPrefix(name, ".") || name == "venv" || name == "__pycache__" || name == ".venv" || name == "env" {
+			if filePath != path && (strings.HasPrefix(name, ".") || name == "venv" || name == "__pycache__" || name == ".venv" || name == "env") {
 				return filepath.SkipDir
 			}
 			return nil

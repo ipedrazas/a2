@@ -51,10 +51,11 @@ func (c *CyclomaticCheck) Run(path string) (checker.Result, error) {
 			return nil
 		}
 
-		// Skip directories
+		// Skip directories — but never the walk root itself (path "." has
+		// Name() "." and would match the dot-prefix skip).
 		if info.IsDir() {
 			name := info.Name()
-			if strings.HasPrefix(name, ".") || name == "vendor" || name == "testdata" {
+			if filePath != path && (strings.HasPrefix(name, ".") || name == "vendor" || name == "testdata") {
 				return filepath.SkipDir
 			}
 			return nil

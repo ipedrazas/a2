@@ -42,10 +42,12 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 			return nil
 		}
 
-		// Skip directories
+		// Skip directories — but never the walk root itself: when the check
+		// runs with path ".", the root's Name() is "." and the dot-prefix
+		// match would skip the entire tree.
 		if info.IsDir() {
 			name := info.Name()
-			if strings.HasPrefix(name, ".") || name == "vendor" || name == "testdata" {
+			if filePath != path && (strings.HasPrefix(name, ".") || name == "vendor" || name == "testdata") {
 				return filepath.SkipDir
 			}
 			return nil
