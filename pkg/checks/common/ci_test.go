@@ -21,7 +21,7 @@ func (s *CICheckTestSuite) SetupTest() {
 }
 
 func (s *CICheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *CICheckTestSuite) TestIDAndName() {

@@ -23,7 +23,7 @@ func (s *K8sCheckTestSuite) SetupTest() {
 }
 
 func (s *K8sCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *K8sCheckTestSuite) TestID() {

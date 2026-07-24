@@ -23,7 +23,7 @@ func (s *PulumiCheckTestSuite) SetupTest() {
 }
 
 func (s *PulumiCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *PulumiCheckTestSuite) TestID() {

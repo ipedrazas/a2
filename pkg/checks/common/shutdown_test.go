@@ -21,7 +21,7 @@ func (s *ShutdownCheckTestSuite) SetupTest() {
 }
 
 func (s *ShutdownCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *ShutdownCheckTestSuite) TestIDAndName() {

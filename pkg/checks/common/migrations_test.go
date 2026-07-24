@@ -21,7 +21,7 @@ func (s *MigrationsCheckTestSuite) SetupTest() {
 }
 
 func (s *MigrationsCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *MigrationsCheckTestSuite) TestIDAndName() {

@@ -21,7 +21,7 @@ func (s *EnvCheckTestSuite) SetupTest() {
 }
 
 func (s *EnvCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *EnvCheckTestSuite) TestIDAndName() {

@@ -28,12 +28,12 @@ go 1.21
 }
 
 func (s *CyclomaticCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *CyclomaticCheckTestSuite) TestNoGoMod() {
 	// Remove go.mod
-	os.Remove(filepath.Join(s.tempDir, "go.mod"))
+	_ = os.Remove(filepath.Join(s.tempDir, "go.mod"))
 
 	check := &CyclomaticCheck{Threshold: 15}
 	result, err := check.Run(s.tempDir)

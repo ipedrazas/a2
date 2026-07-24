@@ -23,7 +23,7 @@ func (s *AnsibleCheckTestSuite) SetupTest() {
 }
 
 func (s *AnsibleCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *AnsibleCheckTestSuite) TestID() {

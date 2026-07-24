@@ -21,7 +21,7 @@ func (s *E2ECheckTestSuite) SetupTest() {
 }
 
 func (s *E2ECheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *E2ECheckTestSuite) TestIDAndName() {

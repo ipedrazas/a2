@@ -21,7 +21,7 @@ func (s *PrecommitCheckTestSuite) SetupTest() {
 }
 
 func (s *PrecommitCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *PrecommitCheckTestSuite) TestIDAndName() {

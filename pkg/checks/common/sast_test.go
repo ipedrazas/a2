@@ -27,7 +27,7 @@ func (s *SASTCheckTestSuite) SetupTest() {
 }
 
 func (s *SASTCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *SASTCheckTestSuite) TestIDAndName() {

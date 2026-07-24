@@ -21,7 +21,7 @@ func (s *TracingCheckTestSuite) SetupTest() {
 }
 
 func (s *TracingCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *TracingCheckTestSuite) TestIDAndName() {

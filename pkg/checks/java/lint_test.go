@@ -21,7 +21,7 @@ func (s *LintCheckTestSuite) SetupTest() {
 }
 
 func (s *LintCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *LintCheckTestSuite) TestIDAndName() {

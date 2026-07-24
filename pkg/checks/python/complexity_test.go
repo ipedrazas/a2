@@ -28,12 +28,12 @@ name = "test"
 }
 
 func (s *ComplexityCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *ComplexityCheckTestSuite) TestNoPythonProject() {
 	// Remove pyproject.toml
-	os.Remove(filepath.Join(s.tempDir, "pyproject.toml"))
+	_ = os.Remove(filepath.Join(s.tempDir, "pyproject.toml"))
 
 	check := &ComplexityCheck{}
 	result, err := check.Run(s.tempDir)

@@ -23,7 +23,7 @@ func (s *ProjectCheckTestSuite) SetupTest() {
 }
 
 func (s *ProjectCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *ProjectCheckTestSuite) TestID() {

@@ -130,7 +130,6 @@ func (s *RegisterTestSuite) TestRegister_CheckerImplementsInterface() {
 	checks := Register(cfg)
 
 	for _, check := range checks {
-		var _ checker.Checker = check.Checker
 		s.NotEmpty(check.Checker.ID())
 		s.NotEmpty(check.Checker.Name())
 	}

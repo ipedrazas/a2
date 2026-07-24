@@ -23,7 +23,7 @@ func (s *CoverageTestSuite) SetupTest() {
 
 func (s *CoverageTestSuite) TearDownTest() {
 	if s.tempDir != "" {
-		os.RemoveAll(s.tempDir)
+		_ = os.RemoveAll(s.tempDir)
 	}
 }
 

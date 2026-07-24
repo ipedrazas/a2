@@ -21,7 +21,7 @@ func (s *DepsFreshnessCheckTestSuite) SetupTest() {
 }
 
 func (s *DepsFreshnessCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *DepsFreshnessCheckTestSuite) TestIDAndName() {

@@ -27,7 +27,7 @@ func (suite *BuildTestSuite) SetupTest() {
 func (suite *BuildTestSuite) TearDownTest() {
 	// Clean up temporary directory
 	if suite.tempDir != "" {
-		os.RemoveAll(suite.tempDir)
+		_ = os.RemoveAll(suite.tempDir)
 	}
 }
 

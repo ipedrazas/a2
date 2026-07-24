@@ -27,7 +27,7 @@ func (s *DuplicationCheckTestSuite) SetupTest() {
 }
 
 func (s *DuplicationCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *DuplicationCheckTestSuite) TestIDAndName() {

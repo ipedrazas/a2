@@ -36,7 +36,7 @@ func (suite *SafePathTestSuite) SetupTest() {
 // TearDownTest removes the temporary directory after each test.
 func (suite *SafePathTestSuite) TearDownTest() {
 	if suite.tempDir != "" {
-		os.RemoveAll(suite.tempDir)
+		_ = os.RemoveAll(suite.tempDir)
 	}
 }
 
@@ -239,7 +239,7 @@ func (suite *SafePathTestSuite) TestOpen_ValidFile() {
 	file, err := Open(suite.tempDir, "test.txt")
 	suite.NoError(err)
 	suite.NotNil(file)
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	// Verify we can read from it
 	buf := make([]byte, 100)
@@ -253,7 +253,7 @@ func (suite *SafePathTestSuite) TestOpen_NestedFile() {
 	file, err := Open(suite.tempDir, "subdir/nested.txt")
 	suite.NoError(err)
 	suite.NotNil(file)
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 }
 
 // TestOpen_NonExistent tests Open with a non-existent file.
@@ -275,7 +275,7 @@ func (suite *SafePathTestSuite) TestOpenPath_ValidFile() {
 	file, err := OpenPath(suite.tempDir, filePath)
 	suite.NoError(err)
 	suite.NotNil(file)
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	// Verify we can read from it
 	buf := make([]byte, 100)
@@ -290,7 +290,7 @@ func (suite *SafePathTestSuite) TestOpenPath_NestedFile() {
 	file, err := OpenPath(suite.tempDir, filePath)
 	suite.NoError(err)
 	suite.NotNil(file)
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 }
 
 // TestOpenPath_NonExistent tests OpenPath with a non-existent file.

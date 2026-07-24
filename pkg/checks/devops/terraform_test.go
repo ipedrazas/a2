@@ -23,7 +23,7 @@ func (s *TerraformCheckTestSuite) SetupTest() {
 }
 
 func (s *TerraformCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *TerraformCheckTestSuite) TestID() {

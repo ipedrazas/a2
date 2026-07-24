@@ -21,7 +21,7 @@ func (s *LoggingCheckTestSuite) SetupTest() {
 }
 
 func (s *LoggingCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *LoggingCheckTestSuite) TestIDAndName() {

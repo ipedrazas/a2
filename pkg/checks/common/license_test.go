@@ -21,7 +21,7 @@ func (s *LicenseCheckTestSuite) SetupTest() {
 }
 
 func (s *LicenseCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *LicenseCheckTestSuite) TestIDAndName() {

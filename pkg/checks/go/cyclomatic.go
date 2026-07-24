@@ -145,9 +145,9 @@ func (c *CyclomaticCheck) Run(path string) (checker.Result, error) {
 
 	// Build raw output with all complex functions
 	var rawOutput strings.Builder
-	rawOutput.WriteString(fmt.Sprintf("Functions exceeding complexity threshold (%d):\n", threshold))
+	fmt.Fprintf(&rawOutput, "Functions exceeding complexity threshold (%d):\n", threshold)
 	for _, f := range complexFunctions {
-		rawOutput.WriteString(fmt.Sprintf("  %s:%d %s (complexity: %d)\n", f.File, f.Line, f.Name, f.Complexity))
+		fmt.Fprintf(&rawOutput, "  %s:%d %s (complexity: %d)\n", f.File, f.Line, f.Name, f.Complexity)
 	}
 
 	return rb.WarnWithOutput(msg, rawOutput.String()), nil

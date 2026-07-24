@@ -21,7 +21,7 @@ func (s *ConfigValidationCheckTestSuite) SetupTest() {
 }
 
 func (s *ConfigValidationCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *ConfigValidationCheckTestSuite) TestIDAndName() {

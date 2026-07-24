@@ -22,7 +22,7 @@ func (s *BuildCheckTestSuite) SetupTest() {
 }
 
 func (s *BuildCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *BuildCheckTestSuite) TestIDAndName() {

@@ -27,7 +27,7 @@ func (s *DockerfileCheckTestSuite) SetupTest() {
 }
 
 func (s *DockerfileCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *DockerfileCheckTestSuite) TestIDAndName() {

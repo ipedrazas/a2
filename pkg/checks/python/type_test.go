@@ -25,7 +25,7 @@ func (suite *TypeTestSuite) SetupTest() {
 // TearDownTest is called after each test method.
 func (suite *TypeTestSuite) TearDownTest() {
 	if suite.tempDir != "" {
-		os.RemoveAll(suite.tempDir)
+		_ = os.RemoveAll(suite.tempDir)
 	}
 }
 

@@ -21,7 +21,7 @@ func (s *ChangelogCheckTestSuite) SetupTest() {
 }
 
 func (s *ChangelogCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *ChangelogCheckTestSuite) TestIDAndName() {

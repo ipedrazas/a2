@@ -79,11 +79,12 @@ func (c *FormatCheck) detectFormatter(path string) string {
 	// Check config preference first
 	if c.Config != nil && c.Config.Formatter != "" && c.Config.Formatter != "auto" {
 		// Verify the configured formatter is available
-		if c.Config.Formatter == "swift-format" {
+		switch c.Config.Formatter {
+		case "swift-format":
 			if _, err := exec.LookPath("swift-format"); err == nil {
 				return "swift-format"
 			}
-		} else if c.Config.Formatter == "swiftformat" {
+		case "swiftformat":
 			if _, err := exec.LookPath("swiftformat"); err == nil {
 				return "swiftformat"
 			}

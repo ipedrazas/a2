@@ -375,7 +375,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_InvalidSourceDir() {
 func (suite *ExternalTestSuite) TestExternalCheck_Run_WithSourceDir() {
 	root, err := os.MkdirTemp("", "a2-external-source-dir-")
 	suite.Require().NoError(err)
-	defer os.RemoveAll(root)
+	defer func() { _ = os.RemoveAll(root) }()
 	subDir := filepath.Join(root, "mydir")
 	suite.Require().NoError(os.Mkdir(subDir, 0755))
 

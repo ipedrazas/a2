@@ -24,7 +24,7 @@ func (s *LoggingTestSuite) SetupTest() {
 
 func (s *LoggingTestSuite) TearDownTest() {
 	if s.tempDir != "" {
-		os.RemoveAll(s.tempDir)
+		_ = os.RemoveAll(s.tempDir)
 	}
 }
 

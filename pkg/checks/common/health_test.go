@@ -21,7 +21,7 @@ func (s *HealthCheckTestSuite) SetupTest() {
 }
 
 func (s *HealthCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *HealthCheckTestSuite) TestIDAndName() {

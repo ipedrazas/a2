@@ -27,7 +27,7 @@ func (s *DeadcodeCheckTestSuite) SetupTest() {
 }
 
 func (s *DeadcodeCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *DeadcodeCheckTestSuite) TestIDAndName() {

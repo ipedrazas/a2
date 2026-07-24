@@ -341,7 +341,7 @@ func (suite *RegistryTestSuite) TestGetChecks_NoLanguageDetected() {
 func (suite *RegistryTestSuite) TestGetChecks_CommonShutdownUsesSourceDir() {
 	root, err := os.MkdirTemp("", "a2-shutdown-multipath-*")
 	suite.Require().NoError(err)
-	defer os.RemoveAll(root)
+	defer func() { _ = os.RemoveAll(root) }()
 
 	// Go code with signal handling in backend/ (no go.mod at root)
 	backend := filepath.Join(root, "backend")

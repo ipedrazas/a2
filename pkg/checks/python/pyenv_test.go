@@ -20,7 +20,7 @@ func (s *PyenvTestSuite) SetupTest() {
 }
 
 func (s *PyenvTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *PyenvTestSuite) TestResolvePythonEnv_BareCommand() {

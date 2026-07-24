@@ -26,7 +26,7 @@ func (suite *CoverageTestSuite) SetupTest() {
 // TearDownTest is called after each test method.
 func (suite *CoverageTestSuite) TearDownTest() {
 	if suite.tempDir != "" {
-		os.RemoveAll(suite.tempDir)
+		_ = os.RemoveAll(suite.tempDir)
 	}
 }
 

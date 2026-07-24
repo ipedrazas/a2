@@ -23,7 +23,7 @@ func (s *HelmCheckTestSuite) SetupTest() {
 }
 
 func (s *HelmCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *HelmCheckTestSuite) TestID() {

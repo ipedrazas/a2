@@ -21,7 +21,7 @@ func (suite *LoaderTestSuite) SetupTest() {
 
 func (suite *LoaderTestSuite) TearDownTest() {
 	if suite.tempDir != "" {
-		os.RemoveAll(suite.tempDir)
+		_ = os.RemoveAll(suite.tempDir)
 	}
 }
 

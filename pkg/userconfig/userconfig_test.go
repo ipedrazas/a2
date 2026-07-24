@@ -22,7 +22,7 @@ func (suite *UserConfigTestSuite) SetupTest() {
 
 func (suite *UserConfigTestSuite) TearDownTest() {
 	if suite.tempDir != "" {
-		os.RemoveAll(suite.tempDir)
+		_ = os.RemoveAll(suite.tempDir)
 	}
 }
 
@@ -76,7 +76,7 @@ func (suite *UserConfigTestSuite) TestEnsureDir_Idempotent() {
 		// Skip if we can't create in user config dir (e.g., in CI)
 		suite.T().Skip("Cannot create user config directory")
 	}
-	defer os.RemoveAll(dir1)
+	defer func() { _ = os.RemoveAll(dir1) }()
 
 	// Second call should succeed without error
 	dir2, err := EnsureDir("test-idempotent")

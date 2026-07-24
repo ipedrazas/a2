@@ -21,7 +21,7 @@ func (s *APIDocsCheckTestSuite) SetupTest() {
 }
 
 func (s *APIDocsCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *APIDocsCheckTestSuite) TestIDAndName() {

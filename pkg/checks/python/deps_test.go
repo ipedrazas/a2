@@ -23,7 +23,7 @@ func (s *DepsTestSuite) SetupTest() {
 
 func (s *DepsTestSuite) TearDownTest() {
 	if s.tempDir != "" {
-		os.RemoveAll(s.tempDir)
+		_ = os.RemoveAll(s.tempDir)
 	}
 }
 

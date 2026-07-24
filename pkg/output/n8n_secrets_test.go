@@ -45,7 +45,7 @@ func TestN8nSecretsAbsentFromJSONOutput(t *testing.T) {
 	}
 	os.Stdout = w
 	success, outputErr := output.JSON(result, detected, output.VerbosityAll)
-	w.Close()
+	_ = w.Close()
 	os.Stdout = old
 	data, err := io.ReadAll(r)
 	if err != nil {

@@ -21,7 +21,7 @@ func (s *CoverageCheckTestSuite) SetupTest() {
 }
 
 func (s *CoverageCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *CoverageCheckTestSuite) TestIDAndName() {

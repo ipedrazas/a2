@@ -21,7 +21,7 @@ func (s *ErrorsCheckTestSuite) SetupTest() {
 }
 
 func (s *ErrorsCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *ErrorsCheckTestSuite) TestIDAndName() {

@@ -23,7 +23,7 @@ func (s *LintTestSuite) SetupTest() {
 
 func (s *LintTestSuite) TearDownTest() {
 	if s.tempDir != "" {
-		os.RemoveAll(s.tempDir)
+		_ = os.RemoveAll(s.tempDir)
 	}
 }
 

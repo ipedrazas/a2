@@ -21,7 +21,7 @@ func (s *MetricsCheckTestSuite) SetupTest() {
 }
 
 func (s *MetricsCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *MetricsCheckTestSuite) TestIDAndName() {

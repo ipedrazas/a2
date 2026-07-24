@@ -21,7 +21,7 @@ func (s *NamingCheckTestSuite) SetupTest() {
 }
 
 func (s *NamingCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *NamingCheckTestSuite) createFile(name string) {

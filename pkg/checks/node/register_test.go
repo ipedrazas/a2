@@ -150,8 +150,6 @@ func (suite *RegisterTestSuite) TestRegister_CheckerImplementsInterface() {
 	checks := Register(cfg)
 
 	for _, check := range checks {
-		// Verify each checker implements the interface
-		var _ checker.Checker = check.Checker
 		suite.NotEmpty(check.Checker.ID())
 		suite.NotEmpty(check.Checker.Name())
 	}

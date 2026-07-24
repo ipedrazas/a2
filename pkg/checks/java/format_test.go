@@ -21,7 +21,7 @@ func (s *FormatCheckTestSuite) SetupTest() {
 }
 
 func (s *FormatCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *FormatCheckTestSuite) TestIDAndName() {

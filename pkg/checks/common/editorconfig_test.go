@@ -21,7 +21,7 @@ func (s *EditorconfigCheckTestSuite) SetupTest() {
 }
 
 func (s *EditorconfigCheckTestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	_ = os.RemoveAll(s.tempDir)
 }
 
 func (s *EditorconfigCheckTestSuite) TestIDAndName() {
