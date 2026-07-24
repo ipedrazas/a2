@@ -40,6 +40,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 
 	hasLoggingImport := false
 	printCount := 0
+	filesScanned := 0
 
 	err := filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -60,6 +61,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 		if !strings.HasSuffix(filePath, ".py") {
 			return nil
 		}
+		filesScanned++
 
 		// Skip test files for print detection
 		baseName := filepath.Base(filePath)
@@ -124,6 +126,15 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 		result.Status = checker.Warn
 		result.Message = "Error scanning files: " + err.Error()
 		result.Reason = "Error scanning files: " + err.Error()
+		return result, nil
+	}
+
+	// Zero files scanned would make any verdict below vacuous — surface it.
+	if filesScanned == 0 {
+		result.Passed = false
+		result.Status = checker.Warn
+		result.Message = "No Python files scanned — nothing to analyze (check the analysis path)"
+		result.Reason = "No Python files scanned — nothing to analyze (check the analysis path)"
 		return result, nil
 	}
 

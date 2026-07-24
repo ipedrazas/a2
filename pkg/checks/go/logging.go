@@ -35,6 +35,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 
 	hasStructuredLogger := false
 	printCount := 0
+	filesScanned := 0
 	var filesWithPrints []string
 
 	err := filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
@@ -57,6 +58,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 		if !strings.HasSuffix(filePath, ".go") {
 			return nil
 		}
+		filesScanned++
 
 		// Skip test files for print detection
 		isTestFile := strings.HasSuffix(filePath, "_test.go")
@@ -122,6 +124,13 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 			sb.WriteString("  " + f + "\n")
 		}
 		rawOutput = sb.String()
+	}
+
+	// Zero files scanned means the walk found nothing to analyze — a silent
+	// pass or a "no logging" verdict here would be meaningless (this is how
+	// the root-skip bug went unnoticed).
+	if filesScanned == 0 {
+		return rb.Warn("No Go files scanned — nothing to analyze (check the analysis path)"), nil
 	}
 
 	// Determine result based on findings

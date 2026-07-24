@@ -45,6 +45,7 @@ func (c *CyclomaticCheck) Run(path string) (checker.Result, error) {
 	}
 
 	var complexFunctions []FunctionComplexity
+	filesScanned := 0
 
 	err := filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -70,6 +71,7 @@ func (c *CyclomaticCheck) Run(path string) (checker.Result, error) {
 		if strings.HasSuffix(filePath, "_test.go") {
 			return nil
 		}
+		filesScanned++
 
 		// Parse the file
 		fset := token.NewFileSet()
@@ -105,6 +107,12 @@ func (c *CyclomaticCheck) Run(path string) (checker.Result, error) {
 
 	if err != nil {
 		return rb.Warn("Error scanning files: " + err.Error()), nil
+	}
+
+	// A pass with zero files scanned would be vacuous — surface it instead
+	// (this is how the root-skip bug produced false passes).
+	if filesScanned == 0 {
+		return rb.Warn("No Go files scanned — nothing to analyze (check the analysis path)"), nil
 	}
 
 	if len(complexFunctions) == 0 {

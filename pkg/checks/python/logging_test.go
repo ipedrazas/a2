@@ -260,10 +260,10 @@ func (s *LoggingCheckTestSuite) TestEmptyDirectory() {
 	check := &LoggingCheck{}
 	result, err := check.Run(s.tempDir)
 
-	// Empty directory means no logging, no prints
+	// Nothing scanned: say so, rather than a vacuous "no logging" verdict.
 	s.NoError(err)
 	s.False(result.Passed)
-	s.Contains(result.Reason, "No logging module detected")
+	s.Contains(result.Reason, "No Python files scanned")
 }
 
 func TestLoggingCheckTestSuite(t *testing.T) {

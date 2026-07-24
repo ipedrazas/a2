@@ -63,6 +63,7 @@ func (c *HealthCheck) Run(path string) (checker.Result, error) {
 	}
 
 	found := false
+	filesScanned := 0
 	var foundPattern string
 
 	err = filepath.Walk(path, func(filePath string, info os.FileInfo, walkErr error) error {
@@ -85,6 +86,7 @@ func (c *HealthCheck) Run(path string) (checker.Result, error) {
 		if !codeExtensions[ext] {
 			return nil
 		}
+		filesScanned++
 
 		// Search file for patterns
 		pattern, hasPattern := c.searchFileForPatterns(path, filePath, patterns)
@@ -99,6 +101,11 @@ func (c *HealthCheck) Run(path string) (checker.Result, error) {
 
 	if err != nil {
 		return rb.Fail(err.Error()), err
+	}
+
+	// Distinguish "scanned code, found nothing" from "scanned nothing".
+	if filesScanned == 0 {
+		return rb.Warn("No source files scanned — nothing to analyze (check the analysis path)"), nil
 	}
 
 	if !found {

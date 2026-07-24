@@ -113,6 +113,9 @@ func (s *LoggingTestSuite) TestRun_WithConsoleStatements() {
 
 func (s *LoggingTestSuite) TestRun_NoLogging() {
 	s.writeFile("package.json", `{"name": "test-app"}`)
+	// A scannable source file with neither structured logging nor console.*
+	// (a fixture with zero JS files now warns about scanning nothing).
+	s.writeFile("index.js", "export function add(a, b) { return a + b }\n")
 
 	result, err := s.check.Run(s.tempDir)
 

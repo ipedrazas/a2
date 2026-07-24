@@ -69,6 +69,20 @@ func (s *LoggingCheckTestSuite) TestDotPathScansTree() {
 	s.True(result.Passed, "run with path '.' must scan the tree: %s", result.Reason)
 }
 
+// TestZeroFilesScannedWarns: a verdict from a walk that saw no files is
+// meaningless — the check must say so instead of passing or reporting
+// "no structured logging".
+func (s *LoggingCheckTestSuite) TestZeroFilesScannedWarns() {
+	s.write("notes.txt", "not go code")
+
+	check := &LoggingCheck{}
+	result, err := check.Run(s.tempDir)
+
+	s.NoError(err)
+	s.False(result.Passed)
+	s.Contains(result.Reason, "No Go files scanned")
+}
+
 func TestLoggingCheckTestSuite(t *testing.T) {
 	suite.Run(t, new(LoggingCheckTestSuite))
 }

@@ -138,6 +138,12 @@ func complexTest(x, y, z int) int {
 	err := os.WriteFile(filepath.Join(s.tempDir, "main_test.go"), []byte(code), 0644)
 	s.Require().NoError(err)
 
+	// A simple non-test file so the walk scans something (zero scanned
+	// files is a warn in its own right).
+	simple := "package main\n\nfunc main() {}\n"
+	err = os.WriteFile(filepath.Join(s.tempDir, "main.go"), []byte(simple), 0644)
+	s.Require().NoError(err)
+
 	check := &CyclomaticCheck{Threshold: 5}
 	result, err := check.Run(s.tempDir)
 
@@ -168,6 +174,12 @@ func veryComplex(x int) int {
 }
 `
 	err = os.WriteFile(filepath.Join(vendorDir, "lib.go"), []byte(code), 0644)
+	s.Require().NoError(err)
+
+	// A simple non-vendor file so the walk scans something (zero scanned
+	// files is a warn in its own right).
+	simple := "package main\n\nfunc main() {}\n"
+	err = os.WriteFile(filepath.Join(s.tempDir, "main.go"), []byte(simple), 0644)
 	s.Require().NoError(err)
 
 	check := &CyclomaticCheck{Threshold: 5}

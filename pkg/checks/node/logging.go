@@ -43,6 +43,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 
 	hasLoggingLib := false
 	consoleCount := 0
+	filesScanned := 0
 
 	// First check package.json for logging libraries
 	pkg, err := ParsePackageJSON(path)
@@ -80,6 +81,7 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 		if ext != ".js" && ext != ".ts" && ext != ".jsx" && ext != ".tsx" && ext != ".mjs" && ext != ".cjs" {
 			return nil
 		}
+		filesScanned++
 
 		// Skip test files and config files
 		baseName := filepath.Base(filePath)
@@ -130,6 +132,13 @@ func (c *LoggingCheck) Run(path string) (checker.Result, error) {
 
 	if err != nil {
 		return rb.Warn("Error scanning files: " + err.Error()), nil
+	}
+
+	// A "no structured logging" verdict from a walk that saw no files would
+	// be vacuous — surface it. (A logger declared in package.json stands on
+	// its own, so the guard only protects the negative conclusion.)
+	if !hasLoggingLib && filesScanned == 0 {
+		return rb.Warn("No JS/TS files scanned — nothing to analyze (check the analysis path)"), nil
 	}
 
 	// Determine result based on findings
