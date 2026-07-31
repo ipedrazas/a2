@@ -29,14 +29,21 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: "1.26.1"
           go-version-file: "go.mod"
           cache-dependency-path: go.sum
 
+      # Do not run `go mod tidy` here: it would mutate go.mod/go.sum after the
+      # tagged commit, so the released binaries would not match what
+      # `go install github.com/ipedrazas/a2@<version>` builds from the proxy.
       - name: Get dependencies
         run: |
-          go mod tidy
           go mod download
+          go mod verify
+
+      - name: Verify go.mod and go.sum are tidy
+        run: |
+          go mod tidy
+          git diff --exit-code -- go.mod go.sum
 
       - name: Run tests
         run: go test -v ./...
@@ -77,6 +84,12 @@ jobs:
             - `a2-darwin-arm64` - macOS (arm64)
             - `a2-windows-amd64.exe` - Windows (amd64)
 
+            ### Install
+
+            ```sh
+            go install github.com/ipedrazas/a2@${{ inputs.version }}
+            ```
+
             ### Checksums
             See `checksums.txt` for SHA256 checksums.
           files: |
@@ -84,3 +97,37 @@ jobs:
             dist/checksums.txt
           prerelease: ${{ inputs.prerelease }}
           generate_release_notes: true
+
+  verify-go-install:
+    name: Verify go install
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "stable"
+
+      # The proxy fetches the tag lazily, so the first request can 404 while
+      # it is still indexing. Retry for a couple of minutes before failing.
+      - name: Install from the module proxy
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if go install "github.com/ipedrazas/a2@${VERSION}"; then
+              exit_code=0
+              break
+            fi
+            exit_code=1
+            echo "Attempt ${attempt} failed; the proxy may not have indexed ${VERSION} yet."
+            sleep 30
+          done
+          test "${exit_code}" -eq 0
+
+      - name: Check the installed binary reports the release version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          "$(go env GOPATH)/bin/a2" version
+          "$(go env GOPATH)/bin/a2" version | grep -q "Version:   ${VERSION}"
