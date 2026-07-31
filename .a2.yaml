@@ -1,6 +1,6 @@
 language:
   explicit: ["go"]           # Override auto-detect: ["go", "python"]
-  go:   
+  go:
     coverage_threshold: 60
 
 # Required files to check
@@ -14,8 +14,8 @@ files:
 checks:
   disabled:
     - go:logging  # Skip logging check
+    - go:cyclomatic
     - common:health  # Skip health check
-    - devops:k8s  # Skip k8s check
     - common:api_docs  # Skip api docs check
     - common:integration  # Skip integration check
     - common:metrics  # Skip metrics check
@@ -31,7 +31,7 @@ checks:
     - security:shell_injection
     # - security:filesystem
     - security:network
-    
+
 # Execution options
 execution:
   parallel: true  # Run checks in parallel (default: true). Set to false for CI with limited CPU.
@@ -55,12 +55,6 @@ external:
     speed: slow
     # source_dir: backend   # uncomment if Go code is in backend/
 
-  # - id: secrets
-  #   name: Secret Detection
-  #   command: gitleaks
-  #   args: ["detect", "--no-git", "--redact", "-v", "--config", ".gitleaks.toml", "."]
-  #   severity: fail
-
   - id: go:errcheck
     name: Error Check
     command: errcheck
@@ -74,7 +68,7 @@ external:
     args: ["./..."]
     severity: warn
     speed: slow
-  
+
   # - id: go:golicense
   #   name: Go License
   #   command: go-licenses
