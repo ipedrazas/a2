@@ -35,6 +35,13 @@ func (s *DepsFreshnessCheckTestSuite) TestCountOutdatedGoModules_Empty() {
 	s.Equal(0, countOutdatedGoModules(""))
 }
 
+// TestCountOutdatedGoModules_DirectFormat covers the -f output, which prints
+// an empty line for every module that does not match the template.
+func (s *DepsFreshnessCheckTestSuite) TestCountOutdatedGoModules_DirectFormat() {
+	output := "\n\ngithub.com/foo/bar v1.0.0 [v1.1.0]\n\n\n"
+	s.Equal(1, countOutdatedGoModules(output))
+}
+
 func TestDepsFreshnessCheckTestSuite(t *testing.T) {
 	suite.Run(t, new(DepsFreshnessCheckTestSuite))
 }
