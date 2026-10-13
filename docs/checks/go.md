@@ -159,11 +159,13 @@ Checks for proper structured logging practices instead of fmt.Print statements.
 
 ## go:deps_freshness
 
-Checks for outdated Go module dependencies using `go list -m -u all`.
+Checks for outdated direct Go module dependencies using `go list -m -u`.
+Indirect modules are not counted: many are only in the module graph and are
+never compiled into your binary, and `go get -u` cannot update them.
 
 **Status:**
-- **Pass**: All dependencies up to date, or fewer than 20 outdated
-- **Warn**: More than 20 outdated dependencies
+- **Pass**: All direct dependencies up to date, or 20 or fewer outdated
+- **Warn**: More than 20 outdated direct dependencies
 
 ---
 
