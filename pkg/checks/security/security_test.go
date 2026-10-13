@@ -1,6 +1,7 @@
 package security
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -61,7 +62,7 @@ func main() {
 `)
 
 	check := &ShellInjectionCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -86,7 +87,7 @@ func main() {
 `)
 
 	check := &ShellInjectionCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -122,7 +123,7 @@ func main() {
 `)
 
 	check := &FileSystemCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -146,7 +147,7 @@ func main() {
 `)
 
 	check := &FileSystemCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -169,7 +170,7 @@ func main() {
 	check := &FileSystemCheck{
 		Allowlist: []string{"main.go:7"},
 	}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -191,7 +192,7 @@ func main() {
 	check := &FileSystemCheck{
 		Allowlist: []string{"main.go:os.WriteFile(path"},
 	}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -215,7 +216,7 @@ func main() {
 `)
 
 	check := &FileSystemCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -246,7 +247,7 @@ func main() {
 `)
 
 	check := &NetworkCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -271,7 +272,7 @@ func main() {
 `)
 
 	check := &NetworkCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -304,7 +305,7 @@ func main() {
 `)
 
 	check := &ObfuscationCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -327,7 +328,7 @@ func main() {
 `)
 
 	check := &ObfuscationCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -358,7 +359,7 @@ func (suite *SecurityTestSuite) TestShellInjectionCheck_Run_AllowlistSuppresses(
 	check := &ShellInjectionCheck{
 		Allowlist: []string{"main.go:exec.Command"},
 	}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -373,7 +374,7 @@ func (suite *SecurityTestSuite) TestShellInjectionCheck_Run_AllowlistNonMatching
 	check := &ShellInjectionCheck{
 		Allowlist: []string{"other.go:exec.Command"},
 	}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -403,7 +404,7 @@ func (suite *SecurityTestSuite) TestNetworkCheck_Run_AllowlistSuppresses() {
 	check := &NetworkCheck{
 		Allowlist: []string{"main.go:suspicious-domain.com"},
 	}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -418,7 +419,7 @@ func (suite *SecurityTestSuite) TestNetworkCheck_Run_AllowlistNonMatchingStillWa
 	check := &NetworkCheck{
 		Allowlist: []string{"main.go:1"},
 	}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -442,7 +443,7 @@ func (suite *SecurityTestSuite) TestObfuscationCheck_Run_AllowlistSuppresses() {
 	check := &ObfuscationCheck{
 		Allowlist: []string{"main.go:SGVsbG8gV29ybGQ"},
 	}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -457,7 +458,7 @@ func (suite *SecurityTestSuite) TestObfuscationCheck_Run_AllowlistNonMatchingSti
 	check := &ObfuscationCheck{
 		Allowlist: []string{"main.go:1"},
 	}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)

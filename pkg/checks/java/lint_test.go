@@ -1,6 +1,7 @@
 package javacheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -32,7 +33,7 @@ func (s *LintCheckTestSuite) TestIDAndName() {
 
 func (s *LintCheckTestSuite) TestRun_NoLinters() {
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -42,7 +43,7 @@ func (s *LintCheckTestSuite) TestRun_NoLinters() {
 
 func (s *LintCheckTestSuite) TestRun_ResultLanguage() {
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangJava, result.Language)
@@ -53,7 +54,7 @@ func (s *LintCheckTestSuite) TestRun_Checkstyle_ConfigFile() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -70,7 +71,7 @@ func (s *LintCheckTestSuite) TestRun_Checkstyle_ConfigSubdirectory() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -92,7 +93,7 @@ func (s *LintCheckTestSuite) TestRun_Checkstyle_Maven() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -108,7 +109,7 @@ func (s *LintCheckTestSuite) TestRun_Checkstyle_Gradle() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -120,7 +121,7 @@ func (s *LintCheckTestSuite) TestRun_SpotBugs_ConfigFile() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -132,7 +133,7 @@ func (s *LintCheckTestSuite) TestRun_SpotBugs_ExcludeFile() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -154,7 +155,7 @@ func (s *LintCheckTestSuite) TestRun_SpotBugs_Maven() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -170,7 +171,7 @@ func (s *LintCheckTestSuite) TestRun_SpotBugs_Gradle() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -192,7 +193,7 @@ func (s *LintCheckTestSuite) TestRun_FindBugs_Legacy() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -204,7 +205,7 @@ func (s *LintCheckTestSuite) TestRun_PMD_ConfigFile() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -216,7 +217,7 @@ func (s *LintCheckTestSuite) TestRun_PMD_RulesetFile() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -238,7 +239,7 @@ func (s *LintCheckTestSuite) TestRun_PMD_Maven() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -258,7 +259,7 @@ pmd {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -288,7 +289,7 @@ func (s *LintCheckTestSuite) TestRun_ErrorProne_Maven() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -304,7 +305,7 @@ func (s *LintCheckTestSuite) TestRun_ErrorProne_Gradle() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -316,7 +317,7 @@ func (s *LintCheckTestSuite) TestRun_SonarQube_PropertiesFile() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -338,7 +339,7 @@ func (s *LintCheckTestSuite) TestRun_SonarQube_Maven() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -354,7 +355,7 @@ func (s *LintCheckTestSuite) TestRun_SonarQube_Gradle() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -380,7 +381,7 @@ func (s *LintCheckTestSuite) TestRun_MultipleLinters() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -397,7 +398,7 @@ func (s *LintCheckTestSuite) TestRun_GradleKts() {
 	s.Require().NoError(err)
 
 	check := &LintCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

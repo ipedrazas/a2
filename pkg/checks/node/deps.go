@@ -2,6 +2,7 @@ package nodecheck
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os/exec"
@@ -28,7 +29,7 @@ func (c *DepsCheck) Name() string {
 }
 
 // Run executes the dependency vulnerability check.
-func (c *DepsCheck) Run(path string) (checker.Result, error) {
+func (c *DepsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists
@@ -44,7 +45,7 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run security audit
-	vulnCount, output, err := c.runAudit(path, pm)
+	vulnCount, output, err := c.runAudit(ctx, path, pm)
 	if err != nil {
 		return rb.WarnWithOutput(fmt.Sprintf("Security audit failed: %v", err), output), nil
 	}
@@ -78,19 +79,19 @@ func (c *DepsCheck) detectPackageManager(path string) string {
 }
 
 // runAudit runs the security audit and returns the vulnerability count and output.
-func (c *DepsCheck) runAudit(path, pm string) (int, string, error) {
+func (c *DepsCheck) runAudit(ctx context.Context, path, pm string) (int, string, error) {
 	var cmd *exec.Cmd
 
 	switch pm {
 	case "npm":
-		cmd = exec.Command("npm", "audit", "--json")
+		cmd = checkutil.Command(ctx, "npm", "audit", "--json")
 	case "yarn":
 		// Yarn 1.x uses different format than yarn 2+
-		cmd = exec.Command("yarn", "audit", "--json")
+		cmd = checkutil.Command(ctx, "yarn", "audit", "--json")
 	case "pnpm":
-		cmd = exec.Command("pnpm", "audit", "--json")
+		cmd = checkutil.Command(ctx, "pnpm", "audit", "--json")
 	default:
-		cmd = exec.Command("npm", "audit", "--json")
+		cmd = checkutil.Command(ctx, "npm", "audit", "--json")
 	}
 
 	cmd.Dir = path

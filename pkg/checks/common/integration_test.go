@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -40,7 +41,7 @@ func (s *IntegrationCheckTestSuite) TestIntegrationDirectory() {
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -57,7 +58,7 @@ func (s *IntegrationCheckTestSuite) TestE2EDirectory() {
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -74,7 +75,7 @@ func (s *IntegrationCheckTestSuite) TestIntegrationTestsDirectory() {
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -95,7 +96,7 @@ func TestIntegration_UserAPI(t *testing.T) {
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -117,7 +118,7 @@ services:
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -135,7 +136,7 @@ services:
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -154,7 +155,7 @@ require github.com/testcontainers/testcontainers-go v0.25.0
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -174,7 +175,7 @@ dependencies = [
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -194,7 +195,7 @@ func (s *IntegrationCheckTestSuite) TestTestcontainersNode() {
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -215,7 +216,7 @@ module.exports = defineConfig({
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -237,7 +238,7 @@ export default defineConfig({
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -258,7 +259,7 @@ func (s *IntegrationCheckTestSuite) TestWebdriverIOConfig() {
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -278,7 +279,7 @@ func (s *IntegrationCheckTestSuite) TestSeleniumInPackageJson() {
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -300,7 +301,7 @@ func (s *IntegrationCheckTestSuite) TestMultipleIntegrationIndicators() {
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -315,7 +316,7 @@ func (s *IntegrationCheckTestSuite) TestNoIntegrationTests() {
 	s.Require().NoError(err)
 
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -325,7 +326,7 @@ func (s *IntegrationCheckTestSuite) TestNoIntegrationTests() {
 
 func (s *IntegrationCheckTestSuite) TestEmptyDirectory() {
 	check := &IntegrationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

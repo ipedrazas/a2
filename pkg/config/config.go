@@ -87,7 +87,9 @@ func (s *SourceDirConfig) UnmarshalYAML(value *yaml.Node) error {
 	}
 }
 
-// StringOrSlice is an alias for backward compatibility.
+// StringOrSlice is an alias for backward compatibility. Declare struct fields
+// as SourceDirConfig, not StringOrSlice: deadcode does not resolve the alias
+// and would report SourceDirConfig.UnmarshalYAML as unreachable.
 type StringOrSlice = SourceDirConfig
 
 // Config represents the .a2.yaml configuration file.
@@ -151,70 +153,76 @@ type LanguageConfig struct {
 
 // GoLanguageConfig contains Go-specific settings.
 type GoLanguageConfig struct {
-	SourceDir           StringOrSlice `yaml:"source_dir,omitempty"` // Subdirectory(ies) containing Go code
-	CoverageThreshold   float64       `yaml:"coverage_threshold,omitempty"`
-	CyclomaticThreshold int           `yaml:"cyclomatic_threshold,omitempty"`
+	SourceDir           SourceDirConfig `yaml:"source_dir,omitempty"` // Subdirectory(ies) containing Go code
+	CoverageThreshold   float64         `yaml:"coverage_threshold,omitempty"`
+	CyclomaticThreshold int             `yaml:"cyclomatic_threshold,omitempty"`
 }
 
 // PythonLanguageConfig contains Python-specific settings.
 type PythonLanguageConfig struct {
-	SourceDir           StringOrSlice `yaml:"source_dir,omitempty"`      // Subdirectory(ies) containing Python code
-	PackageManager      string        `yaml:"package_manager,omitempty"` // auto, pip, poetry, pipenv
-	TestRunner          string        `yaml:"test_runner,omitempty"`     // auto, pytest, unittest
-	Formatter           string        `yaml:"formatter,omitempty"`       // auto, black, ruff
-	Linter              string        `yaml:"linter,omitempty"`          // auto, pylint, ruff, flake8
-	CoverageThreshold   float64       `yaml:"coverage_threshold,omitempty"`
-	CyclomaticThreshold int           `yaml:"cyclomatic_threshold,omitempty"`
+	SourceDir           SourceDirConfig `yaml:"source_dir,omitempty"`      // Subdirectory(ies) containing Python code
+	PackageManager      string          `yaml:"package_manager,omitempty"` // auto, pip, poetry, pipenv
+	TestRunner          string          `yaml:"test_runner,omitempty"`     // auto, pytest, unittest
+	Formatter           string          `yaml:"formatter,omitempty"`       // auto, black, ruff
+	Linter              string          `yaml:"linter,omitempty"`          // auto, pylint, ruff, flake8
+	CoverageThreshold   float64         `yaml:"coverage_threshold,omitempty"`
+	CyclomaticThreshold int             `yaml:"cyclomatic_threshold,omitempty"`
 }
 
 // NodeLanguageConfig contains Node.js-specific settings.
 type NodeLanguageConfig struct {
-	SourceDir         StringOrSlice `yaml:"source_dir,omitempty"`      // Subdirectory(ies) containing Node.js code
-	PackageManager    string        `yaml:"package_manager,omitempty"` // auto, npm, yarn, pnpm, bun
-	TestRunner        string        `yaml:"test_runner,omitempty"`     // auto, jest, vitest, mocha, npm-test
-	Formatter         string        `yaml:"formatter,omitempty"`       // auto, prettier, biome
-	Linter            string        `yaml:"linter,omitempty"`          // auto, eslint, biome, oxlint
-	CoverageThreshold float64       `yaml:"coverage_threshold,omitempty"`
+	SourceDir         SourceDirConfig `yaml:"source_dir,omitempty"`      // Subdirectory(ies) containing Node.js code
+	PackageManager    string          `yaml:"package_manager,omitempty"` // auto, npm, yarn, pnpm, bun
+	TestRunner        string          `yaml:"test_runner,omitempty"`     // auto, jest, vitest, mocha, npm-test
+	Formatter         string          `yaml:"formatter,omitempty"`       // auto, prettier, biome
+	Linter            string          `yaml:"linter,omitempty"`          // auto, eslint, biome, oxlint
+	CoverageThreshold float64         `yaml:"coverage_threshold,omitempty"`
 }
 
 // JavaLanguageConfig contains Java-specific settings.
 type JavaLanguageConfig struct {
-	SourceDir         StringOrSlice `yaml:"source_dir,omitempty"`         // Subdirectory(ies) containing Java code
-	BuildTool         string        `yaml:"build_tool,omitempty"`         // auto, maven, gradle
-	TestRunner        string        `yaml:"test_runner,omitempty"`        // auto, junit, testng
-	CoverageThreshold float64       `yaml:"coverage_threshold,omitempty"` // default 80
+	SourceDir         SourceDirConfig `yaml:"source_dir,omitempty"`         // Subdirectory(ies) containing Java code
+	BuildTool         string          `yaml:"build_tool,omitempty"`         // auto, maven, gradle
+	TestRunner        string          `yaml:"test_runner,omitempty"`        // auto, junit, testng
+	CoverageThreshold float64         `yaml:"coverage_threshold,omitempty"` // default 80
 }
 
 // RustLanguageConfig contains Rust-specific settings.
 type RustLanguageConfig struct {
-	SourceDir         StringOrSlice `yaml:"source_dir,omitempty"`         // Subdirectory(ies) containing Rust code
-	CoverageThreshold float64       `yaml:"coverage_threshold,omitempty"` // default 80
+	SourceDir         SourceDirConfig `yaml:"source_dir,omitempty"`         // Subdirectory(ies) containing Rust code
+	CoverageThreshold float64         `yaml:"coverage_threshold,omitempty"` // default 80
 }
 
 // TypeScriptLanguageConfig contains TypeScript-specific settings.
 type TypeScriptLanguageConfig struct {
-	SourceDir         StringOrSlice `yaml:"source_dir,omitempty"`      // Subdirectory(ies) containing TypeScript code
-	PackageManager    string        `yaml:"package_manager,omitempty"` // auto, npm, yarn, pnpm, bun
-	TestRunner        string        `yaml:"test_runner,omitempty"`     // auto, jest, vitest, mocha
-	Formatter         string        `yaml:"formatter,omitempty"`       // auto, prettier, biome, dprint
-	Linter            string        `yaml:"linter,omitempty"`          // auto, eslint, biome, oxlint
-	CoverageThreshold float64       `yaml:"coverage_threshold,omitempty"`
+	SourceDir         SourceDirConfig `yaml:"source_dir,omitempty"`      // Subdirectory(ies) containing TypeScript code
+	PackageManager    string          `yaml:"package_manager,omitempty"` // auto, npm, yarn, pnpm, bun
+	TestRunner        string          `yaml:"test_runner,omitempty"`     // auto, jest, vitest, mocha
+	Formatter         string          `yaml:"formatter,omitempty"`       // auto, prettier, biome, dprint
+	Linter            string          `yaml:"linter,omitempty"`          // auto, eslint, biome, oxlint
+	CoverageThreshold float64         `yaml:"coverage_threshold,omitempty"`
 }
 
 // SwiftLanguageConfig contains Swift-specific settings.
 type SwiftLanguageConfig struct {
-	SourceDir         StringOrSlice `yaml:"source_dir,omitempty"`         // Subdirectory(ies) containing Swift code
-	Formatter         string        `yaml:"formatter,omitempty"`          // auto, swift-format, swiftformat
-	Linter            string        `yaml:"linter,omitempty"`             // auto, swiftlint
-	CoverageThreshold float64       `yaml:"coverage_threshold,omitempty"` // default 80
+	SourceDir         SourceDirConfig `yaml:"source_dir,omitempty"`         // Subdirectory(ies) containing Swift code
+	Formatter         string          `yaml:"formatter,omitempty"`          // auto, swift-format, swiftformat
+	Linter            string          `yaml:"linter,omitempty"`             // auto, swiftlint
+	CoverageThreshold float64         `yaml:"coverage_threshold,omitempty"` // default 80
 }
 
 // ExecutionConfig configures how checks are executed.
 type ExecutionConfig struct {
 	Parallel bool `yaml:"parallel"`
-	// Concurrency caps how many checks run at once in parallel mode.
+	// Concurrency caps how many fast checks run at once in parallel mode.
 	// 0 (the default) uses GOMAXPROCS.
 	Concurrency int `yaml:"concurrency,omitempty"`
+	// SlowConcurrency caps how many slow checks (builds, tests, coverage)
+	// run at once in parallel mode. 0 (the default) uses 2.
+	SlowConcurrency int `yaml:"slow_concurrency,omitempty"`
+	// Strict fails checks that errored, timed out, or whose tool is not
+	// installed, instead of excluding them. Same as `a2 check --strict`.
+	Strict bool `yaml:"strict,omitempty"`
 }
 
 // ExternalCheck defines a custom external check.

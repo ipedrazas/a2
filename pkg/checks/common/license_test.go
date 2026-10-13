@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -35,7 +36,7 @@ func (s *LicenseCheckTestSuite) TestLicensrcConfig() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -48,7 +49,7 @@ func (s *LicenseCheckTestSuite) TestLicensrcJsonConfig() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -60,7 +61,7 @@ func (s *LicenseCheckTestSuite) TestLicenseCheckerConfig() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -76,7 +77,7 @@ project:
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -89,7 +90,7 @@ func (s *LicenseCheckTestSuite) TestFOSSAYamlConfig() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -101,7 +102,7 @@ func (s *LicenseCheckTestSuite) TestSPDXFile() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -113,7 +114,7 @@ func (s *LicenseCheckTestSuite) TestSPDXSBOMFile() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -131,7 +132,7 @@ require github.com/google/go-licenses v1.6.0
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -150,7 +151,7 @@ require github.com/uw-labs/lichen v0.1.7
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -168,7 +169,7 @@ require github.com/anchore/syft v0.100.0
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -186,7 +187,7 @@ require github.com/CycloneDX/cyclonedx-gomod v1.4.0
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -204,7 +205,7 @@ dependencies = [
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -220,7 +221,7 @@ liccheck>=0.9.0
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -232,7 +233,7 @@ func (s *LicenseCheckTestSuite) TestPythonLiccheckConfig() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -246,7 +247,7 @@ func (s *LicenseCheckTestSuite) TestPythonCycloneDX() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -264,7 +265,7 @@ func (s *LicenseCheckTestSuite) TestNodeLicenseChecker() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -283,7 +284,7 @@ func (s *LicenseCheckTestSuite) TestNodeLicenseCompliance() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -301,7 +302,7 @@ func (s *LicenseCheckTestSuite) TestNodeCycloneDX() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -319,7 +320,7 @@ func (s *LicenseCheckTestSuite) TestNodeSnyk() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -344,7 +345,7 @@ func (s *LicenseCheckTestSuite) TestJavaLicenseMavenPlugin() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -371,7 +372,7 @@ func (s *LicenseCheckTestSuite) TestJavaCycloneDXMaven() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -388,7 +389,7 @@ func (s *LicenseCheckTestSuite) TestJavaGradleLicensePlugin() {
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -413,7 +414,7 @@ jobs:
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -439,7 +440,7 @@ jobs:
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -463,7 +464,7 @@ jobs:
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -486,7 +487,7 @@ require github.com/google/go-licenses v1.6.0
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -496,7 +497,7 @@ require github.com/google/go-licenses v1.6.0
 
 func (s *LicenseCheckTestSuite) TestNoLicenseCompliance() {
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -506,7 +507,7 @@ func (s *LicenseCheckTestSuite) TestNoLicenseCompliance() {
 
 func (s *LicenseCheckTestSuite) TestResultLanguage() {
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangCommon, result.Language)
@@ -523,7 +524,7 @@ require github.com/gin-gonic/gin v1.9.0
 	s.Require().NoError(err)
 
 	check := &LicenseCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

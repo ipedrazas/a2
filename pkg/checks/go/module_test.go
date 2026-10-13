@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -43,7 +44,7 @@ func (suite *ModuleTestSuite) createTempFile(name, content string) string {
 func (suite *ModuleTestSuite) TestModuleCheck_Run_NoGoMod() {
 	check := &ModuleCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -67,7 +68,7 @@ require (
 
 	check := &ModuleCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -85,7 +86,7 @@ invalid syntax here
 
 	check := &ModuleCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -105,7 +106,7 @@ require (
 
 	check := &ModuleCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -127,7 +128,7 @@ require (
 
 	check := &ModuleCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -167,7 +168,7 @@ require (
 
 	check := &ModuleCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -180,7 +181,7 @@ func (suite *ModuleTestSuite) TestModuleCheck_Run_FileReadError() {
 	check := &ModuleCheck{}
 
 	// Use a non-existent path - should return Fail result (go.mod not found)
-	result, err := check.Run("/nonexistent/path/that/does/not/exist")
+	result, err := check.Run(context.Background(), "/nonexistent/path/that/does/not/exist")
 
 	// The check treats missing go.mod as a Fail, not an error
 	suite.NoError(err)

@@ -1,6 +1,9 @@
 package checker
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 // Language represents a supported programming language.
 type Language string
@@ -56,18 +59,19 @@ func (s Status) String() string {
 
 // Result represents the outcome of running a check.
 type Result struct {
-	Name      string        // Human-readable name of the check
-	ID        string        // Unique identifier for the check
-	Passed    bool          // Whether the check passed
-	Status    Status        // Severity level (Pass, Warn, Fail)
-	Message   string        // What happened (short, user-facing summary)
-	Reason    string        // Why it happened (evidence or rationale)
-	Language  Language      // Which language this check applies to
-	Duration  time.Duration // How long the check took to execute
-	RawOutput string        // Full command output for verbose display
-	Critical  bool          // Set by the runner from CheckMeta; weights the maturity score
-	SourceDir string        // Directory the check ran in (empty means repo root); set for source_dir-scoped checks
-	Command   string        // The actual command a2 executed (e.g. "cd nodeagent && govulncheck ./..."); empty for checks that don't shell out
+	Name        string        // Human-readable name of the check
+	ID          string        // Unique identifier for the check
+	Passed      bool          // Whether the check passed
+	Status      Status        // Severity level (Pass, Warn, Fail)
+	Message     string        // What happened (short, user-facing summary)
+	Reason      string        // Why it happened (evidence or rationale)
+	Language    Language      // Which language this check applies to
+	Duration    time.Duration // How long the check took to execute
+	RawOutput   string        // Full command output for verbose display
+	Critical    bool          // Set by the runner from CheckMeta; weights the maturity score
+	SourceDir   string        // Directory the check ran in (empty means repo root); set for source_dir-scoped checks
+	Command     string        // The actual command a2 executed (e.g. "cd nodeagent && govulncheck ./..."); empty for checks that don't shell out
+	ToolMissing bool          // The check could not run because a required tool is not installed; strict mode fails it
 }
 
 // Speed indicates the relative cost of a check.
@@ -112,7 +116,9 @@ type Checker interface {
 
 	// Run executes the check against the given path.
 	// Returns a Result and any error encountered during execution.
-	Run(path string) (Result, error)
+	// ctx is cancelled on timeout or fail-fast; checks must pass it to any
+	// command they run (see checkutil.Command) so the process is killed.
+	Run(ctx context.Context, path string) (Result, error)
 }
 
 // CoverageThresholdSetter is implemented by checks that support

@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"sort"
@@ -27,7 +28,7 @@ type PiiToAICheck struct{}
 func (c *PiiToAICheck) ID() string   { return "n8n:pii-to-ai" }
 func (c *PiiToAICheck) Name() string { return "PII Into AI Inputs" }
 
-func (c *PiiToAICheck) Run(path string) (checker.Result, error) {
+func (c *PiiToAICheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	bundle, early := loadBundle(c, path)
 	if early != nil {
 		return *early, nil

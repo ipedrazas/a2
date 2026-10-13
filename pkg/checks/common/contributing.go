@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *ContributingCheck) ID() string   { return "common:contributing" }
 func (c *ContributingCheck) Name() string { return "Contributing Guidelines" }
 
 // Run checks for contribution guidelines and templates.
-func (c *ContributingCheck) Run(path string) (checker.Result, error) {
+func (c *ContributingCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string

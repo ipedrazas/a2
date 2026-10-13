@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -43,7 +44,7 @@ func (s *SASTCheckTestSuite) TestSemgrepInstalled_RunsWithDefaults() {
 	}
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -60,7 +61,7 @@ func (s *SASTCheckTestSuite) TestSemgrepInstalled_UsesConfig() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -78,7 +79,7 @@ func (s *SASTCheckTestSuite) TestSemgrepYml() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -95,7 +96,7 @@ func (s *SASTCheckTestSuite) TestSemgrepYaml() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -111,7 +112,7 @@ func (s *SASTCheckTestSuite) TestSemgrepDir() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -133,7 +134,7 @@ sonar.organization=myorg
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -150,7 +151,7 @@ func (s *SASTCheckTestSuite) TestSonarCloudProperties() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -171,7 +172,7 @@ func (s *SASTCheckTestSuite) TestSonarInGradle() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -194,7 +195,7 @@ func (s *SASTCheckTestSuite) TestSonarInMaven() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -210,7 +211,7 @@ func (s *SASTCheckTestSuite) TestSnykConfig() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -227,7 +228,7 @@ func (s *SASTCheckTestSuite) TestSnykJson() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -244,7 +245,7 @@ func (s *SASTCheckTestSuite) TestCodeQLConfig() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -274,7 +275,7 @@ jobs:
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -302,7 +303,7 @@ jobs:
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -318,7 +319,7 @@ func (s *SASTCheckTestSuite) TestCheckmarx() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -334,7 +335,7 @@ func (s *SASTCheckTestSuite) TestVeracode() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -350,7 +351,7 @@ func (s *SASTCheckTestSuite) TestFortify() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -366,7 +367,7 @@ func (s *SASTCheckTestSuite) TestBearer() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -382,7 +383,7 @@ func (s *SASTCheckTestSuite) TestHorusec() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -405,7 +406,7 @@ func (s *SASTCheckTestSuite) TestGosecInMakefile() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -431,7 +432,7 @@ tasks:
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -447,7 +448,7 @@ func (s *SASTCheckTestSuite) TestBanditConfig() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -466,7 +467,7 @@ exclude_dirs = ["tests"]
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -482,7 +483,7 @@ func (s *SASTCheckTestSuite) TestSafetyPolicy() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -504,7 +505,7 @@ func (s *SASTCheckTestSuite) TestEslintPluginSecurity() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -526,7 +527,7 @@ func (s *SASTCheckTestSuite) TestAuditCI() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -562,7 +563,7 @@ func (s *SASTCheckTestSuite) TestFindSecBugs() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -590,7 +591,7 @@ jobs:
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -618,7 +619,7 @@ jobs:
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -640,7 +641,7 @@ sast:
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -661,7 +662,7 @@ func (s *SASTCheckTestSuite) TestMultipleFindings() {
 	s.Require().NoError(err)
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -675,7 +676,7 @@ func (s *SASTCheckTestSuite) TestNoSASTTooling() {
 	}
 
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -685,7 +686,7 @@ func (s *SASTCheckTestSuite) TestNoSASTTooling() {
 
 func (s *SASTCheckTestSuite) TestResultLanguage() {
 	check := &SASTCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangCommon, result.Language)

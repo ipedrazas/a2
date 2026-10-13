@@ -1,6 +1,7 @@
 package pythoncheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,7 +49,7 @@ func (s *ProjectTestSuite) TestName() {
 }
 
 func (s *ProjectTestSuite) TestRun_NoProject() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -60,7 +61,7 @@ func (s *ProjectTestSuite) TestRun_PyprojectToml() {
 	s.writeFile("pyproject.toml", `[project]
 name = "test"`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -72,7 +73,7 @@ func (s *ProjectTestSuite) TestRun_SetupPy() {
 	s.writeFile("setup.py", `from setuptools import setup
 setup(name='test')`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -84,7 +85,7 @@ setup(name='test')`)
 func (s *ProjectTestSuite) TestRun_RequirementsTxt() {
 	s.writeFile("requirements.txt", `flask==2.0.0`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -93,7 +94,7 @@ func (s *ProjectTestSuite) TestRun_RequirementsTxt() {
 }
 
 func (s *ProjectTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangPython, result.Language)

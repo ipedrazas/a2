@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -42,7 +43,7 @@ func (s *DeadcodeCheckTestSuite) TestToolNotInstalled() {
 	}
 
 	check := &DeadcodeCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -69,7 +70,7 @@ func main() {
 	s.Require().NoError(err)
 
 	check := &DeadcodeCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.NotEqual(checker.Fail, result.Status)

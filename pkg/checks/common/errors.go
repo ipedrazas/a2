@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *ErrorsCheck) ID() string   { return "common:errors" }
 func (c *ErrorsCheck) Name() string { return "Error Tracking" }
 
 // Run checks for error tracking SDKs and configuration.
-func (c *ErrorsCheck) Run(path string) (checker.Result, error) {
+func (c *ErrorsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string

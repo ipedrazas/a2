@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *EditorconfigCheck) ID() string   { return "common:editorconfig" }
 func (c *EditorconfigCheck) Name() string { return "Editor Config" }
 
 // Run checks for editor configuration files.
-func (c *EditorconfigCheck) Run(path string) (checker.Result, error) {
+func (c *EditorconfigCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string

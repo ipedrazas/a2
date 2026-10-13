@@ -2,6 +2,7 @@ package nodecheck
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -19,7 +20,7 @@ type LoggingCheck struct{}
 func (c *LoggingCheck) ID() string   { return "node:logging" }
 func (c *LoggingCheck) Name() string { return "Node Logging" }
 
-func (c *LoggingCheck) Run(path string) (checker.Result, error) {
+func (c *LoggingCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists

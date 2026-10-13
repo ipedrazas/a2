@@ -102,7 +102,9 @@ func ToYAML(cfg *Config, opts GeneratorOptions) ([]byte, error) {
 	buf.WriteString("# How checks are executed.\n")
 	buf.WriteString("execution:\n")
 	buf.WriteString("  parallel: true      # run checks concurrently\n")
-	buf.WriteString("  # concurrency: 0    # max checks at once (0 = number of CPUs)\n\n")
+	buf.WriteString("  # concurrency: 0    # max fast checks at once (0 = number of CPUs)\n")
+	buf.WriteString("  # slow_concurrency: 2 # max slow checks (builds, tests, coverage) at once\n")
+	buf.WriteString("  # strict: false     # fail errored/timed-out checks and missing tools (CI)\n\n")
 
 	// Checks: active empty disable list with commented examples.
 	buf.WriteString("# Disable individual checks by ID (see 'a2 list checks').\n")

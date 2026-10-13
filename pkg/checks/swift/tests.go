@@ -1,7 +1,7 @@
 package swiftcheck
 
 import (
-	"os/exec"
+	"context"
 	"regexp"
 	"strings"
 
@@ -17,7 +17,7 @@ func (c *TestsCheck) ID() string   { return "swift:tests" }
 func (c *TestsCheck) Name() string { return "Swift Tests" }
 
 // Run executes swift test.
-func (c *TestsCheck) Run(path string) (checker.Result, error) {
+func (c *TestsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangSwift)
 
 	// Check for Package.swift first
@@ -26,7 +26,7 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run swift test
-	cmd := exec.Command("swift", "test")
+	cmd := checkutil.Command(ctx, "swift", "test")
 	cmd.Dir = path
 	output, err := cmd.CombinedOutput()
 	outputStr := string(output)

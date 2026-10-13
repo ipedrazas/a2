@@ -73,7 +73,7 @@ func runSingleCheck(cmd *cobra.Command, args []string) error {
 
 	// Run the check
 	start := time.Now()
-	result, err := found.Checker.Run(path)
+	result, err := found.Checker.Run(cmd.Context(), path)
 	duration := time.Since(start)
 	result.Duration = duration
 

@@ -1,6 +1,7 @@
 package pythoncheck
 
 import (
+	"context"
 	"regexp"
 	"strings"
 
@@ -21,7 +22,7 @@ type FormatCheck struct {
 func (c *FormatCheck) ID() string   { return "python:format" }
 func (c *FormatCheck) Name() string { return "Python Format" }
 
-func (c *FormatCheck) Run(path string) (checker.Result, error) {
+func (c *FormatCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 	formatter := c.detectFormatter(path)
 
@@ -30,18 +31,18 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 
 	switch formatter {
 	case "ruff":
-		result = runPythonCommand(rb, path, "ruff", "format", "--check", ".")
+		result = runPythonCommand(ctx, rb, path, "ruff", "format", "--check", ".")
 		cmdDesc = "ruff format"
 	case "black":
-		result = runPythonCommand(rb, path, "black", "--check", ".")
+		result = runPythonCommand(ctx, rb, path, "black", "--check", ".")
 		cmdDesc = "black"
 	default:
 		// Try ruff first, fall back to black
 		if pythonToolAvailable(path, "ruff") {
-			result = runPythonCommand(rb, path, "ruff", "format", "--check", ".")
+			result = runPythonCommand(ctx, rb, path, "ruff", "format", "--check", ".")
 			cmdDesc = "ruff format"
 		} else if pythonToolAvailable(path, "black") {
-			result = runPythonCommand(rb, path, "black", "--check", ".")
+			result = runPythonCommand(ctx, rb, path, "black", "--check", ".")
 			cmdDesc = "black"
 		} else {
 			return rb.Pass("No formatter installed (install ruff or black)"), nil

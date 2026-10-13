@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -41,7 +42,7 @@ require github.com/getsentry/sentry-go v0.25.0
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -60,7 +61,7 @@ require github.com/rollbar/rollbar-go v1.4.5
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -79,7 +80,7 @@ require github.com/bugsnag/bugsnag-go v2.2.0
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -98,7 +99,7 @@ dependencies = [
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -114,7 +115,7 @@ rollbar>=0.16.0
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -134,7 +135,7 @@ func (s *ErrorsCheckTestSuite) TestNodeSentryNode() {
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -153,7 +154,7 @@ func (s *ErrorsCheckTestSuite) TestNodeBugsnag() {
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -172,7 +173,7 @@ func (s *ErrorsCheckTestSuite) TestNodeHoneybadger() {
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -195,7 +196,7 @@ func (s *ErrorsCheckTestSuite) TestJavaSentry() {
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -216,7 +217,7 @@ dependencies {
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -233,7 +234,7 @@ project=my-project
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -250,7 +251,7 @@ defaults.project=my-project
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -270,7 +271,7 @@ SENTRY_DSN=
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -286,7 +287,7 @@ ROLLBAR_TOKEN=
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -309,7 +310,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -330,7 +331,7 @@ require github.com/gin-gonic/gin v1.9.0
 	s.Require().NoError(err)
 
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -340,7 +341,7 @@ require github.com/gin-gonic/gin v1.9.0
 
 func (s *ErrorsCheckTestSuite) TestEmptyDirectory() {
 	check := &ErrorsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

@@ -1,6 +1,7 @@
 package swiftcheck
 
 import (
+	"context"
 	"encoding/json"
 	"strconv"
 	"strings"
@@ -17,7 +18,7 @@ func (c *DepsCheck) ID() string   { return "swift:deps" }
 func (c *DepsCheck) Name() string { return "Swift Vulnerabilities" }
 
 // Run checks Package.resolved for outdated or potentially vulnerable dependencies.
-func (c *DepsCheck) Run(path string) (checker.Result, error) {
+func (c *DepsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangSwift)
 
 	// Check for Package.swift first

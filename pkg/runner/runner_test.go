@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"context"
 	"errors"
 	"runtime"
 	"sync/atomic"
@@ -23,10 +24,11 @@ func testRunSuiteSequential(path string, registrations []checker.CheckRegistrati
 
 // mockChecker is a simple mock implementation of the Checker interface for testing.
 type mockChecker struct {
-	id     string
-	name   string
-	result checker.Result
-	err    error
+	id       string
+	name     string
+	result   checker.Result
+	err      error
+	critical bool // registered as a Critical check (its Fail is a veto)
 }
 
 func (m *mockChecker) ID() string {
@@ -37,7 +39,7 @@ func (m *mockChecker) Name() string {
 	return m.name
 }
 
-func (m *mockChecker) Run(path string) (checker.Result, error) {
+func (m *mockChecker) Run(_ context.Context, path string) (checker.Result, error) {
 	return m.result, m.err
 }
 
@@ -47,7 +49,7 @@ type slowMockChecker struct {
 	delay time.Duration
 }
 
-func (m *slowMockChecker) Run(path string) (checker.Result, error) {
+func (m *slowMockChecker) Run(_ context.Context, path string) (checker.Result, error) {
 	time.Sleep(m.delay)
 	return m.result, m.err
 }
@@ -61,18 +63,23 @@ type panicMockChecker struct {
 
 func (m *panicMockChecker) ID() string   { return m.id }
 func (m *panicMockChecker) Name() string { return m.name }
-func (m *panicMockChecker) Run(path string) (checker.Result, error) {
+func (m *panicMockChecker) Run(_ context.Context, path string) (checker.Result, error) {
 	panic(m.panicValue)
 }
 
 // Helper functions to convert mock checkers to registrations for testing
 func toRegistration(c checker.Checker, optional bool) checker.CheckRegistration {
+	critical := false
+	if m, ok := c.(*mockChecker); ok {
+		critical = m.critical
+	}
 	return checker.CheckRegistration{
 		Checker: c,
 		Meta: checker.CheckMeta{
 			ID:       c.ID(),
 			Name:     c.Name(),
 			Optional: optional,
+			Critical: critical,
 		},
 	}
 }
@@ -205,8 +212,9 @@ func (suite *RunnerTestSuite) TestRunSuite_WithFailure() {
 			},
 		},
 		&mockChecker{
-			id:   "check2",
-			name: "Check 2",
+			id:       "check2",
+			name:     "Check 2",
+			critical: true,
 			result: checker.Result{
 				Name:   "Check 2",
 				ID:     "check2",
@@ -337,8 +345,9 @@ func (suite *RunnerTestSuite) TestRunSuite_MixedResults() {
 			},
 		},
 		&mockChecker{
-			id:   "check3",
-			name: "Check 3",
+			id:       "check3",
+			name:     "Check 3",
+			critical: true,
 			result: checker.Result{
 				Name:   "Check 3",
 				ID:     "check3",
@@ -469,8 +478,9 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelRunsAllChecks() {
 			},
 		},
 		&mockChecker{
-			id:   "check2",
-			name: "Check 2",
+			id:       "check2",
+			name:     "Check 2",
+			critical: true,
 			result: checker.Result{
 				Name:   "Check 2",
 				ID:     "check2",
@@ -493,7 +503,7 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelRunsAllChecks() {
 	}
 
 	// Parallel mode should run all checks
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	suite.Equal(3, result.TotalChecks()) // All 3 checks ran
 	suite.Equal(2, result.Passed)
@@ -564,7 +574,7 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelFailFastCancelsRemaining() {
 	registrations := toRegistrations(checks)
 	registrations[0].Meta.Critical = true
 
-	result := RunSuiteWithOptions("/test/path", registrations, RunSuiteOptions{
+	result := RunSuiteWithOptions(context.Background(), "/test/path", registrations, RunSuiteOptions{
 		Parallel: true,
 		FailFast: true,
 	})
@@ -595,8 +605,9 @@ func (suite *RunnerTestSuite) TestRunSuite_SequentialStopsOnFailure() {
 			},
 		},
 		&mockChecker{
-			id:   "check2",
-			name: "Check 2",
+			id:       "check2",
+			name:     "Check 2",
+			critical: true,
 			result: checker.Result{
 				Name:   "Check 2",
 				ID:     "check2",
@@ -661,7 +672,7 @@ func (suite *RunnerTestSuite) TestRunSuiteWithOptions_Parallel() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	suite.Equal(2, result.TotalChecks())
 	suite.Equal(1, result.Passed)
@@ -697,7 +708,7 @@ func (suite *RunnerTestSuite) TestRunSuiteWithOptions_Sequential() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: false})
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: false})
 
 	suite.Equal(2, result.TotalChecks())
 	suite.Equal(1, result.Passed)
@@ -709,7 +720,7 @@ func (suite *RunnerTestSuite) TestRunSuiteWithOptions_Sequential() {
 // TestRunSuite_ParallelEmptyChecks tests parallel mode with empty check list.
 func (suite *RunnerTestSuite) TestRunSuite_ParallelEmptyChecks() {
 	checks := []checker.Checker{}
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	suite.Equal(0, result.TotalChecks())
 	suite.Equal(0, result.Passed)
@@ -749,7 +760,7 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelWithError() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	suite.Equal(3, result.TotalChecks()) // All 3 checks ran in parallel
 	suite.Equal(2, result.Passed)
@@ -1031,7 +1042,7 @@ func (suite *RunnerTestSuite) TestRunSuite_ParallelTiming() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	// In parallel mode, TotalDuration should be less than the sum of delays
 	// (since checks run concurrently) but at least as long as the longest check
@@ -1073,7 +1084,7 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutNotExceeded() {
 	}
 
 	// Timeout is 100ms, check takes 10ms - should succeed
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{
 		Parallel: true,
 		Timeout:  100 * time.Millisecond,
 	})
@@ -1105,7 +1116,7 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutExceeded() {
 	}
 
 	// Timeout is 20ms, check takes 100ms - should timeout
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{
 		Parallel: true,
 		Timeout:  20 * time.Millisecond,
 	})
@@ -1169,7 +1180,7 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutSequential() {
 	}
 
 	// Timeout is 20ms per check
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{
 		Parallel: false,
 		Timeout:  20 * time.Millisecond,
 	})
@@ -1205,7 +1216,7 @@ func (suite *RunnerTestSuite) TestRunSuite_TimeoutZeroMeansNoTimeout() {
 	}
 
 	// Timeout is 0 (no timeout)
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{
 		Parallel: true,
 		Timeout:  0,
 	})
@@ -1249,7 +1260,7 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryParallel() {
 	}
 
 	// Parallel mode should recover from panic and continue
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	suite.Equal(3, result.TotalChecks()) // All 3 checks should have results
 	suite.Equal(2, result.Passed)
@@ -1281,7 +1292,7 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithError() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	suite.Equal(1, result.TotalChecks())
 	suite.Equal(0, result.Passed)
@@ -1302,7 +1313,7 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithUnknownValue() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{Parallel: true})
 
 	suite.Equal(1, result.TotalChecks())
 	suite.Equal(0, result.Passed)
@@ -1333,7 +1344,7 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoveryWithTimeout() {
 	}
 
 	// Panic recovery should work with timeout enabled
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{
 		Parallel: true,
 		Timeout:  1 * time.Second,
 	})
@@ -1383,7 +1394,7 @@ func (suite *RunnerTestSuite) TestRunSuite_PanicRecoverySequential() {
 
 	// Sequential mode recovers from the panic. A panic becomes an Errored
 	// result, which does not abort the run, so all three checks run.
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), RunSuiteOptions{
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), RunSuiteOptions{
 		Parallel: false,
 		Timeout:  1 * time.Second,
 	})
@@ -1500,7 +1511,7 @@ func (suite *RunnerTestSuite) TestProgressCallback_Parallel() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), opts)
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), opts)
 
 	suite.Equal(3, result.TotalChecks())
 	suite.Equal(int32(3), callCount, "Progress callback should be called once per check")
@@ -1541,7 +1552,7 @@ func (suite *RunnerTestSuite) TestProgressCallback_Sequential() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), opts)
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), opts)
 
 	suite.Equal(2, result.TotalChecks())
 	suite.Equal([]int{1, 2}, progressUpdates, "Progress should be called in sequence")
@@ -1568,7 +1579,7 @@ func (suite *RunnerTestSuite) TestProgressCallback_Nil() {
 		OnProgress: nil,
 	}
 
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), opts)
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), opts)
 
 	suite.Equal(1, result.TotalChecks())
 	suite.Equal(1, result.Passed)
@@ -1587,7 +1598,7 @@ func (suite *RunnerTestSuite) TestProgressCallback_EmptyChecks() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), opts)
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), opts)
 
 	suite.Equal(0, result.TotalChecks())
 	suite.Equal(int32(0), callCount, "Progress callback should not be called with empty checks")
@@ -1622,7 +1633,7 @@ func (suite *RunnerTestSuite) TestProgressCallback_WithPanic() {
 		},
 	}
 
-	result := RunSuiteWithOptions("/test/path", toRegistrations(checks), opts)
+	result := RunSuiteWithOptions(context.Background(), "/test/path", toRegistrations(checks), opts)
 
 	suite.Equal(2, result.TotalChecks())
 	suite.Equal(int32(2), callCount, "Progress callback should be called even for panicking checks")
@@ -1688,8 +1699,9 @@ func (suite *RunnerTestSuite) TestRunSuite_OptionalCheck_WarnBecomesInfo() {
 func (suite *RunnerTestSuite) TestRunSuite_OptionalCheck_FailStaysFail() {
 	checks := []checker.Checker{
 		&mockChecker{
-			id:   "check1",
-			name: "Optional Check",
+			id:       "check1",
+			name:     "Optional Check",
+			critical: true,
 			result: checker.Result{
 				Name:   "Optional Check",
 				ID:     "check1",

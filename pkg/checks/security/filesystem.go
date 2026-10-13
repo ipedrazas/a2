@@ -2,6 +2,7 @@ package security
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -52,7 +53,7 @@ func (c *FileSystemCheck) Name() string {
 }
 
 // Run executes the file system safety check.
-func (c *FileSystemCheck) Run(path string) (checker.Result, error) {
+func (c *FileSystemCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	if c.Patterns == nil {

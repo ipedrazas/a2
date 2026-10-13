@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -40,7 +41,7 @@ API_KEY=
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -56,7 +57,7 @@ PORT=8080
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -69,7 +70,7 @@ func (s *EnvCheckTestSuite) TestEnvTemplate() {
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -81,7 +82,7 @@ func (s *EnvCheckTestSuite) TestExampleEnv() {
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -97,7 +98,7 @@ node_modules/
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -112,7 +113,7 @@ node_modules/
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -125,7 +126,7 @@ func (s *EnvCheckTestSuite) TestEnvExistsNotIgnored() {
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -143,7 +144,7 @@ func (s *EnvCheckTestSuite) TestEnvExistsButIgnored() {
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -162,7 +163,7 @@ require github.com/joho/godotenv v1.5.1
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -180,7 +181,7 @@ require github.com/kelseyhightower/envconfig v1.4.0
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -198,7 +199,7 @@ require github.com/spf13/viper v1.18.0
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -216,7 +217,7 @@ dependencies = [
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -231,7 +232,7 @@ python-dotenv>=1.0.0
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -249,7 +250,7 @@ dependencies = [
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -263,7 +264,7 @@ func (s *EnvCheckTestSuite) TestPythonDjangoEnviron() {
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -282,7 +283,7 @@ func (s *EnvCheckTestSuite) TestNodeDotenv() {
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -300,7 +301,7 @@ func (s *EnvCheckTestSuite) TestNodeDotenvSafe() {
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -318,7 +319,7 @@ func (s *EnvCheckTestSuite) TestNodeCrossEnv() {
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -338,7 +339,7 @@ server.port=${PORT:8080}
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -361,7 +362,7 @@ server:
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -381,7 +382,7 @@ dependencies {
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -408,7 +409,7 @@ require github.com/joho/godotenv v1.5.1
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -428,7 +429,7 @@ func (s *EnvCheckTestSuite) TestEnvExampleWithIssue() {
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -439,7 +440,7 @@ func (s *EnvCheckTestSuite) TestEnvExampleWithIssue() {
 
 func (s *EnvCheckTestSuite) TestNoEnvConfig() {
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -449,7 +450,7 @@ func (s *EnvCheckTestSuite) TestNoEnvConfig() {
 
 func (s *EnvCheckTestSuite) TestResultLanguage() {
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangCommon, result.Language)
@@ -465,7 +466,7 @@ func (s *EnvCheckTestSuite) TestGitignoreWithComments() {
 	s.Require().NoError(err)
 
 	check := &EnvCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

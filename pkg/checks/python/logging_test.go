@@ -1,6 +1,7 @@
 package pythoncheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -42,7 +43,7 @@ def main():
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -63,7 +64,7 @@ def main():
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -80,7 +81,7 @@ def main():
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -100,7 +101,7 @@ def main():
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -118,7 +119,7 @@ func (s *LoggingCheckTestSuite) TestNoLoggingNoPrint() {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -134,7 +135,7 @@ func (s *LoggingCheckTestSuite) TestNoLoggingWithPrint() {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -164,7 +165,7 @@ def main():
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -190,7 +191,7 @@ logger = logging.getLogger(__name__)
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -215,7 +216,7 @@ logger = logging.getLogger(__name__)
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -231,7 +232,7 @@ func (s *LoggingCheckTestSuite) TestMultiplePrintStatements() {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -250,7 +251,7 @@ def main():
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -258,7 +259,7 @@ def main():
 
 func (s *LoggingCheckTestSuite) TestEmptyDirectory() {
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	// Nothing scanned: say so, rather than a vacuous "no logging" verdict.
 	s.NoError(err)

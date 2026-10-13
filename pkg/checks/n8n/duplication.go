@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -20,7 +21,7 @@ type DuplicationCheck struct {
 func (c *DuplicationCheck) ID() string   { return "n8n:duplication" }
 func (c *DuplicationCheck) Name() string { return "Cross-Workflow Duplication" }
 
-func (c *DuplicationCheck) Run(path string) (checker.Result, error) {
+func (c *DuplicationCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	bundle, early := loadBundle(c, path)
 	if early != nil {
 		return *early, nil

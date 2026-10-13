@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -18,7 +19,7 @@ func (c *PrecommitCheck) ID() string   { return "common:precommit" }
 func (c *PrecommitCheck) Name() string { return "Pre-commit Hooks" }
 
 // Run checks for pre-commit hook configurations.
-func (c *PrecommitCheck) Run(path string) (checker.Result, error) {
+func (c *PrecommitCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var foundTools []string

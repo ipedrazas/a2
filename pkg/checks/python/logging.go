@@ -2,6 +2,7 @@ package pythoncheck
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -18,7 +19,7 @@ type LoggingCheck struct{}
 func (c *LoggingCheck) ID() string   { return "python:logging" }
 func (c *LoggingCheck) Name() string { return "Python Logging" }
 
-func (c *LoggingCheck) Run(path string) (checker.Result, error) {
+func (c *LoggingCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	result := checker.Result{
 		Name:     c.Name(),
 		ID:       c.ID(),

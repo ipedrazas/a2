@@ -1,6 +1,7 @@
 package javacheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -33,7 +34,7 @@ func (s *BuildCheckTestSuite) TestIDAndName() {
 
 func (s *BuildCheckTestSuite) TestRun_NoBuildTool() {
 	check := &BuildCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -47,7 +48,7 @@ func (s *BuildCheckTestSuite) TestRun_ResultLanguage() {
 	s.Require().NoError(err)
 
 	check := &BuildCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangJava, result.Language)
@@ -91,7 +92,7 @@ func (s *BuildCheckTestSuite) TestGetMavenCommand_WithWrapper() {
 	s.Require().NoError(err)
 
 	check := &BuildCheck{}
-	cmd := check.getMavenCommand(s.tempDir)
+	cmd := check.getMavenCommand(context.Background(), s.tempDir)
 
 	s.Equal("./mvnw", cmd.Args[0])
 	s.Contains(cmd.Args, "compile")
@@ -99,7 +100,7 @@ func (s *BuildCheckTestSuite) TestGetMavenCommand_WithWrapper() {
 
 func (s *BuildCheckTestSuite) TestGetMavenCommand_WithoutWrapper() {
 	check := &BuildCheck{}
-	cmd := check.getMavenCommand(s.tempDir)
+	cmd := check.getMavenCommand(context.Background(), s.tempDir)
 
 	s.Equal("mvn", cmd.Args[0])
 	s.Contains(cmd.Args, "compile")
@@ -111,7 +112,7 @@ func (s *BuildCheckTestSuite) TestGetGradleCommand_WithWrapper() {
 	s.Require().NoError(err)
 
 	check := &BuildCheck{}
-	cmd := check.getGradleCommand(s.tempDir)
+	cmd := check.getGradleCommand(context.Background(), s.tempDir)
 
 	s.Equal("./gradlew", cmd.Args[0])
 	s.Contains(cmd.Args, "compileJava")
@@ -119,7 +120,7 @@ func (s *BuildCheckTestSuite) TestGetGradleCommand_WithWrapper() {
 
 func (s *BuildCheckTestSuite) TestGetGradleCommand_WithoutWrapper() {
 	check := &BuildCheck{}
-	cmd := check.getGradleCommand(s.tempDir)
+	cmd := check.getGradleCommand(context.Background(), s.tempDir)
 
 	s.Equal("gradle", cmd.Args[0])
 	s.Contains(cmd.Args, "compileJava")

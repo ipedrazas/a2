@@ -2,6 +2,7 @@ package nodecheck
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -28,7 +29,7 @@ func (c *LintCheck) Name() string {
 }
 
 // Run executes the lint check.
-func (c *LintCheck) Run(path string) (checker.Result, error) {
+func (c *LintCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists
@@ -41,21 +42,21 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 	// Handle auto mode - try available linters
 	if linter == "auto" {
 		if _, err := exec.LookPath("npx"); err != nil {
-			return rb.Pass("npx not available, skipping lint check"), nil
+			return rb.ToolNotInstalled("npx", "install Node.js"), nil
 		}
 
 		// Try eslint first, then biome, then oxlint
-		eslintResult := c.runESLint(path, rb)
+		eslintResult := c.runESLint(ctx, path, rb)
 		if eslintResult != nil {
 			return *eslintResult, nil
 		}
 
-		biomeResult := c.runBiome(path, rb)
+		biomeResult := c.runBiome(ctx, path, rb)
 		if biomeResult != nil {
 			return *biomeResult, nil
 		}
 
-		oxlintResult := c.runOxlint(path, rb)
+		oxlintResult := c.runOxlint(ctx, path, rb)
 		if oxlintResult != nil {
 			return *oxlintResult, nil
 		}
@@ -66,17 +67,17 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 	// Run specific linter
 	switch linter {
 	case "eslint":
-		if eslintResult := c.runESLint(path, rb); eslintResult != nil {
+		if eslintResult := c.runESLint(ctx, path, rb); eslintResult != nil {
 			return *eslintResult, nil
 		}
 		return rb.ToolNotInstalled("ESLint", "npm install eslint"), nil
 	case "biome":
-		if biomeResult := c.runBiome(path, rb); biomeResult != nil {
+		if biomeResult := c.runBiome(ctx, path, rb); biomeResult != nil {
 			return *biomeResult, nil
 		}
 		return rb.ToolNotInstalled("Biome", "npm install @biomejs/biome"), nil
 	case "oxlint":
-		if oxlintResult := c.runOxlint(path, rb); oxlintResult != nil {
+		if oxlintResult := c.runOxlint(ctx, path, rb); oxlintResult != nil {
 			return *oxlintResult, nil
 		}
 		return rb.ToolNotInstalled("Oxlint", "npm install oxlint"), nil
@@ -86,13 +87,13 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 }
 
 // runESLint runs eslint and returns a result or nil if eslint is not available.
-func (c *LintCheck) runESLint(path string, rb *checkutil.ResultBuilder) *checker.Result {
+func (c *LintCheck) runESLint(ctx context.Context, path string, rb *checkutil.ResultBuilder) *checker.Result {
 	// Check if eslint config exists
 	if !c.hasESLintConfig(path) {
 		return nil
 	}
 
-	cmd := exec.Command("npx", "eslint", ".", "--max-warnings=0")
+	cmd := checkutil.Command(ctx, "npx", "eslint", ".", "--max-warnings=0")
 	cmd.Dir = path
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -116,13 +117,13 @@ func (c *LintCheck) runESLint(path string, rb *checkutil.ResultBuilder) *checker
 }
 
 // runBiome runs biome lint and returns a result or nil if biome is not available.
-func (c *LintCheck) runBiome(path string, rb *checkutil.ResultBuilder) *checker.Result {
+func (c *LintCheck) runBiome(ctx context.Context, path string, rb *checkutil.ResultBuilder) *checker.Result {
 	// Check if biome config exists
 	if !c.hasBiomeConfig(path) {
 		return nil
 	}
 
-	cmd := exec.Command("npx", "@biomejs/biome", "lint", ".")
+	cmd := checkutil.Command(ctx, "npx", "@biomejs/biome", "lint", ".")
 	cmd.Dir = path
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -141,13 +142,13 @@ func (c *LintCheck) runBiome(path string, rb *checkutil.ResultBuilder) *checker.
 }
 
 // runOxlint runs oxlint and returns a result or nil if oxlint is not available.
-func (c *LintCheck) runOxlint(path string, rb *checkutil.ResultBuilder) *checker.Result {
+func (c *LintCheck) runOxlint(ctx context.Context, path string, rb *checkutil.ResultBuilder) *checker.Result {
 	// Check if oxlint config exists or is in devDependencies
 	if !c.hasOxlintConfig(path) {
 		return nil
 	}
 
-	cmd := exec.Command("npx", "oxlint", ".")
+	cmd := checkutil.Command(ctx, "npx", "oxlint", ".")
 	cmd.Dir = path
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout

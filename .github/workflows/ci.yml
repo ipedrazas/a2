@@ -15,18 +15,20 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: "go.mod"
           cache-dependency-path: go.sum
 
+      # Fail when go.mod/go.sum are stale instead of silently tidying them.
+      - name: Verify go.mod is tidy
+        run: go mod tidy -diff
+
       - name: Get dependencies
-        run: |
-          go mod tidy
-          go mod download
+        run: go mod download
 
       # `go install github.com/ipedrazas/a2@latest` must keep working, so the
       # root package has to stay installable with no ldflags and no repo files.
@@ -37,13 +39,18 @@ jobs:
 
       - name: Format check
         run: |
-          gofmt -l . | grep -q . && echo "Files need formatting" && exit 1 || true
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "Files need formatting:"
+            echo "$unformatted"
+            exit 1
+          fi
 
       - name: Lint
         run: go vet ./...
 
       - name: Run tests
-        run: go test -v ./...
+        run: go test -race ./...
 
       - name: Build
         run: |
@@ -54,34 +61,34 @@ jobs:
 
       - name: Install A2 go dependencies
         run: |
-          go install github.com/securego/gosec/v2/cmd/gosec@latest
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-          go install golang.org/x/vuln/cmd/govulncheck@latest
-          go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
-          go install github.com/kisielk/errcheck@latest
-          go install github.com/zricethezav/gitleaks/v8@latest
-          go install golang.org/x/tools/cmd/deadcode@latest
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
+          go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
+          go install honnef.co/go/tools/cmd/staticcheck@v0.8.2
+          go install github.com/kisielk/errcheck@v1.30.0
+          go install github.com/zricethezav/gitleaks/v8@v8.30.1
+          go install golang.org/x/tools/cmd/deadcode@v0.52.0
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
-          node-version: "25"
+          node-version: "24"
 
       - name: Install A2 npm dependencies
-        run: npm install -g jscpd
+        run: npm install -g jscpd@5.4.1
 
       - name: Install A2 Python dependencies
         run: |
-          pip3 install --no-cache-dir --break-system-packages bandit semgrep
+          pip3 install --no-cache-dir --break-system-packages bandit==1.9.4 semgrep==1.180.0
 
+      # a2 gates its own repository. --strict fails the run if a check errors,
+      # times out, or its tool is missing, so a broken install cannot pass.
       - name: Run A2 self-check
         run: |
           chmod +x ./dist/a2
-          ./dist/a2 check . --format pretty
-        continue-on-error: true
+          ./dist/a2 check . --format pretty --strict
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: a2-binary
           path: dist/a2

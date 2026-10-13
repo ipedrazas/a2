@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,7 +18,7 @@ func (c *LicenseCheck) ID() string   { return "common:license" }
 func (c *LicenseCheck) Name() string { return "License Compliance" }
 
 // Run checks for license compliance tooling configuration.
-func (c *LicenseCheck) Run(path string) (checker.Result, error) {
+func (c *LicenseCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var findings []string

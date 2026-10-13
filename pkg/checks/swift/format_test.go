@@ -1,6 +1,7 @@
 package swiftcheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -49,7 +50,7 @@ func (s *FormatTestSuite) TestName() {
 }
 
 func (s *FormatTestSuite) TestRun_NoPackageSwift() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -58,7 +59,7 @@ func (s *FormatTestSuite) TestRun_NoPackageSwift() {
 }
 
 func (s *FormatTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangSwift, result.Language)

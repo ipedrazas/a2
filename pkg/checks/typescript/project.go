@@ -1,6 +1,7 @@
 package typescriptcheck
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -41,7 +42,7 @@ type PackageJSON struct {
 }
 
 // Run checks for TypeScript project configuration.
-func (c *ProjectCheck) Run(path string) (checker.Result, error) {
+func (c *ProjectCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json

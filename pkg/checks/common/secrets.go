@@ -2,6 +2,7 @@ package common
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -26,7 +27,7 @@ type secretPattern struct {
 }
 
 // Run checks for secret scanning configuration or scans for hardcoded secrets.
-func (c *SecretsCheck) Run(path string) (checker.Result, error) {
+func (c *SecretsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Check if gitleaks is installed
@@ -35,7 +36,7 @@ func (c *SecretsCheck) Run(path string) (checker.Result, error) {
 
 	// Priority 1 & 2: If gitleaks is installed, run it
 	if gitleaksInstalled {
-		return c.runGitleaks(path, configFile, rb)
+		return c.runGitleaks(ctx, path, configFile, rb)
 	}
 
 	// Priority 3: Check if any scanner is configured (trust CI/pre-commit runs it)
@@ -67,7 +68,7 @@ func (c *SecretsCheck) findGitleaksConfig(path string) string {
 }
 
 // runGitleaks executes gitleaks and returns the result.
-func (c *SecretsCheck) runGitleaks(path, configFile string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *SecretsCheck) runGitleaks(ctx context.Context, path, configFile string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	args := []string{"detect", "--staged", "--redact=10", "-v", "."}
 	configMsg := "default rules"
 
@@ -76,7 +77,7 @@ func (c *SecretsCheck) runGitleaks(path, configFile string, rb *checkutil.Result
 		configMsg = "using " + configFile
 	}
 
-	result := rb.RunCommand(path, "gitleaks", args...)
+	result := rb.RunCommand(ctx, path, "gitleaks", args...)
 
 	if result.Success() {
 		return rb.Pass(fmt.Sprintf("gitleaks: No secrets detected (%s)", configMsg)), nil

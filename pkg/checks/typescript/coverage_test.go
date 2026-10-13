@@ -1,6 +1,7 @@
 package typescriptcheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,7 +49,7 @@ func (s *CoverageTestSuite) TestName() {
 }
 
 func (s *CoverageTestSuite) TestRun_NoTsconfig() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -57,7 +58,7 @@ func (s *CoverageTestSuite) TestRun_NoTsconfig() {
 }
 
 func (s *CoverageTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangTypeScript, result.Language)

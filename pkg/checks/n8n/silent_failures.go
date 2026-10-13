@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -16,7 +17,7 @@ type SilentFailuresCheck struct{}
 func (c *SilentFailuresCheck) ID() string   { return "n8n:silent-failures" }
 func (c *SilentFailuresCheck) Name() string { return "Silent Failure Settings" }
 
-func (c *SilentFailuresCheck) Run(path string) (checker.Result, error) {
+func (c *SilentFailuresCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	bundle, early := loadBundle(c, path)
 	if early != nil {
 		return *early, nil

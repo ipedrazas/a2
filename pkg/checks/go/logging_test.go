@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -31,7 +32,7 @@ func (s *LoggingCheckTestSuite) TestDetectsSlog() {
 	s.write("main.go", "package main\n\nimport \"log/slog\"\n\nfunc main() { slog.Info(\"hi\") }\n")
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed, "slog import must count as structured logging: %s", result.Reason)
@@ -41,7 +42,7 @@ func (s *LoggingCheckTestSuite) TestWarnsOnPrints() {
 	s.write("main.go", "package main\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"hi\") }\n")
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -63,7 +64,7 @@ func (s *LoggingCheckTestSuite) TestDotPathScansTree() {
 	defer func() { s.Require().NoError(os.Chdir(wd)) }()
 
 	check := &LoggingCheck{}
-	result, err := check.Run(".")
+	result, err := check.Run(context.Background(), ".")
 
 	s.NoError(err)
 	s.True(result.Passed, "run with path '.' must scan the tree: %s", result.Reason)
@@ -76,7 +77,7 @@ func (s *LoggingCheckTestSuite) TestZeroFilesScannedWarns() {
 	s.write("notes.txt", "not go code")
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

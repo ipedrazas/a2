@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *MetricsCheck) ID() string   { return "common:metrics" }
 func (c *MetricsCheck) Name() string { return "Metrics Instrumentation" }
 
 // Run checks for metrics libraries and configuration.
-func (c *MetricsCheck) Run(path string) (checker.Result, error) {
+func (c *MetricsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string

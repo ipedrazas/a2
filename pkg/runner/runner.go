@@ -18,7 +18,7 @@ type ProgressFunc func(completed, total int)
 // SuiteResult holds the results of running a suite of checks.
 type SuiteResult struct {
 	Results       []checker.Result // All check results
-	Aborted       bool             // True if a Fail (veto) check stopped execution
+	Aborted       bool             // True if a Critical check failed (the veto)
 	Passed        int              // Number of passed checks
 	Warnings      int              // Number of warning checks
 	Failed        int              // Number of failed checks
@@ -30,35 +30,46 @@ type SuiteResult struct {
 
 // RunSuiteOptions configures how the suite is executed.
 type RunSuiteOptions struct {
-	Parallel    bool          // Run checks in parallel (default: true)
-	FailFast    bool          // Cancel remaining checks on first critical failure (parallel mode only)
-	Timeout     time.Duration // Timeout for each individual check (0 = no timeout)
-	Concurrency int           // Max concurrent checks in parallel mode (0 = GOMAXPROCS)
-	OnProgress  ProgressFunc  // Optional callback for progress updates
+	Parallel        bool          // Run checks in parallel (default: true)
+	FailFast        bool          // Cancel remaining and in-flight checks on first critical failure (parallel mode only)
+	Strict          bool          // Fail non-optional checks that errored or whose tool is not installed
+	Timeout         time.Duration // Timeout for each individual check (0 = no timeout)
+	Concurrency     int           // Max concurrent fast checks in parallel mode (0 = GOMAXPROCS)
+	SlowConcurrency int           // Max concurrent slow checks in parallel mode (0 = DefaultSlowConcurrency)
+	OnProgress      ProgressFunc  // Optional callback for progress updates
 }
+
+// DefaultSlowConcurrency is how many slow checks (builds, tests, coverage, race)
+// run at once by default. Each of them already uses every core, so running
+// more in parallel oversubscribes the CPU and makes timeouts more likely.
+const DefaultSlowConcurrency = 2
+
+// errFailFast is the cancellation cause recorded when fail-fast stops the run.
+var errFailFast = errors.New("fail-fast")
 
 // runSuite executes a suite of checks against the given path.
 // Uses parallel execution by default for better performance.
-// If a check returns Fail status, Aborted is set to true.
 func runSuite(path string, registrations []checker.CheckRegistration) SuiteResult {
-	return RunSuiteWithOptions(path, registrations, RunSuiteOptions{Parallel: true})
+	return RunSuiteWithOptions(context.Background(), path, registrations, RunSuiteOptions{Parallel: true})
 }
 
 // runSuiteSequential executes checks sequentially, stopping on first critical failure.
 // Use this when you need veto power behavior or have limited CPU resources.
 func runSuiteSequential(path string, registrations []checker.CheckRegistration) SuiteResult {
-	return RunSuiteWithOptions(path, registrations, RunSuiteOptions{Parallel: false})
+	return RunSuiteWithOptions(context.Background(), path, registrations, RunSuiteOptions{Parallel: false})
 }
 
 // RunSuiteWithOptions executes a suite of checks with the given options.
-// In parallel mode: checks run on a bounded worker pool. With FailFast, the first
-// critical failure cancels the remaining (not-yet-started) checks.
+// In parallel mode: fast and slow checks run on separate bounded worker pools.
+// With FailFast, the first critical failure cancels the remaining checks,
+// including those already running.
 // In sequential mode: stops immediately on first critical failure (veto power).
-func RunSuiteWithOptions(path string, registrations []checker.CheckRegistration, opts RunSuiteOptions) SuiteResult {
+// Cancelling ctx (e.g. on Ctrl-C) stops running checks and skips the rest.
+func RunSuiteWithOptions(ctx context.Context, path string, registrations []checker.CheckRegistration, opts RunSuiteOptions) SuiteResult {
 	if opts.Parallel {
-		return runParallel(path, registrations, opts)
+		return runParallel(ctx, path, registrations, opts)
 	}
-	return runSequential(path, registrations, opts)
+	return runSequential(ctx, path, registrations, opts)
 }
 
 // poolSize returns the number of workers to use for a parallel run, bounded by
@@ -77,6 +88,19 @@ func poolSize(opts RunSuiteOptions, n int) int {
 	return workers
 }
 
+// slowPoolSize returns the number of workers for slow checks. It never exceeds
+// the fast pool's configured size, so a low `concurrency` also limits slow checks.
+func slowPoolSize(opts RunSuiteOptions, n int) int {
+	workers := opts.SlowConcurrency
+	if workers < 1 {
+		workers = DefaultSlowConcurrency
+	}
+	if limit := poolSize(opts, n); workers > limit {
+		workers = limit
+	}
+	return workers
+}
+
 // applyOptional converts a Warn result to Info for optional checks so that
 // optional checks never drag down the maturity score, and stamps the result
 // with the check's Critical flag so scoring can weight it.
@@ -89,9 +113,37 @@ func applyOptional(meta checker.CheckMeta, res checker.Result) checker.Result {
 	return res
 }
 
-// runParallel executes all checks on a bounded worker pool. When opts.FailFast
-// is set, the first critical failure cancels checks that have not started yet.
-func runParallel(path string, registrations []checker.CheckRegistration, opts RunSuiteOptions) SuiteResult {
+// applyStrict turns results a2 could not trust into failures: checks that
+// errored (crash, panic, timeout) and checks whose tool is not installed.
+// Optional checks are exempt, since they never gate the suite.
+func applyStrict(meta checker.CheckMeta, res checker.Result) checker.Result {
+	if meta.Optional || (res.Status != checker.Errored && !res.ToolMissing) {
+		return res
+	}
+	res.Status = checker.Fail
+	res.Passed = false
+	res.Reason = "Strict mode: " + res.Reason
+	return res
+}
+
+// finalize applies the per-check result policies in order.
+func finalize(meta checker.CheckMeta, res checker.Result, opts RunSuiteOptions) checker.Result {
+	res = applyOptional(meta, res)
+	if opts.Strict {
+		res = applyStrict(meta, res)
+	}
+	return res
+}
+
+// isVeto reports whether res is a critical failure that stops the run.
+func isVeto(res checker.Result) bool {
+	return res.Critical && res.Status == checker.Fail && !res.Passed
+}
+
+// runParallel executes checks on two bounded worker pools: one for fast
+// checks and a smaller one for slow checks. When opts.FailFast is set, the
+// first critical failure cancels every check that has not finished yet.
+func runParallel(ctx context.Context, path string, registrations []checker.CheckRegistration, opts RunSuiteOptions) SuiteResult {
 	result := SuiteResult{
 		Results: make([]checker.Result, len(registrations)),
 	}
@@ -103,18 +155,13 @@ func runParallel(path string, registrations []checker.CheckRegistration, opts Ru
 	total := len(registrations)
 	var completed int32
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx, cancel := context.WithCancelCause(ctx)
+	defer cancel(nil)
 
 	type task struct {
 		idx int
 		reg checker.CheckRegistration
 	}
-
-	workers := poolSize(opts, len(registrations))
-	tasks := make(chan task)
-	var wg sync.WaitGroup
-	wg.Add(workers)
 
 	reportProgress := func() {
 		if opts.OnProgress != nil {
@@ -123,41 +170,51 @@ func runParallel(path string, registrations []checker.CheckRegistration, opts Ru
 		}
 	}
 
-	for range workers {
-		go func() {
-			defer wg.Done()
-			for t := range tasks {
-				if opts.FailFast && ctx.Err() != nil {
-					result.Results[t.idx] = skippedResult(t.reg)
-					reportProgress()
-					continue
-				}
-
-				res := applyOptional(t.reg.Meta, runCheckWithTimeout(ctx, path, t.reg.Checker, opts.Timeout))
-				result.Results[t.idx] = res
-
-				if opts.FailFast && t.reg.Meta.Critical && res.Status == checker.Fail && !res.Passed {
-					cancel()
-				}
-				reportProgress()
-			}
-		}()
-	}
-
+	var fast, slow []task
 	for idx, reg := range registrations {
-		if opts.FailFast && ctx.Err() != nil {
-			result.Results[idx] = skippedResult(reg)
-			reportProgress()
-			continue
-		}
-		select {
-		case tasks <- task{idx: idx, reg: reg}:
-		case <-ctx.Done():
-			result.Results[idx] = skippedResult(reg)
-			reportProgress()
+		if reg.Meta.Speed == checker.SpeedSlow {
+			slow = append(slow, task{idx: idx, reg: reg})
+		} else {
+			fast = append(fast, task{idx: idx, reg: reg})
 		}
 	}
-	close(tasks)
+
+	var wg sync.WaitGroup
+	runPool := func(tasks []task, workers int) {
+		if len(tasks) == 0 {
+			return
+		}
+		if workers > len(tasks) {
+			workers = len(tasks)
+		}
+		queue := make(chan task)
+		for range workers {
+			wg.Go(func() {
+				for t := range queue {
+					res := finalize(t.reg.Meta, runCheck(ctx, path, t.reg.Checker, opts.Timeout), opts)
+					result.Results[t.idx] = res
+					if opts.FailFast && isVeto(res) {
+						cancel(errFailFast)
+					}
+					reportProgress()
+				}
+			})
+		}
+		wg.Go(func() {
+			defer close(queue)
+			for _, t := range tasks {
+				select {
+				case queue <- t:
+				case <-ctx.Done():
+					result.Results[t.idx] = skippedResult(ctx, t.reg)
+					reportProgress()
+				}
+			}
+		})
+	}
+
+	runPool(fast, poolSize(opts, len(registrations)))
+	runPool(slow, slowPoolSize(opts, len(registrations)))
 	wg.Wait()
 
 	result.TotalDuration = time.Since(suiteStart)
@@ -166,7 +223,7 @@ func runParallel(path string, registrations []checker.CheckRegistration, opts Ru
 }
 
 // runSequential executes checks one by one, stopping on first critical failure.
-func runSequential(path string, registrations []checker.CheckRegistration, opts RunSuiteOptions) SuiteResult {
+func runSequential(ctx context.Context, path string, registrations []checker.CheckRegistration, opts RunSuiteOptions) SuiteResult {
 	result := SuiteResult{
 		Results: make([]checker.Result, 0, len(registrations)),
 	}
@@ -176,7 +233,7 @@ func runSequential(path string, registrations []checker.CheckRegistration, opts 
 	completed := 0
 
 	for _, reg := range registrations {
-		res := applyOptional(reg.Meta, runCheckWithTimeout(context.Background(), path, reg.Checker, opts.Timeout))
+		res := finalize(reg.Meta, runCheck(ctx, path, reg.Checker, opts.Timeout), opts)
 		result.Results = append(result.Results, res)
 		completed++
 
@@ -185,7 +242,7 @@ func runSequential(path string, registrations []checker.CheckRegistration, opts 
 		}
 
 		// Veto Power Logic: stop if a critical check fails
-		if !res.Passed && res.Status == checker.Fail {
+		if isVeto(res) {
 			break
 		}
 	}
@@ -205,7 +262,7 @@ func tally(result *SuiteResult) {
 			result.Warnings++
 		case checker.Fail:
 			result.Failed++
-			if !res.Passed {
+			if isVeto(res) {
 				result.Aborted = true
 			}
 		case checker.Info:
@@ -218,74 +275,55 @@ func tally(result *SuiteResult) {
 	}
 }
 
-// runCheckWithTimeout executes a single check with an optional timeout and cancellation.
-// If timeout is 0, no timeout is applied.
-func runCheckWithTimeout(ctx context.Context, path string, c checker.Checker, timeout time.Duration) checker.Result {
+// runCheck executes a single check with an optional timeout, recovering from
+// panics so a single check cannot crash the whole run. If timeout is 0, no
+// timeout is applied. The check's context is cancelled when it times out or
+// ctx is cancelled, which kills any command it started; runCheck returns
+// immediately even if the check itself ignores cancellation.
+func runCheck(ctx context.Context, path string, c checker.Checker, timeout time.Duration) checker.Result {
 	start := time.Now()
-
-	// If no timeout, run directly (recovering from panics so a single check
-	// cannot crash the whole run).
-	if timeout == 0 {
-		if ctx.Err() != nil {
-			return skippedCheckResult(c)
-		}
-		return runCheckDirect(path, c, start)
+	if ctx.Err() != nil {
+		return skippedCheckResult(ctx, c)
 	}
 
-	// Run with timeout using context
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	checkCtx, cancel := context.WithCancel(ctx)
+	if timeout > 0 {
+		checkCtx, cancel = context.WithTimeout(ctx, timeout)
+	}
 	defer cancel()
 
-	// Channel for result
-	type checkResult struct {
-		res checker.Result
-		err error
-	}
-	resultCh := make(chan checkResult, 1)
-
+	resultCh := make(chan checker.Result, 1)
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				resultCh <- checkResult{res: erroredResult(c, formatPanicMessage(r))}
+				resultCh <- erroredResult(c, formatPanicMessage(r))
 			}
 		}()
-		res, err := c.Run(path)
-		resultCh <- checkResult{res: res, err: err}
+		res, err := c.Run(checkCtx, path)
+		if err != nil {
+			res = erroredResult(c, "Internal error: "+err.Error())
+		}
+		resultCh <- res
 	}()
 
+	var res checker.Result
 	select {
-	case <-ctx.Done():
-		duration := time.Since(start)
-		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-			res := erroredResult(c, "Check timed out after "+timeout.String())
-			res.Duration = duration
+	case res = <-resultCh:
+		// The check finished before any cancellation: its result stands.
+		if checkCtx.Err() == nil {
+			res.Duration = time.Since(start)
 			return res
 		}
-		res := skippedCheckResult(c)
-		res.Duration = duration
-		return res
-	case cr := <-resultCh:
-		duration := time.Since(start)
-		res := cr.res
-		if cr.err != nil {
-			res = erroredResult(c, "Internal error: "+cr.err.Error())
-		}
-		res.Duration = duration
-		return res
+	case <-checkCtx.Done():
 	}
-}
 
-// runCheckDirect runs a check synchronously, recovering from panics.
-func runCheckDirect(path string, c checker.Checker, start time.Time) (res checker.Result) {
-	defer func() {
-		if r := recover(); r != nil {
-			res = erroredResult(c, formatPanicMessage(r))
-			res.Duration = time.Since(start)
-		}
-	}()
-	res, err := c.Run(path)
-	if err != nil {
-		res = erroredResult(c, "Internal error: "+err.Error())
+	// The check was cancelled. Any command it ran was killed, so whatever it
+	// returned is a misleading failure: report the cancellation instead.
+	switch {
+	case ctx.Err() != nil:
+		res = skippedCheckResult(ctx, c)
+	case errors.Is(checkCtx.Err(), context.DeadlineExceeded):
+		res = erroredResult(c, "Check timed out after "+timeout.String())
 	}
 	res.Duration = time.Since(start)
 	return res
@@ -303,20 +341,25 @@ func erroredResult(c checker.Checker, msg string) checker.Result {
 	}
 }
 
-// skippedCheckResult builds a result for a check that was cancelled before running.
-func skippedCheckResult(c checker.Checker) checker.Result {
+// skippedCheckResult builds a result for a check that was cancelled before it
+// finished, either by fail-fast or because the run was interrupted.
+func skippedCheckResult(ctx context.Context, c checker.Checker) checker.Result {
+	reason := "Skipped: run was cancelled"
+	if errors.Is(context.Cause(ctx), errFailFast) {
+		reason = "Skipped due to fail-fast"
+	}
 	return checker.Result{
 		Name:    c.Name(),
 		ID:      c.ID(),
 		Passed:  true,
 		Status:  checker.Skipped,
 		Message: "Skipped",
-		Reason:  "Skipped due to fail-fast",
+		Reason:  reason,
 	}
 }
 
-func skippedResult(reg checker.CheckRegistration) checker.Result {
-	return skippedCheckResult(reg.Checker)
+func skippedResult(ctx context.Context, reg checker.CheckRegistration) checker.Result {
+	return skippedCheckResult(ctx, reg.Checker)
 }
 
 // TotalChecks returns the total number of checks that were run.

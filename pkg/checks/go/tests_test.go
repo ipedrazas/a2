@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -94,7 +95,7 @@ func TestPass(t *testing.T) {
 	suite.createTempFile("main_test.go", testCode)
 
 	check := &TestsCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -121,7 +122,7 @@ func TestFail(t *testing.T) {
 	suite.createTempFile("main_test.go", code)
 
 	check := &TestsCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -146,7 +147,7 @@ func main() {
 	suite.createTempFile("main.go", code)
 
 	check := &TestsCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// No test files should pass (not a failure)
@@ -165,7 +166,7 @@ func (suite *TestsTestSuite) TestTestsCheck_Run_EmptyDirectory() {
 	suite.createTempFile("main.go", code)
 
 	check := &TestsCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// Directory with code but no test files should pass
@@ -204,7 +205,7 @@ func TestTwo(t *testing.T) {
 	suite.createTempFile("helper_test.go", code2)
 
 	check := &TestsCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -232,7 +233,7 @@ func TestSub(t *testing.T) {
 	suite.createTempFile("sub/helper_test.go", nestedCode)
 
 	check := &TestsCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -259,7 +260,7 @@ func TestStderr(t *testing.T) {
 	suite.createTempFile("main_test.go", testCode)
 
 	check := &TestsCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -283,7 +284,7 @@ func TestFail(t *testing.T) {
 	suite.createTempFile("main_test.go", testCode)
 
 	check := &TestsCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -313,7 +314,7 @@ func TestFail(t *testing.T) {
 	suite.createTempFile("main_test.go", testCode)
 
 	check := &TestsCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -324,4 +325,46 @@ func TestFail(t *testing.T) {
 // TestTestsTestSuite runs all the tests in the suite.
 func TestTestsTestSuite(t *testing.T) {
 	suite.Run(t, new(TestsTestSuite))
+}
+
+// TestTestsCheck_Run_UntestedPackageDoesNotMaskFailure verifies a package
+// without tests cannot turn a failing test elsewhere into a pass.
+func (suite *TestsTestSuite) TestTestsCheck_Run_UntestedPackageDoesNotMaskFailure() {
+	suite.createGoMod()
+	suite.createTempFile("main.go", "package main\n\nfunc main() {}\n")
+	suite.createTempFile("lib/lib.go", "package lib\n")
+	suite.createTempFile("lib/lib_test.go", `package lib
+
+import "testing"
+
+func TestFail(t *testing.T) {
+	t.Fatal("boom")
+}
+`)
+
+	check := &TestsCheck{}
+	result, err := check.Run(context.Background(), suite.tempDir)
+
+	suite.NoError(err)
+	suite.False(result.Passed)
+	suite.Equal(checker.Fail, result.Status)
+}
+
+func TestHasTestedPackages(t *testing.T) {
+	tests := []struct {
+		name   string
+		output string
+		want   bool
+	}{
+		{"only untested", "?   \texample.com/m\t[no test files]\n", false},
+		{"mixed", "?   \texample.com/m\t[no test files]\nok  \texample.com/m/pkg\t0.1s\n", true},
+		{"empty", "", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := hasTestedPackages(tt.output); got != tt.want {
+				t.Errorf("hasTestedPackages() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

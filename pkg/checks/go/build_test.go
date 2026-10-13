@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -82,7 +83,7 @@ func main() {
 	suite.createTempFile("main.go", validCode)
 
 	check := &BuildCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -109,7 +110,7 @@ func main() {
 	suite.createTempFile("main.go", invalidCode)
 
 	check := &BuildCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -123,7 +124,7 @@ func (suite *BuildTestSuite) TestBuildCheck_Run_EmptyDirectory() {
 	suite.createGoMod()
 
 	check := &BuildCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// Empty directory with go.mod should build successfully (no code to build)
@@ -159,7 +160,7 @@ func Helper() {
 	suite.createTempFile("sub/helper.go", subCode)
 
 	check := &BuildCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -180,7 +181,7 @@ func main() {
 	suite.createTempFile("main.go", code)
 
 	check := &BuildCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	// go build requires go.mod, so this should fail
 	suite.NoError(err)
@@ -204,7 +205,7 @@ func main() {
 	suite.createTempFile("main.go", invalidCode)
 
 	check := &BuildCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -227,7 +228,7 @@ func main() {
 	suite.createTempFile("main.go", invalidCode)
 
 	check := &BuildCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -265,7 +266,7 @@ func DoSomething() {
 	suite.createTempFile("utils/helper.go", utilsCode)
 
 	check := &BuildCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)

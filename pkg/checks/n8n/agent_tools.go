@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -19,7 +20,7 @@ type AgentToolsCheck struct {
 func (c *AgentToolsCheck) ID() string   { return "n8n:agent-tools" }
 func (c *AgentToolsCheck) Name() string { return "Agent Tool Inventory" }
 
-func (c *AgentToolsCheck) Run(path string) (checker.Result, error) {
+func (c *AgentToolsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	bundle, early := loadBundle(c, path)
 	if early != nil {
 		return *early, nil

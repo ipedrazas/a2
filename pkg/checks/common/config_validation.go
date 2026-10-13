@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *ConfigValidationCheck) ID() string   { return "common:config_validation
 func (c *ConfigValidationCheck) Name() string { return "Config Validation" }
 
 // Run checks for configuration validation libraries and patterns.
-func (c *ConfigValidationCheck) Run(path string) (checker.Result, error) {
+func (c *ConfigValidationCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string

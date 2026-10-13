@@ -1,6 +1,7 @@
 package devops
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,7 +18,7 @@ func (c *HelmCheck) ID() string   { return "devops:helm" }
 func (c *HelmCheck) Name() string { return "Helm Charts" }
 
 // Run checks for Helm charts and validates them if helm is installed.
-func (c *HelmCheck) Run(path string) (checker.Result, error) {
+func (c *HelmCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Check if helm charts exist
@@ -35,7 +36,7 @@ func (c *HelmCheck) Run(path string) (checker.Result, error) {
 	var warnings []string
 	var passed []string
 	for _, chart := range charts {
-		result := rb.RunCommand(filepath.Dir(chart), "helm", "lint", filepath.Dir(chart))
+		result := rb.RunCommand(ctx, filepath.Dir(chart), "helm", "lint", filepath.Dir(chart))
 		if result.Success() {
 			passed = append(passed, chart)
 		} else {

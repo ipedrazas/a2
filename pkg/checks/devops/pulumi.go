@@ -1,6 +1,7 @@
 package devops
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,7 +18,7 @@ func (c *PulumiCheck) ID() string   { return "devops:pulumi" }
 func (c *PulumiCheck) Name() string { return "Pulumi Configuration" }
 
 // Run checks for Pulumi files and validates them if pulumi is installed.
-func (c *PulumiCheck) Run(path string) (checker.Result, error) {
+func (c *PulumiCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Check if pulumi files exist
@@ -32,7 +33,7 @@ func (c *PulumiCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run pulumi validate
-	result := rb.RunCommand(path, "pulumi", "validate", "--offline")
+	result := rb.RunCommand(ctx, path, "pulumi", "validate", "--offline")
 
 	if result.Success() {
 		return rb.Pass("pulumi validate passed"), nil

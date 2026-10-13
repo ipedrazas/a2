@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -41,7 +42,7 @@ receivers:
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -57,7 +58,7 @@ sampling:
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -78,7 +79,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -98,7 +99,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -118,7 +119,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -138,7 +139,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -158,7 +159,7 @@ func (s *TracingCheckTestSuite) TestNodeOpenTelemetry() {
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -177,7 +178,7 @@ func (s *TracingCheckTestSuite) TestNodeDatadog() {
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -196,7 +197,7 @@ func (s *TracingCheckTestSuite) TestNodeSentry() {
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -215,7 +216,7 @@ func (s *TracingCheckTestSuite) TestNodeElasticAPM() {
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -230,7 +231,7 @@ opentelemetry-instrumentation==0.42b0`
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -244,7 +245,7 @@ func (s *TracingCheckTestSuite) TestPythonDatadog() {
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -258,7 +259,7 @@ func (s *TracingCheckTestSuite) TestPythonSentry() {
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -275,7 +276,7 @@ func (s *TracingCheckTestSuite) TestJavaOpenTelemetry() {
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -292,7 +293,7 @@ func (s *TracingCheckTestSuite) TestJavaSpringSleuth() {
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -306,7 +307,7 @@ func (s *TracingCheckTestSuite) TestJavaMicrometer() {
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -330,7 +331,7 @@ jobs:
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -350,7 +351,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -360,7 +361,7 @@ require (
 
 func (s *TracingCheckTestSuite) TestEmptyDirectory() {
 	check := &TracingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

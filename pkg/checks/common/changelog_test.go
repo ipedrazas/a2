@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -47,7 +48,7 @@ func (s *ChangelogCheckTestSuite) TestChangelogMdExists() {
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -65,7 +66,7 @@ v1.0.0 - Initial release
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -83,7 +84,7 @@ func (s *ChangelogCheckTestSuite) TestHistoryFileExists() {
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -99,7 +100,7 @@ func (s *ChangelogCheckTestSuite) TestNewsFileExists() {
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -116,7 +117,7 @@ builds:
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -132,7 +133,7 @@ func (s *ChangelogCheckTestSuite) TestSemanticReleaseConfigured() {
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -148,7 +149,7 @@ func (s *ChangelogCheckTestSuite) TestReleasePleaseConfigured() {
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -168,7 +169,7 @@ func (s *ChangelogCheckTestSuite) TestChangesetsConfigured() {
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -191,7 +192,7 @@ func (s *ChangelogCheckTestSuite) TestChangelogWithGoReleaser() {
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -228,7 +229,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -261,7 +262,7 @@ func (s *ChangelogCheckTestSuite) TestConventionalChangelogFormat() {
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -278,7 +279,7 @@ func (s *ChangelogCheckTestSuite) TestPlainTextFormat() {
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -292,7 +293,7 @@ func (s *ChangelogCheckTestSuite) TestNoChangelog() {
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -302,7 +303,7 @@ func (s *ChangelogCheckTestSuite) TestNoChangelog() {
 
 func (s *ChangelogCheckTestSuite) TestEmptyDirectory() {
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -320,7 +321,7 @@ Initial release
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -339,7 +340,7 @@ func (s *ChangelogCheckTestSuite) TestStandardVersionConfigured() {
 	s.Require().NoError(err)
 
 	check := &ChangelogCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

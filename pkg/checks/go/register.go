@@ -163,7 +163,7 @@ func Register(cfg *config.Config) []checker.CheckRegistration {
 				Languages:   []checker.Language{checker.LangGo},
 				Critical:    false,
 				Order:       235,
-				Suggestion:  "Run 'go get -u ./...' to update dependencies",
+				Suggestion:  "Run 'go get -u -t ./...' to update dependencies (including test-only ones)",
 				Command:     "go list -m -u all",
 			},
 		},

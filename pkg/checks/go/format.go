@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -13,11 +14,11 @@ type FormatCheck struct{}
 func (c *FormatCheck) ID() string   { return "go:format" }
 func (c *FormatCheck) Name() string { return "Go Format" }
 
-func (c *FormatCheck) Run(path string) (checker.Result, error) {
+func (c *FormatCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
 	// Run gofmt -l to list files that need formatting
-	result := rb.RunCommand(path, "gofmt", "-l", ".")
+	result := rb.RunCommand(ctx, path, "gofmt", "-l", ".")
 
 	// gofmt returns non-zero if there's an error (not just unformatted files)
 	if result.Err != nil && result.Stderr != "" {

@@ -1,6 +1,8 @@
 package javacheck
 
 import (
+	"context"
+
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
@@ -13,7 +15,7 @@ func (c *ProjectCheck) ID() string   { return "java:project" }
 func (c *ProjectCheck) Name() string { return "Java Project" }
 
 // Run checks for Maven or Gradle project files.
-func (c *ProjectCheck) Run(path string) (checker.Result, error) {
+func (c *ProjectCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	buildTool := detectBuildTool(path)

@@ -1,6 +1,7 @@
 package devops
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -35,7 +36,7 @@ func (s *AnsibleCheckTestSuite) TestName() {
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_NoAnsibleFiles() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -50,7 +51,7 @@ inventory = ./inventory
 remote_user = ansible`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -70,7 +71,7 @@ func (s *AnsibleCheckTestSuite) TestRun_PlaybookYml() {
         state: present`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -87,7 +88,7 @@ func (s *AnsibleCheckTestSuite) TestRun_PlaybookYaml() {
     - myrole`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -106,7 +107,7 @@ func (s *AnsibleCheckTestSuite) TestRun_SiteYml() {
         msg: "Hello"`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -123,7 +124,7 @@ func (s *AnsibleCheckTestSuite) TestRun_SiteYaml() {
       ansible.builtin.ping:`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -140,7 +141,7 @@ func (s *AnsibleCheckTestSuite) TestRun_MainYml() {
   gather_facts: yes`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -153,7 +154,7 @@ func (s *AnsibleCheckTestSuite) TestRun_RolesDirectory() {
 	err := os.MkdirAll(rolesDir, 0755)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -166,7 +167,7 @@ func (s *AnsibleCheckTestSuite) TestRun_AnsibleDirectory() {
 	err := os.MkdirAll(ansibleDir, 0755)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -179,7 +180,7 @@ func (s *AnsibleCheckTestSuite) TestRun_DotAnsibleDirectory() {
 	err := os.MkdirAll(dotAnsibleDir, 0755)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -202,7 +203,7 @@ func (s *AnsibleCheckTestSuite) TestRun_PlaybookInAnsibleDir() {
         msg: "Deploying"`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -223,7 +224,7 @@ func (s *AnsibleCheckTestSuite) TestRun_PlaybookInPlaybooksDir() {
     - deploy`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -244,7 +245,7 @@ func (s *AnsibleCheckTestSuite) TestRun_RoleInRolesDir() {
     state: present`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -260,7 +261,7 @@ func (s *AnsibleCheckTestSuite) TestRun_DoesNotConfuseWithNonAnsibleYaml() {
   port: 5432`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -270,7 +271,7 @@ func (s *AnsibleCheckTestSuite) TestRun_DoesNotConfuseWithNonAnsibleYaml() {
 }
 
 func (s *AnsibleCheckTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangCommon, result.Language)
@@ -289,7 +290,7 @@ func (s *AnsibleCheckTestSuite) TestRun_IgnoresHiddenDirs() {
   tasks: []`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -310,7 +311,7 @@ func (s *AnsibleCheckTestSuite) TestRun_IgnoresVendorDirs() {
   tasks: []`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -330,7 +331,7 @@ func (s *AnsibleCheckTestSuite) TestRun_SkipsRequirementsAndGalaxyFiles() {
   - name: common`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -354,7 +355,7 @@ func (s *AnsibleCheckTestSuite) TestRun_MultipleAnsibleIndicators() {
 	err = os.MkdirAll(rolesDir, 0755)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

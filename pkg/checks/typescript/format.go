@@ -2,6 +2,7 @@ package typescriptcheck
 
 import (
 	"bytes"
+	"context"
 	"os/exec"
 	"strings"
 
@@ -20,7 +21,7 @@ func (c *FormatCheck) ID() string   { return "typescript:format" }
 func (c *FormatCheck) Name() string { return "TypeScript Format" }
 
 // Run checks code formatting.
-func (c *FormatCheck) Run(path string) (checker.Result, error) {
+func (c *FormatCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json
@@ -34,11 +35,11 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 
 	switch formatter {
 	case "prettier":
-		return c.runPrettier(path, pm, rb)
+		return c.runPrettier(ctx, path, pm, rb)
 	case "biome":
-		return c.runBiome(path, pm, rb)
+		return c.runBiome(ctx, path, pm, rb)
 	case "dprint":
-		return c.runDprint(path, pm, rb)
+		return c.runDprint(ctx, path, pm, rb)
 	default:
 		return rb.Warn("No formatter configured (consider Prettier or Biome)"), nil
 	}
@@ -110,17 +111,17 @@ func (c *FormatCheck) detectPackageManager(path string) string {
 }
 
 // runPrettier checks formatting with Prettier.
-func (c *FormatCheck) runPrettier(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *FormatCheck) runPrettier(ctx context.Context, path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
-		cmd = exec.Command("yarn", "prettier", "--check", ".")
+		cmd = checkutil.Command(ctx, "yarn", "prettier", "--check", ".")
 	case "pnpm":
-		cmd = exec.Command("pnpm", "exec", "prettier", "--check", ".")
+		cmd = checkutil.Command(ctx, "pnpm", "exec", "prettier", "--check", ".")
 	case "bun":
-		cmd = exec.Command("bun", "run", "prettier", "--check", ".")
+		cmd = checkutil.Command(ctx, "bun", "run", "prettier", "--check", ".")
 	default:
-		cmd = exec.Command("npx", "prettier", "--check", ".")
+		cmd = checkutil.Command(ctx, "npx", "prettier", "--check", ".")
 	}
 	cmd.Dir = path
 
@@ -142,17 +143,17 @@ func (c *FormatCheck) runPrettier(path, pm string, rb *checkutil.ResultBuilder) 
 }
 
 // runBiome checks formatting with Biome.
-func (c *FormatCheck) runBiome(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *FormatCheck) runBiome(ctx context.Context, path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
-		cmd = exec.Command("yarn", "biome", "format", "--error-on-warnings", ".")
+		cmd = checkutil.Command(ctx, "yarn", "biome", "format", "--error-on-warnings", ".")
 	case "pnpm":
-		cmd = exec.Command("pnpm", "exec", "biome", "format", "--error-on-warnings", ".")
+		cmd = checkutil.Command(ctx, "pnpm", "exec", "biome", "format", "--error-on-warnings", ".")
 	case "bun":
-		cmd = exec.Command("bun", "run", "biome", "format", "--error-on-warnings", ".")
+		cmd = checkutil.Command(ctx, "bun", "run", "biome", "format", "--error-on-warnings", ".")
 	default:
-		cmd = exec.Command("npx", "@biomejs/biome", "format", "--error-on-warnings", ".")
+		cmd = checkutil.Command(ctx, "npx", "@biomejs/biome", "format", "--error-on-warnings", ".")
 	}
 	cmd.Dir = path
 
@@ -170,17 +171,17 @@ func (c *FormatCheck) runBiome(path, pm string, rb *checkutil.ResultBuilder) (ch
 }
 
 // runDprint checks formatting with dprint.
-func (c *FormatCheck) runDprint(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *FormatCheck) runDprint(ctx context.Context, path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
-		cmd = exec.Command("yarn", "dprint", "check")
+		cmd = checkutil.Command(ctx, "yarn", "dprint", "check")
 	case "pnpm":
-		cmd = exec.Command("pnpm", "exec", "dprint", "check")
+		cmd = checkutil.Command(ctx, "pnpm", "exec", "dprint", "check")
 	case "bun":
-		cmd = exec.Command("bun", "run", "dprint", "check")
+		cmd = checkutil.Command(ctx, "bun", "run", "dprint", "check")
 	default:
-		cmd = exec.Command("npx", "dprint", "check")
+		cmd = checkutil.Command(ctx, "npx", "dprint", "check")
 	}
 	cmd.Dir = path
 

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *APIDocsCheck) ID() string   { return "common:api_docs" }
 func (c *APIDocsCheck) Name() string { return "API Documentation" }
 
 // Run checks for API documentation files and generators.
-func (c *APIDocsCheck) Run(path string) (checker.Result, error) {
+func (c *APIDocsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string

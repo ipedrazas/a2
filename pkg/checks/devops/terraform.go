@@ -1,6 +1,7 @@
 package devops
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,7 +18,7 @@ func (c *TerraformCheck) ID() string   { return "devops:terraform" }
 func (c *TerraformCheck) Name() string { return "Terraform Configuration" }
 
 // Run checks for Terraform files and validates them if terraform is installed.
-func (c *TerraformCheck) Run(path string) (checker.Result, error) {
+func (c *TerraformCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Check if terraform files exist
@@ -37,12 +38,12 @@ func (c *TerraformCheck) Run(path string) (checker.Result, error) {
 	if !hasDotTerraform {
 		// Try to run terraform init, but don't fail if it fails
 		// Some repos might need backend config or credentials
-		_ = rb.RunCommand(path, "terraform", "init", "-backend=false")
+		_ = rb.RunCommand(ctx, path, "terraform", "init", "-backend=false")
 		// Silently ignore init failures - terraform validate might still work
 	}
 
 	// Run terraform validate
-	result := rb.RunCommand(path, "terraform", "validate")
+	result := rb.RunCommand(ctx, path, "terraform", "validate")
 
 	if result.Success() {
 		return rb.Pass("terraform validate passed"), nil

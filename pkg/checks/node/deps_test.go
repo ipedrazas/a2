@@ -1,6 +1,7 @@
 package nodecheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -42,7 +43,7 @@ func (suite *DepsTestSuite) createTempFile(name, content string) string {
 func (suite *DepsTestSuite) TestDepsCheck_Run_NoPackageJSON() {
 	check := &DepsCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -59,7 +60,7 @@ func (suite *DepsTestSuite) TestDepsCheck_Run_BunSkipped() {
 
 	check := &DepsCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -216,7 +217,7 @@ func (suite *DepsTestSuite) TestParseYarnAudit_DuplicateAdvisories() {
 func (suite *DepsTestSuite) TestDepsCheck_Run_NonExistentPath() {
 	check := &DepsCheck{}
 
-	result, err := check.Run("/nonexistent/path/that/does/not/exist")
+	result, err := check.Run(context.Background(), "/nonexistent/path/that/does/not/exist")
 
 	suite.NoError(err)
 	suite.False(result.Passed)

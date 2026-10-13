@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,7 +49,7 @@ func (suite *FilesTestSuite) TestFileExistsCheck_Run_AllFilesExist() {
 		Files: []string{"README.md", "LICENSE"},
 	}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -67,7 +68,7 @@ func (suite *FilesTestSuite) TestFileExistsCheck_Run_MissingFiles() {
 		Files: []string{"README.md", "LICENSE"},
 	}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -82,7 +83,7 @@ func (suite *FilesTestSuite) TestFileExistsCheck_Run_MultipleMissingFiles() {
 		Files: []string{"README.md", "LICENSE", "CONTRIBUTING.md"},
 	}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -99,7 +100,7 @@ func (suite *FilesTestSuite) TestFileExistsCheck_Run_EmptyFileList() {
 		Files: []string{},
 	}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -120,7 +121,7 @@ func (suite *FilesTestSuite) TestFileExistsCheck_Run_NestedFiles() {
 		Files: []string{"docs/README.md"},
 	}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -158,7 +159,7 @@ func (suite *FilesTestSuite) TestFileExistsCheck_Run_PartialMatch() {
 		Files: []string{"README.md", "LICENSE", "CONTRIBUTING.md"},
 	}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)

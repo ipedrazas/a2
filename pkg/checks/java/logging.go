@@ -2,6 +2,7 @@ package javacheck
 
 import (
 	"bufio"
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,7 +19,7 @@ func (c *LoggingCheck) ID() string   { return "java:logging" }
 func (c *LoggingCheck) Name() string { return "Java Logging" }
 
 // Run checks for structured logging libraries and anti-patterns.
-func (c *LoggingCheck) Run(path string) (checker.Result, error) {
+func (c *LoggingCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	var loggers []string

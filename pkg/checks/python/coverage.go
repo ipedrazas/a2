@@ -1,6 +1,7 @@
 package pythoncheck
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -26,7 +27,7 @@ func (c *CoverageCheck) SetCoverageThreshold(t float64) {
 	}
 }
 
-func (c *CoverageCheck) Run(path string) (checker.Result, error) {
+func (c *CoverageCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 
 	threshold := 80.0
@@ -34,7 +35,7 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 		threshold = c.Config.CoverageThreshold
 	}
 
-	result := runPythonCommand(rb, path, "pytest", "--cov=.", "--cov-report=term-missing", "-q")
+	result := runPythonCommand(ctx, rb, path, "pytest", "--cov=.", "--cov-report=term-missing", "-q")
 	output := result.CombinedOutput()
 
 	// Check if pytest or pytest-cov is not installed

@@ -1,6 +1,7 @@
 package typescriptcheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,7 +49,7 @@ func (s *DepsTestSuite) TestName() {
 }
 
 func (s *DepsTestSuite) TestRun_NoPackageJson() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -57,7 +58,7 @@ func (s *DepsTestSuite) TestRun_NoPackageJson() {
 }
 
 func (s *DepsTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangTypeScript, result.Language)
@@ -107,7 +108,7 @@ version: 2
 updates:
   - package-ecosystem: npm
 `)
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -117,7 +118,7 @@ updates:
 func (s *DepsTestSuite) TestRun_WithRenovate() {
 	s.writeFile("package.json", `{"name": "test"}`)
 	s.writeFile("renovate.json", `{}`)
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

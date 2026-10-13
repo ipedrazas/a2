@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -42,7 +43,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -62,7 +63,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -82,7 +83,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -102,7 +103,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -122,7 +123,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -141,7 +142,7 @@ func (s *ConfigValidationCheckTestSuite) TestNodeZod() {
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -160,7 +161,7 @@ func (s *ConfigValidationCheckTestSuite) TestNodeJoi() {
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -179,7 +180,7 @@ func (s *ConfigValidationCheckTestSuite) TestNodeYup() {
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -198,7 +199,7 @@ func (s *ConfigValidationCheckTestSuite) TestNodeAjv() {
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -217,7 +218,7 @@ func (s *ConfigValidationCheckTestSuite) TestNodeEnvalid() {
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -236,7 +237,7 @@ func (s *ConfigValidationCheckTestSuite) TestNodeDotenv() {
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -255,7 +256,7 @@ func (s *ConfigValidationCheckTestSuite) TestNestJSConfig() {
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -269,7 +270,7 @@ func (s *ConfigValidationCheckTestSuite) TestPythonPydantic() {
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -283,7 +284,7 @@ func (s *ConfigValidationCheckTestSuite) TestPythonPydanticSettings() {
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -297,7 +298,7 @@ func (s *ConfigValidationCheckTestSuite) TestPythonDynaconf() {
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -311,7 +312,7 @@ func (s *ConfigValidationCheckTestSuite) TestPythonMarshmallow() {
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -328,7 +329,7 @@ func (s *ConfigValidationCheckTestSuite) TestJavaHibernateValidator() {
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -342,7 +343,7 @@ func (s *ConfigValidationCheckTestSuite) TestJavaSpringBootConfig() {
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -360,7 +361,7 @@ serde = "1.0"`
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -378,7 +379,7 @@ figment = "0.10"`
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -396,7 +397,7 @@ clap = "4.0"`
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -415,7 +416,7 @@ func (s *ConfigValidationCheckTestSuite) TestTypeScriptStrict() {
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -437,7 +438,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -458,7 +459,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -468,7 +469,7 @@ require (
 
 func (s *ConfigValidationCheckTestSuite) TestEmptyDirectory() {
 	check := &ConfigValidationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

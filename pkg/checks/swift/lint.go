@@ -1,6 +1,7 @@
 package swiftcheck
 
 import (
+	"context"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -21,7 +22,7 @@ func (c *LintCheck) ID() string   { return "swift:lint" }
 func (c *LintCheck) Name() string { return "Swift Lint" }
 
 // Run executes swiftlint.
-func (c *LintCheck) Run(path string) (checker.Result, error) {
+func (c *LintCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangSwift)
 
 	// Check for Package.swift first
@@ -31,14 +32,14 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 
 	// Check if swiftlint is available
 	if _, err := exec.LookPath("swiftlint"); err != nil {
-		return rb.Info("SwiftLint not installed (install with 'brew install swiftlint')"), nil
+		return rb.ToolNotInstalled("SwiftLint", "install with 'brew install swiftlint'"), nil
 	}
 
 	// Check for SwiftLint config
 	hasConfig := safepath.Exists(path, ".swiftlint.yml") || safepath.Exists(path, ".swiftlint.yaml")
 
 	// Run swiftlint
-	cmd := exec.Command("swiftlint", "lint", "--quiet")
+	cmd := checkutil.Command(ctx, "swiftlint", "lint", "--quiet")
 	cmd.Dir = path
 	output, err := cmd.CombinedOutput()
 	outputStr := string(output)

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -41,7 +42,7 @@ require github.com/prometheus/client_golang v1.17.0
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -61,7 +62,7 @@ require go.opentelemetry.io/otel/sdk v1.19.0
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -80,7 +81,7 @@ require gopkg.in/DataDog/dd-trace-go.v1 v1.56.0
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -99,7 +100,7 @@ dependencies = [
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -115,7 +116,7 @@ statsd>=4.0.0
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -135,7 +136,7 @@ func (s *MetricsCheckTestSuite) TestNodePromClient() {
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -155,7 +156,7 @@ func (s *MetricsCheckTestSuite) TestNodeOpenTelemetry() {
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -174,7 +175,7 @@ func (s *MetricsCheckTestSuite) TestNodeDatadog() {
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -197,7 +198,7 @@ func (s *MetricsCheckTestSuite) TestJavaMicrometer() {
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -218,7 +219,7 @@ dependencies {
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -239,7 +240,7 @@ scrape_configs:
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -268,7 +269,7 @@ service:
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -289,7 +290,7 @@ func (s *MetricsCheckTestSuite) TestGrafanaDashboards() {
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -312,7 +313,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -333,7 +334,7 @@ require github.com/gin-gonic/gin v1.9.0
 	s.Require().NoError(err)
 
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -343,7 +344,7 @@ require github.com/gin-gonic/gin v1.9.0
 
 func (s *MetricsCheckTestSuite) TestEmptyDirectory() {
 	check := &MetricsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

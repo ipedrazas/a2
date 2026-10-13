@@ -1,6 +1,7 @@
 package javacheck
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *DepsCheck) ID() string   { return "java:deps" }
 func (c *DepsCheck) Name() string { return "Java Dependencies" }
 
 // Run checks for dependency vulnerability scanning tools.
-func (c *DepsCheck) Run(path string) (checker.Result, error) {
+func (c *DepsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	var tools []string

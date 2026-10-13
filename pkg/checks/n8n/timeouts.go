@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -22,7 +23,7 @@ type TimeoutsCheck struct{}
 func (c *TimeoutsCheck) ID() string   { return "n8n:timeouts" }
 func (c *TimeoutsCheck) Name() string { return "HTTP Timeout Discipline" }
 
-func (c *TimeoutsCheck) Run(path string) (checker.Result, error) {
+func (c *TimeoutsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	bundle, early := loadBundle(c, path)
 	if early != nil {
 		return *early, nil

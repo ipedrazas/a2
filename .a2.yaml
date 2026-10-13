@@ -45,15 +45,9 @@ external:
     severity: warn
     speed: slow
 
-# This check is an order of magnitude slower than the others
-  # Optional source_dir: run the command in a subdir (e.g. when Go code lives in backend/)
-  - id: gosec
-    name: Gosec
-    command: gosec
-    args: ["./..."]
-    severity: fail
-    speed: slow
-    # source_dir: backend   # uncomment if Go code is in backend/
+  # Gosec runs inside golangci-lint (see .golangci.yml). The standalone gosec
+  # binary (v2.29.0) cannot read Go 1.26 export data, so it analyses nothing
+  # and fails on type-check errors; re-add it once a release supports Go 1.26.
 
   - id: go:errcheck
     name: Error Check

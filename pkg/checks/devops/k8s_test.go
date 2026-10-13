@@ -1,6 +1,7 @@
 package devops
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -35,7 +36,7 @@ func (s *K8sCheckTestSuite) TestName() {
 }
 
 func (s *K8sCheckTestSuite) TestRun_NoK8sConfig() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -48,7 +49,7 @@ func (s *K8sCheckTestSuite) TestRun_HelmChartInRoot() {
 	err := os.WriteFile(chartYaml, []byte("apiVersion: v2\nname: myapp"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -65,7 +66,7 @@ func (s *K8sCheckTestSuite) TestRun_HelmChartInChartsDir() {
 	err = os.WriteFile(chartYaml, []byte("apiVersion: v2\nname: myapp"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -81,7 +82,7 @@ func (s *K8sCheckTestSuite) TestRun_HelmChartInHelmDir() {
 	err = os.WriteFile(chartYaml, []byte("apiVersion: v2\nname: myapp"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -93,7 +94,7 @@ func (s *K8sCheckTestSuite) TestRun_KustomizeInRoot() {
 	err := os.WriteFile(kustomizeYaml, []byte("resources:\n  - deployment.yaml"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -109,7 +110,7 @@ func (s *K8sCheckTestSuite) TestRun_KustomizeInK8sDir() {
 	err = os.WriteFile(kustomizeYaml, []byte("resources:\n  - deployment.yaml"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -125,7 +126,7 @@ func (s *K8sCheckTestSuite) TestRun_KustomizeInBaseDir() {
 	err = os.WriteFile(kustomizeYaml, []byte("resources:\n  - deployment.yaml"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -145,7 +146,7 @@ metadata:
 	err = os.WriteFile(deploymentYaml, []byte(content), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -165,7 +166,7 @@ metadata:
 	err = os.WriteFile(serviceYaml, []byte(content), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -185,7 +186,7 @@ metadata:
 	err = os.WriteFile(configmapYaml, []byte(content), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -197,7 +198,7 @@ func (s *K8sCheckTestSuite) TestRun_ManifestsInRoot() {
 	err := os.WriteFile(deploymentYaml, []byte("apiVersion: apps/v1\nkind: Deployment"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -209,7 +210,7 @@ func (s *K8sCheckTestSuite) TestRun_ServiceInRoot() {
 	err := os.WriteFile(serviceYaml, []byte("apiVersion: v1\nkind: Service"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -221,7 +222,7 @@ func (s *K8sCheckTestSuite) TestRun_DockerCompose() {
 	err := os.WriteFile(composeYaml, []byte("version: '3'\nservices:"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -233,7 +234,7 @@ func (s *K8sCheckTestSuite) TestRun_ComposeYml() {
 	err := os.WriteFile(composeYml, []byte("version: '3'\nservices:"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -245,7 +246,7 @@ func (s *K8sCheckTestSuite) TestRun_Skaffold() {
 	err := os.WriteFile(skaffoldYaml, []byte("apiVersion: skaffold/v2\nkind: Config"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -257,7 +258,7 @@ func (s *K8sCheckTestSuite) TestRun_Tilt() {
 	err := os.WriteFile(tiltfile, []byte("k8s_yaml('k8s/deployment.yaml')"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -273,7 +274,7 @@ func (s *K8sCheckTestSuite) TestRun_MultipleConfigs() {
 	err = os.WriteFile(composeYaml, []byte("version: '3'\nservices:"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -294,7 +295,7 @@ metadata:
 	err = os.WriteFile(deploymentYaml, []byte(content), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -310,7 +311,7 @@ func (s *K8sCheckTestSuite) TestRun_NonK8sYamlIgnored() {
 	err = os.WriteFile(configYaml, []byte("database:\n  host: localhost"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -318,7 +319,7 @@ func (s *K8sCheckTestSuite) TestRun_NonK8sYamlIgnored() {
 }
 
 func (s *K8sCheckTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangCommon, result.Language)
@@ -337,7 +338,7 @@ metadata:
 	err = os.WriteFile(statefulsetYaml, []byte(content), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -356,7 +357,7 @@ metadata:
 	err = os.WriteFile(daemonsetYaml, []byte(content), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -375,7 +376,7 @@ metadata:
 	err = os.WriteFile(networkPolicyYaml, []byte(content), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

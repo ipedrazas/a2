@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
@@ -16,7 +17,7 @@ type DockerfileCheck struct{}
 func (c *DockerfileCheck) ID() string   { return "common:dockerfile" }
 func (c *DockerfileCheck) Name() string { return "Container Ready" }
 
-func (c *DockerfileCheck) Run(path string) (checker.Result, error) {
+func (c *DockerfileCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Find Dockerfile
@@ -30,7 +31,7 @@ func (c *DockerfileCheck) Run(path string) (checker.Result, error) {
 
 	// Priority 1: If trivy is installed, scan the Dockerfile
 	if trivyInstalled {
-		return c.runTrivy(path, dockerfile, rb)
+		return c.runTrivy(ctx, path, dockerfile, rb)
 	}
 
 	// Priority 2: Fall back to basic file existence check
@@ -55,11 +56,11 @@ func (c *DockerfileCheck) findDockerfile(path string) string {
 }
 
 // runTrivy executes trivy to scan the Dockerfile for misconfigurations.
-func (c *DockerfileCheck) runTrivy(path, dockerfile string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *DockerfileCheck) runTrivy(ctx context.Context, path, dockerfile string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	// Run trivy config scan on the Dockerfile
 	args := []string{"config", "--exit-code", "0", "--format", "json", dockerfile}
 
-	result := rb.RunCommand(path, "trivy", args...)
+	result := rb.RunCommand(ctx, path, "trivy", args...)
 	output := result.CombinedOutput()
 
 	// Check for .dockerignore

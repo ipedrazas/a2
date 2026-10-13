@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ type SecretsCheck struct{}
 func (c *SecretsCheck) ID() string   { return "n8n:secrets" }
 func (c *SecretsCheck) Name() string { return "Hardcoded Secrets" }
 
-func (c *SecretsCheck) Run(path string) (checker.Result, error) {
+func (c *SecretsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	bundle, early := loadBundle(c, path)
 	if early != nil {
 		return *early, nil

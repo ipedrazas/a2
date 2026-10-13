@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -33,12 +34,12 @@ type jscpdReport struct {
 }
 
 // Run checks for code duplication using jscpd or config file detection.
-func (c *DuplicationCheck) Run(path string) (checker.Result, error) {
+func (c *DuplicationCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Priority 1: Run jscpd if installed
 	if checkutil.ToolAvailable("jscpd") {
-		return c.runJscpd(path, rb)
+		return c.runJscpd(ctx, path, rb)
 	}
 
 	// Priority 2: Check if duplication tooling is configured
@@ -52,7 +53,7 @@ func (c *DuplicationCheck) Run(path string) (checker.Result, error) {
 }
 
 // runJscpd executes jscpd and parses the JSON report file.
-func (c *DuplicationCheck) runJscpd(path string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *DuplicationCheck) runJscpd(ctx context.Context, path string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	// jscpd requires a writable output directory for the JSON reporter
 	tmpDir, err := os.MkdirTemp("", "a2-jscpd-*")
 	if err != nil {
@@ -64,7 +65,7 @@ func (c *DuplicationCheck) runJscpd(path string, rb *checkutil.ResultBuilder) (c
 
 	args := []string{"--reporters", "json", "--output", tmpDir, "--silent", "."}
 
-	result := rb.RunCommand(path, "jscpd", args...)
+	result := rb.RunCommand(ctx, path, "jscpd", args...)
 	output := result.CombinedOutput()
 
 	// Read the JSON report file that jscpd writes, scoped to tmpDir

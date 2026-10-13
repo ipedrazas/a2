@@ -1,6 +1,7 @@
 package nodecheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -43,7 +44,7 @@ func (suite *BuildTestSuite) createTempFile(name, content string) string {
 func (suite *BuildTestSuite) TestBuildCheck_Run_NoPackageJSON() {
 	check := &BuildCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -127,7 +128,7 @@ func (suite *BuildTestSuite) TestBuildCheck_DetectPackageManager_ConfigOverride(
 func (suite *BuildTestSuite) TestBuildCheck_Run_NonExistentPath() {
 	check := &BuildCheck{}
 
-	result, err := check.Run("/nonexistent/path/that/does/not/exist")
+	result, err := check.Run(context.Background(), "/nonexistent/path/that/does/not/exist")
 
 	suite.NoError(err)
 	suite.False(result.Passed)

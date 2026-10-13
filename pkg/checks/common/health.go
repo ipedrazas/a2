@@ -2,6 +2,7 @@ package common
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -18,7 +19,7 @@ type HealthCheck struct{}
 func (c *HealthCheck) ID() string   { return "common:health" }
 func (c *HealthCheck) Name() string { return "Health Endpoint" }
 
-func (c *HealthCheck) Run(path string) (checker.Result, error) {
+func (c *HealthCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Resolve to absolute path so Walk and OpenPath use the same root (avoids

@@ -1,6 +1,7 @@
 package typescriptcheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -32,7 +33,7 @@ func (s *DepsFreshnessCheckTestSuite) TestIDAndName() {
 
 func (s *DepsFreshnessCheckTestSuite) TestNoPackageJSON() {
 	check := &DepsFreshnessCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Fail, result.Status)

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *EnvCheck) ID() string   { return "common:env" }
 func (c *EnvCheck) Name() string { return "Environment Config" }
 
 // Run checks for proper environment variable handling.
-func (c *EnvCheck) Run(path string) (checker.Result, error) {
+func (c *EnvCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var findings []string

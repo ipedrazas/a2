@@ -2,6 +2,7 @@ package devops
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,7 +18,7 @@ type K8sCheck struct{}
 func (c *K8sCheck) ID() string   { return "devops:k8s" }
 func (c *K8sCheck) Name() string { return "Kubernetes Ready" }
 
-func (c *K8sCheck) Run(path string) (checker.Result, error) {
+func (c *K8sCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var foundConfigs []string

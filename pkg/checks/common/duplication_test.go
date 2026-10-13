@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -42,7 +43,7 @@ func (s *DuplicationCheckTestSuite) TestNoToolNoConfig() {
 	}
 
 	check := &DuplicationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -58,7 +59,7 @@ func (s *DuplicationCheckTestSuite) TestConfigFileDetected_JscpdJSON() {
 	s.Require().NoError(err)
 
 	check := &DuplicationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -75,7 +76,7 @@ func (s *DuplicationCheckTestSuite) TestConfigFileDetected_SonarQube() {
 	s.Require().NoError(err)
 
 	check := &DuplicationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -98,7 +99,7 @@ func main() {
 	s.Require().NoError(err)
 
 	check := &DuplicationCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	// Should pass or at least not fail

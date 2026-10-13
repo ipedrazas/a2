@@ -1,6 +1,7 @@
 package pythoncheck
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -15,7 +16,7 @@ type DepsFreshnessCheck struct{}
 func (c *DepsFreshnessCheck) ID() string   { return "python:deps_freshness" }
 func (c *DepsFreshnessCheck) Name() string { return "Python Dependency Freshness" }
 
-func (c *DepsFreshnessCheck) Run(path string) (checker.Result, error) {
+func (c *DepsFreshnessCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 
 	hasPython := safepath.Exists(path, "pyproject.toml") ||
@@ -30,7 +31,7 @@ func (c *DepsFreshnessCheck) Run(path string) (checker.Result, error) {
 		return rb.ToolNotInstalled("pip", ""), nil
 	}
 
-	result := runPythonCommand(rb, path, "pip", "list", "--outdated", "--format=columns")
+	result := runPythonCommand(ctx, rb, path, "pip", "list", "--outdated", "--format=columns")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

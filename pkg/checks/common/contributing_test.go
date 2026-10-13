@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -39,7 +40,7 @@ Thank you for contributing!
 	s.Require().NoError(err)
 
 	check := &ContributingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -54,7 +55,7 @@ Contributing guidelines here.
 	s.Require().NoError(err)
 
 	check := &ContributingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -73,7 +74,7 @@ func (s *ContributingCheckTestSuite) TestContributingInGithub() {
 	s.Require().NoError(err)
 
 	check := &ContributingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -92,7 +93,7 @@ func (s *ContributingCheckTestSuite) TestPRTemplate() {
 	s.Require().NoError(err)
 
 	check := &ContributingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -111,7 +112,7 @@ func (s *ContributingCheckTestSuite) TestPRTemplateLowercase() {
 	s.Require().NoError(err)
 
 	check := &ContributingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -130,7 +131,7 @@ func (s *ContributingCheckTestSuite) TestIssueTemplateFile() {
 	s.Require().NoError(err)
 
 	check := &ContributingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -149,7 +150,7 @@ name: Bug Report
 	s.Require().NoError(err)
 
 	check := &ContributingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -164,7 +165,7 @@ func (s *ContributingCheckTestSuite) TestCodeowners() {
 	s.Require().NoError(err)
 
 	check := &ContributingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -183,7 +184,7 @@ func (s *ContributingCheckTestSuite) TestCodeownersInGithub() {
 	s.Require().NoError(err)
 
 	check := &ContributingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -209,7 +210,7 @@ func (s *ContributingCheckTestSuite) TestMultipleFound() {
 	s.Require().NoError(err)
 
 	check := &ContributingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -225,7 +226,7 @@ func (s *ContributingCheckTestSuite) TestNoContributingFound() {
 	s.Require().NoError(err)
 
 	check := &ContributingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -235,7 +236,7 @@ func (s *ContributingCheckTestSuite) TestNoContributingFound() {
 
 func (s *ContributingCheckTestSuite) TestEmptyDirectory() {
 	check := &ContributingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

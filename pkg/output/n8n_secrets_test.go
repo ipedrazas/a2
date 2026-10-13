@@ -1,6 +1,7 @@
 package output_test
 
 import (
+	"context"
 	"io"
 	"os"
 	"strings"
@@ -27,7 +28,7 @@ func TestN8nSecretsAbsentFromJSONOutput(t *testing.T) {
 	// Parallel matches how `a2 check` runs (config default) and avoids the
 	// sequential runner's veto-abort on the first critical failure, so every
 	// check's output is present to scan.
-	result := runner.RunSuiteWithOptions(vulnerableFixtures, regs, runner.RunSuiteOptions{
+	result := runner.RunSuiteWithOptions(context.Background(), vulnerableFixtures, regs, runner.RunSuiteOptions{
 		Parallel: true,
 		Timeout:  time.Minute,
 	})

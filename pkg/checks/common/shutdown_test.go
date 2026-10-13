@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -58,7 +59,7 @@ func main() {
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -98,7 +99,7 @@ func main() {
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -117,7 +118,7 @@ require github.com/oklog/run v1.1.0
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -152,7 +153,7 @@ if __name__ == '__main__':
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -181,7 +182,7 @@ if __name__ == '__main__':
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -219,7 +220,7 @@ server.listen(3000);
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -238,7 +239,7 @@ func (s *ShutdownCheckTestSuite) TestNodeHttpTerminator() {
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -257,7 +258,7 @@ func (s *ShutdownCheckTestSuite) TestNodeTerminus() {
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -293,7 +294,7 @@ public class Application {
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -328,7 +329,7 @@ public class MyService {
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -357,7 +358,7 @@ spec:
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -389,7 +390,7 @@ spec:
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -414,7 +415,7 @@ spec:
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -461,7 +462,7 @@ spec:
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -491,7 +492,7 @@ func main() {
 	s.Require().NoError(err)
 
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -501,7 +502,7 @@ func main() {
 
 func (s *ShutdownCheckTestSuite) TestEmptyDirectory() {
 	check := &ShutdownCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

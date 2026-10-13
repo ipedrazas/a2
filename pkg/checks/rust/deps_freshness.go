@@ -1,6 +1,7 @@
 package rustcheck
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -15,7 +16,7 @@ type DepsFreshnessCheck struct{}
 func (c *DepsFreshnessCheck) ID() string   { return "rust:deps_freshness" }
 func (c *DepsFreshnessCheck) Name() string { return "Rust Dependency Freshness" }
 
-func (c *DepsFreshnessCheck) Run(path string) (checker.Result, error) {
+func (c *DepsFreshnessCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	if !safepath.Exists(path, "Cargo.toml") {
@@ -30,7 +31,7 @@ func (c *DepsFreshnessCheck) Run(path string) (checker.Result, error) {
 		return rb.ToolNotInstalled("cargo-outdated", "cargo install cargo-outdated"), nil
 	}
 
-	result := rb.RunCommand(path, "cargo", "outdated", "--root-deps-only")
+	result := rb.RunCommand(ctx, path, "cargo", "outdated", "--root-deps-only")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

@@ -1,6 +1,7 @@
 package typescriptcheck
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -23,7 +24,7 @@ func (c *CoverageCheck) Name() string                   { return "TypeScript Cov
 func (c *CoverageCheck) SetCoverageThreshold(t float64) { c.Threshold = t }
 
 // Run checks for coverage tooling and reports.
-func (c *CoverageCheck) Run(path string) (checker.Result, error) {
+func (c *CoverageCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json

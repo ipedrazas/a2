@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -13,10 +14,10 @@ type RaceCheck struct{}
 func (c *RaceCheck) ID() string   { return "go:race" }
 func (c *RaceCheck) Name() string { return "Go Race Detection" }
 
-func (c *RaceCheck) Run(path string) (checker.Result, error) {
+func (c *RaceCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
-	result := rb.RunCommand(path, "go", "test", "-race", "-short", "./...")
+	result := rb.RunCommand(ctx, path, "go", "test", "-race", "-short", "./...")
 	output := result.CombinedOutput()
 
 	// Check for race conditions in output
@@ -24,14 +25,14 @@ func (c *RaceCheck) Run(path string) (checker.Result, error) {
 		return rb.WarnWithOutput("Race condition detected", output), nil
 	}
 
-	// Handle no test files
-	if strings.Contains(output, "no test files") {
-		return rb.PassWithOutput("No test files to check for races", output), nil
-	}
-
-	// Handle test failures (separate from race detection)
+	// Handle test failures (separate from race detection). This must come
+	// before the no-test-files case so an untested package cannot mask it.
 	if !result.Success() {
 		return rb.WarnWithOutput("Tests failed during race detection", output), nil
+	}
+
+	if !hasTestedPackages(result.Stdout) {
+		return rb.PassWithOutput("No test files to check for races", output), nil
 	}
 
 	return rb.PassWithOutput("No race conditions detected", output), nil

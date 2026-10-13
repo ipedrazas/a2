@@ -1,7 +1,7 @@
 package rustcheck
 
 import (
-	"os/exec"
+	"context"
 	"regexp"
 	"strings"
 
@@ -17,7 +17,7 @@ func (c *TestsCheck) ID() string   { return "rust:tests" }
 func (c *TestsCheck) Name() string { return "Rust Tests" }
 
 // Run executes cargo test.
-func (c *TestsCheck) Run(path string) (checker.Result, error) {
+func (c *TestsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	// Check for Cargo.toml first
@@ -26,7 +26,7 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run cargo test
-	cmd := exec.Command("cargo", "test", "--quiet")
+	cmd := checkutil.Command(ctx, "cargo", "test", "--quiet")
 	cmd.Dir = path
 	output, err := cmd.CombinedOutput()
 	outputStr := string(output)

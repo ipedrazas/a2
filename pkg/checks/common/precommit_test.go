@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -42,7 +43,7 @@ func (s *PrecommitCheckTestSuite) TestPreCommitConfigYaml() {
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -61,7 +62,7 @@ func (s *PrecommitCheckTestSuite) TestPreCommitConfigYml() {
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -82,7 +83,7 @@ npm run lint
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -102,7 +103,7 @@ func (s *PrecommitCheckTestSuite) TestHuskyInPackageJson() {
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -124,7 +125,7 @@ func (s *PrecommitCheckTestSuite) TestHuskyConfigInPackageJson() {
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -142,7 +143,7 @@ func (s *PrecommitCheckTestSuite) TestLefthookYml() {
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -160,7 +161,7 @@ func (s *PrecommitCheckTestSuite) TestLefthookYaml() {
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -177,7 +178,7 @@ func (s *PrecommitCheckTestSuite) TestOvercommit() {
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -193,7 +194,7 @@ func (s *PrecommitCheckTestSuite) TestCommitlintConfigJs() {
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -209,7 +210,7 @@ func (s *PrecommitCheckTestSuite) TestCommitlintRc() {
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -229,7 +230,7 @@ func (s *PrecommitCheckTestSuite) TestCommitlintInPackageJson() {
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -245,7 +246,7 @@ func (s *PrecommitCheckTestSuite) TestLintStagedConfigJs() {
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -265,7 +266,7 @@ func (s *PrecommitCheckTestSuite) TestLintStagedInPackageJson() {
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -287,7 +288,7 @@ echo "Running pre-commit hook"
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -308,7 +309,7 @@ echo "Sample hook"
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -333,7 +334,7 @@ func (s *PrecommitCheckTestSuite) TestMultipleTools() {
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -348,7 +349,7 @@ func (s *PrecommitCheckTestSuite) TestNoPrecommitHooks() {
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -358,7 +359,7 @@ func (s *PrecommitCheckTestSuite) TestNoPrecommitHooks() {
 
 func (s *PrecommitCheckTestSuite) TestEmptyDirectory() {
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -379,7 +380,7 @@ npx --no-install commitlint --edit "$1"
 	s.Require().NoError(err)
 
 	check := &PrecommitCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

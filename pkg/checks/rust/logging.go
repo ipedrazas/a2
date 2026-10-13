@@ -1,6 +1,7 @@
 package rustcheck
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *LoggingCheck) ID() string   { return "rust:logging" }
 func (c *LoggingCheck) Name() string { return "Rust Logging" }
 
 // Run checks for structured logging libraries.
-func (c *LoggingCheck) Run(path string) (checker.Result, error) {
+func (c *LoggingCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	// Check for Cargo.toml first

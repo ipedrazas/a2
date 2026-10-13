@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -132,7 +133,7 @@ func LoadDir(dir string) (*Bundle, error) {
 		case perr == nil:
 			bundle.Workflows = append(bundle.Workflows, &WorkflowFile{Path: rel, Workflow: wf})
 			files = append(files, bundleFile{rel, data})
-		case perr == ErrNotWorkflow:
+		case errors.Is(perr, ErrNotWorkflow):
 			// Valid JSON, not an export (package.json, tsconfig, ...): ignore.
 		case bytes.Contains(data, []byte(`"nodes"`)):
 			// Broken JSON that mentions "nodes" is almost certainly a

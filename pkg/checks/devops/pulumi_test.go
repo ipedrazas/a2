@@ -1,6 +1,7 @@
 package devops
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -35,7 +36,7 @@ func (s *PulumiCheckTestSuite) TestName() {
 }
 
 func (s *PulumiCheckTestSuite) TestRun_NoPulumiFiles() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -50,7 +51,7 @@ runtime: nodejs
 description: A minimal Pulumi program`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	// Without pulumi: Info (tool not installed). With pulumi (e.g. in CI): Pass, Info, or Warn.
@@ -65,7 +66,7 @@ func (s *PulumiCheckTestSuite) TestRun_PulumiYml() {
 runtime: python`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -79,7 +80,7 @@ func (s *PulumiCheckTestSuite) TestRun_PulumiGoYaml() {
 runtime: go`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -93,7 +94,7 @@ func (s *PulumiCheckTestSuite) TestRun_PulumiPythonYaml() {
 runtime: python`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -107,7 +108,7 @@ func (s *PulumiCheckTestSuite) TestRun_PulumiTsYaml() {
 runtime: nodejs`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -121,7 +122,7 @@ func (s *PulumiCheckTestSuite) TestRun_PulumiJavaScriptYaml() {
 runtime: nodejs`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -135,7 +136,7 @@ func (s *PulumiCheckTestSuite) TestRun_PulumiCsYaml() {
 runtime: dotnet`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -149,7 +150,7 @@ func (s *PulumiCheckTestSuite) TestRun_PulumiJavaYaml() {
 runtime: java`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -163,7 +164,7 @@ func (s *PulumiCheckTestSuite) TestRun_PulumiYamlYaml() {
 runtime: yaml`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -176,7 +177,7 @@ func (s *PulumiCheckTestSuite) TestRun_PulumiDirectory() {
 	err := os.MkdirAll(pulumiDir, 0755)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -189,7 +190,7 @@ func (s *PulumiCheckTestSuite) TestRun_DotPulumiDirectory() {
 	err := os.MkdirAll(dotPulumiDir, 0755)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -207,7 +208,7 @@ func (s *PulumiCheckTestSuite) TestRun_PulumiInSubdirectory() {
 runtime: nodejs`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -227,7 +228,7 @@ runtime: nodejs`), 0644)
 	err = os.MkdirAll(dotPulumiDir, 0755)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -236,7 +237,7 @@ runtime: nodejs`), 0644)
 }
 
 func (s *PulumiCheckTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangCommon, result.Language)
@@ -253,7 +254,7 @@ func (s *PulumiCheckTestSuite) TestRun_IgnoresHiddenDirs() {
 runtime: nodejs`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -271,7 +272,7 @@ func (s *PulumiCheckTestSuite) TestRun_IgnoresVendorDirs() {
 runtime: nodejs`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -292,7 +293,7 @@ metadata:
 	err = os.WriteFile(deploymentYaml, []byte(content), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -310,7 +311,7 @@ func (s *PulumiCheckTestSuite) TestRun_DoesNotConfuseWithHelmCharts() {
 name: mychart`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -328,7 +329,7 @@ func (s *PulumiCheckTestSuite) TestRun_DetectsNestedPulumiFile() {
 runtime: go`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,

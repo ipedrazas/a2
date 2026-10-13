@@ -1,6 +1,7 @@
 package typescriptcheck
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -36,7 +37,7 @@ func (s *TypeTestSuite) TestName() {
 }
 
 func (s *TypeTestSuite) TestRun_NoTsconfig() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -45,7 +46,7 @@ func (s *TypeTestSuite) TestRun_NoTsconfig() {
 }
 
 func (s *TypeTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangTypeScript, result.Language)

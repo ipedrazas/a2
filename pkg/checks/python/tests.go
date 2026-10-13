@@ -1,6 +1,7 @@
 package pythoncheck
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -17,7 +18,7 @@ type TestsCheck struct {
 func (c *TestsCheck) ID() string   { return "python:tests" }
 func (c *TestsCheck) Name() string { return "Python Tests" }
 
-func (c *TestsCheck) Run(path string) (checker.Result, error) {
+func (c *TestsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 	runner := c.detectTestRunner(path)
 
@@ -25,11 +26,11 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	var collectResult *checkutil.CommandResult
 	switch runner {
 	case "pytest":
-		collectResult = runPythonCommand(rb, path, "pytest", "--collect-only", "-q")
+		collectResult = runPythonCommand(ctx, rb, path, "pytest", "--collect-only", "-q")
 	case "unittest":
-		collectResult = runPythonCommand(rb, path, "python", "-m", "unittest", "discover", "--list")
+		collectResult = runPythonCommand(ctx, rb, path, "python", "-m", "unittest", "discover", "--list")
 	default:
-		collectResult = runPythonCommand(rb, path, "pytest", "--collect-only", "-q")
+		collectResult = runPythonCommand(ctx, rb, path, "pytest", "--collect-only", "-q")
 	}
 
 	// Check if test runner is not installed
@@ -51,11 +52,11 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	var testResult *checkutil.CommandResult
 	switch runner {
 	case "pytest":
-		testResult = runPythonCommand(rb, path, "pytest", "-v", "--tb=short")
+		testResult = runPythonCommand(ctx, rb, path, "pytest", "-v", "--tb=short")
 	case "unittest":
-		testResult = runPythonCommand(rb, path, "python", "-m", "unittest", "discover", "-v")
+		testResult = runPythonCommand(ctx, rb, path, "python", "-m", "unittest", "discover", "-v")
 	default:
-		testResult = runPythonCommand(rb, path, "pytest", "-v", "--tb=short")
+		testResult = runPythonCommand(ctx, rb, path, "pytest", "-v", "--tb=short")
 	}
 
 	testOutput := testResult.CombinedOutput()

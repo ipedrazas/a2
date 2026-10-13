@@ -1,6 +1,8 @@
 package gocheck
 
 import (
+	"context"
+
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
@@ -13,7 +15,7 @@ type ModuleCheck struct{}
 func (c *ModuleCheck) ID() string   { return "go:module" }
 func (c *ModuleCheck) Name() string { return "Go Module" }
 
-func (c *ModuleCheck) Run(path string) (checker.Result, error) {
+func (c *ModuleCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
 	// Use safepath to prevent directory traversal attacks

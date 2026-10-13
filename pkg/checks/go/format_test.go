@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -71,7 +72,7 @@ func main() {
 	suite.createTempFile("main.go", formattedCode)
 
 	check := &FormatCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -91,7 +92,7 @@ fmt.Println("Hello, World")
 	suite.createTempFile("main.go", unformattedCode)
 
 	check := &FormatCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -120,7 +121,7 @@ fmt.Println("Helper")
 	suite.createTempFile("utils.go", unformattedCode2)
 
 	check := &FormatCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -137,7 +138,7 @@ func (suite *FormatTestSuite) TestGofmtCheck_Run_NoGoFiles() {
 	suite.createTempFile("README.md", "# Test")
 
 	check := &FormatCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// gofmt with no Go files should return empty output (pass)
@@ -148,7 +149,7 @@ func (suite *FormatTestSuite) TestGofmtCheck_Run_NoGoFiles() {
 // TestGofmtCheck_Run_EmptyDirectory tests that FormatCheck handles empty directories.
 func (suite *FormatTestSuite) TestGofmtCheck_Run_EmptyDirectory() {
 	check := &FormatCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// Empty directory should pass
@@ -178,7 +179,7 @@ fmt.Println("Helper")
 	suite.createTempFile("utils.go", unformattedCode)
 
 	check := &FormatCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -201,7 +202,7 @@ fmt.Println("Test")
 	suite.createTempFile("sub/helper.go", unformattedCode)
 
 	check := &FormatCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)

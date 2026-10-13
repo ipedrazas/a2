@@ -1,6 +1,7 @@
 package pythoncheck
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -14,7 +15,7 @@ type DepsCheck struct{}
 func (c *DepsCheck) ID() string   { return "python:deps" }
 func (c *DepsCheck) Name() string { return "Python Vulnerabilities" }
 
-func (c *DepsCheck) Run(path string) (checker.Result, error) {
+func (c *DepsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 
 	// Try pip-audit first, then safety
@@ -22,10 +23,10 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 	var cmdDesc string
 
 	if pythonToolAvailable(path, "pip-audit") {
-		result = runPythonCommand(rb, path, "pip-audit")
+		result = runPythonCommand(ctx, rb, path, "pip-audit")
 		cmdDesc = "pip-audit"
 	} else if pythonToolAvailable(path, "safety") {
-		result = runPythonCommand(rb, path, "safety", "check")
+		result = runPythonCommand(ctx, rb, path, "safety", "check")
 		cmdDesc = "safety"
 	} else {
 		return rb.Pass("No vulnerability scanner installed (install pip-audit or safety)"), nil

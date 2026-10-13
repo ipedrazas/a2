@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -30,7 +31,7 @@ type FunctionComplexity struct {
 	Complexity int
 }
 
-func (c *CyclomaticCheck) Run(path string) (checker.Result, error) {
+func (c *CyclomaticCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
 	threshold := c.Threshold

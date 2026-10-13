@@ -2,6 +2,7 @@ package typescriptcheck
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os/exec"
 	"regexp"
@@ -23,7 +24,7 @@ func (c *TypeCheck) ID() string   { return "typescript:type" }
 func (c *TypeCheck) Name() string { return "TypeScript Type Check" }
 
 // Run executes the TypeScript type check.
-func (c *TypeCheck) Run(path string) (checker.Result, error) {
+func (c *TypeCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json
@@ -33,11 +34,11 @@ func (c *TypeCheck) Run(path string) (checker.Result, error) {
 
 	// Check if npx is available
 	if _, err := exec.LookPath("npx"); err != nil {
-		return rb.Pass("npx not available, skipping type check"), nil
+		return rb.ToolNotInstalled("npx", "install Node.js"), nil
 	}
 
 	// Run tsc --noEmit for type checking
-	cmd := exec.Command("npx", "tsc", "--noEmit")
+	cmd := checkutil.Command(ctx, "npx", "tsc", "--noEmit")
 	cmd.Dir = path
 
 	var stdout, stderr bytes.Buffer

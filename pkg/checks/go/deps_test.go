@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"os/exec"
 	"testing"
 
@@ -37,7 +38,7 @@ func (suite *DepsTestSuite) TestDepsCheck_Run_NoGovulncheck() {
 	// This test will pass regardless of whether govulncheck is installed
 	// because the check handles both cases gracefully
 	check := &DepsCheck{}
-	result, err := check.Run(".")
+	result, err := check.Run(context.Background(), ".")
 
 	suite.NoError(err)
 	// Should return a result (either pass with message or actual check result)
@@ -53,7 +54,7 @@ func (suite *DepsTestSuite) TestDepsCheck_Run_WithGovulncheck() {
 	}
 
 	check := &DepsCheck{}
-	result, err := check.Run(".")
+	result, err := check.Run(context.Background(), ".")
 
 	suite.NoError(err)
 	suite.NotNil(result)
@@ -133,7 +134,7 @@ func (suite *DepsTestSuite) TestDependencyCheck_Run_NoVulnerabilities() {
 	// This test depends on the actual project having no vulnerabilities
 	// or we'd need a test fixture
 	check := &DepsCheck{}
-	result, err := check.Run(".")
+	result, err := check.Run(context.Background(), ".")
 
 	suite.NoError(err)
 	// Result depends on actual vulnerabilities in the project
@@ -150,7 +151,7 @@ func (suite *DepsTestSuite) TestDependencyCheck_Run_ErrorHandling() {
 
 	// Run on a non-existent path to trigger error handling
 	check := &DepsCheck{}
-	result, err := check.Run("/nonexistent/path/that/does/not/exist")
+	result, err := check.Run(context.Background(), "/nonexistent/path/that/does/not/exist")
 
 	suite.NoError(err)
 	// Should handle error gracefully

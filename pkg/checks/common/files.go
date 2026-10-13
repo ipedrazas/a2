@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -16,7 +17,7 @@ type FileExistsCheck struct {
 func (c *FileExistsCheck) ID() string   { return "file_exists" }
 func (c *FileExistsCheck) Name() string { return "Required Files" }
 
-func (c *FileExistsCheck) Run(path string) (checker.Result, error) {
+func (c *FileExistsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var missing []string

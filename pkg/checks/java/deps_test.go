@@ -1,6 +1,7 @@
 package javacheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -32,7 +33,7 @@ func (s *DepsCheckTestSuite) TestIDAndName() {
 
 func (s *DepsCheckTestSuite) TestRun_NoDependencyScanning() {
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -42,7 +43,7 @@ func (s *DepsCheckTestSuite) TestRun_NoDependencyScanning() {
 
 func (s *DepsCheckTestSuite) TestRun_ResultLanguage() {
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangJava, result.Language)
@@ -63,7 +64,7 @@ func (s *DepsCheckTestSuite) TestRun_OWASPDependencyCheck_Maven() {
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -80,7 +81,7 @@ func (s *DepsCheckTestSuite) TestRun_OWASPDependencyCheck_Gradle() {
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -96,7 +97,7 @@ func (s *DepsCheckTestSuite) TestRun_OWASPDependencyCheck_GradleKts() {
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -108,7 +109,7 @@ func (s *DepsCheckTestSuite) TestRun_Snyk_ConfigFile() {
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -130,7 +131,7 @@ func (s *DepsCheckTestSuite) TestRun_Snyk_Maven() {
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -152,7 +153,7 @@ updates:
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -174,7 +175,7 @@ updates:
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -194,7 +195,7 @@ func (s *DepsCheckTestSuite) TestRun_Renovate_Json() {
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -210,7 +211,7 @@ func (s *DepsCheckTestSuite) TestRun_Renovate_Json5() {
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -222,7 +223,7 @@ func (s *DepsCheckTestSuite) TestRun_Renovate_Rc() {
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -234,7 +235,7 @@ func (s *DepsCheckTestSuite) TestRun_Renovate_RcJson() {
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -263,7 +264,7 @@ func (s *DepsCheckTestSuite) TestRun_MavenDependencyPlugin() {
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -283,7 +284,7 @@ func (s *DepsCheckTestSuite) TestRun_GradleDependencyVerification() {
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -299,7 +300,7 @@ func (s *DepsCheckTestSuite) TestRun_GradleDependencyVerification_LegacyFile() {
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -328,7 +329,7 @@ func (s *DepsCheckTestSuite) TestRun_MultipleTools() {
 	s.Require().NoError(err)
 
 	check := &DepsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

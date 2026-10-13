@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,7 +49,7 @@ func (s *NamingCheckTestSuite) TestConsistentSnakeCase() {
 	s.createFile("db_connection.go")
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -64,7 +65,7 @@ func (s *NamingCheckTestSuite) TestConsistentCamelCase() {
 	s.createFile("apiClient.js")
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -79,7 +80,7 @@ func (s *NamingCheckTestSuite) TestConsistentPascalCase() {
 	s.createFile("ApiClient.java")
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -94,7 +95,7 @@ func (s *NamingCheckTestSuite) TestConsistentKebabCase() {
 	s.createFile("api-client.ts")
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -110,7 +111,7 @@ func (s *NamingCheckTestSuite) TestMixedConventions() {
 	s.createFile("api-client.go")
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -126,7 +127,7 @@ func (s *NamingCheckTestSuite) TestMostlyConsistent() {
 	s.createFile("apiClient.go")
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -140,7 +141,7 @@ func (s *NamingCheckTestSuite) TestTooFewFiles() {
 	s.createFile("util.go")
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -150,7 +151,7 @@ func (s *NamingCheckTestSuite) TestTooFewFiles() {
 
 func (s *NamingCheckTestSuite) TestEmptyDirectory() {
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -167,7 +168,7 @@ func (s *NamingCheckTestSuite) TestSkipsNodeModules() {
 	s.createFile("node_modules/anotherPackage.js")
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -182,7 +183,7 @@ func (s *NamingCheckTestSuite) TestSkipsVendor() {
 	s.createFile("vendor/SomePackage.go")
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -198,7 +199,7 @@ func (s *NamingCheckTestSuite) TestIgnoresNonCodeFiles() {
 	s.createFile("SomeConfig.yaml")
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -214,7 +215,7 @@ func (s *NamingCheckTestSuite) TestStripsTestSuffixes() {
 	s.createFile("auth_handler_test.go")
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -232,7 +233,7 @@ func (s *NamingCheckTestSuite) TestESLintNamingConvention() {
 	s.Require().NoError(err)
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -249,7 +250,7 @@ function-naming-style=snake_case
 	s.Require().NoError(err)
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -265,7 +266,7 @@ func (s *NamingCheckTestSuite) TestRubocopNaming() {
 	s.Require().NoError(err)
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -285,7 +286,7 @@ func (s *NamingCheckTestSuite) TestCheckstyleNaming() {
 	s.Require().NoError(err)
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -298,7 +299,7 @@ func (s *NamingCheckTestSuite) TestClippyConfig() {
 	s.Require().NoError(err)
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -313,7 +314,7 @@ func (s *NamingCheckTestSuite) TestConsistentFlatNames() {
 	s.createFile("config.go")
 
 	check := &NamingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

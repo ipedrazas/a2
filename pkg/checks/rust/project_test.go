@@ -1,6 +1,7 @@
 package rustcheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,7 +49,7 @@ func (s *ProjectTestSuite) TestName() {
 }
 
 func (s *ProjectTestSuite) TestRun_NoCargoToml() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -63,7 +64,7 @@ name = "myapp"
 version = "1.0.0"
 `)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -78,7 +79,7 @@ func (s *ProjectTestSuite) TestRun_Workspace() {
 members = ["crate1", "crate2"]
 `)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -92,7 +93,7 @@ func (s *ProjectTestSuite) TestRun_MinimalCargoToml() {
 name = "test"
 `)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -104,7 +105,7 @@ func (s *ProjectTestSuite) TestRun_ResultLanguage() {
 name = "test"
 `)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangRust, result.Language)

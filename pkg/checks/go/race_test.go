@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -90,7 +91,7 @@ func TestSimple(t *testing.T) {
 	suite.createTempFile("main_test.go", testCode)
 
 	check := &RaceCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -117,7 +118,7 @@ func main() {
 	suite.createTempFile("main.go", code)
 
 	check := &RaceCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -146,7 +147,7 @@ func TestFailing(t *testing.T) {
 	suite.createTempFile("main_test.go", testCode)
 
 	check := &RaceCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// Test failure (not race) should still warn but not be a critical failure

@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
@@ -69,7 +70,7 @@ type NamingCheck struct {
 func (c *NamingCheck) ID() string   { return "n8n:naming" }
 func (c *NamingCheck) Name() string { return "Naming Convention" }
 
-func (c *NamingCheck) Run(path string) (checker.Result, error) {
+func (c *NamingCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	var convention *regexp.Regexp
 	if c.Regex != "" {
 		var err error

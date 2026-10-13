@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -82,7 +83,7 @@ func main() {
 	suite.createTempFile("main.go", validCode)
 
 	check := &VetCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -107,7 +108,7 @@ func main() {
 	suite.createTempFile("main.go", codeWithIssues)
 
 	check := &VetCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -122,7 +123,7 @@ func (suite *VetTestSuite) TestGoVetCheck_Run_EmptyDirectory() {
 	suite.createGoMod()
 
 	check := &VetCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// Empty directory with go.mod - go vet may return an error or pass
@@ -145,7 +146,7 @@ func main() {
 	suite.createTempFile("main.go", code)
 
 	check := &VetCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	// go vet requires go.mod, so this may fail or return an error
 	// The behavior depends on go vet's handling
@@ -181,7 +182,7 @@ func helper() {
 	suite.createTempFile("helper.go", code2)
 
 	check := &VetCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// Should check all files
@@ -204,7 +205,7 @@ func Test() {
 	suite.createTempFile("sub/helper.go", nestedCode)
 
 	check := &VetCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// Should check nested packages
@@ -227,7 +228,7 @@ func main() {
 	suite.createTempFile("main.go", code)
 
 	check := &VetCheck{}
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// Should handle both stdout and stderr

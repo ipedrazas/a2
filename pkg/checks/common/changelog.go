@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *ChangelogCheck) ID() string   { return "common:changelog" }
 func (c *ChangelogCheck) Name() string { return "Changelog" }
 
 // Run checks for changelog files and release tooling configuration.
-func (c *ChangelogCheck) Run(path string) (checker.Result, error) {
+func (c *ChangelogCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Check for changelog files

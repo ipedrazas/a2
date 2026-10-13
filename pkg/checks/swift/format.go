@@ -1,6 +1,7 @@
 package swiftcheck
 
 import (
+	"context"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -20,7 +21,7 @@ func (c *FormatCheck) ID() string   { return "swift:format" }
 func (c *FormatCheck) Name() string { return "Swift Format" }
 
 // Run checks if code is properly formatted using swift-format or swiftformat.
-func (c *FormatCheck) Run(path string) (checker.Result, error) {
+func (c *FormatCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangSwift)
 
 	// Check for Package.swift first
@@ -42,10 +43,10 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 	switch formatter {
 	case "swift-format":
 		// swift-format lint --recursive .
-		cmd = exec.Command("swift-format", "lint", "--recursive", ".")
+		cmd = checkutil.Command(ctx, "swift-format", "lint", "--recursive", ".")
 	case "swiftformat":
 		// swiftformat --lint .
-		cmd = exec.Command("swiftformat", "--lint", ".")
+		cmd = checkutil.Command(ctx, "swiftformat", "--lint", ".")
 	}
 
 	cmd.Dir = path

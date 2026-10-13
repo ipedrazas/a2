@@ -1,6 +1,7 @@
 package typescriptcheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,7 +49,7 @@ func (s *LoggingTestSuite) TestName() {
 }
 
 func (s *LoggingTestSuite) TestRun_NoTsconfig() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -57,7 +58,7 @@ func (s *LoggingTestSuite) TestRun_NoTsconfig() {
 }
 
 func (s *LoggingTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangTypeScript, result.Language)
@@ -72,7 +73,7 @@ func (s *LoggingTestSuite) TestRun_WithLogLayer() {
 		}
 	}`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -89,7 +90,7 @@ func (s *LoggingTestSuite) TestRun_WithWinston() {
 		}
 	}`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -106,7 +107,7 @@ func (s *LoggingTestSuite) TestRun_LogLayerInDevDependencies() {
 		}
 	}`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -124,7 +125,7 @@ func (s *LoggingTestSuite) TestRun_WithLoggingLibAndConsole() {
 	}`)
 	s.writeFile("src/index.ts", `console.log("debug")`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -137,7 +138,7 @@ func (s *LoggingTestSuite) TestRun_NoLoggingLib() {
 	s.writeFile("tsconfig.json", `{}`)
 	s.writeFile("package.json", `{"name": "test-app"}`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -155,7 +156,7 @@ func (s *LoggingTestSuite) TestRun_ConsoleLogOnly() {
 		}
 	`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
