@@ -1,7 +1,7 @@
 package rustcheck
 
 import (
-	"os/exec"
+	"context"
 	"regexp"
 	"strconv"
 	"strings"
@@ -18,7 +18,7 @@ func (c *LintCheck) ID() string   { return "rust:lint" }
 func (c *LintCheck) Name() string { return "Rust Clippy" }
 
 // Run executes cargo clippy.
-func (c *LintCheck) Run(path string) (checker.Result, error) {
+func (c *LintCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	// Check for Cargo.toml first
@@ -30,7 +30,7 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 	hasConfig := safepath.Exists(path, "clippy.toml") || safepath.Exists(path, ".clippy.toml")
 
 	// Run cargo clippy
-	cmd := exec.Command("cargo", "clippy", "--quiet", "--", "-D", "warnings")
+	cmd := checkutil.Command(ctx, "cargo", "clippy", "--quiet", "--", "-D", "warnings")
 	cmd.Dir = path
 	output, err := cmd.CombinedOutput()
 	outputStr := string(output)

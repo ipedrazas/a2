@@ -1,6 +1,7 @@
 package nodecheck
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -18,7 +19,7 @@ type DepsFreshnessCheck struct {
 func (c *DepsFreshnessCheck) ID() string   { return "node:deps_freshness" }
 func (c *DepsFreshnessCheck) Name() string { return "Node Dependency Freshness" }
 
-func (c *DepsFreshnessCheck) Run(path string) (checker.Result, error) {
+func (c *DepsFreshnessCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	if !safepath.Exists(path, "package.json") {
@@ -28,7 +29,7 @@ func (c *DepsFreshnessCheck) Run(path string) (checker.Result, error) {
 	pm := c.detectPackageManager(path)
 
 	// npm outdated --json returns a JSON object of outdated packages
-	result := rb.RunCommand(path, pm, "outdated", "--json")
+	result := rb.RunCommand(ctx, path, pm, "outdated", "--json")
 	output := result.CombinedOutput()
 
 	// npm outdated exits with code 1 when outdated packages exist, so don't check Success()

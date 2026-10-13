@@ -1,7 +1,9 @@
 package checkutil
 
 import (
+	"context"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/stretchr/testify/assert"
@@ -16,7 +18,7 @@ type mockChecker struct {
 
 func (m *mockChecker) ID() string   { return m.id }
 func (m *mockChecker) Name() string { return m.name }
-func (m *mockChecker) Run(path string) (checker.Result, error) {
+func (m *mockChecker) Run(_ context.Context, path string) (checker.Result, error) {
 	return checker.Result{}, nil
 }
 
@@ -98,20 +100,20 @@ func (s *UtilTestSuite) TestPluralizeCount_Zero() {
 }
 
 func (s *UtilTestSuite) TestRunCommand_Success() {
-	result := RunCommand(".", "echo", "hello")
+	result := RunCommand(context.Background(), ".", "echo", "hello")
 	assert.True(s.T(), result.Success())
 	assert.Contains(s.T(), result.Stdout, "hello")
 	assert.Equal(s.T(), 0, result.ExitCode)
 }
 
 func (s *UtilTestSuite) TestRunCommand_RecordsCommandAndDir() {
-	result := RunCommand(".", "echo", "hello", "world")
+	result := RunCommand(context.Background(), ".", "echo", "hello", "world")
 	assert.Equal(s.T(), "echo hello world", result.Command)
 	assert.Equal(s.T(), ".", result.Dir)
 }
 
 func (s *UtilTestSuite) TestRunCommand_QuotesArgsWithSpaces() {
-	result := RunCommand("", "echo", "two words")
+	result := RunCommand(context.Background(), "", "echo", "two words")
 	assert.Equal(s.T(), `echo "two words"`, result.Command)
 }
 
@@ -134,19 +136,19 @@ func (s *UtilTestSuite) TestDisplayCommand_EmptyCommand() {
 
 func (s *UtilTestSuite) TestResultBuilder_RunCommandRecordsOntoResult() {
 	rb := NewResultBuilder(&mockChecker{id: "demo:cmd", name: "Demo"}, checker.LangGo)
-	rb.RunCommand("nodeagent", "echo", "hi")
+	rb.RunCommand(context.Background(), "nodeagent", "echo", "hi")
 	res := rb.Warn("something")
 	assert.Equal(s.T(), "cd nodeagent && echo hi", res.Command)
 }
 
 func (s *UtilTestSuite) TestRunCommand_Failure() {
-	result := RunCommand(".", "ls", "/nonexistent/path/that/does/not/exist")
+	result := RunCommand(context.Background(), ".", "ls", "/nonexistent/path/that/does/not/exist")
 	assert.False(s.T(), result.Success())
 	assert.NotEqual(s.T(), 0, result.ExitCode)
 }
 
 func (s *UtilTestSuite) TestRunCommand_NotFound() {
-	result := RunCommand(".", "nonexistent_command_xyz123")
+	result := RunCommand(context.Background(), ".", "nonexistent_command_xyz123")
 	assert.False(s.T(), result.Success())
 	assert.Equal(s.T(), -1, result.ExitCode)
 }
@@ -185,12 +187,12 @@ func (s *UtilTestSuite) TestToolAvailable_NotExists() {
 }
 
 func (s *UtilTestSuite) TestToolNotFoundError_True() {
-	result := RunCommand(".", "nonexistent_command_xyz123")
+	result := RunCommand(context.Background(), ".", "nonexistent_command_xyz123")
 	assert.True(s.T(), ToolNotFoundError(result.Err))
 }
 
 func (s *UtilTestSuite) TestToolNotFoundError_False() {
-	result := RunCommand(".", "ls", "/nonexistent/path")
+	result := RunCommand(context.Background(), ".", "ls", "/nonexistent/path")
 	assert.False(s.T(), ToolNotFoundError(result.Err))
 }
 
@@ -309,4 +311,18 @@ func (s *UtilTestSuite) TestResultBuilder_MultipleResults() {
 	assert.False(s.T(), result2.Passed)
 	assert.Equal(s.T(), result1.Name, result2.Name)
 	assert.Equal(s.T(), result1.ID, result2.ID)
+}
+
+func TestTruncateMessage_DoesNotSplitRunes(t *testing.T) {
+	got := TruncateMessage("héllo wörld", 7)
+	assert.Equal(t, "héllo w...", got)
+	assert.True(t, utf8.ValidString(got))
+}
+
+func TestToolNotInstalled_FlagsToolMissing(t *testing.T) {
+	b := NewResultBuilder(&mockChecker{id: "x", name: "X"}, checker.LangGo)
+	res := b.ToolNotInstalled("govulncheck", "go install golang.org/x/vuln/cmd/govulncheck@latest")
+	assert.True(t, res.ToolMissing)
+	assert.Equal(t, checker.Info, res.Status)
+	assert.False(t, b.Info("plain info").ToolMissing)
 }

@@ -228,10 +228,9 @@ func (suite *SafePathTestSuite) TestSafeJoin_SymlinkInPath() {
 		suite.T().Skip("Cannot create symlinks (may require elevated privileges)")
 	}
 
-	// SafeJoin should still work as it validates the logical path
-	result, err := SafeJoin(suite.tempDir, "link")
-	suite.NoError(err)
-	suite.Contains(result, "link")
+	// SafeJoin resolves the link and rejects it because it leaves root
+	_, err = SafeJoin(suite.tempDir, "link")
+	suite.Error(err)
 }
 
 // TestOpen_ValidFile tests Open with a valid file.
@@ -314,6 +313,37 @@ func (suite *SafePathTestSuite) TestOpenPath_RelativeTraversal() {
 	_, err := OpenPath(suite.tempDir, escapePath)
 	suite.Error(err)
 	suite.Contains(err.Error(), "path escapes root directory")
+}
+
+// TestSymlinkEscape verifies a symlink inside root cannot reach files outside it.
+func (suite *SafePathTestSuite) TestSymlinkEscape() {
+	outside := suite.T().TempDir()
+	suite.Require().NoError(os.WriteFile(filepath.Join(outside, "secret.txt"), []byte("secret"), 0600))
+	if err := os.Symlink(outside, filepath.Join(suite.tempDir, "escape")); err != nil {
+		suite.T().Skipf("symlinks not supported: %v", err)
+	}
+
+	_, err := ReadFile(suite.tempDir, "escape/secret.txt")
+	suite.Error(err)
+	suite.False(Exists(suite.tempDir, "escape/secret.txt"))
+
+	_, err = OpenPath(suite.tempDir, filepath.Join(suite.tempDir, "escape", "secret.txt"))
+	suite.Error(err)
+
+	matches, err := Glob(suite.tempDir, "escape/*.txt")
+	suite.NoError(err)
+	suite.Empty(matches)
+}
+
+// TestSymlinkInsideRoot verifies symlinks that stay within root still work.
+func (suite *SafePathTestSuite) TestSymlinkInsideRoot() {
+	if err := os.Symlink(filepath.Join(suite.tempDir, "subdir"), filepath.Join(suite.tempDir, "link")); err != nil {
+		suite.T().Skipf("symlinks not supported: %v", err)
+	}
+
+	data, err := ReadFile(suite.tempDir, "link/nested.txt")
+	suite.NoError(err)
+	suite.Equal("nested content", string(data))
 }
 
 // TestSafePathTestSuite runs all the tests in the suite.

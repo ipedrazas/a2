@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -38,7 +39,7 @@ func (s *DockerfileCheckTestSuite) TestIDAndName() {
 
 func (s *DockerfileCheckTestSuite) TestNoDockerfile() {
 	check := &DockerfileCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -60,7 +61,7 @@ RUN apk add --no-cache curl
 	s.Require().NoError(err)
 
 	check := &DockerfileCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	// Result should mention trivy
@@ -82,7 +83,7 @@ func (s *DockerfileCheckTestSuite) TestTrivyInstalled_WithDockerignore() {
 	s.Require().NoError(err)
 
 	check := &DockerfileCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Contains(result.Reason, "trivy:")
@@ -102,7 +103,7 @@ RUN apt-get update && apt-get install -y curl
 	s.Require().NoError(err)
 
 	check := &DockerfileCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Contains(result.Reason, "trivy:")
@@ -120,7 +121,7 @@ func (s *DockerfileCheckTestSuite) TestDockerfileExists() {
 	s.Require().NoError(err)
 
 	check := &DockerfileCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -137,7 +138,7 @@ func (s *DockerfileCheckTestSuite) TestDockerfileLowercase() {
 	s.Require().NoError(err)
 
 	check := &DockerfileCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -155,7 +156,7 @@ func (s *DockerfileCheckTestSuite) TestContainerfile() {
 	s.Require().NoError(err)
 
 	check := &DockerfileCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -175,7 +176,7 @@ func (s *DockerfileCheckTestSuite) TestDockerfileWithIgnore() {
 	s.Require().NoError(err)
 
 	check := &DockerfileCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -192,7 +193,7 @@ func (s *DockerfileCheckTestSuite) TestDockerfileWithoutIgnore() {
 	s.Require().NoError(err)
 
 	check := &DockerfileCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

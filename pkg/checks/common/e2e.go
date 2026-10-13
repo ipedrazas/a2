@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *E2ECheck) ID() string   { return "common:e2e" }
 func (c *E2ECheck) Name() string { return "E2E Tests" }
 
 // Run checks for end-to-end test configuration.
-func (c *E2ECheck) Run(path string) (checker.Result, error) {
+func (c *E2ECheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string

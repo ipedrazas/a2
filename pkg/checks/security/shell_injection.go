@@ -2,6 +2,7 @@ package security
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -32,7 +33,7 @@ func (c *ShellInjectionCheck) Name() string {
 }
 
 // Run executes the shell injection detection check.
-func (c *ShellInjectionCheck) Run(path string) (checker.Result, error) {
+func (c *ShellInjectionCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Initialize patterns if not already done

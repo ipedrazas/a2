@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 
@@ -16,7 +17,7 @@ func (c *RetryCheck) ID() string   { return "common:retry" }
 func (c *RetryCheck) Name() string { return "Retry Logic" }
 
 // Run checks for retry and backoff libraries.
-func (c *RetryCheck) Run(path string) (checker.Result, error) {
+func (c *RetryCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string

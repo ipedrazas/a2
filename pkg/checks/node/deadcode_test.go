@@ -1,6 +1,7 @@
 package nodecheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -32,7 +33,7 @@ func (s *DeadcodeCheckTestSuite) TestIDAndName() {
 
 func (s *DeadcodeCheckTestSuite) TestNoPackageJSON() {
 	check := &DeadcodeCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

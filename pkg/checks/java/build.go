@@ -2,6 +2,7 @@ package javacheck
 
 import (
 	"bytes"
+	"context"
 	"os/exec"
 	"strings"
 
@@ -20,7 +21,7 @@ func (c *BuildCheck) ID() string   { return "java:build" }
 func (c *BuildCheck) Name() string { return "Java Build" }
 
 // Run compiles the Java project using Maven or Gradle.
-func (c *BuildCheck) Run(path string) (checker.Result, error) {
+func (c *BuildCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	buildTool := c.detectBuildTool(path)
@@ -31,9 +32,9 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch buildTool {
 	case "maven":
-		cmd = c.getMavenCommand(path)
+		cmd = c.getMavenCommand(ctx, path)
 	case "gradle":
-		cmd = c.getGradleCommand(path)
+		cmd = c.getGradleCommand(ctx, path)
 	}
 
 	cmd.Dir = path
@@ -74,18 +75,18 @@ func (c *BuildCheck) detectBuildTool(path string) string {
 	return detectBuildTool(path)
 }
 
-func (c *BuildCheck) getMavenCommand(path string) *exec.Cmd {
+func (c *BuildCheck) getMavenCommand(ctx context.Context, path string) *exec.Cmd {
 	// Prefer wrapper script
 	if safepath.Exists(path, "mvnw") {
-		return exec.Command("./mvnw", "compile", "-q", "-DskipTests")
+		return checkutil.Command(ctx, "./mvnw", "compile", "-q", "-DskipTests")
 	}
-	return exec.Command("mvn", "compile", "-q", "-DskipTests")
+	return checkutil.Command(ctx, "mvn", "compile", "-q", "-DskipTests")
 }
 
-func (c *BuildCheck) getGradleCommand(path string) *exec.Cmd {
+func (c *BuildCheck) getGradleCommand(ctx context.Context, path string) *exec.Cmd {
 	// Prefer wrapper script
 	if safepath.Exists(path, "gradlew") {
-		return exec.Command("./gradlew", "compileJava", "-q", "--no-daemon")
+		return checkutil.Command(ctx, "./gradlew", "compileJava", "-q", "--no-daemon")
 	}
-	return exec.Command("gradle", "compileJava", "-q", "--no-daemon")
+	return checkutil.Command(ctx, "gradle", "compileJava", "-q", "--no-daemon")
 }

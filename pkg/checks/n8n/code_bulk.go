@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"sort"
@@ -32,7 +33,7 @@ type CodeBulkCheck struct {
 func (c *CodeBulkCheck) ID() string   { return "n8n:code-node-bulk" }
 func (c *CodeBulkCheck) Name() string { return "Code Node Bulk" }
 
-func (c *CodeBulkCheck) Run(path string) (checker.Result, error) {
+func (c *CodeBulkCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	bundle, early := loadBundle(c, path)
 	if early != nil {
 		return *early, nil

@@ -1,6 +1,7 @@
 package typescriptcheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,7 +49,7 @@ func (s *ProjectTestSuite) TestName() {
 }
 
 func (s *ProjectTestSuite) TestRun_NoTsConfig() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -65,7 +66,7 @@ func (s *ProjectTestSuite) TestRun_BasicTsConfig() {
   }
 }`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -89,7 +90,7 @@ func (s *ProjectTestSuite) TestRun_TsConfigWithPackageJson() {
   }
 }`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -104,7 +105,7 @@ func (s *ProjectTestSuite) TestRun_TsConfigBase() {
   }
 }`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -114,7 +115,7 @@ func (s *ProjectTestSuite) TestRun_TsConfigBase() {
 func (s *ProjectTestSuite) TestRun_ResultLanguage() {
 	s.writeFile("tsconfig.json", `{}`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangTypeScript, result.Language)

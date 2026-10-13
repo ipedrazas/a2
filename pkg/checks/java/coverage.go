@@ -1,6 +1,7 @@
 package javacheck
 
 import (
+	"context"
 	"encoding/xml"
 	"fmt"
 	"os"
@@ -22,7 +23,7 @@ func (c *CoverageCheck) Name() string                   { return "Java Coverage"
 func (c *CoverageCheck) SetCoverageThreshold(t float64) { c.Threshold = t }
 
 // Run checks for JaCoCo coverage reports and validates against threshold.
-func (c *CoverageCheck) Run(path string) (checker.Result, error) {
+func (c *CoverageCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	threshold := c.Threshold

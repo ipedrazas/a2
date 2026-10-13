@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 
@@ -22,7 +23,7 @@ type InlineAuthCheck struct{}
 func (c *InlineAuthCheck) ID() string   { return "n8n:inline-auth" }
 func (c *InlineAuthCheck) Name() string { return "Inline Auth Vs Credential Store" }
 
-func (c *InlineAuthCheck) Run(path string) (checker.Result, error) {
+func (c *InlineAuthCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	bundle, early := loadBundle(c, path)
 	if early != nil {
 		return *early, nil

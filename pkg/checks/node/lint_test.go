@@ -1,6 +1,7 @@
 package nodecheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -42,7 +43,7 @@ func (suite *LintTestSuite) createTempFile(name, content string) string {
 func (suite *LintTestSuite) TestLintCheck_Run_NoPackageJSON() {
 	check := &LintCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -62,7 +63,7 @@ func (suite *LintTestSuite) TestLintCheck_Run_NoLinterConfigured() {
 
 	check := &LintCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -245,7 +246,7 @@ src/index.js:3:1: error: 'foo' is not defined
 func (suite *LintTestSuite) TestLintCheck_Run_NonExistentPath() {
 	check := &LintCheck{}
 
-	result, err := check.Run("/nonexistent/path/that/does/not/exist")
+	result, err := check.Run(context.Background(), "/nonexistent/path/that/does/not/exist")
 
 	suite.NoError(err)
 	suite.False(result.Passed)

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -45,7 +46,7 @@ regex = "AKIA[0-9A-Z]{16}"
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -71,7 +72,7 @@ detectors:
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -92,7 +93,7 @@ func (s *SecretsCheckTestSuite) TestDetectSecretsConfigured() {
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -116,7 +117,7 @@ repos:
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -136,7 +137,7 @@ func main() {
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	// If gitleaks is installed, it runs and passes; otherwise warns about no scanner
@@ -165,7 +166,7 @@ const awsKey = "AKIAIOSFODNN7EXAMPLE"
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -196,7 +197,7 @@ MIIEpAIBAAKCAQEA...
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -222,7 +223,7 @@ api_key = "%s"
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -242,7 +243,7 @@ func (s *SecretsCheckTestSuite) TestDetectsGitHubToken() {
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -262,7 +263,7 @@ func (s *SecretsCheckTestSuite) TestDetectsDatabaseURL() {
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -284,7 +285,7 @@ SECRET="your_secret_key_here_abcdefghij1234"
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	// Should warn about no scanner, not about the secrets
@@ -312,7 +313,7 @@ func (s *SecretsCheckTestSuite) TestSkipsNodeModules() {
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	// Should only warn about no scanner, not about secrets in node_modules
@@ -340,7 +341,7 @@ func (s *SecretsCheckTestSuite) TestSkipsVendorDirectory() {
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Contains(result.Reason, "No secret scanning configured")
@@ -363,7 +364,7 @@ const (
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -374,7 +375,7 @@ const (
 
 func (s *SecretsCheckTestSuite) TestEmptyDirectory() {
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	// If gitleaks is installed, it runs and passes; otherwise warns about no scanner
@@ -401,7 +402,7 @@ func (s *SecretsCheckTestSuite) TestJWTToken() {
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -423,7 +424,7 @@ func main() {}
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -452,7 +453,7 @@ func main() {}
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -475,7 +476,7 @@ const apiKey = "api_key_secret_abcdefghijklmnop1234567890abcdefghijklmnop"
 	s.Require().NoError(err)
 
 	check := &SecretsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	// gitleaks may or may not find this depending on its rules

@@ -1,6 +1,7 @@
 package swiftcheck
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *ProjectCheck) ID() string   { return "swift:project" }
 func (c *ProjectCheck) Name() string { return "Swift Project" }
 
 // Run checks for Package.swift and extracts project information.
-func (c *ProjectCheck) Run(path string) (checker.Result, error) {
+func (c *ProjectCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangSwift)
 
 	// Check for Package.swift

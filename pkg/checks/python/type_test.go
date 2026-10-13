@@ -1,6 +1,7 @@
 package pythoncheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -61,7 +62,7 @@ func (suite *TypeTestSuite) TestTypeCheck_Run_NotTypedProject() {
 
 	check := &TypeCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -77,7 +78,7 @@ func (suite *TypeTestSuite) TestTypeCheck_Run_MypyIniExists() {
 
 	check := &TypeCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// Result depends on whether mypy is installed
@@ -92,7 +93,7 @@ func (suite *TypeTestSuite) TestTypeCheck_Run_PyTypedExists() {
 
 	check := &TypeCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// Result depends on whether mypy is installed
@@ -109,7 +110,7 @@ strict = true
 
 	check := &TypeCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// Result depends on whether mypy is installed

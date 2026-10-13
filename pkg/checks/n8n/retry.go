@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -24,7 +25,7 @@ type RetryCheck struct{}
 func (c *RetryCheck) ID() string   { return "n8n:retry-config" }
 func (c *RetryCheck) Name() string { return "Retry Configuration" }
 
-func (c *RetryCheck) Run(path string) (checker.Result, error) {
+func (c *RetryCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	bundle, early := loadBundle(c, path)
 	if early != nil {
 		return *early, nil

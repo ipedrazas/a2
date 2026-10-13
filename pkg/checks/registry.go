@@ -1,6 +1,7 @@
 package checks
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"sort"
@@ -35,13 +36,13 @@ func (p *pathResolvingChecker) Name() string {
 	return p.checker.Name()
 }
 
-func (p *pathResolvingChecker) Run(path string) (checker.Result, error) {
+func (p *pathResolvingChecker) Run(ctx context.Context, path string) (checker.Result, error) {
 	// Resolve the actual path to use
 	actualPath := path
 	if p.sourceDir != "" {
 		actualPath = filepath.Join(path, p.sourceDir)
 	}
-	res, err := p.checker.Run(actualPath)
+	res, err := p.checker.Run(ctx, actualPath)
 	// Record which source_dir this check ran in so output can disambiguate
 	// the same check running across multiple directories (monorepos).
 	res.SourceDir = p.sourceDir
@@ -59,12 +60,12 @@ type multiPathChecker struct {
 func (m *multiPathChecker) ID() string   { return m.checker.ID() }
 func (m *multiPathChecker) Name() string { return m.checker.Name() }
 
-func (m *multiPathChecker) Run(path string) (checker.Result, error) {
+func (m *multiPathChecker) Run(ctx context.Context, path string) (checker.Result, error) {
 	paths := m.pathsToCheck(path)
 	var lastResult checker.Result
 	var lastErr error
 	for _, p := range paths {
-		res, err := m.checker.Run(p)
+		res, err := m.checker.Run(ctx, p)
 		if err != nil {
 			lastErr = err
 			lastResult = res

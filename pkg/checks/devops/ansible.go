@@ -1,6 +1,7 @@
 package devops
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -18,7 +19,7 @@ func (c *AnsibleCheck) ID() string   { return "devops:ansible" }
 func (c *AnsibleCheck) Name() string { return "Ansible Configuration" }
 
 // Run checks for Ansible files and validates them if ansible-lint is installed.
-func (c *AnsibleCheck) Run(path string) (checker.Result, error) {
+func (c *AnsibleCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Check if ansible files exist
@@ -33,7 +34,7 @@ func (c *AnsibleCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run ansible-lint
-	result := rb.RunCommand(path, "ansible-lint", ".")
+	result := rb.RunCommand(ctx, path, "ansible-lint", ".")
 
 	if result.Success() {
 		return rb.Pass("ansible-lint passed"), nil

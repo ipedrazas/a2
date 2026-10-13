@@ -1,6 +1,7 @@
 package nodecheck
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -34,7 +35,7 @@ func (c *ProjectCheck) Name() string {
 }
 
 // Run executes the project check.
-func (c *ProjectCheck) Run(path string) (checker.Result, error) {
+func (c *ProjectCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists

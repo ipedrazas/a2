@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -14,14 +15,14 @@ type DeadcodeCheck struct{}
 func (c *DeadcodeCheck) ID() string   { return "go:deadcode" }
 func (c *DeadcodeCheck) Name() string { return "Go Dead Code" }
 
-func (c *DeadcodeCheck) Run(path string) (checker.Result, error) {
+func (c *DeadcodeCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
 	if !checkutil.ToolAvailable("deadcode") {
 		return rb.ToolNotInstalled("deadcode", "go install golang.org/x/tools/cmd/deadcode@latest"), nil
 	}
 
-	result := rb.RunCommand(path, "deadcode", "-test", "./...")
+	result := rb.RunCommand(ctx, path, "deadcode", "-test", "./...")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

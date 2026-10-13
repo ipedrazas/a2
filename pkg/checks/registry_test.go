@@ -1,6 +1,7 @@
 package checks
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -370,7 +371,7 @@ func main() { signal.Notify(make(chan os.Signal, 1), syscall.SIGTERM) }
 	suite.Require().NotNil(shutdownCheck, "common:shutdown should be present")
 
 	// Run from repo root: should pass because wrapper runs check on root and backend/
-	result, err := shutdownCheck.Checker.Run(root)
+	result, err := shutdownCheck.Checker.Run(context.Background(), root)
 	suite.NoError(err)
 	suite.True(result.Passed, "common:shutdown should pass when Go signal handling is in source_dir")
 	suite.Contains(result.Reason, "Go signal handling")

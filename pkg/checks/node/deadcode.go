@@ -1,6 +1,7 @@
 package nodecheck
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -18,7 +19,7 @@ type DeadcodeCheck struct {
 func (c *DeadcodeCheck) ID() string   { return "node:deadcode" }
 func (c *DeadcodeCheck) Name() string { return "Node Dead Code" }
 
-func (c *DeadcodeCheck) Run(path string) (checker.Result, error) {
+func (c *DeadcodeCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	if !safepath.Exists(path, "package.json") {
@@ -27,16 +28,16 @@ func (c *DeadcodeCheck) Run(path string) (checker.Result, error) {
 
 	// Check for knip (preferred) or ts-prune
 	if c.hasKnip(path) {
-		return c.runKnip(path, rb)
+		return c.runKnip(ctx, path, rb)
 	}
 
 	if checkutil.ToolAvailable("ts-prune") {
-		return c.runTsPrune(path, rb)
+		return c.runTsPrune(ctx, path, rb)
 	}
 
 	// Check if knip is a devDependency but npx is available
 	if checkutil.ToolAvailable("npx") && c.hasKnipDep(path) {
-		return c.runKnip(path, rb)
+		return c.runKnip(ctx, path, rb)
 	}
 
 	return rb.ToolNotInstalled("knip", "npm install -D knip"), nil
@@ -58,13 +59,13 @@ func (c *DeadcodeCheck) hasKnipDep(path string) bool {
 }
 
 // runKnip executes knip and parses its output.
-func (c *DeadcodeCheck) runKnip(path string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *DeadcodeCheck) runKnip(ctx context.Context, path string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var result *checkutil.CommandResult
 
 	if checkutil.ToolAvailable("knip") {
-		result = rb.RunCommand(path, "knip", "--no-progress")
+		result = rb.RunCommand(ctx, path, "knip", "--no-progress")
 	} else {
-		result = rb.RunCommand(path, "npx", "knip", "--no-progress")
+		result = rb.RunCommand(ctx, path, "npx", "knip", "--no-progress")
 	}
 
 	output := result.CombinedOutput()
@@ -96,8 +97,8 @@ func (c *DeadcodeCheck) runKnip(path string, rb *checkutil.ResultBuilder) (check
 }
 
 // runTsPrune executes ts-prune as a fallback.
-func (c *DeadcodeCheck) runTsPrune(path string, rb *checkutil.ResultBuilder) (checker.Result, error) {
-	result := rb.RunCommand(path, "ts-prune")
+func (c *DeadcodeCheck) runTsPrune(ctx context.Context, path string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+	result := rb.RunCommand(ctx, path, "ts-prune")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

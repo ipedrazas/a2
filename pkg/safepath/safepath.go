@@ -43,11 +43,8 @@ func SafeJoin(root, relPath string) (string, error) {
 		return "", fmt.Errorf("invalid path: %w", err)
 	}
 
-	// Ensure the result is within root (prevent ../../../ attacks)
-	// We need to add a separator to root to prevent matching partial directory names
-	// e.g., /foo should not match /foobar
-	rootWithSep := absRoot + string(filepath.Separator)
-	if absJoined != absRoot && !hasPrefix(absJoined, rootWithSep) {
+	// Ensure the result is within root (prevent ../../../ and symlink escapes)
+	if !contained(absRoot, absJoined) {
 		return "", fmt.Errorf("path escapes root directory: %s", relPath)
 	}
 
@@ -102,14 +99,38 @@ func OpenPath(root, filePath string) (*os.File, error) {
 		return nil, fmt.Errorf("invalid file path: %w", err)
 	}
 
-	// Ensure the path is within root
-	rootWithSep := absRoot + string(filepath.Separator)
-	if absPath != absRoot && !hasPrefix(absPath, rootWithSep) {
+	// Ensure the path is within root, following symlinks
+	if !contained(absRoot, absPath) {
 		return nil, fmt.Errorf("path escapes root directory: %s", filePath)
 	}
 
 	// #nosec G304 -- Path is validated above to prevent traversal
 	return os.Open(absPath)
+}
+
+// within reports whether absPath is absRoot or lexically inside it. The
+// separator suffix stops /foo from matching /foobar.
+func within(absRoot, absPath string) bool {
+	return absPath == absRoot || hasPrefix(absPath, absRoot+string(filepath.Separator))
+}
+
+// contained reports whether absPath stays inside absRoot both lexically and
+// after resolving symlinks, so a link inside a scanned repository cannot point
+// a2 at files outside it. A path that does not exist has no links to follow,
+// so it is only checked lexically.
+func contained(absRoot, absPath string) bool {
+	if !within(absRoot, absPath) {
+		return false
+	}
+	realPath, err := filepath.EvalSymlinks(absPath)
+	if err != nil {
+		return true
+	}
+	realRoot, err := filepath.EvalSymlinks(absRoot)
+	if err != nil {
+		realRoot = absRoot
+	}
+	return within(realRoot, realPath)
 }
 
 // hasPrefix checks if path starts with prefix, handling OS-specific path separators.
@@ -163,13 +184,12 @@ func Glob(root, pattern string) ([]string, error) {
 	}
 
 	var validMatches []string
-	rootWithSep := absRoot + string(filepath.Separator)
 	for _, match := range matches {
 		absMatch, err := filepath.Abs(match)
 		if err != nil {
 			continue
 		}
-		if absMatch == absRoot || hasPrefix(absMatch, rootWithSep) {
+		if contained(absRoot, absMatch) {
 			validMatches = append(validMatches, absMatch)
 		}
 	}

@@ -2,6 +2,7 @@ package security
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"net/url"
 	"os"
@@ -34,7 +35,7 @@ func (c *NetworkCheck) Name() string {
 }
 
 // Run executes the network exfiltration detection check.
-func (c *NetworkCheck) Run(path string) (checker.Result, error) {
+func (c *NetworkCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Initialize patterns and safe domains if not already done

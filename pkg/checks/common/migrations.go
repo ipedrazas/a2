@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *MigrationsCheck) ID() string   { return "common:migrations" }
 func (c *MigrationsCheck) Name() string { return "Database Migrations" }
 
 // Run checks for database migration configuration.
-func (c *MigrationsCheck) Run(path string) (checker.Result, error) {
+func (c *MigrationsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string

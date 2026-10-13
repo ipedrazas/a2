@@ -1,6 +1,7 @@
 package pythoncheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -36,7 +37,7 @@ func (s *ComplexityCheckTestSuite) TestNoPythonProject() {
 	_ = os.Remove(filepath.Join(s.tempDir, "pyproject.toml"))
 
 	check := &ComplexityCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -101,7 +102,7 @@ func (s *ComplexityCheckTestSuite) TestConfigThreshold() {
 	check := &ComplexityCheck{Config: cfg}
 
 	// The check will use threshold from config
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 	s.NoError(err)
 
 	// If radon is not installed, it should pass with a message

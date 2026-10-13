@@ -1,6 +1,7 @@
 package rustcheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,7 +49,7 @@ func (s *DepsTestSuite) TestName() {
 }
 
 func (s *DepsTestSuite) TestRun_NoCargoToml() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -57,7 +58,7 @@ func (s *DepsTestSuite) TestRun_NoCargoToml() {
 }
 
 func (s *DepsTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangRust, result.Language)

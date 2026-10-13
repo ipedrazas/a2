@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -19,7 +20,7 @@ type WebhookAuthCheck struct {
 func (c *WebhookAuthCheck) ID() string   { return "n8n:webhook-auth" }
 func (c *WebhookAuthCheck) Name() string { return "Unauthenticated Webhooks" }
 
-func (c *WebhookAuthCheck) Run(path string) (checker.Result, error) {
+func (c *WebhookAuthCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	bundle, early := loadBundle(c, path)
 	if early != nil {
 		return *early, nil

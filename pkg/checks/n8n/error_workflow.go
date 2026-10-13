@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -18,7 +19,7 @@ type ErrorWorkflowCheck struct {
 func (c *ErrorWorkflowCheck) ID() string   { return "n8n:error-workflow" }
 func (c *ErrorWorkflowCheck) Name() string { return "Error Workflow Coverage" }
 
-func (c *ErrorWorkflowCheck) Run(path string) (checker.Result, error) {
+func (c *ErrorWorkflowCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	bundle, early := loadBundle(c, path)
 	if early != nil {
 		return *early, nil

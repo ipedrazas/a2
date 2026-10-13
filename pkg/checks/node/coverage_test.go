@@ -1,6 +1,7 @@
 package nodecheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -42,7 +43,7 @@ func (suite *CoverageTestSuite) createTempFile(name, content string) string {
 func (suite *CoverageTestSuite) TestCoverageCheck_Run_NoPackageJSON() {
 	check := &CoverageCheck{Threshold: 80.0}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -62,7 +63,7 @@ func (suite *CoverageTestSuite) TestCoverageCheck_Run_NoTestScript() {
 
 	check := &CoverageCheck{Threshold: 80.0}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -84,7 +85,7 @@ func (suite *CoverageTestSuite) TestCoverageCheck_Run_DefaultNoTestScript() {
 
 	check := &CoverageCheck{Threshold: 80.0}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -231,7 +232,7 @@ Lines        : 75.00% ( 15/20 )
 func (suite *CoverageTestSuite) TestCoverageCheck_Run_NonExistentPath() {
 	check := &CoverageCheck{Threshold: 80.0}
 
-	result, err := check.Run("/nonexistent/path/that/does/not/exist")
+	result, err := check.Run(context.Background(), "/nonexistent/path/that/does/not/exist")
 
 	suite.NoError(err)
 	suite.False(result.Passed)

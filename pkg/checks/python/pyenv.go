@@ -1,6 +1,7 @@
 package pythoncheck
 
 import (
+	"context"
 	"path/filepath"
 
 	"github.com/ipedrazas/a2/pkg/checkutil"
@@ -11,10 +12,10 @@ import (
 // It detects uv, poetry, or local virtualenvs and wraps the command accordingly.
 // The executed command is recorded on rb so the resulting check Result reports
 // exactly what a2 ran (e.g. "uv run mypy . --ignore-missing-imports").
-func runPythonCommand(rb *checkutil.ResultBuilder, projectPath, command string, args ...string) *checkutil.CommandResult {
+func runPythonCommand(ctx context.Context, rb *checkutil.ResultBuilder, projectPath, command string, args ...string) *checkutil.CommandResult {
 	name, prefix := resolvePythonEnv(projectPath, command)
 	allArgs := append(prefix, args...)
-	res := checkutil.RunCommand(projectPath, name, allArgs...)
+	res := checkutil.RunCommand(ctx, projectPath, name, allArgs...)
 	rb.RecordCommand(res)
 	return res
 }

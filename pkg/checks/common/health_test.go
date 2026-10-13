@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -42,7 +43,7 @@ func main() {
 	s.Require().NoError(err)
 
 	check := &HealthCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -63,7 +64,7 @@ func main() {
 	s.Require().NoError(err)
 
 	check := &HealthCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -83,7 +84,7 @@ func setupRoutes() {
 	s.Require().NoError(err)
 
 	check := &HealthCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -104,7 +105,7 @@ def ready():
 	s.Require().NoError(err)
 
 	check := &HealthCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -123,7 +124,7 @@ func HealthCheck() error {
 	s.Require().NoError(err)
 
 	check := &HealthCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -139,7 +140,7 @@ func (s *HealthCheckTestSuite) TestHealthCheckInPython() {
 	s.Require().NoError(err)
 
 	check := &HealthCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -160,7 +161,7 @@ app.get('/health', (req, res) => {
 	s.Require().NoError(err)
 
 	check := &HealthCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -184,7 +185,7 @@ func (s *HealthCheckTestSuite) TestSkipsNodeModules() {
 	s.Require().NoError(err)
 
 	check := &HealthCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -205,7 +206,7 @@ spec:
 	s.Require().NoError(err)
 
 	check := &HealthCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -214,7 +215,7 @@ spec:
 
 func (s *HealthCheckTestSuite) TestEmptyDirectory() {
 	check := &HealthCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

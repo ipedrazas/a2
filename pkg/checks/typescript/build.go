@@ -2,6 +2,7 @@ package typescriptcheck
 
 import (
 	"bytes"
+	"context"
 	"os/exec"
 	"strings"
 
@@ -20,7 +21,7 @@ func (c *BuildCheck) ID() string   { return "typescript:build" }
 func (c *BuildCheck) Name() string { return "TypeScript Build" }
 
 // Run checks if TypeScript compiles successfully.
-func (c *BuildCheck) Run(path string) (checker.Result, error) {
+func (c *BuildCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json
@@ -35,12 +36,12 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 	// Check if there's a build script in package.json
 	if pkg != nil {
 		if _, hasBuild := pkg.Scripts["build"]; hasBuild {
-			return c.runBuildScript(path, pm, rb)
+			return c.runBuildScript(ctx, path, pm, rb)
 		}
 	}
 
 	// Fall back to tsc --noEmit for type checking only
-	return c.runTscNoEmit(path, rb)
+	return c.runTscNoEmit(ctx, path, rb)
 }
 
 // detectPackageManager determines which package manager to use.
@@ -63,17 +64,17 @@ func (c *BuildCheck) detectPackageManager(path string) string {
 }
 
 // runBuildScript runs the package.json build script.
-func (c *BuildCheck) runBuildScript(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *BuildCheck) runBuildScript(ctx context.Context, path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
-		cmd = exec.Command("yarn", "build")
+		cmd = checkutil.Command(ctx, "yarn", "build")
 	case "pnpm":
-		cmd = exec.Command("pnpm", "run", "build")
+		cmd = checkutil.Command(ctx, "pnpm", "run", "build")
 	case "bun":
-		cmd = exec.Command("bun", "run", "build")
+		cmd = checkutil.Command(ctx, "bun", "run", "build")
 	default:
-		cmd = exec.Command("npm", "run", "build")
+		cmd = checkutil.Command(ctx, "npm", "run", "build")
 	}
 	cmd.Dir = path
 
@@ -95,13 +96,13 @@ func (c *BuildCheck) runBuildScript(path, pm string, rb *checkutil.ResultBuilder
 }
 
 // runTscNoEmit runs tsc --noEmit for type checking.
-func (c *BuildCheck) runTscNoEmit(path string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *BuildCheck) runTscNoEmit(ctx context.Context, path string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	// Check if npx is available
 	if _, err := exec.LookPath("npx"); err != nil {
-		return rb.Pass("npx not available, skipping build check"), nil
+		return rb.ToolNotInstalled("npx", "install Node.js"), nil
 	}
 
-	cmd := exec.Command("npx", "tsc", "--noEmit")
+	cmd := checkutil.Command(ctx, "npx", "tsc", "--noEmit")
 	cmd.Dir = path
 
 	var stdout, stderr bytes.Buffer

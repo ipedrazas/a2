@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 
@@ -16,7 +17,7 @@ func (c *ShutdownCheck) ID() string   { return "common:shutdown" }
 func (c *ShutdownCheck) Name() string { return "Graceful Shutdown" }
 
 // Run checks for graceful shutdown signal handling.
-func (c *ShutdownCheck) Run(path string) (checker.Result, error) {
+func (c *ShutdownCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string

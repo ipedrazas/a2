@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -38,7 +39,7 @@ var (
 )
 
 // Run checks for naming convention consistency in file names.
-func (c *NamingCheck) Run(path string) (checker.Result, error) {
+func (c *NamingCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	absPath, err := filepath.Abs(path)

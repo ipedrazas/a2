@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -19,7 +20,7 @@ func (c *SASTCheck) ID() string   { return "common:sast" }
 func (c *SASTCheck) Name() string { return "SAST Security Scanning" }
 
 // Run checks for SAST tooling configuration.
-func (c *SASTCheck) Run(path string) (checker.Result, error) {
+func (c *SASTCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Check if semgrep is installed
@@ -28,7 +29,7 @@ func (c *SASTCheck) Run(path string) (checker.Result, error) {
 
 	// Priority 1 & 2: If semgrep is installed, run it
 	if semgrepInstalled {
-		return c.runSemgrep(path, semgrepConfig, rb)
+		return c.runSemgrep(ctx, path, semgrepConfig, rb)
 	}
 
 	// Priority 3: Check for configured SAST scanners (trust CI/manual runs)
@@ -89,7 +90,7 @@ func (c *SASTCheck) findSemgrepConfig(path string) string {
 }
 
 // runSemgrep executes semgrep and returns the result.
-func (c *SASTCheck) runSemgrep(path, configPath string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *SASTCheck) runSemgrep(ctx context.Context, path, configPath string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var args []string
 	configMsg := "auto rules"
 
@@ -102,7 +103,7 @@ func (c *SASTCheck) runSemgrep(path, configPath string, rb *checkutil.ResultBuil
 		args = []string{"scan", "--config", "auto", "--quiet", "--json", "."}
 	}
 
-	result := rb.RunCommand(path, "semgrep", args...)
+	result := rb.RunCommand(ctx, path, "semgrep", args...)
 
 	if result.Success() {
 		return rb.Pass(fmt.Sprintf("semgrep: No issues detected (%s)", configMsg)), nil

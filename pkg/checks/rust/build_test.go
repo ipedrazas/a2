@@ -1,6 +1,7 @@
 package rustcheck
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -36,7 +37,7 @@ func (s *BuildTestSuite) TestName() {
 }
 
 func (s *BuildTestSuite) TestRun_NoCargoToml() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -45,7 +46,7 @@ func (s *BuildTestSuite) TestRun_NoCargoToml() {
 }
 
 func (s *BuildTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangRust, result.Language)

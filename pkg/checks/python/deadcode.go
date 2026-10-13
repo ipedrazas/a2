@@ -1,6 +1,7 @@
 package pythoncheck
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -15,7 +16,7 @@ type DeadcodeCheck struct{}
 func (c *DeadcodeCheck) ID() string   { return "python:deadcode" }
 func (c *DeadcodeCheck) Name() string { return "Python Dead Code" }
 
-func (c *DeadcodeCheck) Run(path string) (checker.Result, error) {
+func (c *DeadcodeCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 
 	// Verify Python project
@@ -30,7 +31,7 @@ func (c *DeadcodeCheck) Run(path string) (checker.Result, error) {
 		return rb.ToolNotInstalled("vulture", "pip install vulture"), nil
 	}
 
-	result := runPythonCommand(rb, path, "vulture", ".")
+	result := runPythonCommand(ctx, rb, path, "vulture", ".")
 	output := result.CombinedOutput()
 
 	if result.Success() {

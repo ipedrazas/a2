@@ -1,7 +1,7 @@
 package swiftcheck
 
 import (
-	"os/exec"
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -16,7 +16,7 @@ func (c *BuildCheck) ID() string   { return "swift:build" }
 func (c *BuildCheck) Name() string { return "Swift Build" }
 
 // Run executes swift build to check compilation.
-func (c *BuildCheck) Run(path string) (checker.Result, error) {
+func (c *BuildCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangSwift)
 
 	// Check for Package.swift first
@@ -25,7 +25,7 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run swift build
-	cmd := exec.Command("swift", "build")
+	cmd := checkutil.Command(ctx, "swift", "build")
 	cmd.Dir = path
 	output, err := cmd.CombinedOutput()
 	outputStr := string(output)

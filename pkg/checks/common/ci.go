@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,7 +17,7 @@ type CICheck struct{}
 func (c *CICheck) ID() string   { return "common:ci" }
 func (c *CICheck) Name() string { return "CI Pipeline" }
 
-func (c *CICheck) Run(path string) (checker.Result, error) {
+func (c *CICheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Check for various CI configurations

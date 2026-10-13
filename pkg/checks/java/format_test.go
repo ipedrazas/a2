@@ -1,6 +1,7 @@
 package javacheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -32,7 +33,7 @@ func (s *FormatCheckTestSuite) TestIDAndName() {
 
 func (s *FormatCheckTestSuite) TestRun_NoFormatter() {
 	check := &FormatCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -42,7 +43,7 @@ func (s *FormatCheckTestSuite) TestRun_NoFormatter() {
 
 func (s *FormatCheckTestSuite) TestRun_ResultLanguage() {
 	check := &FormatCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangJava, result.Language)
@@ -66,7 +67,7 @@ func (s *FormatCheckTestSuite) TestRun_GoogleJavaFormat_Maven() {
 	s.Require().NoError(err)
 
 	check := &FormatCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -82,7 +83,7 @@ func (s *FormatCheckTestSuite) TestRun_GoogleJavaFormat_Gradle() {
 	s.Require().NoError(err)
 
 	check := &FormatCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -97,7 +98,7 @@ func (s *FormatCheckTestSuite) TestRun_GoogleJavaFormat_GradleKts() {
 	s.Require().NoError(err)
 
 	check := &FormatCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -119,7 +120,7 @@ func (s *FormatCheckTestSuite) TestRun_Spotless_Maven() {
 	s.Require().NoError(err)
 
 	check := &FormatCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -140,7 +141,7 @@ spotless {
 	s.Require().NoError(err)
 
 	check := &FormatCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -158,7 +159,7 @@ indent_size = 4
 	s.Require().NoError(err)
 
 	check := &FormatCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -176,7 +177,7 @@ indent_size = 4
 	s.Require().NoError(err)
 
 	check := &FormatCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -193,7 +194,7 @@ func (s *FormatCheckTestSuite) TestRun_IntelliJFormatter() {
 	s.Require().NoError(err)
 
 	check := &FormatCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -210,7 +211,7 @@ func (s *FormatCheckTestSuite) TestRun_IntelliJCodeStyleSettings() {
 	s.Require().NoError(err)
 
 	check := &FormatCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -223,7 +224,7 @@ func (s *FormatCheckTestSuite) TestRun_EclipseFormatter_Settings() {
 	s.Require().NoError(err)
 
 	check := &FormatCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -235,7 +236,7 @@ func (s *FormatCheckTestSuite) TestRun_EclipseFormatter_File() {
 	s.Require().NoError(err)
 
 	check := &FormatCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -264,7 +265,7 @@ indent_style = space
 	s.Require().NoError(err)
 
 	check := &FormatCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

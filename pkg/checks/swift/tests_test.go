@@ -1,6 +1,7 @@
 package swiftcheck
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -36,7 +37,7 @@ func (s *TestsTestSuite) TestName() {
 }
 
 func (s *TestsTestSuite) TestRun_NoPackageSwift() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -45,7 +46,7 @@ func (s *TestsTestSuite) TestRun_NoPackageSwift() {
 }
 
 func (s *TestsTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangSwift, result.Language)

@@ -1,6 +1,8 @@
 package pythoncheck
 
 import (
+	"context"
+
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/config"
@@ -14,7 +16,7 @@ type BuildCheck struct {
 func (c *BuildCheck) ID() string   { return "python:build" }
 func (c *BuildCheck) Name() string { return "Python Build" }
 
-func (c *BuildCheck) Run(path string) (checker.Result, error) {
+func (c *BuildCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 	pm := c.detectPackageManager(path)
 
@@ -23,13 +25,13 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 
 	switch pm {
 	case "poetry":
-		result = rb.RunCommand(path, "poetry", "check")
+		result = rb.RunCommand(ctx, path, "poetry", "check")
 		cmdDesc = "poetry check"
 	case "pipenv":
-		result = rb.RunCommand(path, "pipenv", "check")
+		result = rb.RunCommand(ctx, path, "pipenv", "check")
 		cmdDesc = "pipenv check"
 	default:
-		result = rb.RunCommand(path, "pip", "--version")
+		result = rb.RunCommand(ctx, path, "pip", "--version")
 		cmdDesc = "pip --version"
 	}
 

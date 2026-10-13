@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -41,7 +42,7 @@ indent_size = 2
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -60,7 +61,7 @@ end_of_line = lf
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -78,7 +79,7 @@ charset = utf-8
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -96,7 +97,7 @@ trim_trailing_whitespace = true
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -119,7 +120,7 @@ insert_final_newline = true
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -143,7 +144,7 @@ func (s *EditorconfigCheckTestSuite) TestVSCodeSettings() {
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -163,7 +164,7 @@ func (s *EditorconfigCheckTestSuite) TestVSCodeExtensions() {
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -181,7 +182,7 @@ func (s *EditorconfigCheckTestSuite) TestJetBrainsIDE() {
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -198,7 +199,7 @@ func (s *EditorconfigCheckTestSuite) TestJetBrainsCodeStyles() {
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -214,7 +215,7 @@ set shiftwidth=4
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -229,7 +230,7 @@ vim.opt.tabstop = 4
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -250,7 +251,7 @@ func (s *EditorconfigCheckTestSuite) TestDevContainer() {
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -267,7 +268,7 @@ func (s *EditorconfigCheckTestSuite) TestDevContainerAtRoot() {
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -295,7 +296,7 @@ indent_style = space
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -310,7 +311,7 @@ func (s *EditorconfigCheckTestSuite) TestNoEditorConfigFound() {
 	s.Require().NoError(err)
 
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -320,7 +321,7 @@ func (s *EditorconfigCheckTestSuite) TestNoEditorConfigFound() {
 
 func (s *EditorconfigCheckTestSuite) TestEmptyDirectory() {
 	check := &EditorconfigCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

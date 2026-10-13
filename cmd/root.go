@@ -1,10 +1,13 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -31,6 +34,7 @@ var (
 	timeout       time.Duration // Timeout for each individual check
 	verbosity     int           // Verbosity level (0=normal, 1=failures, 2=all)
 	failFast      bool          // Cancel remaining checks on first critical failure (parallel mode)
+	strict        bool          // Fail errored and missing-tool checks
 	dryRun        bool          // List checks without running them
 	quick         bool          // Run only fast (static/IO-light) checks
 	forceInit     bool          // Force overwrite in profiles/targets init
@@ -124,6 +128,7 @@ func init() {
 	checkCmd.Flags().DurationVar(&timeout, "timeout", 3*time.Minute, "Timeout for each individual check (e.g., 30s, 1m). 0 means no timeout")
 	checkCmd.Flags().CountVarP(&verbosity, "verbose", "v", "Increase verbosity (-v for failures, -vv for all)")
 	checkCmd.Flags().BoolVar(&failFast, "fail-fast", false, "Cancel remaining checks on first critical failure (parallel mode only)")
+	checkCmd.Flags().BoolVar(&strict, "strict", false, "Fail checks that errored, timed out, or whose tool is not installed (recommended in CI)")
 	checkCmd.Flags().BoolVar(&dryRun, "dry-run", false, "List checks without running them")
 	checkCmd.Flags().BoolVar(&quick, "quick", false, "Run only fast static checks (skip builds/tests/scans)")
 	checkCmd.Flags().BoolVar(&quick, "fast", false, "Alias for --quick")
@@ -161,7 +166,11 @@ func Execute() {
 
 	checkHelpJSON()
 
-	if err := rootCmd.Execute(); err != nil {
+	// Cancel on Ctrl-C/SIGTERM so running checks kill the commands they started.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	err := rootCmd.ExecuteContext(ctx)
+	stop()
+	if err != nil {
 		if !errors.Is(err, errSilent) {
 			fmt.Fprintln(os.Stderr, "Error:", err)
 		}
@@ -275,13 +284,15 @@ func runCheck(cmd *cobra.Command, args []string) error {
 
 	// Run the suite with configured execution options
 	opts := runner.RunSuiteOptions{
-		Parallel:    cfg.Execution.Parallel,
-		FailFast:    failFast,
-		Timeout:     timeout,
-		Concurrency: cfg.Execution.Concurrency,
-		OnProgress:  progressFunc,
+		Parallel:        cfg.Execution.Parallel,
+		FailFast:        failFast,
+		Strict:          strict || cfg.Execution.Strict,
+		Timeout:         timeout,
+		Concurrency:     cfg.Execution.Concurrency,
+		SlowConcurrency: cfg.Execution.SlowConcurrency,
+		OnProgress:      progressFunc,
 	}
-	result := runner.RunSuiteWithOptions(path, registrations, opts)
+	result := runner.RunSuiteWithOptions(cmd.Context(), path, registrations, opts)
 
 	// Clear progress display before showing results
 	if progress != nil {

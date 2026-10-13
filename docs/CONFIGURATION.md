@@ -95,7 +95,10 @@ checks:
 
 # Execution options
 execution:
-  parallel: true  # Run checks concurrently (default)
+  parallel: true        # Run checks concurrently (default)
+  # concurrency: 0      # Max fast checks at once (0 = number of CPUs)
+  # slow_concurrency: 2 # Max slow checks (builds, tests, coverage) at once
+  # strict: false       # Fail checks that errored, timed out, or whose tool is missing (same as --strict)
 
 # Custom external checks
 external:

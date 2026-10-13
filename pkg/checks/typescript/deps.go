@@ -2,6 +2,7 @@ package typescriptcheck
 
 import (
 	"bytes"
+	"context"
 	"os/exec"
 	"strings"
 
@@ -20,7 +21,7 @@ func (c *DepsCheck) ID() string   { return "typescript:deps" }
 func (c *DepsCheck) Name() string { return "TypeScript Vulnerabilities" }
 
 // Run checks for dependency vulnerabilities.
-func (c *DepsCheck) Run(path string) (checker.Result, error) {
+func (c *DepsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for package.json
@@ -51,7 +52,7 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run audit command
-	auditResult, auditOutput := c.runAudit(path, pm)
+	auditResult, auditOutput := c.runAudit(ctx, path, pm)
 	if auditResult != "" {
 		if len(tools) > 0 {
 			return rb.Pass(auditResult + "; configured: " + strings.Join(tools, ", ")), nil
@@ -111,19 +112,19 @@ func (c *DepsCheck) hasSnyk(path string) bool {
 }
 
 // runAudit runs the package manager's audit command.
-func (c *DepsCheck) runAudit(path, pm string) (string, string) {
+func (c *DepsCheck) runAudit(ctx context.Context, path, pm string) (string, string) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
 		// yarn audit exits with non-zero if vulnerabilities found
-		cmd = exec.Command("yarn", "audit", "--summary")
+		cmd = checkutil.Command(ctx, "yarn", "audit", "--summary")
 	case "pnpm":
-		cmd = exec.Command("pnpm", "audit")
+		cmd = checkutil.Command(ctx, "pnpm", "audit")
 	case "bun":
 		// bun doesn't have audit yet, skip
 		return "", ""
 	default:
-		cmd = exec.Command("npm", "audit", "--audit-level=high")
+		cmd = checkutil.Command(ctx, "npm", "audit", "--audit-level=high")
 	}
 	cmd.Dir = path
 

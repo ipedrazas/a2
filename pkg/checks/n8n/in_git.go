@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -18,7 +19,7 @@ type InGitCheck struct{}
 func (c *InGitCheck) ID() string   { return "n8n:in-git" }
 func (c *InGitCheck) Name() string { return "Workflows Versioned In Git" }
 
-func (c *InGitCheck) Run(path string) (checker.Result, error) {
+func (c *InGitCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	bundle, err := n8n.LoadDirCached(path)
 	if err != nil {
 		return erroredResult(c, "could not scan for n8n workflows: "+err.Error()), nil
@@ -39,14 +40,14 @@ func (c *InGitCheck) Run(path string) (checker.Result, error) {
 		return rb.ToolNotInstalled("git", "install git to verify workflow version control"), nil
 	}
 
-	inside := rb.RunCommand(path, "git", "rev-parse", "--is-inside-work-tree")
+	inside := rb.RunCommand(ctx, path, "git", "rev-parse", "--is-inside-work-tree")
 	if !inside.Success() {
 		return warnResult(c,
 			fmt.Sprintf("%d workflow file(s) are not under version control (not a git repository)", len(files)),
 			"exports live outside any git repository — commit them to a repo so changes have history and review"), nil
 	}
 
-	tracked := rb.RunCommand(path, "git", append([]string{"ls-files", "--"}, files...)...)
+	tracked := rb.RunCommand(ctx, path, "git", append([]string{"ls-files", "--"}, files...)...)
 	if !tracked.Success() {
 		return erroredResult(c, "git ls-files failed: "+strings.TrimSpace(tracked.CombinedOutput())), nil
 	}

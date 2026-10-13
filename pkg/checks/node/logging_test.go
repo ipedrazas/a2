@@ -1,6 +1,7 @@
 package nodecheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,7 +49,7 @@ func (s *LoggingTestSuite) TestName() {
 }
 
 func (s *LoggingTestSuite) TestRun_NoPackageJson() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -57,7 +58,7 @@ func (s *LoggingTestSuite) TestRun_NoPackageJson() {
 }
 
 func (s *LoggingTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangNode, result.Language)
@@ -71,7 +72,7 @@ func (s *LoggingTestSuite) TestRun_WithStructuredLogging() {
 		}
 	}`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -87,7 +88,7 @@ func (s *LoggingTestSuite) TestRun_WithPino() {
 		}
 	}`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -103,7 +104,7 @@ func (s *LoggingTestSuite) TestRun_WithConsoleStatements() {
 		}
 	`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -117,7 +118,7 @@ func (s *LoggingTestSuite) TestRun_NoLogging() {
 	// (a fixture with zero JS files now warns about scanning nothing).
 	s.writeFile("index.js", "export function add(a, b) { return a + b }\n")
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -134,7 +135,7 @@ func (s *LoggingTestSuite) TestRun_StructuredWithConsole() {
 	}`)
 	s.writeFile("src/main.js", `console.log("debug")`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

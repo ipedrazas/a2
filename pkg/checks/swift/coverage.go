@@ -1,9 +1,9 @@
 package swiftcheck
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"os/exec"
 
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checkutil"
@@ -20,7 +20,7 @@ func (c *CoverageCheck) Name() string                   { return "Swift Coverage
 func (c *CoverageCheck) SetCoverageThreshold(t float64) { c.Threshold = t }
 
 // Run checks test coverage using swift test with coverage enabled.
-func (c *CoverageCheck) Run(path string) (checker.Result, error) {
+func (c *CoverageCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangSwift)
 
 	// Check for Package.swift first
@@ -29,7 +29,7 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run swift test with coverage
-	cmd := exec.Command("swift", "test", "--enable-code-coverage")
+	cmd := checkutil.Command(ctx, "swift", "test", "--enable-code-coverage")
 	cmd.Dir = path
 	_, err := cmd.CombinedOutput()
 
@@ -39,7 +39,7 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 
 	// Get coverage data using llvm-cov
 	// First, find the test binary and profdata
-	coverage, err := c.extractCoverage(path)
+	coverage, err := c.extractCoverage(ctx, path)
 	if err != nil {
 		return rb.Info("Coverage data not available (llvm-cov not configured)"), nil
 	}
@@ -56,9 +56,9 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 }
 
 // extractCoverage attempts to get coverage percentage from swift test output.
-func (c *CoverageCheck) extractCoverage(path string) (float64, error) {
+func (c *CoverageCheck) extractCoverage(ctx context.Context, path string) (float64, error) {
 	// Use swift package show-codecov-path to find the coverage file
-	cmd := exec.Command("swift", "package", "show-codecov-path")
+	cmd := checkutil.Command(ctx, "swift", "package", "show-codecov-path")
 	cmd.Dir = path
 	output, err := cmd.Output()
 	if err != nil {

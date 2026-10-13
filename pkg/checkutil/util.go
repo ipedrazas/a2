@@ -3,9 +3,12 @@ package checkutil
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/ipedrazas/a2/pkg/checker"
 )
@@ -23,8 +26,8 @@ type ResultBuilder struct {
 // executed command line (with working dir) so any Result built afterwards
 // reports exactly what a2 ran. Use this instead of checkutil.RunCommand inside
 // a check's Run method whenever a ResultBuilder is in scope.
-func (b *ResultBuilder) RunCommand(dir, name string, args ...string) *CommandResult {
-	res := RunCommand(dir, name, args...)
+func (b *ResultBuilder) RunCommand(ctx context.Context, dir, name string, args ...string) *CommandResult {
+	res := RunCommand(ctx, dir, name, args...)
 	b.RecordCommand(res)
 	return res
 }
@@ -68,145 +71,87 @@ func ShortMessage(reason string) string {
 		msg = strings.TrimSpace(msg[:idx])
 	}
 	// Truncate very long messages.
-	const maxLen = 80
-	if len(msg) > maxLen {
-		return msg[:maxLen] + "..."
+	return TruncateMessage(msg, 80)
+}
+
+// result builds a Result with the builder's identity and last recorded command.
+func (b *ResultBuilder) result(status checker.Status, passed bool, reason, rawOutput string) checker.Result {
+	return checker.Result{
+		Name:      b.name,
+		ID:        b.id,
+		Passed:    passed,
+		Status:    status,
+		Message:   ShortMessage(reason),
+		Reason:    reason,
+		Language:  b.language,
+		RawOutput: rawOutput,
+		Command:   b.command,
 	}
-	return msg
 }
 
 // Pass creates a passing result with the given reason.
 func (b *ResultBuilder) Pass(reason string) checker.Result {
-	return checker.Result{
-		Name:     b.name,
-		ID:       b.id,
-		Passed:   true,
-		Status:   checker.Pass,
-		Message:  ShortMessage(reason),
-		Reason:   reason,
-		Language: b.language,
-		Command:  b.command,
-	}
+	return b.result(checker.Pass, true, reason, "")
 }
 
 // Fail creates a failing result with the given reason.
 // Fail status indicates a critical failure that may abort execution.
 func (b *ResultBuilder) Fail(reason string) checker.Result {
-	return checker.Result{
-		Name:     b.name,
-		ID:       b.id,
-		Passed:   false,
-		Status:   checker.Fail,
-		Message:  ShortMessage(reason),
-		Reason:   reason,
-		Language: b.language,
-		Command:  b.command,
-	}
+	return b.result(checker.Fail, false, reason, "")
 }
 
 // Warn creates a warning result with the given reason.
 // Warnings indicate issues but don't cause execution to abort.
 func (b *ResultBuilder) Warn(reason string) checker.Result {
-	return checker.Result{
-		Name:     b.name,
-		ID:       b.id,
-		Passed:   false,
-		Status:   checker.Warn,
-		Message:  ShortMessage(reason),
-		Reason:   reason,
-		Language: b.language,
-		Command:  b.command,
-	}
+	return b.result(checker.Warn, false, reason, "")
 }
 
 // Info creates an informational result with the given reason.
 // Info results don't affect the pass/fail status or maturity score.
 func (b *ResultBuilder) Info(reason string) checker.Result {
-	return checker.Result{
-		Name:     b.name,
-		ID:       b.id,
-		Passed:   true,
-		Status:   checker.Info,
-		Message:  ShortMessage(reason),
-		Reason:   reason,
-		Language: b.language,
-		Command:  b.command,
-	}
+	return b.result(checker.Info, true, reason, "")
 }
 
 // ToolNotInstalled creates an Info result indicating a tool is not installed.
 // This standardizes the handling of missing tools across all checks.
 // Use this when a check cannot run because an optional tool is not available.
 // The installHint should provide installation instructions (e.g., "pip install black").
+// The result is flagged ToolMissing so strict mode can fail it.
 func (b *ResultBuilder) ToolNotInstalled(toolName, installHint string) checker.Result {
 	message := toolName + " not installed"
 	if installHint != "" {
 		message += " (" + installHint + ")"
 	}
-	return checker.Result{
-		Name:     b.name,
-		ID:       b.id,
-		Passed:   true,
-		Status:   checker.Info,
-		Message:  ShortMessage(message),
-		Reason:   message,
-		Language: b.language,
-	}
+	res := b.result(checker.Info, true, message, "")
+	res.Command = ""
+	res.ToolMissing = true
+	return res
 }
 
 // PassWithOutput creates a passing result with the given reason and raw output.
 func (b *ResultBuilder) PassWithOutput(reason, rawOutput string) checker.Result {
-	return checker.Result{
-		Name:      b.name,
-		ID:        b.id,
-		Passed:    true,
-		Status:    checker.Pass,
-		Message:   ShortMessage(reason),
-		Reason:    reason,
-		Language:  b.language,
-		RawOutput: rawOutput,
-		Command:   b.command,
-	}
+	return b.result(checker.Pass, true, reason, rawOutput)
 }
 
 // FailWithOutput creates a failing result with the given reason and raw output.
 func (b *ResultBuilder) FailWithOutput(reason, rawOutput string) checker.Result {
-	return checker.Result{
-		Name:      b.name,
-		ID:        b.id,
-		Passed:    false,
-		Status:    checker.Fail,
-		Message:   ShortMessage(reason),
-		Reason:    reason,
-		Language:  b.language,
-		RawOutput: rawOutput,
-		Command:   b.command,
-	}
+	return b.result(checker.Fail, false, reason, rawOutput)
 }
 
 // WarnWithOutput creates a warning result with the given reason and raw output.
 func (b *ResultBuilder) WarnWithOutput(reason, rawOutput string) checker.Result {
-	return checker.Result{
-		Name:      b.name,
-		ID:        b.id,
-		Passed:    false,
-		Status:    checker.Warn,
-		Message:   ShortMessage(reason),
-		Reason:    reason,
-		Language:  b.language,
-		RawOutput: rawOutput,
-		Command:   b.command,
-	}
+	return b.result(checker.Warn, false, reason, rawOutput)
 }
 
 // TruncateMessage limits a message to maxLen characters.
 // It trims whitespace and appends "..." if truncated.
+// Truncation counts runes, so multi-byte UTF-8 characters are never split.
 func TruncateMessage(msg string, maxLen int) string {
 	msg = strings.TrimSpace(msg)
-	if len(msg) <= maxLen {
+	if utf8.RuneCountInString(msg) <= maxLen {
 		return msg
 	}
-	return msg[:maxLen] + "..."
+	return string([]rune(msg)[:maxLen]) + "..."
 }
 
 // Pluralize returns the singular form if count is 1, otherwise the plural form.
@@ -294,8 +239,9 @@ func (r *CommandResult) Success() bool {
 
 // RunCommand executes a command in the specified directory and captures output.
 // It returns a CommandResult with stdout, stderr, and exit information.
-func RunCommand(dir, name string, args ...string) *CommandResult {
-	cmd := exec.Command(name, args...) // #nosec G204 -- command execution is by design
+// The command is killed if ctx is cancelled.
+func RunCommand(ctx context.Context, dir, name string, args ...string) *CommandResult {
+	cmd := Command(ctx, name, args...)
 	cmd.Dir = dir
 
 	var stdout, stderr bytes.Buffer
@@ -314,7 +260,7 @@ func RunCommand(dir, name string, args ...string) *CommandResult {
 
 	// Extract exit code if available
 	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
+		if exitErr, ok := errors.AsType[*exec.ExitError](err); ok {
 			result.ExitCode = exitErr.ExitCode()
 		} else {
 			result.ExitCode = -1 // Unknown error (e.g., command not found)

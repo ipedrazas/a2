@@ -2,7 +2,9 @@ package common
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os/exec"
 	"path/filepath"
@@ -40,7 +42,7 @@ type ExternalOutput struct {
 func (c *ExternalCheck) ID() string   { return c.CheckID }
 func (c *ExternalCheck) Name() string { return c.CheckName }
 
-func (c *ExternalCheck) Run(path string) (checker.Result, error) {
+func (c *ExternalCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	// Validate command before execution
@@ -73,7 +75,7 @@ func (c *ExternalCheck) Run(path string) (checker.Result, error) {
 	// command name is validated to reject shell metacharacters, and args are passed
 	// directly to exec without shell interpretation.
 	// nosemgrep: go.lang.security.audit.dangerous-exec-command.dangerous-exec-command
-	cmd := exec.Command(cmdPath, sanitizedArgs...)
+	cmd := checkutil.Command(ctx, cmdPath, sanitizedArgs...)
 	cmd.Dir = workDir
 
 	var stdout, stderr bytes.Buffer
@@ -157,7 +159,7 @@ func (c *ExternalCheck) resultFromExitCode(output string, err error, rawOutput s
 
 	// Get exit code
 	exitCode := 1
-	if exitErr, ok := err.(*exec.ExitError); ok {
+	if exitErr, ok := errors.AsType[*exec.ExitError](err); ok {
 		exitCode = exitErr.ExitCode()
 	}
 

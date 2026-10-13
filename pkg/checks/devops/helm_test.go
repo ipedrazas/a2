@@ -1,6 +1,7 @@
 package devops
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -35,7 +36,7 @@ func (s *HelmCheckTestSuite) TestName() {
 }
 
 func (s *HelmCheckTestSuite) TestRun_NoHelmCharts() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -50,7 +51,7 @@ name: myapp
 version: 1.0.0`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	// Without helm: Info (tool not installed). With helm (e.g. in CI): Pass or Warn after helm lint.
@@ -65,7 +66,7 @@ func (s *HelmCheckTestSuite) TestRun_ChartYmlInRoot() {
 name: myapp`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -83,7 +84,7 @@ func (s *HelmCheckTestSuite) TestRun_ChartInChartsDir() {
 name: mychart`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -101,7 +102,7 @@ func (s *HelmCheckTestSuite) TestRun_ChartInHelmDir() {
 name: mychart`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -119,7 +120,7 @@ func (s *HelmCheckTestSuite) TestRun_ChartInHelmSubdir() {
 name: subchart`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -136,7 +137,7 @@ image:
 	s.Require().NoError(err)
 
 	// values.yaml alone is not enough to detect a chart
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -153,7 +154,7 @@ name: myapp`), 0644)
 	err = os.WriteFile(valuesYaml, []byte(`replicaCount: 1`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -178,7 +179,7 @@ name: chart1`), 0644)
 name: chart2`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -197,7 +198,7 @@ func (s *HelmCheckTestSuite) TestRun_NestedChart() {
 name: nested`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Status == checker.Info || result.Status == checker.Pass || result.Status == checker.Warn,
@@ -206,7 +207,7 @@ name: nested`), 0644)
 }
 
 func (s *HelmCheckTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangCommon, result.Language)
@@ -223,7 +224,7 @@ func (s *HelmCheckTestSuite) TestRun_IgnoresHiddenDirs() {
 name: hidden`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -241,7 +242,7 @@ func (s *HelmCheckTestSuite) TestRun_IgnoresVendorDirs() {
 name: vendor`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -262,7 +263,7 @@ metadata:
 	err = os.WriteFile(deploymentYaml, []byte(content), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)

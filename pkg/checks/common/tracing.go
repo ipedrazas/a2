@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *TracingCheck) ID() string   { return "common:tracing" }
 func (c *TracingCheck) Name() string { return "Distributed Tracing" }
 
 // Run checks for tracing configuration and libraries.
-func (c *TracingCheck) Run(path string) (checker.Result, error) {
+func (c *TracingCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string

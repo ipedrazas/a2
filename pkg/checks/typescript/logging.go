@@ -1,6 +1,7 @@
 package typescriptcheck
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -19,7 +20,7 @@ func (c *LoggingCheck) ID() string   { return "typescript:logging" }
 func (c *LoggingCheck) Name() string { return "TypeScript Logging" }
 
 // Run checks for logging configuration.
-func (c *LoggingCheck) Run(path string) (checker.Result, error) {
+func (c *LoggingCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json

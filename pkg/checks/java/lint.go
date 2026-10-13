@@ -1,6 +1,7 @@
 package javacheck
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *LintCheck) ID() string   { return "java:lint" }
 func (c *LintCheck) Name() string { return "Java Lint" }
 
 // Run checks for Checkstyle, SpotBugs, and PMD configuration.
-func (c *LintCheck) Run(path string) (checker.Result, error) {
+func (c *LintCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	var linters []string

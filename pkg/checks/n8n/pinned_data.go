@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -15,7 +16,7 @@ type PinnedDataCheck struct{}
 func (c *PinnedDataCheck) ID() string   { return "n8n:pinned-data" }
 func (c *PinnedDataCheck) Name() string { return "Pinned Data In Production" }
 
-func (c *PinnedDataCheck) Run(path string) (checker.Result, error) {
+func (c *PinnedDataCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	bundle, early := loadBundle(c, path)
 	if early != nil {
 		return *early, nil

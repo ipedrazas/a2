@@ -2,6 +2,7 @@ package nodecheck
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os/exec"
 	"regexp"
@@ -33,7 +34,7 @@ func (c *CoverageCheck) Name() string {
 func (c *CoverageCheck) SetCoverageThreshold(t float64) { c.Threshold = t }
 
 // Run executes the coverage check.
-func (c *CoverageCheck) Run(path string) (checker.Result, error) {
+func (c *CoverageCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists
@@ -60,7 +61,7 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 
 	// Detect test runner and run with coverage
 	runner := c.detectTestRunner(path, pkg)
-	coverage, err := c.runCoverage(path, runner)
+	coverage, err := c.runCoverage(ctx, path, runner)
 
 	if err != nil {
 		return rb.Warn(fmt.Sprintf("Failed to measure coverage: %v", err)), nil
@@ -120,21 +121,21 @@ func (c *CoverageCheck) detectTestRunner(path string, pkg *PackageJSON) string {
 }
 
 // runCoverage runs the appropriate coverage command and returns the coverage percentage.
-func (c *CoverageCheck) runCoverage(path, runner string) (float64, error) {
+func (c *CoverageCheck) runCoverage(ctx context.Context, path, runner string) (float64, error) {
 	var cmd *exec.Cmd
 
 	switch runner {
 	case "jest":
-		cmd = exec.Command("npx", "jest", "--coverage", "--coverageReporters=text-summary", "--passWithNoTests")
+		cmd = checkutil.Command(ctx, "npx", "jest", "--coverage", "--coverageReporters=text-summary", "--passWithNoTests")
 	case "vitest":
-		cmd = exec.Command("npx", "vitest", "run", "--coverage")
+		cmd = checkutil.Command(ctx, "npx", "vitest", "run", "--coverage")
 	case "c8":
-		cmd = exec.Command("npx", "c8", "npm", "test")
+		cmd = checkutil.Command(ctx, "npx", "c8", "npm", "test")
 	case "nyc":
-		cmd = exec.Command("npx", "nyc", "npm", "test")
+		cmd = checkutil.Command(ctx, "npx", "nyc", "npm", "test")
 	default:
 		// Try jest with coverage
-		cmd = exec.Command("npx", "jest", "--coverage", "--coverageReporters=text-summary", "--passWithNoTests")
+		cmd = checkutil.Command(ctx, "npx", "jest", "--coverage", "--coverageReporters=text-summary", "--passWithNoTests")
 	}
 
 	cmd.Dir = path

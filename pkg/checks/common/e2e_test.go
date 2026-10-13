@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -41,7 +42,7 @@ module.exports = {
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -56,7 +57,7 @@ export default defineConfig({});
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -72,7 +73,7 @@ export default defineConfig({});
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -87,7 +88,7 @@ exports.config = {};
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -102,7 +103,7 @@ module.exports = {};
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -119,7 +120,7 @@ func (s *E2ECheckTestSuite) TestTestCafe() {
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -134,7 +135,7 @@ exports.config = {};
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -151,7 +152,7 @@ func (s *E2ECheckTestSuite) TestDetox() {
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -170,7 +171,7 @@ describe('E2E', () => {});
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -184,7 +185,7 @@ func (s *E2ECheckTestSuite) TestCypressDirectory() {
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -198,7 +199,7 @@ func (s *E2ECheckTestSuite) TestPlaywrightDirectory() {
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -217,7 +218,7 @@ func (s *E2ECheckTestSuite) TestE2EDependencyInPackageJson() {
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -236,7 +237,7 @@ func (s *E2ECheckTestSuite) TestPlaywrightTestInPackageJson() {
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -255,7 +256,7 @@ func (s *E2ECheckTestSuite) TestPuppeteerInPackageJson() {
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -274,7 +275,7 @@ func (s *E2ECheckTestSuite) TestSeleniumInPackageJson() {
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -289,7 +290,7 @@ pytest==7.4.0`
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -303,7 +304,7 @@ func (s *E2ECheckTestSuite) TestPythonPlaywright() {
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -317,7 +318,7 @@ func (s *E2ECheckTestSuite) TestPythonRobot() {
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -333,7 +334,7 @@ format=pretty
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -352,7 +353,7 @@ require 'cucumber'
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -368,7 +369,7 @@ func (s *E2ECheckTestSuite) TestNoE2EFound() {
 	s.Require().NoError(err)
 
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -378,7 +379,7 @@ func (s *E2ECheckTestSuite) TestNoE2EFound() {
 
 func (s *E2ECheckTestSuite) TestEmptyDirectory() {
 	check := &E2ECheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

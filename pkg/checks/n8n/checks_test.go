@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -38,7 +39,7 @@ func allCheckers(t *testing.T) []checker.Checker {
 
 func runCheck(t *testing.T, c checker.Checker, dir string) checker.Result {
 	t.Helper()
-	res, err := c.Run(dir)
+	res, err := c.Run(context.Background(), dir)
 	if err != nil {
 		t.Fatalf("%s.Run(%s) returned error: %v", c.ID(), dir, err)
 	}

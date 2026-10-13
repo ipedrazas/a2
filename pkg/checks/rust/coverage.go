@@ -1,6 +1,7 @@
 package rustcheck
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -21,7 +22,7 @@ func (c *CoverageCheck) Name() string                   { return "Rust Coverage"
 func (c *CoverageCheck) SetCoverageThreshold(t float64) { c.Threshold = t }
 
 // Run runs coverage tools and checks that coverage meets the threshold.
-func (c *CoverageCheck) Run(path string) (checker.Result, error) {
+func (c *CoverageCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	threshold := c.Threshold
@@ -36,7 +37,7 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 
 	// Try to run cargo-tarpaulin
 	if checkutil.ToolAvailable("cargo-tarpaulin") {
-		result := rb.RunCommand(path, "cargo", "tarpaulin", "--skip-clean", "--out", "stdout")
+		result := rb.RunCommand(ctx, path, "cargo", "tarpaulin", "--skip-clean", "--out", "stdout")
 		output := result.CombinedOutput()
 
 		if !result.Success() {
@@ -52,7 +53,7 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 
 	// Try to run cargo-llvm-cov
 	if checkutil.ToolAvailable("cargo-llvm-cov") {
-		result := rb.RunCommand(path, "cargo", "llvm-cov", "--summary-only")
+		result := rb.RunCommand(ctx, path, "cargo", "llvm-cov", "--summary-only")
 		output := result.CombinedOutput()
 
 		if !result.Success() {

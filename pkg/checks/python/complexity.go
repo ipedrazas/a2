@@ -2,6 +2,7 @@ package pythoncheck
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"regexp"
 	"sort"
@@ -31,7 +32,7 @@ type ComplexFunction struct {
 	Grade      string // A, B, C, D, E, F
 }
 
-func (c *ComplexityCheck) Run(path string) (checker.Result, error) {
+func (c *ComplexityCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 
 	// Check if Python project exists
@@ -55,7 +56,7 @@ func (c *ComplexityCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run radon cc with show-complexity flag
-	result := runPythonCommand(rb, path, "radon", "cc", "-s", ".")
+	result := runPythonCommand(ctx, rb, path, "radon", "cc", "-s", ".")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

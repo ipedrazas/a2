@@ -2,6 +2,7 @@ package typescriptcheck
 
 import (
 	"bytes"
+	"context"
 	"os/exec"
 	"strings"
 
@@ -20,7 +21,7 @@ func (c *TestsCheck) ID() string   { return "typescript:tests" }
 func (c *TestsCheck) Name() string { return "TypeScript Tests" }
 
 // Run executes the test suite.
-func (c *TestsCheck) Run(path string) (checker.Result, error) {
+func (c *TestsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json
@@ -34,13 +35,13 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 
 	switch runner {
 	case "jest":
-		return c.runJest(path, pm, rb)
+		return c.runJest(ctx, path, pm, rb)
 	case "vitest":
-		return c.runVitest(path, pm, rb)
+		return c.runVitest(ctx, path, pm, rb)
 	case "mocha":
-		return c.runMocha(path, pm, rb)
+		return c.runMocha(ctx, path, pm, rb)
 	case "npm-test":
-		return c.runNpmTest(path, pm, rb)
+		return c.runNpmTest(ctx, path, pm, rb)
 	default:
 		return rb.Pass("No test runner detected"), nil
 	}
@@ -114,17 +115,17 @@ func (c *TestsCheck) detectPackageManager(path string) string {
 }
 
 // runJest runs Jest tests.
-func (c *TestsCheck) runJest(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *TestsCheck) runJest(ctx context.Context, path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
-		cmd = exec.Command("yarn", "jest", "--passWithNoTests")
+		cmd = checkutil.Command(ctx, "yarn", "jest", "--passWithNoTests")
 	case "pnpm":
-		cmd = exec.Command("pnpm", "exec", "jest", "--passWithNoTests")
+		cmd = checkutil.Command(ctx, "pnpm", "exec", "jest", "--passWithNoTests")
 	case "bun":
-		cmd = exec.Command("bun", "run", "jest", "--passWithNoTests")
+		cmd = checkutil.Command(ctx, "bun", "run", "jest", "--passWithNoTests")
 	default:
-		cmd = exec.Command("npx", "jest", "--passWithNoTests")
+		cmd = checkutil.Command(ctx, "npx", "jest", "--passWithNoTests")
 	}
 	cmd.Dir = path
 
@@ -142,17 +143,17 @@ func (c *TestsCheck) runJest(path, pm string, rb *checkutil.ResultBuilder) (chec
 }
 
 // runVitest runs Vitest tests.
-func (c *TestsCheck) runVitest(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *TestsCheck) runVitest(ctx context.Context, path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
-		cmd = exec.Command("yarn", "vitest", "run")
+		cmd = checkutil.Command(ctx, "yarn", "vitest", "run")
 	case "pnpm":
-		cmd = exec.Command("pnpm", "exec", "vitest", "run")
+		cmd = checkutil.Command(ctx, "pnpm", "exec", "vitest", "run")
 	case "bun":
-		cmd = exec.Command("bun", "run", "vitest", "run")
+		cmd = checkutil.Command(ctx, "bun", "run", "vitest", "run")
 	default:
-		cmd = exec.Command("npx", "vitest", "run")
+		cmd = checkutil.Command(ctx, "npx", "vitest", "run")
 	}
 	cmd.Dir = path
 
@@ -170,17 +171,17 @@ func (c *TestsCheck) runVitest(path, pm string, rb *checkutil.ResultBuilder) (ch
 }
 
 // runMocha runs Mocha tests.
-func (c *TestsCheck) runMocha(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *TestsCheck) runMocha(ctx context.Context, path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
-		cmd = exec.Command("yarn", "mocha")
+		cmd = checkutil.Command(ctx, "yarn", "mocha")
 	case "pnpm":
-		cmd = exec.Command("pnpm", "exec", "mocha")
+		cmd = checkutil.Command(ctx, "pnpm", "exec", "mocha")
 	case "bun":
-		cmd = exec.Command("bun", "run", "mocha")
+		cmd = checkutil.Command(ctx, "bun", "run", "mocha")
 	default:
-		cmd = exec.Command("npx", "mocha")
+		cmd = checkutil.Command(ctx, "npx", "mocha")
 	}
 	cmd.Dir = path
 
@@ -198,17 +199,17 @@ func (c *TestsCheck) runMocha(path, pm string, rb *checkutil.ResultBuilder) (che
 }
 
 // runNpmTest runs npm test script.
-func (c *TestsCheck) runNpmTest(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *TestsCheck) runNpmTest(ctx context.Context, path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
-		cmd = exec.Command("yarn", "test")
+		cmd = checkutil.Command(ctx, "yarn", "test")
 	case "pnpm":
-		cmd = exec.Command("pnpm", "test")
+		cmd = checkutil.Command(ctx, "pnpm", "test")
 	case "bun":
-		cmd = exec.Command("bun", "test")
+		cmd = checkutil.Command(ctx, "bun", "test")
 	default:
-		cmd = exec.Command("npm", "test")
+		cmd = checkutil.Command(ctx, "npm", "test")
 	}
 	cmd.Dir = path
 

@@ -1,6 +1,7 @@
 package swiftcheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,7 +49,7 @@ func (s *ProjectTestSuite) TestName() {
 }
 
 func (s *ProjectTestSuite) TestRun_NoPackageSwift() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -68,7 +69,7 @@ let package = Package(
 )
 `)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -89,7 +90,7 @@ let package = Package(
   "pins": []
 }`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -106,7 +107,7 @@ let package = Package(
 )
 `)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -122,7 +123,7 @@ let package = Package(
 )
 `)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangSwift, result.Language)

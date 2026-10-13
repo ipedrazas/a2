@@ -1,6 +1,7 @@
 package javacheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -39,7 +40,7 @@ func (s *ProjectCheckTestSuite) TestRun_MavenProject() {
 	err := os.WriteFile(pomXml, []byte("<project></project>"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -56,7 +57,7 @@ func (s *ProjectCheckTestSuite) TestRun_MavenProjectWithWrapper() {
 	err = os.WriteFile(mvnw, []byte("#!/bin/bash"), 0755)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -69,7 +70,7 @@ func (s *ProjectCheckTestSuite) TestRun_GradleProject() {
 	err := os.WriteFile(buildGradle, []byte("plugins {}"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -83,7 +84,7 @@ func (s *ProjectCheckTestSuite) TestRun_GradleKotlinDSL() {
 	err := os.WriteFile(buildGradle, []byte("plugins {}"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -100,7 +101,7 @@ func (s *ProjectCheckTestSuite) TestRun_GradleProjectWithWrapper() {
 	err = os.WriteFile(gradlew, []byte("#!/bin/bash"), 0755)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -109,7 +110,7 @@ func (s *ProjectCheckTestSuite) TestRun_GradleProjectWithWrapper() {
 }
 
 func (s *ProjectCheckTestSuite) TestRun_NoProject() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -127,7 +128,7 @@ func (s *ProjectCheckTestSuite) TestRun_GradlePreferredOverMaven() {
 	err = os.WriteFile(buildGradle, []byte("plugins {}"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -139,7 +140,7 @@ func (s *ProjectCheckTestSuite) TestRun_ResultLanguage() {
 	err := os.WriteFile(pomXml, []byte("<project></project>"), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangJava, result.Language)

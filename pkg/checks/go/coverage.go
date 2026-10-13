@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -19,7 +20,7 @@ func (c *CoverageCheck) ID() string                     { return "go:coverage" }
 func (c *CoverageCheck) Name() string                   { return "Go Coverage" }
 func (c *CoverageCheck) SetCoverageThreshold(t float64) { c.Threshold = t }
 
-func (c *CoverageCheck) Run(path string) (checker.Result, error) {
+func (c *CoverageCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
 	threshold := c.Threshold
@@ -27,7 +28,7 @@ func (c *CoverageCheck) Run(path string) (checker.Result, error) {
 		threshold = 80.0 // Default threshold
 	}
 
-	result := rb.RunCommand(path, "go", "test", "-cover", "./...")
+	result := rb.RunCommand(ctx, path, "go", "test", "-cover", "./...")
 	output := result.CombinedOutput()
 
 	// Check for no test files

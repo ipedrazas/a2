@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -14,7 +15,7 @@ type DepsCheck struct{}
 func (c *DepsCheck) ID() string   { return "go:deps" }
 func (c *DepsCheck) Name() string { return "Go Vulnerabilities" }
 
-func (c *DepsCheck) Run(path string) (checker.Result, error) {
+func (c *DepsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
 	// Check if govulncheck is available
@@ -22,7 +23,7 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 		return rb.ToolNotInstalled("govulncheck", "go install golang.org/x/vuln/cmd/govulncheck@latest"), nil
 	}
 
-	result := rb.RunCommand(path, "govulncheck", "./...")
+	result := rb.RunCommand(ctx, path, "govulncheck", "./...")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

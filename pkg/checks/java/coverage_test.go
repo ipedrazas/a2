@@ -1,6 +1,7 @@
 package javacheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -32,7 +33,7 @@ func (s *CoverageCheckTestSuite) TestIDAndName() {
 
 func (s *CoverageCheckTestSuite) TestRun_NoJaCoCo() {
 	check := &CoverageCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -42,7 +43,7 @@ func (s *CoverageCheckTestSuite) TestRun_NoJaCoCo() {
 
 func (s *CoverageCheckTestSuite) TestRun_ResultLanguage() {
 	check := &CoverageCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangJava, result.Language)
@@ -63,7 +64,7 @@ func (s *CoverageCheckTestSuite) TestRun_JaCoCoConfigured_NoReport() {
 	s.Require().NoError(err)
 
 	check := &CoverageCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -84,7 +85,7 @@ test {
 	s.Require().NoError(err)
 
 	check := &CoverageCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -101,7 +102,7 @@ func (s *CoverageCheckTestSuite) TestRun_JaCoCoConfigured_GradleKts() {
 	s.Require().NoError(err)
 
 	check := &CoverageCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -137,7 +138,7 @@ func (s *CoverageCheckTestSuite) TestRun_WithReport_AboveThreshold() {
 	s.Require().NoError(err)
 
 	check := &CoverageCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -174,7 +175,7 @@ func (s *CoverageCheckTestSuite) TestRun_WithReport_BelowThreshold() {
 	s.Require().NoError(err)
 
 	check := &CoverageCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -212,7 +213,7 @@ func (s *CoverageCheckTestSuite) TestRun_CustomThreshold() {
 
 	// Custom threshold of 50%
 	check := &CoverageCheck{Threshold: 50.0}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -243,7 +244,7 @@ func (s *CoverageCheckTestSuite) TestRun_GradleReportLocation() {
 	s.Require().NoError(err)
 
 	check := &CoverageCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

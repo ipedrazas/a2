@@ -1,6 +1,7 @@
 package nodecheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -58,7 +59,7 @@ func (suite *TypeTestSuite) TestTypeCheck_Name() {
 func (suite *TypeTestSuite) TestTypeCheck_Run_NoPackageJSON() {
 	check := &TypeCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -80,7 +81,7 @@ func (suite *TypeTestSuite) TestTypeCheck_Run_NotTypeScriptProject() {
 
 	check := &TypeCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -103,7 +104,7 @@ func (suite *TypeTestSuite) TestTypeCheck_Run_TypeScriptInDevDependencies() {
 	check := &TypeCheck{}
 
 	// This will detect TypeScript but may fail if tsc is not available
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// The result depends on whether tsc is available
@@ -131,7 +132,7 @@ func (suite *TypeTestSuite) TestTypeCheck_Run_TsconfigExists() {
 
 	check := &TypeCheck{}
 
-	result, err := check.Run(suite.tempDir)
+	result, err := check.Run(context.Background(), suite.tempDir)
 
 	suite.NoError(err)
 	// The result depends on whether npx/tsc is available

@@ -1,6 +1,7 @@
 package devops
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -35,7 +36,7 @@ func (s *TerraformCheckTestSuite) TestName() {
 }
 
 func (s *TerraformCheckTestSuite) TestRun_NoTerraformFiles() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -53,7 +54,7 @@ resource "aws_instance" "example" {
 `), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	// Without terraform installed, should pass with Info
@@ -72,7 +73,7 @@ variable "instance_type" {
 `), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -89,7 +90,7 @@ output "instance_id" {
 `), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -104,7 +105,7 @@ environment  = "prod"
 `), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -126,7 +127,7 @@ terraform {
 `), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -143,7 +144,7 @@ func (s *TerraformCheckTestSuite) TestRun_MultipleTfFiles() {
 	err = os.WriteFile(varsTf, []byte(`variable "bucket_name" {}`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -160,7 +161,7 @@ func (s *TerraformCheckTestSuite) TestRun_NestedTfFiles() {
 	err = os.WriteFile(storageTf, []byte(`resource "aws_s3_bucket" "example" {}`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -174,7 +175,7 @@ region = "us-west-2"
 `), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -182,7 +183,7 @@ region = "us-west-2"
 }
 
 func (s *TerraformCheckTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangCommon, result.Language)
@@ -203,7 +204,7 @@ func (s *TerraformCheckTestSuite) TestRun_IgnoresHiddenDirs() {
 	err = os.WriteFile(hiddenTf, []byte(`resource "aws_s3_bucket" "test" {}`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)
@@ -220,7 +221,7 @@ func (s *TerraformCheckTestSuite) TestRun_IgnoresVendorDirs() {
 	err = os.WriteFile(vendorTf, []byte(`resource "aws_s3_bucket" "test" {}`), 0644)
 	s.Require().NoError(err)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -15,7 +16,7 @@ func (c *IntegrationCheck) ID() string   { return "common:integration" }
 func (c *IntegrationCheck) Name() string { return "Integration Tests" }
 
 // Run checks for integration test directories and files.
-func (c *IntegrationCheck) Run(path string) (checker.Result, error) {
+func (c *IntegrationCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangCommon)
 
 	var found []string

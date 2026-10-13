@@ -1,6 +1,7 @@
 package n8ncheck
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -21,7 +22,7 @@ type AgentInjectionCheck struct {
 func (c *AgentInjectionCheck) ID() string   { return "n8n:agent-injection-path" }
 func (c *AgentInjectionCheck) Name() string { return "Agent Injection Path" }
 
-func (c *AgentInjectionCheck) Run(path string) (checker.Result, error) {
+func (c *AgentInjectionCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	bundle, early := loadBundle(c, path)
 	if early != nil {
 		return *early, nil

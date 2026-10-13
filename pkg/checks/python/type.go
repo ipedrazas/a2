@@ -1,6 +1,7 @@
 package pythoncheck
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -20,7 +21,7 @@ type TypeCheck struct {
 func (c *TypeCheck) ID() string   { return "python:type" }
 func (c *TypeCheck) Name() string { return "Python Type Check" }
 
-func (c *TypeCheck) Run(path string) (checker.Result, error) {
+func (c *TypeCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 
 	// Check if this is a typed Python project
@@ -34,7 +35,7 @@ func (c *TypeCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run mypy
-	result := runPythonCommand(rb, path, "mypy", ".", "--ignore-missing-imports")
+	result := runPythonCommand(ctx, rb, path, "mypy", ".", "--ignore-missing-imports")
 	output := result.CombinedOutput()
 
 	if !result.Success() {

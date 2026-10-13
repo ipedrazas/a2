@@ -1,6 +1,7 @@
 package pythoncheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -38,7 +39,7 @@ func (s *DeadcodeCheckTestSuite) TestIDAndName() {
 
 func (s *DeadcodeCheckTestSuite) TestNoPythonProject() {
 	check := &DeadcodeCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -54,7 +55,7 @@ func (s *DeadcodeCheckTestSuite) TestToolNotInstalled() {
 	s.Require().NoError(err)
 
 	check := &DeadcodeCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.Info, result.Status)

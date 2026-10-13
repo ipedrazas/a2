@@ -2,6 +2,7 @@ package javacheck
 
 import (
 	"bytes"
+	"context"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -21,7 +22,7 @@ func (c *TestsCheck) ID() string   { return "java:tests" }
 func (c *TestsCheck) Name() string { return "Java Tests" }
 
 // Run executes Java tests using Maven or Gradle.
-func (c *TestsCheck) Run(path string) (checker.Result, error) {
+func (c *TestsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangJava)
 
 	buildTool := c.detectBuildTool(path)
@@ -32,9 +33,9 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch buildTool {
 	case "maven":
-		cmd = c.getMavenTestCommand(path)
+		cmd = c.getMavenTestCommand(ctx, path)
 	case "gradle":
-		cmd = c.getGradleTestCommand(path)
+		cmd = c.getGradleTestCommand(ctx, path)
 	}
 
 	cmd.Dir = path
@@ -69,18 +70,18 @@ func (c *TestsCheck) detectBuildTool(path string) string {
 	return detectBuildTool(path)
 }
 
-func (c *TestsCheck) getMavenTestCommand(path string) *exec.Cmd {
+func (c *TestsCheck) getMavenTestCommand(ctx context.Context, path string) *exec.Cmd {
 	if safepath.Exists(path, "mvnw") {
-		return exec.Command("./mvnw", "test", "-q")
+		return checkutil.Command(ctx, "./mvnw", "test", "-q")
 	}
-	return exec.Command("mvn", "test", "-q")
+	return checkutil.Command(ctx, "mvn", "test", "-q")
 }
 
-func (c *TestsCheck) getGradleTestCommand(path string) *exec.Cmd {
+func (c *TestsCheck) getGradleTestCommand(ctx context.Context, path string) *exec.Cmd {
 	if safepath.Exists(path, "gradlew") {
-		return exec.Command("./gradlew", "test", "--no-daemon")
+		return checkutil.Command(ctx, "./gradlew", "test", "--no-daemon")
 	}
-	return exec.Command("gradle", "test", "--no-daemon")
+	return checkutil.Command(ctx, "gradle", "test", "--no-daemon")
 }
 
 // extractTestSummary tries to extract test results from build output.

@@ -1,6 +1,7 @@
 package nodecheck
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -25,7 +26,7 @@ func (c *BuildCheck) Name() string {
 }
 
 // Run executes the build check.
-func (c *BuildCheck) Run(path string) (checker.Result, error) {
+func (c *BuildCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists first
@@ -44,16 +45,16 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 	var result *checkutil.CommandResult
 	switch pm {
 	case "pnpm":
-		result = rb.RunCommand(path, "pnpm", "install", "--frozen-lockfile", "--dry-run")
+		result = rb.RunCommand(ctx, path, "pnpm", "install", "--frozen-lockfile", "--dry-run")
 	case "yarn":
-		result = rb.RunCommand(path, "yarn", "install", "--check-files")
+		result = rb.RunCommand(ctx, path, "yarn", "install", "--check-files")
 	case "bun":
-		result = rb.RunCommand(path, "bun", "install", "--dry-run")
+		result = rb.RunCommand(ctx, path, "bun", "install", "--dry-run")
 	default: // npm
 		if safepath.Exists(path, "package-lock.json") {
-			result = rb.RunCommand(path, "npm", "ci", "--dry-run")
+			result = rb.RunCommand(ctx, path, "npm", "ci", "--dry-run")
 		} else {
-			result = rb.RunCommand(path, "npm", "install", "--dry-run")
+			result = rb.RunCommand(ctx, path, "npm", "install", "--dry-run")
 		}
 	}
 

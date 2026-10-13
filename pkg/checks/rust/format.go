@@ -1,7 +1,7 @@
 package rustcheck
 
 import (
-	"os/exec"
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -16,7 +16,7 @@ func (c *FormatCheck) ID() string   { return "rust:format" }
 func (c *FormatCheck) Name() string { return "Rust Format" }
 
 // Run checks if code is properly formatted using rustfmt.
-func (c *FormatCheck) Run(path string) (checker.Result, error) {
+func (c *FormatCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	// Check for Cargo.toml first
@@ -28,7 +28,7 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 	hasConfig := safepath.Exists(path, "rustfmt.toml") || safepath.Exists(path, ".rustfmt.toml")
 
 	// Run cargo fmt --check to see if code is formatted
-	cmd := exec.Command("cargo", "fmt", "--check")
+	cmd := checkutil.Command(ctx, "cargo", "fmt", "--check")
 	cmd.Dir = path
 	output, err := cmd.CombinedOutput()
 

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -36,7 +37,7 @@ func (s *MigrationsCheckTestSuite) TestMigrationsDirectory() {
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -50,7 +51,7 @@ func (s *MigrationsCheckTestSuite) TestDbMigrationsDirectory() {
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -66,7 +67,7 @@ script_location = alembic
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -81,7 +82,7 @@ flyway.url=jdbc:postgresql://localhost/mydb
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -96,7 +97,7 @@ changeLogFile=changelog.xml
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -117,7 +118,7 @@ model User {
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -132,7 +133,7 @@ export default defineConfig({});
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -149,7 +150,7 @@ module.exports = {
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -164,7 +165,7 @@ module.exports = {};
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -180,7 +181,7 @@ file = "src/schema.rs"
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -200,7 +201,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -220,7 +221,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -240,7 +241,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -255,7 +256,7 @@ schema "public" {}
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -270,7 +271,7 @@ sqlalchemy==2.0.0`
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -284,7 +285,7 @@ func (s *MigrationsCheckTestSuite) TestPythonDjango() {
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -303,7 +304,7 @@ func (s *MigrationsCheckTestSuite) TestNodePrisma() {
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -322,7 +323,7 @@ func (s *MigrationsCheckTestSuite) TestNodeDrizzle() {
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -341,7 +342,7 @@ func (s *MigrationsCheckTestSuite) TestNodeTypeORM() {
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -358,7 +359,7 @@ func (s *MigrationsCheckTestSuite) TestJavaFlyway() {
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -376,7 +377,7 @@ sqlx = "0.7"`
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -394,7 +395,7 @@ sea-orm = "0.12"`
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -414,7 +415,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -424,7 +425,7 @@ require (
 
 func (s *MigrationsCheckTestSuite) TestEmptyDirectory() {
 	check := &MigrationsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

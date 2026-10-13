@@ -1,6 +1,8 @@
 package gocheck
 
 import (
+	"context"
+
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checkutil"
 )
@@ -11,10 +13,10 @@ type BuildCheck struct{}
 func (c *BuildCheck) ID() string   { return "go:build" }
 func (c *BuildCheck) Name() string { return "Go Build" }
 
-func (c *BuildCheck) Run(path string) (checker.Result, error) {
+func (c *BuildCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangGo)
 
-	result := rb.RunCommand(path, "go", "build", "./...")
+	result := rb.RunCommand(ctx, path, "go", "build", "./...")
 	output := result.CombinedOutput()
 	if !result.Success() {
 		return rb.FailWithOutput("Build failed: "+checkutil.TruncateMessage(result.Output(), 200), output), nil

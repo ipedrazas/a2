@@ -1,6 +1,7 @@
 package javacheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -32,7 +33,7 @@ func (s *LoggingCheckTestSuite) TestIDAndName() {
 
 func (s *LoggingCheckTestSuite) TestRun_NoLogging() {
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -42,7 +43,7 @@ func (s *LoggingCheckTestSuite) TestRun_NoLogging() {
 
 func (s *LoggingCheckTestSuite) TestRun_ResultLanguage() {
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangJava, result.Language)
@@ -62,7 +63,7 @@ func (s *LoggingCheckTestSuite) TestRun_SLF4J_Maven() {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -82,7 +83,7 @@ dependencies {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -101,7 +102,7 @@ dependencies {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -129,7 +130,7 @@ func (s *LoggingCheckTestSuite) TestRun_Logback_ConfigFile() {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -145,7 +146,7 @@ func (s *LoggingCheckTestSuite) TestRun_Logback_SpringConfig() {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -157,7 +158,7 @@ func (s *LoggingCheckTestSuite) TestRun_Logback_RootConfig() {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -178,7 +179,7 @@ func (s *LoggingCheckTestSuite) TestRun_Logback_Maven() {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -207,7 +208,7 @@ func (s *LoggingCheckTestSuite) TestRun_Log4j2_ConfigFile() {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -223,7 +224,7 @@ func (s *LoggingCheckTestSuite) TestRun_Log4j2_YamlConfig() {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -239,7 +240,7 @@ func (s *LoggingCheckTestSuite) TestRun_Log4j2_PropertiesConfig() {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -251,7 +252,7 @@ func (s *LoggingCheckTestSuite) TestRun_Log4j2_RootConfig() {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -272,7 +273,7 @@ func (s *LoggingCheckTestSuite) TestRun_Log4j2_Maven() {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -298,7 +299,7 @@ public class App {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -335,7 +336,7 @@ public class App {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -361,7 +362,7 @@ func (s *LoggingCheckTestSuite) TestRun_MultipleLoggingFrameworks() {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -388,7 +389,7 @@ public class App {
 	s.Require().NoError(err)
 
 	check := &LoggingCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	// Should not find println issues because they're in comments

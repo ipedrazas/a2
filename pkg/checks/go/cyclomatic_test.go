@@ -1,6 +1,7 @@
 package gocheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -36,7 +37,7 @@ func (s *CyclomaticCheckTestSuite) TestNoGoMod() {
 	_ = os.Remove(filepath.Join(s.tempDir, "go.mod"))
 
 	check := &CyclomaticCheck{Threshold: 15}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -56,7 +57,7 @@ func simple() int {
 	s.Require().NoError(err)
 
 	check := &CyclomaticCheck{Threshold: 15}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -102,7 +103,7 @@ func complex(x, y, z int) int {
 	s.Require().NoError(err)
 
 	check := &CyclomaticCheck{Threshold: 5}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -145,7 +146,7 @@ func complexTest(x, y, z int) int {
 	s.Require().NoError(err)
 
 	check := &CyclomaticCheck{Threshold: 5}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -183,7 +184,7 @@ func veryComplex(x int) int {
 	s.Require().NoError(err)
 
 	check := &CyclomaticCheck{Threshold: 5}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -213,7 +214,7 @@ func (h *Handler) Handle(x, y int) int {
 	s.Require().NoError(err)
 
 	check := &CyclomaticCheck{Threshold: 3}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -234,7 +235,7 @@ func simple() int {
 	err := os.WriteFile(filepath.Join(s.tempDir, "main.go"), []byte(code), 0644)
 	s.Require().NoError(err)
 
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

@@ -1,6 +1,7 @@
 package javacheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -33,7 +34,7 @@ func (s *TestsCheckTestSuite) TestIDAndName() {
 
 func (s *TestsCheckTestSuite) TestRun_NoBuildTool() {
 	check := &TestsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -47,7 +48,7 @@ func (s *TestsCheckTestSuite) TestRun_ResultLanguage() {
 	s.Require().NoError(err)
 
 	check := &TestsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangJava, result.Language)
@@ -71,7 +72,7 @@ func (s *TestsCheckTestSuite) TestGetMavenTestCommand_WithWrapper() {
 	s.Require().NoError(err)
 
 	check := &TestsCheck{}
-	cmd := check.getMavenTestCommand(s.tempDir)
+	cmd := check.getMavenTestCommand(context.Background(), s.tempDir)
 
 	s.Equal("./mvnw", cmd.Args[0])
 	s.Contains(cmd.Args, "test")
@@ -79,7 +80,7 @@ func (s *TestsCheckTestSuite) TestGetMavenTestCommand_WithWrapper() {
 
 func (s *TestsCheckTestSuite) TestGetMavenTestCommand_WithoutWrapper() {
 	check := &TestsCheck{}
-	cmd := check.getMavenTestCommand(s.tempDir)
+	cmd := check.getMavenTestCommand(context.Background(), s.tempDir)
 
 	s.Equal("mvn", cmd.Args[0])
 	s.Contains(cmd.Args, "test")
@@ -90,7 +91,7 @@ func (s *TestsCheckTestSuite) TestGetGradleTestCommand_WithWrapper() {
 	s.Require().NoError(err)
 
 	check := &TestsCheck{}
-	cmd := check.getGradleTestCommand(s.tempDir)
+	cmd := check.getGradleTestCommand(context.Background(), s.tempDir)
 
 	s.Equal("./gradlew", cmd.Args[0])
 	s.Contains(cmd.Args, "test")
@@ -98,7 +99,7 @@ func (s *TestsCheckTestSuite) TestGetGradleTestCommand_WithWrapper() {
 
 func (s *TestsCheckTestSuite) TestGetGradleTestCommand_WithoutWrapper() {
 	check := &TestsCheck{}
-	cmd := check.getGradleTestCommand(s.tempDir)
+	cmd := check.getGradleTestCommand(context.Background(), s.tempDir)
 
 	s.Equal("gradle", cmd.Args[0])
 	s.Contains(cmd.Args, "test")

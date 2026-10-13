@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -32,7 +33,7 @@ func (s *CICheckTestSuite) TestIDAndName() {
 
 func (s *CICheckTestSuite) TestNoCIConfig() {
 	check := &CICheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -50,7 +51,7 @@ func (s *CICheckTestSuite) TestGitHubActions() {
 	s.Require().NoError(err)
 
 	check := &CICheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -63,7 +64,7 @@ func (s *CICheckTestSuite) TestGitLabCI() {
 	s.Require().NoError(err)
 
 	check := &CICheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -76,7 +77,7 @@ func (s *CICheckTestSuite) TestJenkinsfile() {
 	s.Require().NoError(err)
 
 	check := &CICheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -93,7 +94,7 @@ func (s *CICheckTestSuite) TestCircleCI() {
 	s.Require().NoError(err)
 
 	check := &CICheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -106,7 +107,7 @@ func (s *CICheckTestSuite) TestTravisCI() {
 	s.Require().NoError(err)
 
 	check := &CICheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -119,7 +120,7 @@ func (s *CICheckTestSuite) TestAzurePipelines() {
 	s.Require().NoError(err)
 
 	check := &CICheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -136,7 +137,7 @@ func (s *CICheckTestSuite) TestMultipleCIConfigs() {
 	s.Require().NoError(err)
 
 	check := &CICheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -151,7 +152,7 @@ func (s *CICheckTestSuite) TestTaskfile() {
 	s.Require().NoError(err)
 
 	check := &CICheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

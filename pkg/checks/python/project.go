@@ -1,6 +1,8 @@
 package pythoncheck
 
 import (
+	"context"
+
 	"github.com/ipedrazas/a2/pkg/checker"
 	"github.com/ipedrazas/a2/pkg/checkutil"
 	"github.com/ipedrazas/a2/pkg/safepath"
@@ -12,7 +14,7 @@ type ProjectCheck struct{}
 func (c *ProjectCheck) ID() string   { return "python:project" }
 func (c *ProjectCheck) Name() string { return "Python Project" }
 
-func (c *ProjectCheck) Run(path string) (checker.Result, error) {
+func (c *ProjectCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangPython)
 
 	// Check for pyproject.toml (preferred)

@@ -1,7 +1,7 @@
 package rustcheck
 
 import (
-	"os/exec"
+	"context"
 	"strings"
 
 	"github.com/ipedrazas/a2/pkg/checker"
@@ -16,7 +16,7 @@ func (c *BuildCheck) ID() string   { return "rust:build" }
 func (c *BuildCheck) Name() string { return "Rust Build" }
 
 // Run executes cargo build --release to check compilation.
-func (c *BuildCheck) Run(path string) (checker.Result, error) {
+func (c *BuildCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	// Check for Cargo.toml first
@@ -25,7 +25,7 @@ func (c *BuildCheck) Run(path string) (checker.Result, error) {
 	}
 
 	// Run cargo check (faster than full build, still validates code)
-	cmd := exec.Command("cargo", "check", "--quiet")
+	cmd := checkutil.Command(ctx, "cargo", "check", "--quiet")
 	cmd.Dir = path
 	output, err := cmd.CombinedOutput()
 

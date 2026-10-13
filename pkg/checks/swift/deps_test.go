@@ -1,6 +1,7 @@
 package swiftcheck
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,7 +49,7 @@ func (s *DepsTestSuite) TestName() {
 }
 
 func (s *DepsTestSuite) TestRun_NoPackageSwift() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -62,7 +63,7 @@ import PackageDescription
 let package = Package(name: "Test")
 `)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -80,7 +81,7 @@ let package = Package(name: "Test")
   "pins": []
 }`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -101,7 +102,7 @@ let package = Package(name: "Test")
   ]
 }`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -123,7 +124,7 @@ let package = Package(name: "Test")
   }
 }`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -138,7 +139,7 @@ let package = Package(name: "Test")
 `)
 	s.writeFile("Package.resolved", `{invalid json}`)
 
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -147,7 +148,7 @@ let package = Package(name: "Test")
 }
 
 func (s *DepsTestSuite) TestRun_ResultLanguage() {
-	result, err := s.check.Run(s.tempDir)
+	result, err := s.check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.Equal(checker.LangSwift, result.Language)

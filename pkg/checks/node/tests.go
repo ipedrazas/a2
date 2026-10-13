@@ -2,6 +2,7 @@ package nodecheck
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -28,7 +29,7 @@ func (c *TestsCheck) Name() string {
 }
 
 // Run executes the tests check.
-func (c *TestsCheck) Run(path string) (checker.Result, error) {
+func (c *TestsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists
@@ -61,24 +62,24 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 	switch runner {
 	case "jest":
 		if _, err := exec.LookPath("npx"); err == nil {
-			cmd = exec.Command("npx", "jest", "--passWithNoTests", "--ci")
+			cmd = checkutil.Command(ctx, "npx", "jest", "--passWithNoTests", "--ci")
 		} else {
-			cmd = c.createTestCommand(pm)
+			cmd = c.createTestCommand(ctx, pm)
 		}
 	case "vitest":
 		if _, err := exec.LookPath("npx"); err == nil {
-			cmd = exec.Command("npx", "vitest", "run")
+			cmd = checkutil.Command(ctx, "npx", "vitest", "run")
 		} else {
-			cmd = c.createTestCommand(pm)
+			cmd = c.createTestCommand(ctx, pm)
 		}
 	case "mocha":
 		if _, err := exec.LookPath("npx"); err == nil {
-			cmd = exec.Command("npx", "mocha")
+			cmd = checkutil.Command(ctx, "npx", "mocha")
 		} else {
-			cmd = c.createTestCommand(pm)
+			cmd = c.createTestCommand(ctx, pm)
 		}
 	default:
-		cmd = c.createTestCommand(pm)
+		cmd = c.createTestCommand(ctx, pm)
 	}
 
 	cmd.Dir = path
@@ -101,18 +102,18 @@ func (c *TestsCheck) Run(path string) (checker.Result, error) {
 
 // createTestCommand creates a test command for the given package manager.
 // This validates the package manager to avoid command injection.
-func (c *TestsCheck) createTestCommand(pm string) *exec.Cmd {
+func (c *TestsCheck) createTestCommand(ctx context.Context, pm string) *exec.Cmd {
 	switch pm {
 	case "npm":
-		return exec.Command("npm", "test")
+		return checkutil.Command(ctx, "npm", "test")
 	case "yarn":
-		return exec.Command("yarn", "test")
+		return checkutil.Command(ctx, "yarn", "test")
 	case "pnpm":
-		return exec.Command("pnpm", "test")
+		return checkutil.Command(ctx, "pnpm", "test")
 	case "bun":
-		return exec.Command("bun", "test")
+		return checkutil.Command(ctx, "bun", "test")
 	default:
-		return exec.Command("npm", "test")
+		return checkutil.Command(ctx, "npm", "test")
 	}
 }
 

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -223,7 +224,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_ExitCode0() {
 		Args:      []string{},
 	}
 
-	result, err := check.Run(".")
+	result, err := check.Run(context.Background(), ".")
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -240,7 +241,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_ExitCode1() {
 		Args:      []string{},
 	}
 
-	result, err := check.Run(".")
+	result, err := check.Run(context.Background(), ".")
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -256,7 +257,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_WithOutput() {
 		Args:      []string{"Hello World"},
 	}
 
-	result, err := check.Run(".")
+	result, err := check.Run(context.Background(), ".")
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -274,7 +275,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_JSONOutput() {
 		Args:      []string{`{"message":"Test message","status":"warn"}`},
 	}
 
-	result, err := check.Run(".")
+	result, err := check.Run(context.Background(), ".")
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -291,7 +292,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_JSONOutput_Pass() {
 		Args:      []string{`{"message":"All good","status":"pass"}`},
 	}
 
-	result, err := check.Run(".")
+	result, err := check.Run(context.Background(), ".")
 
 	suite.NoError(err)
 	suite.True(result.Passed)
@@ -308,7 +309,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_JSONOutput_Fail() {
 		Args:      []string{`{"message":"Critical failure","status":"fail"}`},
 	}
 
-	result, err := check.Run(".")
+	result, err := check.Run(context.Background(), ".")
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -327,7 +328,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_InvalidCommand() {
 
 	// The Run method may handle the error internally and return a result
 	// So we check that it either returns an error or a failed result
-	result, err := check.Run(".")
+	result, err := check.Run(context.Background(), ".")
 	if err != nil {
 		suite.Error(err)
 	} else {
@@ -346,7 +347,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_StderrFallback() {
 		Args:      []string{"-c", "echo 'stderr message' >&2 && exit 1"},
 	}
 
-	result, err := check.Run(".")
+	result, err := check.Run(context.Background(), ".")
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -363,7 +364,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_InvalidSourceDir() {
 		SourceDir: "../elsewhere",
 	}
 
-	result, err := check.Run(".")
+	result, err := check.Run(context.Background(), ".")
 
 	suite.NoError(err)
 	suite.False(result.Passed)
@@ -387,7 +388,7 @@ func (suite *ExternalTestSuite) TestExternalCheck_Run_WithSourceDir() {
 		SourceDir: "mydir",
 	}
 
-	result, err := check.Run(root)
+	result, err := check.Run(context.Background(), root)
 
 	suite.NoError(err)
 	suite.True(result.Passed)

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -44,7 +45,7 @@ paths:
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -64,7 +65,7 @@ func (s *APIDocsCheckTestSuite) TestSwaggerJsonExists() {
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -85,7 +86,7 @@ info:
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -103,7 +104,7 @@ func (s *APIDocsCheckTestSuite) TestAPIDocsDirectory() {
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -122,7 +123,7 @@ require github.com/swaggo/swag v1.16.0
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -141,7 +142,7 @@ require github.com/go-swagger/go-swagger v0.30.0
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -161,7 +162,7 @@ dependencies = [
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -182,7 +183,7 @@ dependencies = [
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -203,7 +204,7 @@ func (s *APIDocsCheckTestSuite) TestNodeSwaggerJsdoc() {
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -223,7 +224,7 @@ func (s *APIDocsCheckTestSuite) TestNodeNestJSSwagger() {
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -247,7 +248,7 @@ type User {
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -277,7 +278,7 @@ message User {
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -297,7 +298,7 @@ package myapp;
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -320,7 +321,7 @@ info:
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -335,7 +336,7 @@ func (s *APIDocsCheckTestSuite) TestNoAPIDocs() {
 	s.Require().NoError(err)
 
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -345,7 +346,7 @@ func (s *APIDocsCheckTestSuite) TestNoAPIDocs() {
 
 func (s *APIDocsCheckTestSuite) TestEmptyDirectory() {
 	check := &APIDocsCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)

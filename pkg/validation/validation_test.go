@@ -45,10 +45,10 @@ func (suite *ValidationTestSuite) TestLevenshteinDistance_MultipleDifferences() 
 
 func (suite *ValidationTestSuite) TestLevenshteinDistance_CheckIDs() {
 	// Realistic check ID typos
-	suite.Equal(2, LevenshteinDistance("common:health", "common:helath")) // swap = 2 operations
-	suite.Equal(2, LevenshteinDistance("go:build", "go:biuld"))           // swap = 2 operations
-	suite.Equal(1, LevenshteinDistance("go:tests", "go:test"))            // missing char
-	suite.Equal(2, LevenshteinDistance("common:secrets", "common:secerts"))
+	suite.Equal(2, LevenshteinDistance("common:health", "common:helath"))   // swap = 2 operations
+	suite.Equal(2, LevenshteinDistance("go:build", "go:biuld"))             // swap = 2 operations
+	suite.Equal(1, LevenshteinDistance("go:tests", "go:test"))              // missing char
+	suite.Equal(2, LevenshteinDistance("common:secrets", "common:secerts")) //nolint:misspell // deliberate typo
 }
 
 func (suite *ValidationTestSuite) TestFindSimilar_NoSimilar() {

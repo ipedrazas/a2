@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -42,7 +43,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -62,7 +63,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -82,7 +83,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -102,7 +103,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -122,7 +123,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -142,7 +143,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -161,7 +162,7 @@ func (s *RetryCheckTestSuite) TestNodeAsyncRetry() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -180,7 +181,7 @@ func (s *RetryCheckTestSuite) TestNodeAxiosRetry() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -199,7 +200,7 @@ func (s *RetryCheckTestSuite) TestNodePRetry() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -218,7 +219,7 @@ func (s *RetryCheckTestSuite) TestNodeGot() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -237,7 +238,7 @@ func (s *RetryCheckTestSuite) TestNodeCockatiel() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -256,7 +257,7 @@ func (s *RetryCheckTestSuite) TestNodeOpossum() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -270,7 +271,7 @@ func (s *RetryCheckTestSuite) TestPythonTenacity() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -284,7 +285,7 @@ func (s *RetryCheckTestSuite) TestPythonBackoff() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -298,7 +299,7 @@ func (s *RetryCheckTestSuite) TestPythonUrllib3() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -312,7 +313,7 @@ func (s *RetryCheckTestSuite) TestPythonCircuitBreaker() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -329,7 +330,7 @@ func (s *RetryCheckTestSuite) TestJavaSpringRetry() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -343,7 +344,7 @@ func (s *RetryCheckTestSuite) TestJavaResilience4j() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -357,7 +358,7 @@ func (s *RetryCheckTestSuite) TestJavaFailsafe() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -375,7 +376,7 @@ backoff = "0.4"`
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -393,7 +394,7 @@ tokio-retry = "0.3"`
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -411,7 +412,7 @@ again = "0.1"`
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -432,7 +433,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -453,7 +454,7 @@ require (
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -463,7 +464,7 @@ require (
 
 func (s *RetryCheckTestSuite) TestEmptyDirectory() {
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -486,7 +487,7 @@ func (s *RetryCheckTestSuite) TestCustomRetry_FileNamedRetry() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -512,7 +513,7 @@ func doRequest(url string) error {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)
@@ -530,7 +531,7 @@ func (s *RetryCheckTestSuite) TestCustomRetry_TestFilesIgnored() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.False(result.Passed)
@@ -550,7 +551,7 @@ func (s *RetryCheckTestSuite) TestCustomRetry_LibraryTakesPrecedence() {
 	s.Require().NoError(err)
 
 	check := &RetryCheck{}
-	result, err := check.Run(s.tempDir)
+	result, err := check.Run(context.Background(), s.tempDir)
 
 	s.NoError(err)
 	s.True(result.Passed)

@@ -2,6 +2,7 @@ package nodecheck
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -28,7 +29,7 @@ func (c *FormatCheck) Name() string {
 }
 
 // Run executes the format check.
-func (c *FormatCheck) Run(path string) (checker.Result, error) {
+func (c *FormatCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangNode)
 
 	// Check if package.json exists
@@ -41,16 +42,16 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 	// Handle auto mode - try available formatters
 	if formatter == "auto" {
 		if _, err := exec.LookPath("npx"); err != nil {
-			return rb.Pass("npx not available, skipping format check"), nil
+			return rb.ToolNotInstalled("npx", "install Node.js"), nil
 		}
 
 		// Try prettier first, then biome
-		prettierResult := c.runPrettier(path, rb)
+		prettierResult := c.runPrettier(ctx, path, rb)
 		if prettierResult != nil {
 			return *prettierResult, nil
 		}
 
-		biomeResult := c.runBiome(path, rb)
+		biomeResult := c.runBiome(ctx, path, rb)
 		if biomeResult != nil {
 			return *biomeResult, nil
 		}
@@ -61,12 +62,12 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 	// Run specific formatter
 	switch formatter {
 	case "prettier":
-		if prettierResult := c.runPrettier(path, rb); prettierResult != nil {
+		if prettierResult := c.runPrettier(ctx, path, rb); prettierResult != nil {
 			return *prettierResult, nil
 		}
 		return rb.ToolNotInstalled("Prettier", "npm install prettier"), nil
 	case "biome":
-		if biomeResult := c.runBiome(path, rb); biomeResult != nil {
+		if biomeResult := c.runBiome(ctx, path, rb); biomeResult != nil {
 			return *biomeResult, nil
 		}
 		return rb.ToolNotInstalled("Biome", "npm install @biomejs/biome"), nil
@@ -76,13 +77,13 @@ func (c *FormatCheck) Run(path string) (checker.Result, error) {
 }
 
 // runPrettier runs prettier --check and returns a result or nil if prettier is not available.
-func (c *FormatCheck) runPrettier(path string, rb *checkutil.ResultBuilder) *checker.Result {
+func (c *FormatCheck) runPrettier(ctx context.Context, path string, rb *checkutil.ResultBuilder) *checker.Result {
 	// Check if prettier config exists
 	if !c.hasPrettierConfig(path) {
 		return nil
 	}
 
-	cmd := exec.Command("npx", "prettier", "--check", ".")
+	cmd := checkutil.Command(ctx, "npx", "prettier", "--check", ".")
 	cmd.Dir = path
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -114,13 +115,13 @@ func (c *FormatCheck) runPrettier(path string, rb *checkutil.ResultBuilder) *che
 }
 
 // runBiome runs biome format --check and returns a result or nil if biome is not available.
-func (c *FormatCheck) runBiome(path string, rb *checkutil.ResultBuilder) *checker.Result {
+func (c *FormatCheck) runBiome(ctx context.Context, path string, rb *checkutil.ResultBuilder) *checker.Result {
 	// Check if biome config exists
 	if !c.hasBiomeConfig(path) {
 		return nil
 	}
 
-	cmd := exec.Command("npx", "@biomejs/biome", "format", "--check", ".")
+	cmd := checkutil.Command(ctx, "npx", "@biomejs/biome", "format", "--check", ".")
 	cmd.Dir = path
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout

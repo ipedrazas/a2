@@ -1,7 +1,7 @@
 package rustcheck
 
 import (
-	"os/exec"
+	"context"
 	"regexp"
 	"strings"
 
@@ -17,7 +17,7 @@ func (c *DepsCheck) ID() string   { return "rust:deps" }
 func (c *DepsCheck) Name() string { return "Rust Vulnerabilities" }
 
 // Run checks for dependency vulnerabilities using cargo audit.
-func (c *DepsCheck) Run(path string) (checker.Result, error) {
+func (c *DepsCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangRust)
 
 	// Check for Cargo.toml first
@@ -34,7 +34,7 @@ func (c *DepsCheck) Run(path string) (checker.Result, error) {
 	hasDeny := safepath.Exists(path, "deny.toml")
 
 	// Try cargo audit first
-	cmd := exec.Command("cargo", "audit", "--quiet")
+	cmd := checkutil.Command(ctx, "cargo", "audit", "--quiet")
 	cmd.Dir = path
 	output, err := cmd.CombinedOutput()
 	outputStr := string(output)

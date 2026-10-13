@@ -2,6 +2,7 @@ package typescriptcheck
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os/exec"
 	"regexp"
@@ -23,7 +24,7 @@ func (c *LintCheck) ID() string   { return "typescript:lint" }
 func (c *LintCheck) Name() string { return "TypeScript Lint" }
 
 // Run executes the linter.
-func (c *LintCheck) Run(path string) (checker.Result, error) {
+func (c *LintCheck) Run(ctx context.Context, path string) (checker.Result, error) {
 	rb := checkutil.NewResultBuilder(c, checker.LangTypeScript)
 
 	// Check for tsconfig.json
@@ -37,11 +38,11 @@ func (c *LintCheck) Run(path string) (checker.Result, error) {
 
 	switch linter {
 	case "eslint":
-		return c.runESLint(path, pm, rb)
+		return c.runESLint(ctx, path, pm, rb)
 	case "biome":
-		return c.runBiomeLint(path, pm, rb)
+		return c.runBiomeLint(ctx, path, pm, rb)
 	case "oxlint":
-		return c.runOxlint(path, pm, rb)
+		return c.runOxlint(ctx, path, pm, rb)
 	default:
 		return rb.Warn("No linter configured (consider ESLint or Biome)"), nil
 	}
@@ -107,17 +108,17 @@ func (c *LintCheck) detectPackageManager(path string) string {
 }
 
 // runESLint runs ESLint.
-func (c *LintCheck) runESLint(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *LintCheck) runESLint(ctx context.Context, path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
-		cmd = exec.Command("yarn", "eslint", ".", "--ext", ".ts,.tsx")
+		cmd = checkutil.Command(ctx, "yarn", "eslint", ".", "--ext", ".ts,.tsx")
 	case "pnpm":
-		cmd = exec.Command("pnpm", "exec", "eslint", ".", "--ext", ".ts,.tsx")
+		cmd = checkutil.Command(ctx, "pnpm", "exec", "eslint", ".", "--ext", ".ts,.tsx")
 	case "bun":
-		cmd = exec.Command("bun", "run", "eslint", ".", "--ext", ".ts,.tsx")
+		cmd = checkutil.Command(ctx, "bun", "run", "eslint", ".", "--ext", ".ts,.tsx")
 	default:
-		cmd = exec.Command("npx", "eslint", ".", "--ext", ".ts,.tsx")
+		cmd = checkutil.Command(ctx, "npx", "eslint", ".", "--ext", ".ts,.tsx")
 	}
 	cmd.Dir = path
 
@@ -141,17 +142,17 @@ func (c *LintCheck) runESLint(path, pm string, rb *checkutil.ResultBuilder) (che
 }
 
 // runBiomeLint runs Biome linter.
-func (c *LintCheck) runBiomeLint(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *LintCheck) runBiomeLint(ctx context.Context, path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
-		cmd = exec.Command("yarn", "biome", "lint", ".")
+		cmd = checkutil.Command(ctx, "yarn", "biome", "lint", ".")
 	case "pnpm":
-		cmd = exec.Command("pnpm", "exec", "biome", "lint", ".")
+		cmd = checkutil.Command(ctx, "pnpm", "exec", "biome", "lint", ".")
 	case "bun":
-		cmd = exec.Command("bun", "run", "biome", "lint", ".")
+		cmd = checkutil.Command(ctx, "bun", "run", "biome", "lint", ".")
 	default:
-		cmd = exec.Command("npx", "@biomejs/biome", "lint", ".")
+		cmd = checkutil.Command(ctx, "npx", "@biomejs/biome", "lint", ".")
 	}
 	cmd.Dir = path
 
@@ -169,17 +170,17 @@ func (c *LintCheck) runBiomeLint(path, pm string, rb *checkutil.ResultBuilder) (
 }
 
 // runOxlint runs oxlint.
-func (c *LintCheck) runOxlint(path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
+func (c *LintCheck) runOxlint(ctx context.Context, path, pm string, rb *checkutil.ResultBuilder) (checker.Result, error) {
 	var cmd *exec.Cmd
 	switch pm {
 	case "yarn":
-		cmd = exec.Command("yarn", "oxlint")
+		cmd = checkutil.Command(ctx, "yarn", "oxlint")
 	case "pnpm":
-		cmd = exec.Command("pnpm", "exec", "oxlint")
+		cmd = checkutil.Command(ctx, "pnpm", "exec", "oxlint")
 	case "bun":
-		cmd = exec.Command("bun", "run", "oxlint")
+		cmd = checkutil.Command(ctx, "bun", "run", "oxlint")
 	default:
-		cmd = exec.Command("npx", "oxlint")
+		cmd = checkutil.Command(ctx, "npx", "oxlint")
 	}
 	cmd.Dir = path
 
